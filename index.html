@@ -5,114 +5,108 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mental Commons</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
- <style>
-  * {
-    box-sizing: border-box;
-  }
-
-  body {
-    margin: 0;
-    padding: 4rem 1rem;
-    font-family: 'Inter', sans-serif;
-    background: radial-gradient(circle at top, #121212, #030303);
-    color: #f5f5f5;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    line-height: 1.6;
-  }
-
-  h1 {
-    font-size: 3.5rem;
-    color: #ffffff;
-    margin-bottom: 1rem;
-    animation: fadeIn 2s ease-out;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  h2 {
-    font-size: 1.8rem;
-    font-weight: 400;
-    margin-bottom: 3rem;
-    color: #cccccc;
-    max-width: 600px;
-  }
-
-  section {
-    max-width: 700px;
-    margin-bottom: 3rem;
-    padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  }
-
-  section p {
-    font-size: 1.1rem;
-    margin: 0.8rem 0;
-  }
-
-  input[type="email"] {
-    padding: 0.9rem;
-    width: 100%;
-    max-width: 350px;
-    border: none;
-    border-radius: 8px;
-    background: #252525;
-    color: #ffffff;
-    font-size: 1rem;
-    margin-bottom: 1rem;
-    outline: none;
-  }
-
-  button {
-    padding: 0.9rem 2rem;
-    border: none;
-    border-radius: 8px;
-    background: linear-gradient(to right, #ffffff, #cccccc);
-    color: #101010;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-  }
-
-  button:hover {
-    transform: scale(1.05);
-  }
-
-  .mantra {
-    font-size: 1.3rem;
-    font-style: italic;
-    margin-top: 3rem;
-    color: #a0a0a0;
-  }
-
-  footer {
-    margin-top: 4rem;
-    font-size: 0.85rem;
-    color: #555555;
-  }
-
-  @media (max-width: 600px) {
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(ellipse at top, #101010, #050505);
+      color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 1rem;
+      text-align: center;
+    }
     h1 {
-      font-size: 2.8rem;
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      width: 0;
+      animation: typing 3s steps(30, end) forwards;
     }
-
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
     h2 {
-      font-size: 1.5rem;
+      font-size: 1.75rem;
+      font-weight: 400;
+      max-width: 600px;
+      margin: 0 auto 3rem;
+      color: #dddddd;
     }
-
     section {
-      padding: 1rem;
+      max-width: 750px;
+      margin-bottom: 3rem;
+      padding: 0 1rem;
     }
-  }
-</style>
+    section p {
+      font-size: 1.15rem;
+      line-height: 1.6;
+      color: #e0e0e0;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin-bottom: 1.25rem;
+      font-size: 1.15rem;
+      line-height: 1.5;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+    li::before {
+      content: "\2022";
+      color: #ffffff;
+      position: absolute;
+      left: 0;
+    }
+    input[type="email"] {
+      padding: 1rem;
+      width: 80%;
+      max-width: 400px;
+      border: 1px solid #444;
+      border-radius: 12px;
+      background: #1a1a1a;
+      color: #f0f0f0;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      padding: 1rem 2.5rem;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(to right, #ffffff, #cccccc);
+      color: #0d0d0d;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: linear-gradient(to right, #dddddd, #bbbbbb);
+    }
+    .mantra {
+      font-size: 1.4rem;
+      margin-top: 4rem;
+      font-weight: 500;
+      color: #bbbbbb;
+      font-style: italic;
+    }
+    footer {
+      margin-top: 5rem;
+      font-size: 0.85rem;
+      color: #666;
+    }
+  </style>
 </head>
 <body>
   <h1>Mental Commons</h1>
