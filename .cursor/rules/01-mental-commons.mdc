@@ -1,0 +1,65 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Mental Commons  Core Version
+🔎 Visione
+Mental Commons è una piattaforma peer-to-peer per la riflessione condivisa. Permette a chiunque di condividere un pensiero difficile, confuso o importante (una "UCMe") e ricevere una risposta autentica da un'altra persona.
+Niente diagnosi, niente terapia, niente guru. Solo umani che si pensano a vicenda.
+ 
+🌐 Funzionamento
+Flusso Base:
+1.	Deposita: L'utente scrive una UCMe (Unità Cognitiva Mentale), un pensiero autentico.
+2.	Assegna: Il sistema abbina la UCMe a un altro utente (Portatore) formato alla risposta empatica.
+3.	Risposta: Il Portatore legge e risponde entro 48h. La risposta è umana, riflessiva, rispettosa.
+4.	Chiusura: Il Depositor riceve la risposta, può ringraziare, rispondere, o depositare un nuovo pensiero.
+Regole Chiare:
+•	Una UCMe viene gestita da un solo Portatore alla volta.
+•	I Portatori condividono risonanze.
+•	Il tono è privato, rispettoso, non pubblico.
+ 
+🤝 Ruoli
+Depositor
+•	Chiunque con un pensiero da condividere
+•	Riceve ascolto e una risposta non automatica
+Portatore
+•	Utente formato in base all'etica del contenimento
+•	Riceve crediti (CMC) per ogni risposta
+ 
+💰 Modello Economico
+1. Freemium
+•	Accesso gratuito per tutti
+•	Abbonamento Pro per funzionalità extra (es. storico, risposta prioritaria, rilettura UCMe)
+2. Microdonazioni
+•	Il Depositor può donare 1–5€ al Portatore come ringraziamento
+•	Sistema etico, trasparente, opzionale
+3. Licenze B2B
+•	Commons@Work e Commons@School: pacchetti per aziende/scuole per benessere mentale strutturato
+ 
+📊 Metriche Chiave
+•	% di UCMe con risposta entro 48h
+•	N. utenti attivi mensili (Depositor / Portatori)
+•	N. di portamenti completati
+•	Tasso di donazioni per UCMe
+ 
+🎡 Pitch Breve
+Le persone hanno bisogno di pensare insieme. Mental Commons è uno spazio digitale dove i pensieri fragili vengono contenuti da umani reali, in modo silenzioso, semplice e trasformativo.
+Non è terapia. Non è self-help. È uno strumento cognitivo per l'epoca dell'overload.
+ 
+🚀 Roadmap MVP (3 Mesi)
+Mese 1
+•	Raccolta early adopter e portatori
+•	Landing semplice + modulo UCMe su Typeform / Webapp
+Mese 2
+•	Matching automatico Depositor-Portatore
+•	Sistema base di risposta + rating interno
+Mese 3
+•	Integrazione microdonazioni (Stripe / Ko-fi)
+•	Dashboard utente minimal (storico UCMe e crediti)
+ 
+🌟 Perché ora
+Viviamo in una società connessa ma frammentata. Le persone non hanno bisogno di più contenuti, ma di più contenimento.
+Mental Commons offre una risposta scalabile, umana e sostenibile.
+E non serve crederci. Serve provarlo.
+

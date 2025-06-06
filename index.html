@@ -4,144 +4,189 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mental Commons</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=EB+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-    }
-    body {
+    html, body {
+      height: 100%;
       margin: 0;
       padding: 0;
-      font-family: 'Inter', sans-serif;
-      background: radial-gradient(ellipse at top, #101010, #050505);
-      color: #f0f0f0;
+      background: linear-gradient(120deg, #181818 0%, #232526 100%);
+      color: #f5f5f5;
+      font-family: 'Inter', 'EB Garamond', serif;
+      min-height: 100vh;
+    }
+    body {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 4rem 1rem;
-      text-align: center;
-    }
-    h1 {
-      font-size: 3rem;
-      margin-bottom: 0.5rem;
-      color: #ffffff;
-      white-space: nowrap;
-      overflow: hidden;
-      width: 0;
-      animation: typing 3s steps(30, end) forwards;
-    }
-    @keyframes typing {
-      from { width: 0 }
-      to { width: 100% }
-    }
-    h2 {
-      font-size: 1.75rem;
-      font-weight: 400;
-      max-width: 600px;
-      margin: 0 auto 3rem;
-      color: #dddddd;
-    }
-    section {
-      max-width: 750px;
-      margin-bottom: 3rem;
+      min-height: 100vh;
       padding: 0 1rem;
     }
-    section p {
-      font-size: 1.15rem;
+    .container {
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 3rem 2rem 2rem 2rem;
+      background: rgba(30, 30, 30, 0.85);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 2.5s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h1 {
+      font-family: 'EB Garamond', serif;
+      font-size: 2.8rem;
+      font-style: italic;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.02em;
+      color: #fff;
+      text-shadow: 0 2px 16px #222a;
+      animation: slowAppear 2.5s 0.5s both;
+    }
+    @keyframes slowAppear {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .visione {
+      font-size: 1.2rem;
+      color: #bdbdbd;
+      margin-bottom: 2.5rem;
+      font-style: italic;
       line-height: 1.6;
+      letter-spacing: 0.01em;
+      animation: fadeIn 2.5s 0.7s both;
+    }
+    .rituale {
+      margin: 2.5rem 0 2rem 0;
+      padding: 2rem 1.5rem;
+      background: rgba(255,255,255,0.03);
+      border-radius: 18px;
+      box-shadow: 0 2px 12px #0002;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 2.5s 1.2s both;
+    }
+    .rituale strong {
+      font-size: 1.1rem;
       color: #e0e0e0;
+      letter-spacing: 0.01em;
     }
-    ul {
-      list-style: none;
-      padding: 0;
+    .rituale p {
+      margin: 1.2rem 0 0.5rem 0;
+      font-size: 1.08rem;
+      color: #cccccc;
+      line-height: 1.7;
     }
-    li {
-      margin-bottom: 1.25rem;
-      font-size: 1.15rem;
-      line-height: 1.5;
-      position: relative;
-      padding-left: 1.5rem;
+    .cta {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
     }
-    li::before {
-      content: "\2022";
-      color: #ffffff;
-      position: absolute;
-      left: 0;
-    }
-    input[type="email"] {
-      padding: 1rem;
-      width: 80%;
-      max-width: 400px;
-      border: 1px solid #444;
-      border-radius: 12px;
-      background: #1a1a1a;
-      color: #f0f0f0;
+    .cta input[type="email"] {
+      padding: 1.1rem;
+      width: 100%;
+      max-width: 340px;
+      border: none;
+      border-radius: 10px;
+      background: #232323;
+      color: #f5f5f5;
       font-size: 1rem;
-      margin-bottom: 1rem;
+      margin-bottom: 1.2rem;
+      outline: none;
+      box-shadow: 0 1px 6px #0002;
+      transition: background 0.3s;
     }
-    button {
+    .cta input[type="email"]:focus {
+      background: #292929;
+    }
+    .cta button {
       padding: 1rem 2.5rem;
       border: none;
-      border-radius: 12px;
-      background: linear-gradient(to right, #ffffff, #cccccc);
-      color: #0d0d0d;
-      cursor: pointer;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #f5f5f5 0%, #e0e0e0 100%);
+      color: #181818;
       font-weight: 600;
-      font-size: 1rem;
-      transition: background 0.3s ease;
+      font-size: 1.08rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #0002;
+      transition: transform 0.2s, background 0.3s;
     }
-    button:hover {
-      background: linear-gradient(to right, #dddddd, #bbbbbb);
+    .cta button:hover {
+      transform: scale(1.04);
+      background: linear-gradient(90deg, #e0e0e0 0%, #cccccc 100%);
+    }
+    .pitch {
+      margin: 2.5rem 0 1.5rem 0;
+      font-size: 1.13rem;
+      color: #bdbdbd;
+      font-style: italic;
+      line-height: 1.7;
+      animation: fadeIn 2.5s 1.5s both;
     }
     .mantra {
-      font-size: 1.4rem;
-      margin-top: 4rem;
-      font-weight: 500;
-      color: #bbbbbb;
+      margin-top: 3.5rem;
+      font-size: 1.25rem;
+      color: #a0a0a0;
       font-style: italic;
+      letter-spacing: 0.01em;
+      animation: fadeIn 2.5s 2s both;
     }
     footer {
-      margin-top: 5rem;
-      font-size: 0.85rem;
-      color: #666;
+      margin-top: 4rem;
+      font-size: 0.9rem;
+      color: #555;
+      text-align: center;
+      letter-spacing: 0.01em;
+    }
+    @media (max-width: 700px) {
+      .container {
+        padding: 1.5rem 0.5rem;
+      }
+      h1 {
+        font-size: 2.1rem;
+      }
+      .visione, .pitch {
+        font-size: 1.05rem;
+      }
+      .rituale {
+        padding: 1.2rem 0.5rem;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Mental Commons</h1>
-  <h2>Ogni mente è un mondo. Mental Commons è il loro ponte.</h2>
-
-  <section>
-    <p><strong>Non è terapia. Non è journaling. Non è self-help.</strong></p>
-    <p>
-      È uno scambio mentale puro. Scrivi un pensiero che pesa — e un altro essere umano lo prende sul serio.
-    </p>
-  </section>
-
-  <section>
-    <p><strong>Come funziona:</strong></p>
-    <p>Scrivi un pensiero reale. Crudo, confuso, autentico.</p>
-    <p>Il sistema lo assegna a una persona reale, formata per contenere senza giudicare.</p>
-    <p>Ricevi una risposta riflessiva. Un pensiero che torna. Un'eco, non un verdetto.</p>
-  </section>
-
-  <section>
-    <p><strong>Perché ora?</strong><br/>Perché siamo sommersi da voci ma nessuno ci ascolta davvero.</p>
-    <p>L’intelligenza artificiale sa tutto. Ma non sente nulla. Mental Commons ti raggiunge, e ti considera.</p>
-  </section>
-
-  <section>
-    <p><strong>Scrivi ciò che non sai dire.</strong> Leggi ciò che non pensavi esistesse. Mental Commons ti legge.</p>
-    <form action="https://formspree.io/f/mnnvjdbw" method="POST">
-      <input type="email" name="email" placeholder="La tua email" required />
-      <br/>
-      <button type="submit">Iscrivimi</button>
-    </form>
-  </section>
-
-  <div class="mantra">"Non siamo fatti per pensare da soli."</div>
-
+  <div class="container">
+    <h1>Mental Commons</h1>
+    <div class="visione">
+      Niente diagnosi, niente terapia, niente guru.<br>
+      Solo umani che si pensano a vicenda.
+    </div>
+    <div class="rituale">
+      <strong>Deposita una UCMe</strong>
+      <p>Scrivi un pensiero difficile, confuso o importante.<br>
+      Un altro essere umano lo accoglierà, senza giudizio.</p>
+      <form class="cta" action="https://formspree.io/f/mnnvjdbw" method="POST">
+        <input type="email" name="email" placeholder="La tua email" required />
+        <button type="submit">Inizia il percorso</button>
+      </form>
+    </div>
+    <div class="pitch">
+      Le persone hanno bisogno di pensare insieme.<br>
+      Mental Commons è uno spazio digitale dove i pensieri fragili vengono contenuti da umani reali, in modo silenzioso, semplice e trasformativo.
+    </div>
+    <div class="mantra">"Non siamo fatti per pensare da soli."</div>
+  </div>
   <footer>
     © 2025 — Mental Commons<br/>
     Il contrario di un social. Il prototipo di una mente comune.
