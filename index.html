@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mental Commons</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+ <style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 4rem 1rem;
+    font-family: 'Inter', sans-serif;
+    background: radial-gradient(circle at top, #121212, #030303);
+    color: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  h1 {
+    font-size: 3.5rem;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    animation: fadeIn 2s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    font-weight: 400;
+    margin-bottom: 3rem;
+    color: #cccccc;
+    max-width: 600px;
+  }
+
+  section {
+    max-width: 700px;
+    margin-bottom: 3rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  section p {
+    font-size: 1.1rem;
+    margin: 0.8rem 0;
+  }
+
+  input[type="email"] {
+    padding: 0.9rem;
+    width: 100%;
+    max-width: 350px;
+    border: none;
+    border-radius: 8px;
+    background: #252525;
+    color: #ffffff;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    outline: none;
+  }
+
+  button {
+    padding: 0.9rem 2rem;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(to right, #ffffff, #cccccc);
+    color: #101010;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  button:hover {
+    transform: scale(1.05);
+  }
+
+  .mantra {
+    font-size: 1.3rem;
+    font-style: italic;
+    margin-top: 3rem;
+    color: #a0a0a0;
+  }
+
+  footer {
+    margin-top: 4rem;
+    font-size: 0.85rem;
+    color: #555555;
+  }
+
+  @media (max-width: 600px) {
+    h1 {
+      font-size: 2.8rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    section {
+      padding: 1rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <h1>Mental Commons</h1>
+  <h2>Ogni mente è un mondo. Mental Commons è il loro ponte.</h2>
+
+  <section>
+    <p><strong>Non è terapia. Non è journaling. Non è self-help.</strong></p>
+    <p>
+      È uno scambio mentale puro. Scrivi un pensiero che pesa — e un altro essere umano lo prende sul serio.
+    </p>
+  </section>
+
+  <section>
+    <p><strong>Come funziona:</strong></p>
+    <p>Scrivi un pensiero reale. Crudo, confuso, autentico.</p>
+    <p>Il sistema lo assegna a una persona reale, formata per contenere senza giudicare.</p>
+    <p>Ricevi una risposta riflessiva. Un pensiero che torna. Un'eco, non un verdetto.</p>
+  </section>
+
+  <section>
+    <p><strong>Perché ora?</strong><br/>Perché siamo sommersi da voci ma nessuno ci ascolta davvero.</p>
+    <p>L’intelligenza artificiale sa tutto. Ma non sente nulla. Mental Commons ti raggiunge, e ti considera.</p>
+  </section>
+
+  <section>
+    <p><strong>Scrivi ciò che non sai dire.</strong> Leggi ciò che non pensavi esistesse. Mental Commons ti legge.</p>
+    <form action="https://formspree.io/f/mnnvjdbw" method="POST">
+      <input type="email" name="email" placeholder="La tua email" required />
+      <br/>
+      <button type="submit">Iscrivimi</button>
+    </form>
+  </section>
+
+  <div class="mantra">"Non siamo fatti per pensare da soli."</div>
+
+  <footer>
+    © 2025 — Mental Commons<br/>
+    Il contrario di un social. Il prototipo di una mente comune.
+  </footer>
+</body>
+</html>
