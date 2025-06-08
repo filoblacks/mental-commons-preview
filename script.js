@@ -330,9 +330,9 @@ console.log('- clearAllData(): cancella tutti i dati (attenzione!)');
 // INTEGRAZIONE GOOGLE APPS SCRIPT
 // ==========================================
 
-// Configurazione (⚠️ AGGIORNA QUESTI VALORI!)
+// Configurazione (✅ AGGIORNATO CON NUOVO URL)
 const GOOGLE_SCRIPT_CONFIG = {
-    scriptUrl: 'https://script.google.com/macros/s/AKfycbzSYd8pNfZnCx1HqGshLVkp7hOBRzAWOwJBHMFopQXr9lwGr9loFc_nVni3kOuQww0PYg/exec',
+    scriptUrl: 'https://script.google.com/macros/s/AKfycbwCAv4U4N3MH-hdLFbU0RBPgL2RHYOnNubz5aORQRnfmBEt-Ku0GsG1aTOQZ7uzQ3YG7g/exec',
     apiKey: 'mc_2024_filippo_1201_aB3xY9zK2m'
 };
 

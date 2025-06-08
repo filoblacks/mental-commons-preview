@@ -8,8 +8,13 @@
  * 2. Crea un nuovo Google Apps Script
  * 3. Incolla questo codice
  * 4. Sostituisci YOUR_API_KEY con una chiave sicura
- * 5. Pubblica come Web App con accesso "Anyone"
+ * 5. Pubblica come Web App con:
+ *    - Execute as: "Me"
+ *    - Who has access: "Anyone"
  * 6. Copia l'URL del Web App nel frontend
+ * 
+ * IMPORTANTE: Google Apps Script gestisce CORS automaticamente per Web Apps 
+ * pubblicate con accesso "Anyone". Non serve impostare header CORS manualmente.
  */
 
 // Configurazione
@@ -215,32 +220,21 @@ function getCurrentDateString() {
 }
 
 /**
- * Crea una risposta HTTP standardizzata con header CORS
+ * Crea una risposta HTTP standardizzata (Google Apps Script gestisce CORS automaticamente)
  */
 function createResponse(data, statusCode = 200) {
-  const output = ContentService
+  return ContentService
     .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
-    
-  // Aggiungi header CORS per permettere le richieste cross-origin
-  return output
-    .setHeader('Access-Control-Allow-Origin', '*')
-    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    .setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    .setHeader('Access-Control-Max-Age', '3600');
 }
 
 /**
- * Gestisce le richieste OPTIONS per CORS (preflight requests)
+ * Gestisce le richieste OPTIONS per CORS (Google Apps Script gestisce automaticamente)
  */
 function doOptions() {
   return ContentService
     .createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT)
-    .setHeader('Access-Control-Allow-Origin', '*')
-    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    .setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    .setHeader('Access-Control-Max-Age', '3600');
+    .setMimeType(ContentService.MimeType.TEXT);
 }
 
 /**
