@@ -349,10 +349,8 @@ async function submitUCMeToGoogleSheet(formData) {
     try {
         const response = await fetch(GOOGLE_SCRIPT_CONFIG.scriptUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify(payload)
+            // Rimosso Content-Type per evitare preflight CORS
         });
         
         if (!response.ok) {
@@ -559,10 +557,8 @@ async function debugGoogleSheetConnection() {
         
         const response = await fetch(GOOGLE_SCRIPT_CONFIG.scriptUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify(testData)
+            // Rimosso Content-Type per evitare preflight CORS
         });
         
         console.log('📡 Risposta ricevuta:', {
