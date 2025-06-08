@@ -1,191 +1,100 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mental Commons</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
-      background: radial-gradient(ellipse at top, #101010, #050505);
-      color: #f0f0f0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 4rem 1rem;
-      text-align: center;
-    }
-    .logo-mental-commons {
-      margin-bottom: 2.2rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 120px;
-      height: 120px;
-      min-width: 80px;
-      min-height: 80px;
-      max-width: 30vw;
-      max-height: 30vw;
-      animation: fadeInLogo 2s cubic-bezier(.4,0,.2,1);
-    }
-    @keyframes fadeInLogo {
-      from { opacity: 0; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    h1 {
-      font-size: 3rem;
-      margin-bottom: 0.5rem;
-      color: #ffffff;
-      white-space: nowrap;
-      overflow: visible;
-      width: auto;
-      max-width: 100vw;
-      display: inline-block;
-      animation: typing-reveal 2.5s steps(30, end) forwards;
-    }
-    @keyframes typing-reveal {
-      from { clip-path: inset(0 100% 0 0); }
-      to { clip-path: inset(0 0 0 0); }
-    }
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 2.1rem;
-        max-width: 98vw;
-        white-space: normal;
-        word-break: break-word;
-      }
-      .logo-mental-commons {
-        width: 70px;
-        height: 70px;
-        min-width: 50px;
-        min-height: 50px;
-        margin-bottom: 1.2rem;
-      }
-    }
-    h2 {
-      font-size: 1.75rem;
-      font-weight: 400;
-      max-width: 600px;
-      margin: 0 auto 3rem;
-      color: #dddddd;
-    }
-    section {
-      max-width: 750px;
-      margin-bottom: 3rem;
-      padding: 0 1rem;
-    }
-    section p {
-      font-size: 1.15rem;
-      line-height: 1.6;
-      color: #e0e0e0;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-    li {
-      margin-bottom: 1.25rem;
-      font-size: 1.15rem;
-      line-height: 1.5;
-      position: relative;
-      padding-left: 1.5rem;
-    }
-    li::before {
-      content: "\2022";
-      color: #ffffff;
-      position: absolute;
-      left: 0;
-    }
-    input[type="email"] {
-      padding: 1rem;
-      width: 80%;
-      max-width: 400px;
-      border: 1px solid #444;
-      border-radius: 12px;
-      background: #1a1a1a;
-      color: #f0f0f0;
-      font-size: 1rem;
-      margin-bottom: 1rem;
-    }
-    button {
-      padding: 1rem 2.5rem;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(to right, #ffffff, #cccccc);
-      color: #0d0d0d;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 1rem;
-      transition: background 0.3s ease;
-    }
-    button:hover {
-      background: linear-gradient(to right, #dddddd, #bbbbbb);
-    }
-    .mantra {
-      font-size: 1.4rem;
-      margin-top: 4rem;
-      font-weight: 500;
-      color: #bbbbbb;
-      font-style: italic;
-    }
-    footer {
-      margin-top: 5rem;
-      font-size: 0.85rem;
-      color: #666;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Commons</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="logo-mental-commons">
-    <svg viewBox="0 0 500 500" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="175" cy="250" r="150" stroke="white" stroke-width="3" />
-      <circle cx="325" cy="250" r="150" stroke="white" stroke-width="3" />
-      <circle cx="250" cy="250" r="8" fill="white" />
-    </svg>
-  </div>
-  <h1>Mental Commons</h1>
-  <h2>Ogni mente è un mondo. Mental Commons è il loro ponte.</h2>
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="logo-container">
+                    <img src="logo.svg" alt="Mental Commons Logo" class="logo">
+                </div>
+                <h1 class="title">Mental Commons</h1>
+                <p class="subtitle">Ogni mente è un mondo. Mental Commons è il loro ponte.</p>
+                
+                <div class="copy-section">
+                    <p>Non è terapia. Non è journaling. Non è self-help.</p>
+                    <p>È uno scambio mentale puro.</p>
+                    <p>Scrivi un pensiero che pesa — e un altro essere umano lo prende sul serio.</p>
+                    <p>Nessun consiglio. Nessuna notifica. Solo una risposta.</p>
+                    <p>Da chi ha scelto di contenere, non di rispondere.</p>
+                    <p>Mental Commons è gratuito.</p>
+                    <p>Perché non si dovrebbe pagare per essere ascoltati.</p>
+                </div>
 
-  <section>
-    <p><strong>Non è terapia. Non è journaling. Non è self-help.</strong></p>
-    <p>
-      È uno scambio mentale puro. Scrivi un pensiero che pesa — e un altro essere umano lo prende sul serio.
-    </p>
-  </section>
+                <button class="cta-button" onclick="scrollToForm()">Scrivi una UCMe</button>
+            </div>
+        </section>
 
-  <section>
-    <p><strong>Come funziona:</strong></p>
-    <p>Scrivi un pensiero reale. Crudo, confuso, autentico.</p>
-    <p>Il sistema lo assegna a una persona reale, formata per contenere senza giudicare.</p>
-    <p>Ricevi una risposta riflessiva. Un pensiero che torna. Un'eco, non un verdetto.</p>
-  </section>
+        <section class="form-section" id="form-section">
+            <div class="container">
+                <h2>Affida il tuo pensiero</h2>
+                <p class="form-description">Scrivi quello che pensi. Un altro essere umano lo leggerà e risponderà entro 48 ore.</p>
+                
+                <form id="ucme-form" class="ucme-form">
+                    <div class="form-group">
+                        <label for="ucme-text">Il tuo pensiero (UCMe)</label>
+                        <textarea 
+                            id="ucme-text" 
+                            name="ucmeText" 
+                            placeholder="Scrivi qui il tuo pensiero..."
+                            minlength="20" 
+                            maxlength="600" 
+                            required
+                        ></textarea>
+                        <div class="char-counter">
+                            <span id="char-count">0</span>/600 caratteri (minimo 20)
+                        </div>
+                    </div>
 
-  <section>
-    <p><strong>Perché ora?</strong><br/>Perché siamo sommersi da voci ma nessuno ci ascolta davvero.</p>
-    <p>L'intelligenza artificiale sa tutto. Ma non sente nulla. Mental Commons ti raggiunge, e ti considera.</p>
-  </section>
+                    <div class="form-group">
+                        <label for="email">La tua email</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            placeholder="nome@email.com"
+                            required
+                        >
+                        <small>Serve solo per inviarti la risposta. Non sarà condivisa.</small>
+                    </div>
 
-  <section>
-    <p><strong>Scrivi ciò che non sai dire.</strong> Leggi ciò che non pensavi esistesse. Mental Commons ti legge.</p>
-    <form action="https://formspree.io/f/mnnvjdbw" method="POST">
-      <input type="email" name="email" placeholder="La tua email" required />
-      <br/>
-      <button type="submit">Iscrivimi</button>
-    </form>
-  </section>
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="acceptance" name="acceptance" required>
+                            <span class="checkmark"></span>
+                            Accetto che un altro essere umano legga il mio pensiero e mi risponda con autenticità e rispetto.
+                        </label>
+                    </div>
 
-  <div class="mantra">"Non siamo fatti per pensare da soli."</div>
+                    <button type="submit" class="submit-button" id="submit-button" disabled>
+                        Affida il pensiero
+                    </button>
+                </form>
 
-  <footer>
-    © 2025 — Mental Commons<br/>
-    Il contrario di un social. Il prototipo di una mente comune.
-  </footer>
+                <div id="success-message" class="success-message" style="display: none;">
+                    <h3>Pensiero affidato</h3>
+                    <p>Grazie per aver condiviso la tua UCMe. Riceverai una risposta autentica entro 48 ore.</p>
+                    <p>Un altro essere umano prenderà in carico il tuo pensiero.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2025 — Mental Commons<br/>
+                Il contrario di un social. Il prototipo di una mente comune.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
-</html>
+</html> 
