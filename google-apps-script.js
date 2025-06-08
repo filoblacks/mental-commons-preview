@@ -13,7 +13,7 @@
  */
 
 // Configurazione
-const API_KEY = 'mc_2024_secure_key_change_this'; // ⚠️ CAMBIA QUESTA CHIAVE!
+const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m'; // ✅ Chiave sincronizzata con frontend
 const SHEET_NAME = 'mental_commons_ucme';
 
 /**
@@ -215,21 +215,32 @@ function getCurrentDateString() {
 }
 
 /**
- * Crea una risposta HTTP standardizzata
+ * Crea una risposta HTTP standardizzata con header CORS
  */
 function createResponse(data, statusCode = 200) {
-  return ContentService
+  const output = ContentService
     .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
+    
+  // Aggiungi header CORS per permettere le richieste cross-origin
+  return output
+    .setHeader('Access-Control-Allow-Origin', '*')
+    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    .setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    .setHeader('Access-Control-Max-Age', '3600');
 }
 
 /**
- * Gestisce le richieste OPTIONS per CORS
+ * Gestisce le richieste OPTIONS per CORS (preflight requests)
  */
 function doOptions() {
   return ContentService
     .createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT);
+    .setMimeType(ContentService.MimeType.TEXT)
+    .setHeader('Access-Control-Allow-Origin', '*')
+    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    .setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    .setHeader('Access-Control-Max-Age', '3600');
 }
 
 /**

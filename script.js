@@ -349,8 +349,10 @@ async function submitUCMeToGoogleSheet(formData) {
     try {
         const response = await fetch(GOOGLE_SCRIPT_CONFIG.scriptUrl, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(payload)
-            // Rimosso Content-Type header per evitare preflight CORS
         });
         
         if (!response.ok) {
@@ -373,7 +375,9 @@ async function submitUCMeToGoogleSheet(formData) {
         if (error.name === 'TypeError' && error.message.includes('fetch')) {
             throw new Error('Impossibile connettersi al server. Verifica la connessione internet.');
         } else if (error.message.includes('CORS')) {
-            throw new Error('Errore di configurazione del server. Contatta il supporto.');
+            throw new Error('Errore di configurazione del server. Il Google Apps Script deve essere ripubblicato con i corretti header CORS.');
+        } else if (error.message.includes('Failed to fetch')) {
+            throw new Error('Connessione al server fallita. Verifica la connessione internet e riprova.');
         } else {
             throw new Error(error.message || 'Errore nell\'invio del pensiero. Riprova più tardi.');
         }
@@ -535,6 +539,60 @@ function loadSavedConfiguration() {
 // Carica la configurazione salvata all'avvio
 loadSavedConfiguration();
 
+/**
+ * Funzione di debug per testare dettagliatamente la connessione
+ */
+async function debugGoogleSheetConnection() {
+    console.log('🔍 Debug dettagliato connessione Google Apps Script...');
+    console.log('📋 Configurazione attuale:', GOOGLE_SCRIPT_CONFIG);
+    
+    const testData = {
+        email: 'debug@mentalcommons.test',
+        text: 'Test di debug dettagliato per verificare connessione e CORS dopo correzioni.',
+        key: GOOGLE_SCRIPT_CONFIG.apiKey
+    };
+    
+    console.log('📤 Payload da inviare:', testData);
+    
+    try {
+        console.log('🚀 Inizio richiesta fetch...');
+        
+        const response = await fetch(GOOGLE_SCRIPT_CONFIG.scriptUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(testData)
+        });
+        
+        console.log('📡 Risposta ricevuta:', {
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries())
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('✅ Risposta JSON:', result);
+        
+        if (result.success) {
+            console.log('🎉 Connessione funzionante! UCMe ID:', result.ucmeId);
+            alert(`✅ Debug riuscito!\nUCMe ID: ${result.ucmeId}\nTimestamp: ${result.timestamp}`);
+        } else {
+            console.error('❌ Risposta negativa dal server:', result.message);
+            alert(`❌ Errore server: ${result.message}`);
+        }
+        
+    } catch (error) {
+        console.error('💥 Errore durante debug:', error);
+        console.error('Stack trace:', error.stack);
+        alert(`💥 Debug fallito: ${error.message}`);
+    }
+}
+
 // Expose functions globally for console access
 window.mentalCommons = {
     // Funzioni esistenti
@@ -546,6 +604,7 @@ window.mentalCommons = {
     
     // Nuove funzioni per Google Apps Script
     testConnection: testGoogleSheetConnection,
+    debug: debugGoogleSheetConnection,
     configure: configureGoogleScript,
     getConfig: () => GOOGLE_SCRIPT_CONFIG
 };
