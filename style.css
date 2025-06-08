@@ -519,3 +519,40 @@ html {
         opacity: 1;
     }
 } 
+
+.logo {
+    width: 80px;
+    height: auto;
+    animation: float 4s ease-in-out infinite;
+    margin-bottom: 1.5rem;
+  }
+  
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+    100% { transform: translateY(0px); }
+  }
+
+  body {
+    background: radial-gradient(ellipse at center, #ffffff, #f2f2f2);
+    background-size: 400% 400%;
+    animation: backgroundShift 15s ease infinite;
+    transition: background 1s ease;
+  }
+  
+  @keyframes backgroundShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  main, footer {
+    opacity: 0;
+    animation: fadeIn 1.6s ease forwards;
+    animation-delay: 0.2s;
+  }
+  
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+  
