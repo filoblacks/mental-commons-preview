@@ -15,6 +15,9 @@ function initializeApp() {
     
     // Setup form validation
     setupFormValidation();
+    
+    // Setup mobile optimizations
+    setupMobileOptimizations();
 }
 
 function loadExistingData() {
@@ -63,6 +66,15 @@ function setupEventListeners() {
     // Form submission
     const form = document.getElementById('ucme-form');
     form.addEventListener('submit', handleFormSubmission);
+    
+    // Mobile-specific: Handle textarea resize on focus
+    textarea.addEventListener('focus', function() {
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
+        }
+    });
 }
 
 function setupFormValidation() {
@@ -98,17 +110,26 @@ function scrollToForm() {
         block: 'start'
     });
     
-    // Focus sulla textarea dopo lo scroll
+    // Focus sulla textarea dopo lo scroll con delay appropriato per mobile
+    const delay = window.innerWidth <= 768 ? 1000 : 800;
     setTimeout(() => {
-        document.getElementById('ucme-text').focus();
-    }, 800);
+        const textarea = document.getElementById('ucme-text');
+        textarea.focus();
+        
+        // On mobile, ensure we're scrolled to the right position after focus
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
+        }
+    }, delay);
 }
 
 async function handleFormSubmission(event) {
     event.preventDefault();
     
     if (!validateForm()) {
-        alert('Per favore completa correttamente tutti i campi.');
+        showMobileFriendlyAlert('Per favore completa correttamente tutti i campi.');
         return;
     }
     
@@ -154,7 +175,10 @@ function collectFormData() {
         metadata: {
             characterCount: textarea.value.length,
             userAgent: navigator.userAgent,
-            language: navigator.language
+            language: navigator.language,
+            isMobile: window.innerWidth <= 768,
+            screenSize: `${window.innerWidth}x${window.innerHeight}`,
+            platform: navigator.platform
         }
     };
 }
@@ -278,6 +302,16 @@ function handleResize() {
     if (window.innerWidth < 768) {
         // Logica specifica per mobile
         console.log('Modalità mobile attivata');
+        
+        // Adjust form positioning if keyboard is visible
+        if (document.body.classList.contains('keyboard-visible')) {
+            const activeElement = document.activeElement;
+            if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+                setTimeout(() => {
+                    activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+        }
     }
 }
 
@@ -372,8 +406,9 @@ function showLoadingState() {
     const originalText = submitButton.textContent;
     
     submitButton.disabled = true;
-    submitButton.textContent = 'Invio in corso...';
-    submitButton.style.opacity = '0.7';
+    submitButton.textContent = 'Invio in corso';
+    submitButton.classList.add('loading');
+    submitButton.style.opacity = '0.8';
     
     // Salva il testo originale per ripristinarlo dopo
     submitButton.dataset.originalText = originalText;
@@ -387,6 +422,7 @@ function hideLoadingState() {
     
     submitButton.disabled = false;
     submitButton.textContent = submitButton.dataset.originalText || 'Affida il pensiero';
+    submitButton.classList.remove('loading');
     submitButton.style.opacity = '1';
 }
 
@@ -512,4 +548,166 @@ window.mentalCommons = {
     testConnection: testGoogleSheetConnection,
     configure: configureGoogleScript,
     getConfig: () => GOOGLE_SCRIPT_CONFIG
-}; 
+};
+
+// ==========================================
+// MENTAL COMMONS MVP - CLIENT-SIDE
+// ==========================================
+
+// ==========================================
+// MOBILE OPTIMIZATIONS
+// ==========================================
+
+function setupMobileOptimizations() {
+    // Prevent zoom on input focus on iOS
+    preventZoomOnFocus();
+    
+    // Handle viewport height changes on mobile
+    handleViewportHeight();
+    
+    // Improve touch interactions
+    improveTouchInteractions();
+    
+    // Handle keyboard visibility
+    handleKeyboardVisibility();
+}
+
+function preventZoomOnFocus() {
+    // Already handled in CSS with font-size: 16px
+    // But add extra safety
+    const inputs = document.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+        if (input.style.fontSize === '' || parseInt(input.style.fontSize) < 16) {
+            input.style.fontSize = '16px';
+        }
+    });
+}
+
+function handleViewportHeight() {
+    // Fix for mobile browsers that change viewport height when keyboard appears
+    function setVH() {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    
+    setVH();
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', () => {
+        setTimeout(setVH, 100);
+    });
+}
+
+function improveTouchInteractions() {
+    // Add touch feedback to buttons
+    const buttons = document.querySelectorAll('button, .cta-button, .submit-button');
+    
+    buttons.forEach(button => {
+        button.addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.98)';
+        }, { passive: true });
+        
+        button.addEventListener('touchend', function() {
+            this.style.transform = '';
+        }, { passive: true });
+        
+        button.addEventListener('touchcancel', function() {
+            this.style.transform = '';
+        }, { passive: true });
+    });
+}
+
+function handleKeyboardVisibility() {
+    // Adjust layout when virtual keyboard appears
+    if ('visualViewport' in window) {
+        const viewport = window.visualViewport;
+        
+        function handleViewportChange() {
+            const keyboardHeight = window.innerHeight - viewport.height;
+            
+            if (keyboardHeight > 150) { // Keyboard is visible
+                document.body.classList.add('keyboard-visible');
+                
+                // Scroll active input into view
+                const activeElement = document.activeElement;
+                if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+                    setTimeout(() => {
+                        activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+                }
+            } else {
+                document.body.classList.remove('keyboard-visible');
+            }
+        }
+        
+        viewport.addEventListener('resize', handleViewportChange);
+    }
+}
+
+// Mobile-friendly alert
+function showMobileFriendlyAlert(message) {
+    // Create custom alert for better mobile experience
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'mobile-alert';
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        background: #ff5757;
+        color: white;
+        padding: 16px;
+        border-radius: 8px;
+        text-align: center;
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `;
+    alertDiv.textContent = message;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => alertDiv.remove(), 300);
+        }
+    }, 3000);
+    
+    // Add slideOut animation
+    if (!document.querySelector('#mobile-alert-styles')) {
+        const style = document.createElement('style');
+        style.id = 'mobile-alert-styles';
+        style.textContent = `
+            @keyframes slideOut {
+                from { opacity: 1; transform: translateY(0); }
+                to { opacity: 0; transform: translateY(-20px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+// Detect if user is on mobile device
+function isMobileDevice() {
+    return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+// Get device info for analytics
+function getDeviceInfo() {
+    return {
+        isMobile: isMobileDevice(),
+        screenWidth: window.innerWidth,
+        screenHeight: window.innerHeight,
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+}
+
+// Enhanced console logging for mobile debugging
+if (isMobileDevice()) {
+    console.log('📱 Mental Commons - Modalità Mobile Attivata');
+    console.log('📊 Info Dispositivo:', getDeviceInfo());
+} 

@@ -12,6 +12,8 @@ body {
     background-color: #000;
     font-size: 16px;
     font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Container */
@@ -103,6 +105,7 @@ body {
     transition: all 0.2s ease;
     border-radius: 0;
     letter-spacing: 0.01em;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .cta-button:hover {
@@ -111,11 +114,237 @@ body {
     transform: translateY(-1px);
 }
 
+.cta-button:active {
+    transform: translateY(0);
+}
+
+/* Form Section */
+.form-section {
+    padding: 80px 0;
+    background: linear-gradient(to bottom, #000 0%, #111 100%);
+}
+
+.form-section h2 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin-bottom: 16px;
+    text-align: center;
+    letter-spacing: -0.01em;
+}
+
+.form-description {
+    font-size: 1.1rem;
+    color: #ccc;
+    text-align: center;
+    margin-bottom: 60px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.ucme-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 32px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #fff;
+    font-size: 1rem;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 16px;
+    border: 1px solid #333;
+    background: #111;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #fff;
+    background: #1a1a1a;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.char-counter {
+    text-align: right;
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: #999;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 8px;
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* Checkbox */
+.checkbox-group {
+    position: relative;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    line-height: 1.4;
+    font-size: 0.95rem;
+    color: #ddd;
+}
+
+.checkbox-label input[type="checkbox"] {
+    display: none;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #333;
+    background: transparent;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+    background: #fff;
+    border-color: #fff;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #000;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Submit Button */
+.submit-button {
+    width: 100%;
+    background: #fff;
+    color: #000;
+    border: 2px solid #fff;
+    padding: 18px 24px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    letter-spacing: 0.01em;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.submit-button:hover:not(:disabled) {
+    background: transparent;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.submit-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.submit-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Success Message */
+.success-message {
+    text-align: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #1a4d3a 0%, #2d5a4d 100%);
+    border-radius: 8px;
+    border: 1px solid #4caf50;
+}
+
+.success-message h3 {
+    font-size: 1.8rem;
+    font-weight: 500;
+    margin-bottom: 16px;
+    color: #4caf50;
+}
+
+.success-message p {
+    font-size: 1rem;
+    color: #ddd;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+/* Error Message */
+.error-message {
+    background: #ff5757;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    text-align: center;
+    animation: slideIn 0.3s ease;
+}
+
+/* Footer */
+footer {
+    padding: 40px 0;
+    text-align: center;
+    border-top: 1px solid #222;
+    background: #111;
+}
+
+footer p {
+    color: #999;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
 /* Fade-in animations */
 @keyframes fadeIn {
     from {
         opacity: 0;
         transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
     }
     to {
         opacity: 1;
@@ -131,4 +360,453 @@ body {
     animation: fadeIn 1s ease-out 0.2s both;
 }
 
-/* Resto del CSS invariato */
+/* ========================================
+   MEDIA QUERIES - MOBILE OPTIMIZATIONS
+   ======================================== */
+
+/* Tablet and smaller desktops */
+@media (max-width: 1024px) {
+    .container {
+        padding: 0 32px;
+    }
+    
+    .title {
+        font-size: 3rem;
+    }
+    
+    .form-section h2 {
+        font-size: 2.2rem;
+    }
+}
+
+/* Mobile landscape and tablet portrait */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 24px;
+    }
+    
+    .hero {
+        min-height: 90vh;
+        padding: 60px 0;
+    }
+    
+    .title {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+    }
+    
+    .subtitle {
+        font-size: 1.1rem;
+        margin-bottom: 60px;
+    }
+    
+    .copy-section {
+        margin-bottom: 60px;
+    }
+    
+    .copy-section p {
+        font-size: 1rem;
+        margin-bottom: 14px;
+    }
+    
+    .cta-button {
+        padding: 14px 28px;
+        font-size: 1rem;
+    }
+    
+    .form-section {
+        padding: 60px 0;
+    }
+    
+    .form-section h2 {
+        font-size: 2rem;
+        margin-bottom: 14px;
+    }
+    
+    .form-description {
+        font-size: 1rem;
+        margin-bottom: 40px;
+    }
+    
+    .form-group {
+        margin-bottom: 28px;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        padding: 14px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    .submit-button {
+        padding: 16px 20px;
+        font-size: 1rem;
+    }
+    
+    .logo {
+        width: 100px;
+    }
+    
+    .logo-container {
+        margin-bottom: 32px;
+    }
+}
+
+/* Mobile portrait */
+@media (max-width: 480px) {
+    .container {
+        padding: 0 20px;
+    }
+    
+    .hero {
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+    
+    .title {
+        font-size: 2rem;
+        margin-bottom: 16px;
+        line-height: 1.2;
+    }
+    
+    .subtitle {
+        font-size: 1rem;
+        margin-bottom: 48px;
+        line-height: 1.4;
+    }
+    
+    .copy-section {
+        margin-bottom: 48px;
+    }
+    
+    .copy-section p {
+        font-size: 0.95rem;
+        margin-bottom: 12px;
+        line-height: 1.5;
+    }
+    
+    .cta-button {
+        padding: 16px 24px;
+        font-size: 1rem;
+        width: 100%;
+    }
+    
+    .form-section {
+        padding: 48px 0;
+    }
+    
+    .form-section h2 {
+        font-size: 1.8rem;
+        margin-bottom: 12px;
+        line-height: 1.2;
+    }
+    
+    .form-description {
+        font-size: 0.95rem;
+        margin-bottom: 32px;
+        line-height: 1.5;
+    }
+    
+    .form-group {
+        margin-bottom: 24px;
+    }
+    
+    .form-group label {
+        font-size: 0.95rem;
+        margin-bottom: 6px;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        padding: 16px;
+        font-size: 16px;
+        border-radius: 6px;
+    }
+    
+    .form-group textarea {
+        min-height: 140px;
+    }
+    
+    .char-counter {
+        font-size: 0.85rem;
+        margin-top: 6px;
+    }
+    
+    .checkbox-label {
+        font-size: 0.9rem;
+        gap: 10px;
+        line-height: 1.4;
+    }
+    
+    .checkmark {
+        width: 18px;
+        height: 18px;
+        margin-top: 1px;
+    }
+    
+    .submit-button {
+        padding: 18px 20px;
+        font-size: 1rem;
+        border-radius: 6px;
+    }
+    
+    .success-message {
+        padding: 32px 16px;
+        border-radius: 6px;
+    }
+    
+    .success-message h3 {
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+    }
+    
+    .success-message p {
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+    }
+    
+    .logo {
+        width: 80px;
+    }
+    
+    .logo-container {
+        margin-bottom: 24px;
+    }
+    
+    footer {
+        padding: 32px 0;
+    }
+    
+    footer p {
+        font-size: 0.85rem;
+    }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+    .container {
+        padding: 0 16px;
+    }
+    
+    .title {
+        font-size: 1.8rem;
+    }
+    
+    .form-section h2 {
+        font-size: 1.6rem;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        padding: 14px;
+    }
+    
+    .submit-button {
+        padding: 16px;
+    }
+}
+
+/* Landscape orientation on mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+    .hero {
+        min-height: auto;
+        padding: 40px 0;
+    }
+    
+    .title {
+        font-size: 2rem;
+        margin-bottom: 12px;
+    }
+    
+    .subtitle {
+        font-size: 1rem;
+        margin-bottom: 32px;
+    }
+    
+    .copy-section {
+        margin-bottom: 32px;
+    }
+    
+    .copy-section p {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+    
+    .logo-container {
+        margin-bottom: 20px;
+    }
+    
+    .logo {
+        width: 60px;
+    }
+}
+
+/* High-DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* Dark mode support (if user prefers) */
+@media (prefers-color-scheme: dark) {
+    /* Already dark by default, but ensure consistency */
+    body {
+        background-color: #000;
+        color: #fff;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .logo {
+        animation: none;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (pointer: coarse) {
+    .cta-button,
+    .submit-button {
+        min-height: 48px;
+        touch-action: manipulation;
+    }
+    
+    .checkbox-label {
+        min-height: 48px;
+        align-items: center;
+    }
+    
+    .checkmark {
+        width: 24px;
+        height: 24px;
+    }
+    
+    /* Increase touch targets */
+    .form-group input,
+    .form-group textarea {
+        min-height: 48px;
+    }
+}
+
+/* ========================================
+   KEYBOARD & VIEWPORT HANDLING
+   ======================================== */
+
+/* Support for CSS custom properties for viewport height */
+html {
+    --vh: 1vh;
+}
+
+.hero {
+    min-height: 100vh;
+    min-height: calc(var(--vh, 1vh) * 100);
+}
+
+/* Keyboard visibility adjustments */
+.keyboard-visible .hero {
+    min-height: auto;
+}
+
+.keyboard-visible .form-section {
+    padding: 20px 0;
+}
+
+.keyboard-visible .copy-section {
+    margin-bottom: 20px;
+}
+
+.keyboard-visible .copy-section p {
+    margin-bottom: 8px;
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-appearance: none) {
+    .form-group input,
+    .form-group textarea {
+        -webkit-appearance: none;
+        border-radius: 4px;
+    }
+    
+    /* Fix for iOS Safari zoom issue */
+    .form-group input[type="email"],
+    .form-group textarea {
+        font-size: 16px;
+        transform: translateZ(0);
+    }
+}
+
+/* Android Chrome specific fixes */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    .form-group input,
+    .form-group textarea {
+        font-size: 16px;
+    }
+}
+
+/* Improved scrolling on mobile */
+@media (max-width: 768px) {
+    html {
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    body {
+        -webkit-overflow-scrolling: touch;
+        overflow-scrolling: touch;
+    }
+    
+    /* Prevent horizontal scroll */
+    body, html {
+        overflow-x: hidden;
+    }
+    
+    /* Better text rendering on mobile */
+    * {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+}
+
+/* Focus states for better accessibility */
+.form-group input:focus,
+.form-group textarea:focus,
+.cta-button:focus,
+.submit-button:focus {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+/* Hide outline on mouse but keep for keyboard */
+.form-group input:focus:not(:focus-visible),
+.form-group textarea:focus:not(:focus-visible),
+.cta-button:focus:not(:focus-visible),
+.submit-button:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Loading spinner for better UX */
+.submit-button.loading::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
