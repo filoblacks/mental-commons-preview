@@ -42,6 +42,71 @@
                 <div class="dashboard-actions">
                     <a href="index.html#form-section" class="new-ucme-button">Affida un nuovo pensiero</a>
                 </div>
+
+                <!-- Sezione Gestione Profilo -->
+                <div class="profile-section">
+                    <h2>Gestione Profilo</h2>
+                    
+                    <!-- Info Profilo -->
+                    <div class="profile-info">
+                        <h3>Le tue informazioni</h3>
+                        <div class="profile-details">
+                            <div class="profile-detail">
+                                <span class="detail-label">Email:</span>
+                                <span id="profile-email" class="detail-value">-</span>
+                            </div>
+                            <div class="profile-detail">
+                                <span class="detail-label">Nome:</span>
+                                <span id="profile-name" class="detail-value">-</span>
+                            </div>
+                            <div class="profile-detail">
+                                <span class="detail-label">Membro dal:</span>
+                                <span id="profile-created" class="detail-value">-</span>
+                            </div>
+                            <div class="profile-detail">
+                                <span class="detail-label">Ultimo accesso:</span>
+                                <span id="profile-last-login" class="detail-value">-</span>
+                            </div>
+                        </div>
+                        <button id="edit-profile-btn" class="profile-action-btn">Modifica Profilo</button>
+                    </div>
+
+                    <!-- Form Modifica Profilo (inizialmente nascosto) -->
+                    <div id="edit-profile-form" class="edit-profile-form" style="display: none;">
+                        <h3>Modifica Profilo</h3>
+                        <form id="profile-form">
+                            <div class="form-group">
+                                <label for="edit-name">Nome</label>
+                                <input type="text" id="edit-name" placeholder="Il tuo nome (opzionale)">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-email">Email</label>
+                                <input type="email" id="edit-email" placeholder="nuova@email.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-password">Nuova Password (opzionale)</label>
+                                <input type="password" id="edit-password" placeholder="Lascia vuoto per non modificare">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-confirm-password">Conferma Nuova Password</label>
+                                <input type="password" id="edit-confirm-password" placeholder="Ripeti la nuova password">
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="profile-save-btn">Salva Modifiche</button>
+                                <button type="button" id="cancel-edit-btn" class="profile-cancel-btn">Annulla</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Azioni Account -->
+                    <div class="account-actions">
+                        <h3>Azioni Account</h3>
+                        <div class="action-buttons">
+                            <button id="export-data-btn" class="profile-action-btn">Esporta i tuoi dati</button>
+                            <button id="delete-account-btn" class="profile-danger-btn">Elimina Account</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="no-access" class="no-access" style="display: none;">
