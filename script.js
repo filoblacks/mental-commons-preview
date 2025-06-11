@@ -1,7 +1,9 @@
-// Mental Commons 2.0 - Script principale
+// Mental Commons 3.0 - Sistema Completo con Login e Area Utente
 // Variabili globali
 let ucmeData = [];
 let portatoreData = [];
+let currentUser = null;
+let currentScreen = 'home';
 
 // Inizializzazione quando il DOM è caricato
 document.addEventListener('DOMContentLoaded', function() {
@@ -15,8 +17,11 @@ function initializeApp() {
     // Carica dati esistenti dal localStorage
     loadExistingData();
     
-    // Verifica parametri URL per storico email
-    checkEmailParameter();
+    // Controlla se utente già loggato
+    checkExistingUser();
+    
+    // Inizializza schermata home
+    showScreen('home');
     
     // Setup event listeners
     setupEventListeners();
@@ -27,7 +32,245 @@ function initializeApp() {
     // Setup mobile optimizations
     setupMobileOptimizations();
     
-    console.log('Mental Commons 2.0 inizializzato');
+    console.log('Mental Commons 3.0 inizializzato');
+}
+
+// ========================================
+// GESTIONE NAVIGAZIONE
+// ========================================
+
+function showScreen(screenName) {
+    // Nascondi tutte le schermate
+    document.querySelectorAll('.screen').forEach(screen => {
+        screen.style.display = 'none';
+    });
+    
+    // Mostra schermata richiesta
+    const targetScreen = document.getElementById(screenName + '-screen');
+    if (targetScreen) {
+        targetScreen.style.display = 'block';
+    }
+    
+    // Aggiorna navigazione
+    updateNavigation(screenName);
+    
+    currentScreen = screenName;
+    console.log('Passaggio a schermata:', screenName);
+}
+
+function updateNavigation(activeScreen) {
+    // Reset tutti i bottoni
+    document.querySelectorAll('.nav-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Attiva bottone corretto
+    const activeButton = document.getElementById('nav-' + activeScreen);
+    if (activeButton) {
+        activeButton.classList.add('active');
+    }
+    
+    // Mostra/nascondi bottoni basati su stato login
+    const loginBtn = document.getElementById('nav-login');
+    const userBtn = document.getElementById('nav-user');
+    const logoutBtn = document.getElementById('nav-logout');
+    
+    if (currentUser) {
+        loginBtn.style.display = 'none';
+        userBtn.style.display = 'block';
+        logoutBtn.style.display = 'block';
+    } else {
+        loginBtn.style.display = 'block';
+        userBtn.style.display = 'none';
+        logoutBtn.style.display = 'none';
+    }
+}
+
+// ========================================
+// GESTIONE UTENTI E AUTENTICAZIONE
+// ========================================
+
+function checkExistingUser() {
+    const savedUser = localStorage.getItem('mc-user');
+    if (savedUser) {
+        try {
+            currentUser = JSON.parse(savedUser);
+            console.log('Utente trovato:', currentUser.email);
+            updateNavigation(currentScreen);
+        } catch (error) {
+            console.error('Errore nel caricamento utente:', error);
+            localStorage.removeItem('mc-user');
+        }
+    }
+}
+
+function createUser(email, name = null, accessCode = null) {
+    const user = {
+        id: generateUniqueId(),
+        email: email,
+        name: name || 'Anonimo',
+        accessCode: accessCode || generateAccessCode(),
+        createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+        isPortatore: false
+    };
+    
+    // Salva utente
+    currentUser = user;
+    localStorage.setItem('mc-user', JSON.stringify(user));
+    
+    console.log('Nuovo utente creato:', email);
+    return user;
+}
+
+function loginUser(email, accessCode) {
+    // In un'implementazione reale, questo dovrebbe verificare con un server
+    // Per ora, creiamo/troviamo l'utente localmente
+    
+    const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
+    let user = users.find(u => u.email === email);
+    
+    if (!user) {
+        // Se non esiste, chiedi se vuole registrarsi
+        return { error: 'Email non trovata. Vuoi registrarti?' };
+    }
+    
+    if (user.accessCode !== accessCode) {
+        return { error: 'Codice di accesso non valido.' };
+    }
+    
+    // Login riuscito
+    user.lastLogin = new Date().toISOString();
+    currentUser = user;
+    localStorage.setItem('mc-user', JSON.stringify(user));
+    
+    // Aggiorna nella lista utenti
+    const userIndex = users.findIndex(u => u.id === user.id);
+    users[userIndex] = user;
+    localStorage.setItem('mc-users', JSON.stringify(users));
+    
+    console.log('Login riuscito per:', email);
+    return { success: true, user: user };
+}
+
+function registerUser(email, name) {
+    const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
+    
+    // Controlla se email già esiste
+    if (users.find(u => u.email === email)) {
+        return { error: 'Email già registrata. Prova ad accedere.' };
+    }
+    
+    // Crea nuovo utente
+    const user = createUser(email, name);
+    
+    // Aggiungi alla lista utenti
+    users.push(user);
+    localStorage.setItem('mc-users', JSON.stringify(users));
+    
+    // Simula invio email con codice di accesso
+    console.log('Codice di accesso per', email, ':', user.accessCode);
+    
+    return { 
+        success: true, 
+        user: user,
+        message: `Registrazione completata! Il tuo codice di accesso è: ${user.accessCode}`
+    };
+}
+
+function logoutUser() {
+    currentUser = null;
+    localStorage.removeItem('mc-user');
+    showScreen('home');
+    console.log('Logout completato');
+}
+
+function generateAccessCode() {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+// ========================================
+// GESTIONE AREA UTENTE
+// ========================================
+
+function loadUserDashboard() {
+    if (!currentUser) return;
+    
+    // Aggiorna nome utente
+    document.getElementById('user-welcome').textContent = 
+        `Bentornato${currentUser.name !== 'Anonimo' ? ', ' + currentUser.name : ''}`;
+    
+    // Carica UCMe dell'utente
+    const userUcmes = ucmeData.filter(ucme => ucme.email === currentUser.email);
+    
+    // Aggiorna statistiche
+    updateUserStats(userUcmes);
+    
+    // Mostra UCMe
+    displayUserUcmes(userUcmes);
+}
+
+function updateUserStats(userUcmes) {
+    const totalUcmes = userUcmes.length;
+    const responsesReceived = userUcmes.filter(ucme => ucme.response).length;
+    const daysSinceFirst = userUcmes.length > 0 ? 
+        Math.floor((new Date() - new Date(userUcmes[0].timestamp)) / (1000 * 60 * 60 * 24)) : 0;
+    
+    document.getElementById('total-ucmes').textContent = totalUcmes;
+    document.getElementById('responses-received').textContent = responsesReceived;
+    document.getElementById('days-since-first').textContent = daysSinceFirst;
+}
+
+function displayUserUcmes(userUcmes) {
+    const container = document.getElementById('user-ucmes');
+    container.innerHTML = '';
+    
+    if (userUcmes.length === 0) {
+        container.innerHTML = `
+            <div class="no-ucmes">
+                <p>Non hai ancora scritto nessun pensiero.</p>
+                <button onclick="showScreen('home')" class="auth-button">Scrivi la tua prima UCMe</button>
+            </div>
+        `;
+        return;
+    }
+    
+    // Ordina per timestamp (più recenti prima)
+    const sortedUcmes = userUcmes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    sortedUcmes.forEach((ucme, index) => {
+        const ucmeElement = createUserUcmeElement(ucme, index);
+        container.appendChild(ucmeElement);
+    });
+}
+
+function createUserUcmeElement(ucme, index) {
+    const element = document.createElement('div');
+    element.className = 'user-ucme-item';
+    element.style.animationDelay = `${index * 0.1}s`;
+    
+    const date = new Date(ucme.timestamp);
+    const formattedDate = date.toLocaleDateString('it-IT', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    const statusClass = ucme.response ? 'completed' : 'pending';
+    const statusText = ucme.response ? 'Risposta ricevuta' : 'In attesa di risposta';
+    
+    element.innerHTML = `
+        <div class="ucme-text">${ucme.text}</div>
+        <div class="ucme-meta">
+            <span>${formattedDate} • Tono: ${ucme.tone}</span>
+            <span class="ucme-status ${statusClass}">${statusText}</span>
+        </div>
+        ${ucme.response ? `<div class="ucme-response">${ucme.response}</div>` : ''}
+    `;
+    
+    return element;
 }
 
 // ========================================
@@ -44,6 +287,7 @@ function checkAndShowOnboarding() {
 function showOnboardingModal() {
     const modal = document.getElementById('onboarding-modal');
     modal.style.display = 'flex';
+    modal.style.animation = 'fadeIn 0.5s ease-out';
     
     // Prevenzione scroll del body quando modal è aperto
     document.body.style.overflow = 'hidden';
@@ -76,13 +320,10 @@ function checkEmailParameter() {
     if (email && isValidEmail(email)) {
         // Popola campo email
         const emailInput = document.getElementById('email');
-        emailInput.value = email;
-        
-        // Mostra storico per questa email
-        displayUcmeHistory(email);
-        
-        // Valida form dopo aver impostato l'email
-        validateForm();
+        if (emailInput) {
+            emailInput.value = email;
+            validateForm();
+        }
     }
 }
 
@@ -101,17 +342,19 @@ function displayUcmeHistory(email) {
     const historySection = document.getElementById('ucme-history');
     const historyList = document.getElementById('history-list');
     
-    // Pulisci contenuto esistente
-    historyList.innerHTML = '';
-    
-    // Crea elementi per ogni UCMe
-    recentUcmes.forEach((ucme, index) => {
-        const historyItem = createHistoryItem(ucme, index);
-        historyList.appendChild(historyItem);
-    });
-    
-    // Mostra sezione storico
-    historySection.style.display = 'block';
+    if (historySection && historyList) {
+        // Pulisci contenuto esistente
+        historyList.innerHTML = '';
+        
+        // Crea elementi per ogni UCMe
+        recentUcmes.forEach((ucme, index) => {
+            const historyItem = createHistoryItem(ucme, index);
+            historyList.appendChild(historyItem);
+        });
+        
+        // Mostra sezione storico
+        historySection.style.display = 'block';
+    }
 }
 
 function createHistoryItem(ucme, index) {
@@ -204,70 +447,249 @@ function savePortatoreData(email) {
 }
 
 // ========================================
-// GESTIONE FORM
+// EVENT LISTENERS
 // ========================================
 
 function setupEventListeners() {
+    // Navigazione header
+    setupNavigationListeners();
+    
+    // Form di autenticazione
+    setupAuthFormListeners();
+    
+    // Form UCMe principale
+    setupMainFormListeners();
+    
+    // Area utente
+    setupUserAreaListeners();
+}
+
+function setupNavigationListeners() {
+    document.getElementById('nav-home')?.addEventListener('click', () => showScreen('home'));
+    document.getElementById('nav-login')?.addEventListener('click', () => showScreen('login'));
+    document.getElementById('nav-user')?.addEventListener('click', () => {
+        showScreen('user');
+        loadUserDashboard();
+    });
+    document.getElementById('nav-logout')?.addEventListener('click', logoutUser);
+}
+
+function setupAuthFormListeners() {
+    // Tab switching
+    document.getElementById('tab-login')?.addEventListener('click', () => {
+        document.getElementById('tab-login').classList.add('active');
+        document.getElementById('tab-register').classList.remove('active');
+        document.getElementById('login-form').style.display = 'block';
+        document.getElementById('register-form').style.display = 'none';
+    });
+    
+    document.getElementById('tab-register')?.addEventListener('click', () => {
+        document.getElementById('tab-register').classList.add('active');
+        document.getElementById('tab-login').classList.remove('active');
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('register-form').style.display = 'block';
+    });
+    
+    // Form submissions
+    document.getElementById('login-form')?.addEventListener('submit', handleLoginForm);
+    document.getElementById('register-form')?.addEventListener('submit', handleRegisterForm);
+    
+    // Request code link
+    document.getElementById('request-code')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        if (email && isValidEmail(email)) {
+            requestAccessCode(email);
+        } else {
+            showMobileFriendlyAlert('Inserisci prima un indirizzo email valido.');
+        }
+    });
+}
+
+function setupMainFormListeners() {
     // Textarea character counter
     const textarea = document.getElementById('ucme-text');
     const charCount = document.getElementById('char-count');
     
-    textarea.addEventListener('input', function() {
-        const currentLength = this.value.length;
-        charCount.textContent = currentLength;
-        
-        // Cambio colore del contatore
-        if (currentLength < 20) {
-            charCount.style.color = '#ff6b6b';
-        } else if (currentLength > 500) {
-            charCount.style.color = '#ffa726';
-        } else {
-            charCount.style.color = '#4caf50';
-        }
-        
-        validateForm();
-    });
+    if (textarea && charCount) {
+        textarea.addEventListener('input', function() {
+            const currentLength = this.value.length;
+            charCount.textContent = currentLength;
+            
+            // Cambio colore del contatore
+            if (currentLength < 20) {
+                charCount.style.color = '#ff6b6b';
+            } else if (currentLength > 500) {
+                charCount.style.color = '#ffa726';
+            } else {
+                charCount.style.color = '#4caf50';
+            }
+            
+            validateForm();
+        });
+    }
     
-    // Email validation e aggiornamento storico
-    const emailInput = document.getElementById('email');
-    emailInput.addEventListener('input', function() {
-        validateForm();
-        
-        // Aggiorna storico se email valida
-        if (isValidEmail(this.value)) {
-            displayUcmeHistory(this.value);
-        } else {
-            // Nascondi storico se email non valida
-            document.getElementById('ucme-history').style.display = 'none';
-        }
-    });
-    
-    // Validazione altri campi
-    const toneSelect = document.getElementById('tone');
-    const acceptanceCheckbox = document.getElementById('acceptance');
-    
-    toneSelect.addEventListener('change', validateForm);
-    acceptanceCheckbox.addEventListener('change', validateForm);
-    
-    // Form submission
+    // Form validation
     const form = document.getElementById('ucme-form');
-    form.addEventListener('submit', handleFormSubmission);
-    
-    // Mobile-specific optimizations
-    setupMobileTextareaHandling();
+    if (form) {
+        const inputs = form.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.addEventListener('input', validateForm);
+            input.addEventListener('change', validateForm);
+        });
+        
+        form.addEventListener('submit', handleFormSubmission);
+    }
 }
 
-function setupMobileTextareaHandling() {
-    const textarea = document.getElementById('ucme-text');
-    
-    textarea.addEventListener('focus', function() {
-        if (window.innerWidth <= 768) {
-            setTimeout(() => {
-                this.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 300);
-        }
-    });
+function setupUserAreaListeners() {
+    document.getElementById('edit-profile')?.addEventListener('click', editProfile);
+    document.getElementById('export-data')?.addEventListener('click', exportUserData);
+    document.getElementById('delete-account')?.addEventListener('click', deleteAccount);
 }
+
+// ========================================
+// GESTIONE FORM AUTENTICAZIONE
+// ========================================
+
+function handleLoginForm(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('login-email').value.trim();
+    const code = document.getElementById('login-code').value.trim();
+    
+    if (!email || !code) {
+        showMobileFriendlyAlert('Compila tutti i campi.');
+        return;
+    }
+    
+    if (!isValidEmail(email)) {
+        showMobileFriendlyAlert('Inserisci un indirizzo email valido.');
+        return;
+    }
+    
+    const result = loginUser(email, code);
+    
+    if (result.error) {
+        showMobileFriendlyAlert(result.error);
+    } else {
+        showMobileFriendlyAlert('Login effettuato con successo!');
+        updateNavigation('user');
+        showScreen('user');
+        loadUserDashboard();
+    }
+}
+
+function handleRegisterForm(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('register-email').value.trim();
+    const name = document.getElementById('register-name').value.trim();
+    
+    if (!email) {
+        showMobileFriendlyAlert('Inserisci un indirizzo email.');
+        return;
+    }
+    
+    if (!isValidEmail(email)) {
+        showMobileFriendlyAlert('Inserisci un indirizzo email valido.');
+        return;
+    }
+    
+    const result = registerUser(email, name);
+    
+    if (result.error) {
+        showMobileFriendlyAlert(result.error);
+    } else {
+        showMobileFriendlyAlert(result.message);
+        // Passa al tab login e pre-compila email
+        document.getElementById('tab-login').click();
+        document.getElementById('login-email').value = email;
+    }
+}
+
+function requestAccessCode(email) {
+    // In un'implementazione reale, questo farebbe una richiesta al server
+    // Per ora, mostra il codice dell'utente se esiste
+    const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
+    const user = users.find(u => u.email === email);
+    
+    if (user) {
+        showMobileFriendlyAlert(`Il tuo codice di accesso è: ${user.accessCode}`);
+    } else {
+        showMobileFriendlyAlert('Email non trovata. Registrati prima di richiedere un codice.');
+    }
+}
+
+// ========================================
+// GESTIONE AREA UTENTE - AZIONI
+// ========================================
+
+function editProfile() {
+    if (!currentUser) return;
+    
+    const newName = prompt('Inserisci il tuo nome:', currentUser.name);
+    if (newName !== null && newName.trim() !== '') {
+        currentUser.name = newName.trim();
+        localStorage.setItem('mc-user', JSON.stringify(currentUser));
+        
+        // Aggiorna anche nella lista utenti
+        const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
+        const userIndex = users.findIndex(u => u.id === currentUser.id);
+        if (userIndex !== -1) {
+            users[userIndex] = currentUser;
+            localStorage.setItem('mc-users', JSON.stringify(users));
+        }
+        
+        loadUserDashboard(); // Ricarica dashboard
+        showMobileFriendlyAlert('Profilo aggiornato!');
+    }
+}
+
+function exportUserData() {
+    if (!currentUser) return;
+    
+    const userUcmes = ucmeData.filter(ucme => ucme.email === currentUser.email);
+    const exportData = {
+        user: currentUser,
+        ucmes: userUcmes,
+        exportDate: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `mental-commons-${currentUser.email}-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    
+    showMobileFriendlyAlert('Dati esportati!');
+}
+
+function deleteAccount() {
+    if (!currentUser) return;
+    
+    if (confirm('Sei sicuro di voler eliminare il tuo account? Questa azione non può essere annullata.')) {
+        // Rimuovi utente dalla lista
+        const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
+        const filteredUsers = users.filter(u => u.id !== currentUser.id);
+        localStorage.setItem('mc-users', JSON.stringify(filteredUsers));
+        
+        // Rimuovi UCMe dell'utente (opzionale - potresti volerle mantenere anonime)
+        ucmeData = ucmeData.filter(ucme => ucme.email !== currentUser.email);
+        localStorage.setItem('mentalCommons_ucmes', JSON.stringify(ucmeData));
+        
+        // Logout
+        logoutUser();
+        
+        showMobileFriendlyAlert('Account eliminato.');
+    }
+}
+
+// ========================================
+// GESTIONE FORM
+// ========================================
 
 function setupFormValidation() {
     validateForm(); // Validazione iniziale
@@ -279,6 +701,10 @@ function validateForm() {
     const tone = document.getElementById('tone');
     const checkbox = document.getElementById('acceptance');
     const submitButton = document.getElementById('submit-button');
+    
+    if (!textarea || !email || !tone || !checkbox || !submitButton) {
+        return false;
+    }
     
     const textValid = textarea.value.length >= 20 && textarea.value.length <= 600;
     const emailValid = email.value && isValidEmail(email.value);
@@ -327,6 +753,11 @@ async function handleFormSubmission(event) {
             savePortatoreData(formData.email);
         }
         
+        // Se utente loggato, aggiorna la dashboard
+        if (currentUser && currentUser.email === formData.email) {
+            loadUserDashboard();
+        }
+        
         // Mostra messaggio di successo
         showSuccessMessage();
         
@@ -348,12 +779,15 @@ function collectFormData() {
     const tone = document.getElementById('tone');
     const portatore = document.getElementById('portatore');
     
+    // Se l'utente è loggato, usa la sua email
+    const userEmail = currentUser ? currentUser.email : email.value.trim();
+    
     return {
         id: generateUniqueId(),
-        email: email.value.trim(),
+        email: userEmail,
         text: textarea.value.trim(),
         tone: tone.value,
-        portatore: portatore.checked,
+        portatore: portatore ? portatore.checked : false,
         timestamp: new Date().toISOString(),
         status: 'pending',
         response: null,
@@ -364,7 +798,8 @@ function collectFormData() {
             isMobile: window.innerWidth <= 768,
             screenSize: `${window.innerWidth}x${window.innerHeight}`,
             platform: navigator.platform,
-            version: '2.0'
+            version: '3.0',
+            userId: currentUser ? currentUser.id : null
         }
     };
 }
@@ -423,84 +858,82 @@ async function submitUCMeToGoogleSheet(formData) {
 
 function showLoadingState() {
     const submitButton = document.getElementById('submit-button');
-    submitButton.classList.add('loading');
-    submitButton.textContent = 'Affidando il pensiero...';
-    submitButton.disabled = true;
+    if (submitButton) {
+        submitButton.classList.add('loading');
+        submitButton.textContent = 'Affidando il pensiero...';
+        submitButton.disabled = true;
+    }
 }
 
 function hideLoadingState() {
     const submitButton = document.getElementById('submit-button');
-    submitButton.classList.remove('loading');
-    submitButton.textContent = 'Affida il pensiero';
-    validateForm(); // Ricalcola lo stato disabled
+    if (submitButton) {
+        submitButton.classList.remove('loading');
+        submitButton.textContent = 'Affida il pensiero';
+        validateForm(); // Ricalcola lo stato disabled
+    }
 }
 
 function showSuccessMessage() {
     const form = document.getElementById('ucme-form');
     const successMessage = document.getElementById('success-message');
     
-    // Nascondi il form e mostra il messaggio
-    form.style.display = 'none';
-    successMessage.style.display = 'block';
-    
-    // Scroll al messaggio di successo
-    successMessage.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'center'
-    });
+    if (form && successMessage) {
+        // Nascondi il form e mostra il messaggio
+        form.style.display = 'none';
+        successMessage.style.display = 'block';
+        
+        // Scroll al messaggio di successo
+        successMessage.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'center'
+        });
+        
+        // Dopo 5 secondi, rimostra il form
+        setTimeout(() => {
+            successMessage.style.display = 'none';
+            form.style.display = 'block';
+        }, 5000);
+    }
 }
 
 function showErrorMessage(message) {
-    // Crea e mostra messaggio di errore temporaneo
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message';
-    errorDiv.style.cssText = `
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #ff6b6b;
-        color: white;
-        padding: 15px 25px;
-        border-radius: 8px;
-        z-index: 1001;
-        font-size: 0.9rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        animation: slideInDown 0.3s ease-out;
-        max-width: 90vw;
-        text-align: center;
-    `;
-    errorDiv.textContent = message;
-    
-    document.body.appendChild(errorDiv);
-    
-    // Rimuovi dopo 5 secondi
-    setTimeout(() => {
-        errorDiv.style.animation = 'fadeOut 0.3s ease-out';
-        setTimeout(() => {
-            if (errorDiv.parentNode) {
-                errorDiv.parentNode.removeChild(errorDiv);
-            }
-        }, 300);
-    }, 5000);
+    showMobileFriendlyAlert('Errore: ' + message);
 }
 
 function resetForm() {
     const form = document.getElementById('ucme-form');
+    if (!form) return;
+    
     form.reset();
     
     // Reset del contatore caratteri
-    document.getElementById('char-count').textContent = '0';
-    document.getElementById('char-count').style.color = '#999';
+    const charCount = document.getElementById('char-count');
+    if (charCount) {
+        charCount.textContent = '0';
+        charCount.style.color = '#999';
+    }
     
     // Reset select tono al valore di default
-    document.getElementById('tone').value = 'neutro';
+    const toneSelect = document.getElementById('tone');
+    if (toneSelect) {
+        toneSelect.value = 'neutro';
+    }
     
-    // Nascondi storico se presente
-    document.getElementById('ucme-history').style.display = 'none';
+    // Se utente loggato, mantieni la sua email
+    if (currentUser) {
+        const emailInput = document.getElementById('email');
+        if (emailInput) {
+            emailInput.value = currentUser.email;
+            emailInput.disabled = true;
+        }
+    }
     
     // Disabilita il submit button
-    document.getElementById('submit-button').disabled = true;
+    const submitButton = document.getElementById('submit-button');
+    if (submitButton) {
+        submitButton.disabled = true;
+    }
 }
 
 // ========================================
@@ -509,56 +942,56 @@ function resetForm() {
 
 function scrollToForm() {
     const formSection = document.getElementById('form-section');
-    formSection.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-    });
-    
-    // Focus sulla textarea dopo lo scroll
-    const delay = window.innerWidth <= 768 ? 1000 : 800;
-    setTimeout(() => {
-        const textarea = document.getElementById('ucme-text');
-        textarea.focus();
-        
-        if (window.innerWidth <= 768) {
-            setTimeout(() => {
-                textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 300);
-        }
-    }, delay);
+    if (formSection) {
+        formSection.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
 }
 
 // ========================================
-// OTTIMIZZAZIONI MOBILE
+// MOBILE OPTIMIZATIONS
 // ========================================
 
 function setupMobileOptimizations() {
+    setupMobileTextareaHandling();
     handleResize();
     preventZoomOnFocus();
     handleViewportHeight();
     improveTouchInteractions();
     handleKeyboardVisibility();
+}
+
+function setupMobileTextareaHandling() {
+    const textarea = document.getElementById('ucme-text');
     
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', () => {
-        setTimeout(handleViewportHeight, 500);
-    });
-}
-
-function handleResize() {
-    const isMobile = window.innerWidth <= 768;
-    document.body.classList.toggle('mobile', isMobile);
-}
-
-function preventZoomOnFocus() {
-    if (isMobileDevice()) {
-        const inputs = document.querySelectorAll('input, textarea, select');
-        inputs.forEach(input => {
-            if (input.style.fontSize !== '16px') {
-                input.style.fontSize = '16px';
+    if (textarea) {
+        textarea.addEventListener('focus', function() {
+            if (window.innerWidth <= 768) {
+                setTimeout(() => {
+                    this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
             }
         });
     }
+}
+
+function handleResize() {
+    window.addEventListener('resize', () => {
+        handleViewportHeight();
+    });
+}
+
+function preventZoomOnFocus() {
+    const inputs = document.querySelectorAll('input[type="email"], input[type="text"], textarea');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            if (window.innerWidth <= 768) {
+                this.style.fontSize = '16px';
+            }
+        });
+    });
 }
 
 function handleViewportHeight() {
@@ -572,146 +1005,248 @@ function handleViewportHeight() {
 }
 
 function improveTouchInteractions() {
-    if ('ontouchstart' in window) {
-        document.body.classList.add('touch-device');
-        
-        // Migliora il feedback visivo sui touch
-        const touchElements = document.querySelectorAll('button, .checkbox-label, select');
-        touchElements.forEach(element => {
-            element.addEventListener('touchstart', function() {
-                this.style.opacity = '0.7';
-            });
-            
-            element.addEventListener('touchend', function() {
-                setTimeout(() => {
-                    this.style.opacity = '';
-                }, 150);
-            });
+    // Miglioramenti per dispositivi touch
+    const buttons = document.querySelectorAll('button, .nav-button');
+    buttons.forEach(button => {
+        button.addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.95)';
         });
-    }
+        
+        button.addEventListener('touchend', function() {
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 100);
+        });
+    });
 }
 
 function handleKeyboardVisibility() {
-    if (isMobileDevice()) {
-        let initialViewportHeight = window.innerHeight;
-        
+    if (window.innerWidth <= 768) {
         function handleViewportChange() {
             const currentHeight = window.innerHeight;
-            const heightDifference = initialViewportHeight - currentHeight;
+            const initialHeight = window.screen.height;
             
-            if (heightDifference > 150) {
+            if (currentHeight < initialHeight * 0.75) {
                 document.body.classList.add('keyboard-visible');
             } else {
                 document.body.classList.remove('keyboard-visible');
-                initialViewportHeight = currentHeight;
             }
         }
         
         window.addEventListener('resize', handleViewportChange);
         
-        // Handle focus/blur events
-        const inputs = document.querySelectorAll('input, textarea, select');
-        inputs.forEach(input => {
-            input.addEventListener('focus', () => {
-                setTimeout(handleViewportChange, 300);
-            });
-            
-            input.addEventListener('blur', () => {
-                setTimeout(() => {
-                    document.body.classList.remove('keyboard-visible');
-                }, 300);
-            });
-        });
+        // Initial check
+        handleViewportChange();
     }
 }
 
 function showMobileFriendlyAlert(message) {
-    showErrorMessage(message);
+    // Versione mobile-friendly degli alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'mobile-alert';
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        z-index: 10001;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        animation: slideInDown 0.3s ease-out;
+        max-width: 90vw;
+        text-align: center;
+    `;
+    alertDiv.textContent = message;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Rimuovi dopo 4 secondi
+    setTimeout(() => {
+        alertDiv.style.animation = 'fadeOut 0.3s ease-out';
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        }, 300);
+    }, 4000);
 }
+
+// ========================================
+// UTILITY E HELPERS
+// ========================================
 
 function isMobileDevice() {
-    return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-}
-
-// ========================================
-// UTILITY E FUNZIONI AMMINISTRATIVE
-// ========================================
-
-// Funzioni utility per debug e amministrazione
-function getUcmeById(id) {
-    return ucmeData.find(ucme => ucme.id === id);
-}
-
-function exportAllData() {
-    const allData = {
-        ucmes: ucmeData,
-        portatori: portatoreData,
-        exported: new Date().toISOString(),
-        version: '2.0'
-    };
-    
-    const dataStr = JSON.stringify(allData, null, 2);
-    const dataBlob = new Blob([dataStr], {type: 'application/json'});
-    
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(dataBlob);
-    link.download = `mental_commons_export_${Date.now()}.json`;
-    link.click();
-    
-    console.log('Dati esportati:', allData);
-}
-
-function clearAllData() {
-    if (confirm('Sei sicuro di voler cancellare tutti i dati locali?')) {
-        localStorage.removeItem('mentalCommons_ucmes');
-        localStorage.removeItem('mentalCommons_portatori');
-        localStorage.removeItem('mc-onboarded');
-        ucmeData = [];
-        portatoreData = [];
-        console.log('Tutti i dati locali sono stati cancellati');
-    }
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
 function getStats() {
     return {
         totalUcmes: ucmeData.length,
         totalPortatori: portatoreData.length,
-        ucmesByTone: ucmeData.reduce((acc, ucme) => {
-            acc[ucme.tone || 'neutro'] = (acc[ucme.tone || 'neutro'] || 0) + 1;
-            return acc;
-        }, {}),
-        lastUcme: ucmeData[ucmeData.length - 1],
-        version: '2.0'
+        totalUsers: JSON.parse(localStorage.getItem('mc-users') || '[]').length,
+        currentUser: currentUser,
+        ucmeData: () => ucmeData,
+        portatoreData: () => portatoreData
     };
 }
 
-// Animazioni CSS aggiuntive via JavaScript
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeOut {
-        0% { opacity: 1; }
-        100% { opacity: 0; }
-    }
+function exportAllData() {
+    const data = {
+        ucmes: ucmeData,
+        portatori: portatoreData,
+        users: JSON.parse(localStorage.getItem('mc-users') || '[]'),
+        currentUser: currentUser,
+        exportDate: new Date().toISOString(),
+        version: '3.0'
+    };
     
-    @keyframes slideInDown {
-        0% {
-            opacity: 0;
-            transform: translateX(-50%) translateY(-20px);
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `mental-commons-full-export-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+}
+
+function clearAllData() {
+    if (confirm('Sei sicuro di voler cancellare tutti i dati? Questa azione non può essere annullata.')) {
+        localStorage.removeItem('mentalCommons_ucmes');
+        localStorage.removeItem('mentalCommons_portatori');
+        localStorage.removeItem('mc-users');
+        localStorage.removeItem('mc-user');
+        localStorage.removeItem('mc-onboarded');
+        console.log('Tutti i dati cancellati');
+        location.reload();
+    }
+}
+
+// ========================================
+// FUNZIONI DI DEBUG E TEST
+// ========================================
+
+function createTestData() {
+    // Crea utenti di test
+    const testUsers = [
+        {
+            id: 'test_user_1',
+            email: 'test@email.com',
+            name: 'Marco',
+            accessCode: 'ABC123',
+            createdAt: '2024-12-10T10:00:00Z',
+            lastLogin: '2024-12-11T14:30:00Z',
+            isPortatore: false
+        },
+        {
+            id: 'test_user_2',
+            email: 'altro@email.com',
+            name: 'Sofia',
+            accessCode: 'XYZ789',
+            createdAt: '2024-12-08T15:20:00Z',
+            lastLogin: '2024-12-11T09:15:00Z',
+            isPortatore: true
         }
-        100% {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
+    ];
+    
+    // Dati di test per verificare il funzionamento
+    const testUcmes = [
+        {
+            id: "test_1",
+            email: "test@email.com",
+            text: "Ho un pensiero che non riesco a dire a voce. È come se avessi dentro qualcosa di importante ma ogni volta che provo a condividerlo con qualcuno, le parole si perdono. Non so se è paura del giudizio o semplicemente non so come esprimermi.",
+            tone: "calmo",
+            portatore: false,
+            timestamp: "2024-12-11T10:30:00Z",
+            status: "pending",
+            response: null,
+            metadata: {
+                characterCount: 280,
+                userAgent: "Test",
+                language: "it-IT",
+                version: "3.0",
+                userId: "test_user_1"
+            }
+        },
+        {
+            id: "test_2",
+            email: "test@email.com",
+            text: "Oggi ho sentito una connessione profonda con qualcuno e mi ha fatto riflettere su quanto sia raro trovare persone con cui puoi davvero essere te stesso. È un pensiero che mi riempie di gratitudine ma anche di malinconia.",
+            tone: "poetico",
+            portatore: true,
+            timestamp: "2024-12-10T14:20:00Z",
+            status: "completed",
+            response: "La tua riflessione tocca qualcosa di universale: il bisogno di autenticità nelle relazioni umane. È bello che tu abbia trovato quella connessione, e la malinconia che provi forse nasce dalla consapevolezza di quanto sia preziosa.",
+            metadata: {
+                characterCount: 250,
+                userAgent: "Test",
+                language: "it-IT",
+                version: "3.0",
+                userId: "test_user_1"
+            }
+        },
+        {
+            id: "test_3",
+            email: "altro@email.com",
+            text: "Mi sento come se stessi vivendo la vita di qualcun altro. Ogni giorno faccio le stesse cose, ma non sento che mi appartengano davvero. È come se fossi un attore che recita un ruolo che non ha scelto.",
+            tone: "neutro",
+            portatore: false,
+            timestamp: "2024-12-09T18:45:00Z",
+            status: "pending",
+            response: null,
+            metadata: {
+                characterCount: 220,
+                userAgent: "Test",
+                language: "it-IT",
+                version: "3.0",
+                userId: "test_user_2"
+            }
+        }
+    ];
+    
+    // Salva i dati nel localStorage
+    localStorage.setItem('mc-users', JSON.stringify(testUsers));
+    localStorage.setItem('mentalCommons_ucmes', JSON.stringify(testUcmes));
+    
+    // Aggiorna le variabili globali
+    ucmeData = testUcmes;
+    
+    console.log('Dati di test creati nel localStorage');
+    console.log('Utenti disponibili:');
+    testUsers.forEach(user => {
+        console.log(`- ${user.email} (codice: ${user.accessCode})`);
+    });
+}
+
+function clearTestData() {
+    clearAllData();
+}
+
+// Inizializzazione quando tutto è pronto
+window.addEventListener('load', () => {
+    // Pre-popola email se utente loggato
+    if (currentUser) {
+        const emailInput = document.getElementById('email');
+        if (emailInput) {
+            emailInput.value = currentUser.email;
+            emailInput.disabled = true;
         }
     }
-`;
-document.head.appendChild(style);
+});
 
-// Esposizione funzioni globali per debugging
-window.MCDebug = {
+// Rendi disponibili le funzioni dalla console
+window.MentalCommons = {
+    createTestData,
+    clearTestData,
     getStats,
     exportAllData,
     clearAllData,
-    getUcmeById,
-    ucmeData: () => ucmeData,
-    portatoreData: () => portatoreData
+    showScreen,
+    currentUser: () => currentUser,
+    loginUser,
+    registerUser,
+    logoutUser
 }; 

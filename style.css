@@ -16,6 +16,398 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* ========================================
+   HEADER E NAVIGAZIONE
+   ======================================== */
+
+.main-header {
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-bottom: 1px solid #222;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+}
+
+.logo-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-small {
+    width: 32px;
+    height: 32px;
+    opacity: 0.9;
+}
+
+.site-name {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #fff;
+}
+
+.header-nav {
+    display: flex;
+    gap: 16px;
+}
+
+.nav-button {
+    background: transparent;
+    border: 1px solid #333;
+    color: #ccc;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.nav-button:hover {
+    border-color: #555;
+    color: #fff;
+}
+
+.nav-button.active {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+}
+
+.nav-button.danger {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+}
+
+.nav-button.danger:hover {
+    background: #ff6b6b;
+    color: #fff;
+}
+
+/* ========================================
+   GESTIONE SCHERMATE
+   ======================================== */
+
+.screen {
+    min-height: 100vh;
+    padding-top: 80px; /* Spazio per header fisso */
+}
+
+.screen.hidden {
+    display: none;
+}
+
+/* ========================================
+   SCHERMATA LOGIN
+   ======================================== */
+
+.login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #000 0%, #111 100%);
+}
+
+.login-container {
+    max-width: 500px;
+    width: 100%;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+}
+
+.login-container h2 {
+    font-size: 2rem;
+    font-weight: 400;
+    margin-bottom: 16px;
+    color: #fff;
+}
+
+.login-description {
+    color: #ccc;
+    margin-bottom: 32px;
+    font-size: 1rem;
+}
+
+.login-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 32px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.tab-button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #ccc;
+    padding: 12px 16px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-button.active {
+    background: #333;
+    color: #fff;
+}
+
+.auth-form {
+    text-align: left;
+}
+
+.auth-form .form-group {
+    margin-bottom: 24px;
+}
+
+.auth-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.auth-form input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #333;
+    background: #0a0a0a;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.auth-form input:focus {
+    outline: none;
+    border-color: #555;
+    background: #1a1a1a;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+.auth-form small {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.auth-form small a {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.auth-button {
+    width: 100%;
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 14px;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+}
+
+.auth-button:hover {
+    background: #f0f0f0;
+    transform: translateY(-1px);
+}
+
+.auth-button:active {
+    transform: translateY(0);
+}
+
+/* ========================================
+   AREA UTENTE
+   ======================================== */
+
+.user-screen {
+    background: linear-gradient(to bottom, #000 0%, #111 100%);
+    padding: 100px 0 60px;
+}
+
+.user-dashboard {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.user-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.user-header h2 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin-bottom: 32px;
+    color: #fff;
+}
+
+.user-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 24px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9rem;
+    color: #ccc;
+    margin-top: 8px;
+}
+
+.user-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+}
+
+.user-section {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 32px;
+}
+
+.user-section h3 {
+    font-size: 1.4rem;
+    font-weight: 500;
+    margin-bottom: 24px;
+    color: #fff;
+    border-bottom: 1px solid #333;
+    padding-bottom: 12px;
+}
+
+.user-ucmes {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.user-ucme-item {
+    background: #0a0a0a;
+    border: 1px solid #222;
+    border-radius: 6px;
+    padding: 20px;
+    transition: all 0.2s ease;
+    animation: slideInUp 0.4s ease-out;
+}
+
+.user-ucme-item:hover {
+    border-color: #444;
+    background: #111;
+}
+
+.ucme-text {
+    font-size: 0.95rem;
+    color: #ddd;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.ucme-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.ucme-status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.ucme-status.pending {
+    background: #333;
+    color: #ffa726;
+}
+
+.ucme-status.completed {
+    background: #1b5e20;
+    color: #4caf50;
+}
+
+.ucme-response {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 16px;
+    margin-top: 12px;
+    font-style: italic;
+    color: #ccc;
+}
+
+.user-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.settings-button {
+    background: transparent;
+    border: 1px solid #333;
+    color: #ccc;
+    padding: 12px 16px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.settings-button:hover {
+    border-color: #555;
+    color: #fff;
+    background: #1a1a1a;
+}
+
+.settings-button.danger {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+}
+
+.settings-button.danger:hover {
+    background: #ff6b6b;
+    color: #fff;
+}
+
 /* Container */
 .container {
     max-width: 800px;
@@ -203,49 +595,54 @@ body {
 }
 
 /* Checkbox */
-.checkbox-group {
-    position: relative;
-}
-
-.checkbox-label {
+.checkbox-wrapper {
+    margin-bottom: 1rem;
     display: flex;
     align-items: flex-start;
-    gap: 12px;
-    cursor: pointer;
-    line-height: 1.4;
-    font-size: 0.95rem;
-    color: #ddd;
+    gap: 0.75rem;
 }
 
-.checkbox-label input[type="checkbox"] {
-    display: none;
-}
-
-.checkmark {
+.checkbox-wrapper input[type="checkbox"] {
     width: 20px;
     height: 20px;
-    border: 2px solid #333;
-    background: transparent;
+    accent-color: #fff;
+    border: 1px solid #ccc;
+    background: #000;
+    cursor: pointer;
+    margin: 0;
     flex-shrink: 0;
     margin-top: 2px;
+    border-radius: 3px;
     transition: all 0.2s ease;
-    position: relative;
 }
 
-.checkbox-label input[type="checkbox"]:checked + .checkmark {
+.checkbox-wrapper input[type="checkbox"]:hover {
+    border-color: #fff;
+}
+
+.checkbox-wrapper input[type="checkbox"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked {
     background: #fff;
     border-color: #fff;
 }
 
-.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
-    content: '✓';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #000;
-    font-size: 12px;
-    font-weight: bold;
+.checkbox-wrapper label {
+    color: #ccc;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    cursor: pointer;
+    flex: 1;
+}
+
+.checkbox-wrapper .subtle {
+    font-size: 0.85rem;
+    color: #777;
+    display: block;
+    margin-top: 0.25rem;
 }
 
 /* Submit Button */
@@ -341,6 +738,17 @@ footer p {
     }
 }
 
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
 @keyframes slideIn {
     from {
         opacity: 0;
@@ -382,12 +790,60 @@ footer p {
 /* Mobile landscape and tablet portrait */
 @media (max-width: 768px) {
     .container {
-        padding: 0 24px;
+        padding: 0 20px;
     }
     
+    .header-content {
+        padding: 12px 0;
+    }
+    
+    .header-nav {
+        gap: 8px;
+    }
+    
+    .nav-button {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .site-name {
+        font-size: 1rem;
+    }
+    
+    .login-container {
+        padding: 30px 20px;
+        margin: 20px;
+    }
+    
+    .login-container h2 {
+        font-size: 1.5rem;
+    }
+    
+    .user-header h2 {
+        font-size: 2rem;
+    }
+    
+    .user-stats {
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+    }
+    
+    .user-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .user-section {
+        padding: 24px;
+    }
+
     .hero {
-        min-height: 90vh;
         padding: 60px 0;
+        min-height: calc(100vh - 80px);
     }
     
     .title {
@@ -450,17 +906,118 @@ footer p {
     .logo-container {
         margin-bottom: 32px;
     }
+    
+    .modal-content {
+        padding: 30px 20px;
+        margin: 20px;
+    }
+    
+    .modal-body h2 {
+        font-size: 1.2rem;
+    }
+    
+    .modal-body p {
+        font-size: 0.9rem;
+    }
+    
+    .ucme-history {
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .ucme-history h3 {
+        font-size: 1.1rem;
+    }
+    
+    .history-item {
+        padding: 12px;
+    }
+    
+    .history-item-text {
+        font-size: 0.85rem;
+    }
+    
+    .history-item-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .login-section {
+        padding: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .login-group label {
+        font-size: 0.95rem;
+    }
+    
+    .login-input-wrapper {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .login-button {
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        width: 100%;
+    }
 }
 
 /* Mobile portrait */
 @media (max-width: 480px) {
     .container {
-        padding: 0 20px;
+        padding: 0 16px;
     }
     
+    .header-content {
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px 0;
+    }
+    
+    .header-nav {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .login-container {
+        padding: 20px 16px;
+        margin: 16px;
+    }
+    
+    .login-container h2 {
+        font-size: 1.3rem;
+    }
+    
+    .user-header h2 {
+        font-size: 1.8rem;
+    }
+    
+    .user-stats {
+        gap: 16px;
+        justify-content: space-around;
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+    }
+    
+    .user-section {
+        padding: 20px;
+    }
+    
+    .user-section h3 {
+        font-size: 1.2rem;
+    }
+
     .hero {
-        min-height: 100vh;
         padding: 40px 0;
+        min-height: calc(100vh - 100px);
     }
     
     .title {
@@ -532,13 +1089,17 @@ footer p {
         margin-top: 6px;
     }
     
-    .checkbox-label {
+    .checkbox-wrapper {
+        margin-bottom: 0.8rem;
+        gap: 0.6rem;
+    }
+    
+    .checkbox-wrapper label {
         font-size: 0.9rem;
-        gap: 10px;
         line-height: 1.4;
     }
     
-    .checkmark {
+    .checkbox-wrapper input[type="checkbox"] {
         width: 18px;
         height: 18px;
         margin-top: 1px;
@@ -679,12 +1240,12 @@ footer p {
         touch-action: manipulation;
     }
     
-    .checkbox-label {
+    .checkbox-wrapper {
         min-height: 48px;
         align-items: center;
     }
     
-    .checkmark {
+    .checkbox-wrapper input[type="checkbox"] {
         width: 24px;
         height: 24px;
     }
@@ -913,6 +1474,7 @@ html {
     border-radius: 6px;
     padding: 15px;
     position: relative;
+    animation: slideInUp 0.4s ease-out;
 }
 
 .history-item-text {
@@ -942,39 +1504,140 @@ html {
     font-size: 0.7rem;
 }
 
+.logout-button {
+    background: transparent;
+    border: 1px solid #333;
+    color: #aaa;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    margin-top: 15px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.logout-button:hover {
+    border-color: #555;
+    color: #ccc;
+}
+
+.logout-button:active {
+    background-color: #111;
+}
+
 /* ========================================
-   SELECT PER IL TONO
+   SEZIONE LOGIN LEGGERO
    ======================================== */
 
-.form-group select {
-    width: 100%;
-    padding: 14px 16px;
-    border: 1px solid #333;
-    border-radius: 4px;
-    background-color: #111;
-    color: #fff;
-    font-size: 1rem;
-    font-family: 'Inter', sans-serif;
-    transition: all 0.3s ease;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zM2 5L0 3h4z'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 12px;
-    cursor: pointer;
+.login-section {
+    margin-bottom: 40px;
+    padding: 20px;
+    background-color: #0a0a0a;
+    border: 1px solid #222;
+    border-radius: 8px;
+    animation: fadeIn 0.5s ease-out;
 }
 
-.form-group select:focus {
+.login-form {
+    max-width: 100%;
+}
+
+.login-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.login-group label {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #ccc;
+    margin-bottom: 0;
+}
+
+.login-input-wrapper {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.login-input-wrapper input[type="email"] {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #333;
+    background: #111;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.login-input-wrapper input[type="email"]:focus {
     outline: none;
     border-color: #555;
-    background-color: #0a0a0a;
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+    background: #1a1a1a;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
 }
 
-.form-group select option {
-    background-color: #111;
+.login-input-wrapper input[type="email"]::placeholder {
+    color: #666;
+}
+
+.login-button {
+    background: transparent;
+    border: 1px solid #555;
+    color: #ccc;
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.login-button:hover {
+    border-color: #777;
     color: #fff;
-    padding: 10px;
+    background-color: #111;
+}
+
+.login-button:active {
+    background-color: #1a1a1a;
+    transform: translateY(1px);
+}
+
+.login-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Stato quando utente è "loggato" */
+.logged-in .login-section {
+    display: none;
+}
+
+.logged-in #email {
+    background: #0a0a0a;
+    border-color: #222;
+    color: #888;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.logged-in .form-group label[for="email"]::after {
+    content: " (già salvata)";
+    color: #666;
+    font-size: 0.85rem;
+    font-weight: 300;
 }
 
 /* ========================================
@@ -1017,11 +1680,48 @@ html {
         align-items: flex-start;
         gap: 5px;
     }
+    
+    .login-section {
+        padding: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .login-group label {
+        font-size: 0.95rem;
+    }
+    
+    .login-input-wrapper {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .login-button {
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
     .modal-content {
         padding: 25px 15px;
+        max-width: 90vw;
+    }
+    
+    .modal-body h2 {
+        font-size: 1.1rem;
+        margin-bottom: 16px;
+    }
+    
+    .modal-body p {
+        font-size: 0.85rem;
+        margin-bottom: 24px;
+        line-height: 1.5;
+    }
+    
+    .modal-button {
+        padding: 14px 24px;
+        font-size: 0.95rem;
     }
     
     .ucme-history {
@@ -1088,5 +1788,70 @@ html {
     .ucme-history,
     footer {
         display: none !important;
+    }
+}
+
+/* ========================================
+   SELECT PER IL TONO
+   ======================================== */
+
+.form-group select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background-color: #111;
+    color: #fff;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zM2 5L0 3h4z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    cursor: pointer;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #555;
+    background-color: #0a0a0a;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.form-group select option {
+    background-color: #111;
+    color: #fff;
+    padding: 10px;
+}
+
+/* ========================================
+   ELEMENTI AGGIUNTIVI AREA UTENTE
+   ======================================== */
+
+.no-ucmes {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+}
+
+.no-ucmes p {
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+/* ========================================
+   ANIMAZIONI
+   ======================================== */
+
+@keyframes slideInDown {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
     }
 }

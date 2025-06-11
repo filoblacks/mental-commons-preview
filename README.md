@@ -269,6 +269,106 @@ location.reload()
 - Verificare permessi MailApp in Google Apps Script
 - Testare con `testScript()` nella console GAS
 
+## 🆕 Nuove Funzionalità - Login Leggero
+
+### Sistema di Accesso Semplificato
+- **Login tramite email**: Gli utenti possono "ritrovare il proprio spazio" inserendo la loro email
+- **Nessuna password**: Il sistema è completamente basato sulla fiducia e semplicità  
+- **Non obbligatorio**: È possibile scrivere UCMe anche senza accedere
+- **Persistenza**: L'email viene salvata automaticamente dopo il primo invio
+
+### Storico Personale
+- **Visualizzazione UCMe precedenti**: Massimo 5 pensieri più recenti
+- **Design minimale**: Blocchi scuri con data e tono scelto
+- **Animazioni leggere**: Transizioni rispettose e non intrusive
+
+### Esperienza Utente Migliorata
+- **Continuità**: L'email rimane salvata tra le sessioni
+- **Logout soft**: Possibilità di "tornare a essere anonimo"
+- **Mobile-first**: Ottimizzato per dispositivi touch
+
+## 🧱 Architettura Tecnica
+
+### Frontend
+- **HTML/CSS/JS vanilla**: Nessuna dipendenza esterna
+- **localStorage**: Salvataggio locale per backup e login
+- **Dark mode**: Design minimalista con font Inter
+- **Responsive**: Mobile-first con breakpoint ottimizzati
+
+### Backend/Dati
+- **Google Apps Script**: Gestione notifiche email
+- **File JSON statici**: data.json, portatori.json
+- **localStorage**: Backup e gestione sessioni
+
+### Integrazione Login
+```javascript
+// Funzioni principali del sistema login
+checkExistingLogin()    // Controlla login salvato all'avvio
+performLogin(email)     // Esegue il login con email
+handleLogin(event)      // Gestisce form di login
+handleLogout()          // Logout e ritorno allo stato anonimo
+```
+
+## 🛠️ Funzioni di Test e Debug
+
+Dalla console del browser:
+```javascript
+// Crea dati di test per verificare il sistema
+MentalCommons.createTestData()
+
+// Rimuove tutti i dati salvati
+MentalCommons.clearTestData()
+
+// Visualizza statistiche
+MentalCommons.getStats()
+
+// Esporta tutti i dati
+MentalCommons.exportAllData()
+```
+
+## 🎯 Principi di Design
+
+### Tono Umano
+- **"Hai già scritto qualcosa qui?"** invece di "Login"
+- **"Ritrova"** invece di "Accedi"  
+- **"Torna a essere anonimo"** invece di "Logout"
+
+### Semplicità
+- **Un campo**: Solo email, nessuna password
+- **Opzionale**: Mai obbligatorio, sempre rispettoso
+- **Invisibile**: L'interfaccia sparisce quando non serve
+
+### Rispetto
+- **Non intrusivo**: Nessuna notifica push o alert aggressivi
+- **Privato**: Dati salvati solo localmente
+- **Consensuale**: Ogni azione richiede intento esplicito
+
+## 📱 Utilizzo
+
+### Per Utenti Nuovi
+1. Visita il sito
+2. Scrivi una UCMe direttamente
+3. L'email viene salvata automaticamente per visite future
+
+### Per Utenti Ricorrenti  
+1. La pagina riconosce automaticamente l'email salvata
+2. Mostra lo storico delle UCMe precedenti
+3. Il campo email è pre-compilato e disabilitato
+
+### Ritorno all'Anonimato
+1. Clicca "Torna a essere anonimo" sotto lo storico
+2. L'email viene rimossa dal dispositivo
+3. Il sito torna allo stato iniziale
+
+## 🌟 Filosofia
+
+Mental Commons non vuole account, notifiche, badge o meccaniche di engagement.
+Vuole gesti leggeri, ma significativi.
+Il login non è controllo, è cura.
+
+È uno strumento cognitivo per l'epoca dell'overload informativo.
+Le persone non hanno bisogno di più contenuti, ma di più contenimento.
+
 ---
 
 **Mental Commons v2.0** - L'evoluzione naturale della riflessione condivisa.
