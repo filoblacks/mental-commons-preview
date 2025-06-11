@@ -810,3 +810,283 @@ html {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* ========================================
+   MODAL DI ONBOARDING
+   ======================================== */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.5s ease-out;
+}
+
+.modal-content {
+    background-color: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 40px 30px;
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    animation: slideIn 0.6s ease-out;
+}
+
+.modal-body h2 {
+    font-size: 1.4rem;
+    font-weight: 400;
+    margin-bottom: 20px;
+    color: #fff;
+    line-height: 1.5;
+}
+
+.modal-body p {
+    font-size: 1rem;
+    color: #ccc;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.modal-button {
+    background-color: #fff;
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    padding: 12px 30px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+}
+
+.modal-button:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-1px);
+}
+
+.modal-button:active {
+    transform: translateY(0);
+}
+
+/* ========================================
+   STORICO UCME
+   ======================================== */
+
+.ucme-history {
+    background-color: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 40px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.ucme-history h3 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+    color: #fff;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.history-item {
+    background-color: #0a0a0a;
+    border: 1px solid #222;
+    border-radius: 6px;
+    padding: 15px;
+    position: relative;
+}
+
+.history-item-text {
+    font-size: 0.9rem;
+    color: #ccc;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.history-item-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.history-item-date {
+    font-family: 'Inter', monospace;
+}
+
+.history-item-tone {
+    background-color: #222;
+    color: #aaa;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+}
+
+/* ========================================
+   SELECT PER IL TONO
+   ======================================== */
+
+.form-group select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background-color: #111;
+    color: #fff;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zM2 5L0 3h4z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    cursor: pointer;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #555;
+    background-color: #0a0a0a;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.form-group select option {
+    background-color: #111;
+    color: #fff;
+    padding: 10px;
+}
+
+/* ========================================
+   MIGLIORAMENTI MOBILE PER NUOVI ELEMENTI
+   ======================================== */
+
+@media (max-width: 768px) {
+    .modal-content {
+        padding: 30px 20px;
+        margin: 20px;
+    }
+    
+    .modal-body h2 {
+        font-size: 1.2rem;
+    }
+    
+    .modal-body p {
+        font-size: 0.9rem;
+    }
+    
+    .ucme-history {
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .ucme-history h3 {
+        font-size: 1.1rem;
+    }
+    
+    .history-item {
+        padding: 12px;
+    }
+    
+    .history-item-text {
+        font-size: 0.85rem;
+    }
+    
+    .history-item-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        padding: 25px 15px;
+    }
+    
+    .ucme-history {
+        padding: 15px;
+    }
+    
+    .history-item {
+        padding: 10px;
+    }
+}
+
+/* ========================================
+   ANIMAZIONI AGGIUNTIVE
+   ======================================== */
+
+.history-item {
+    animation: slideInUp 0.4s ease-out;
+}
+
+@keyframes slideInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stagger animation per i history items */
+.history-item:nth-child(1) { animation-delay: 0.1s; }
+.history-item:nth-child(2) { animation-delay: 0.2s; }
+.history-item:nth-child(3) { animation-delay: 0.3s; }
+.history-item:nth-child(4) { animation-delay: 0.4s; }
+.history-item:nth-child(5) { animation-delay: 0.5s; }
+
+/* ========================================
+   MIGLIORAMENTI ACCESSIBILITA'
+   ======================================== */
+
+.form-group select:focus {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+.modal-button:focus {
+    outline: 2px solid #000;
+    outline-offset: 2px;
+}
+
+/* Hide outline on mouse but keep for keyboard */
+.form-group select:focus:not(:focus-visible),
+.modal-button:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ========================================
+   PRINT STYLES (nascondere elementi non necessari)
+   ======================================== */
+
+@media print {
+    .modal-overlay,
+    .ucme-history,
+    footer {
+        display: none !important;
+    }
+}

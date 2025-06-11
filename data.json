@@ -4,26 +4,53 @@
       "id": "example_1",
       "email": "utente@email.com",
       "text": "Ho un pensiero che non riesco a dire a voce. È come se avessi dentro qualcosa di importante ma ogni volta che provo a condividerlo con qualcuno, le parole si perdono. Non so se è paura del giudizio o semplicemente non so come esprimermi. Ma sento che questo pensiero ha bisogno di uscire, di essere ascoltato da qualcuno.",
+      "tone": "calmo",
+      "portatore": false,
       "timestamp": "2024-01-15T10:30:00Z",
       "status": "pending",
       "response": null,
       "metadata": {
         "characterCount": 387,
         "userAgent": "Mozilla/5.0 (example)",
-        "language": "it-IT"
+        "language": "it-IT",
+        "version": "2.0"
+      }
+    },
+    {
+      "id": "example_2",
+      "email": "utente@email.com",
+      "text": "Oggi ho sentito una connessione profonda con qualcuno e mi ha fatto riflettere su quanto sia raro trovare persone con cui puoi davvero essere te stesso. È un pensiero che mi riempie di gratitudine ma anche di malinconia, perché mi rendo conto di quanto spesso viviamo in superficie.",
+      "tone": "poetico",
+      "portatore": true,
+      "timestamp": "2024-01-16T14:20:00Z",
+      "status": "pending",
+      "response": null,
+      "metadata": {
+        "characterCount": 356,
+        "userAgent": "Mozilla/5.0 (example)",
+        "language": "it-IT",
+        "version": "2.0"
       }
     }
   ],
   "stats": {
-    "totalUcmes": 1,
-    "pendingUcmes": 1,
+    "totalUcmes": 2,
+    "pendingUcmes": 2,
     "completedUcmes": 0,
-    "lastUpdated": "2024-01-15T10:30:00Z"
+    "lastUpdated": "2024-01-16T14:20:00Z",
+    "ucmesByTone": {
+      "calmo": 1,
+      "poetico": 1,
+      "neutro": 0,
+      "diretto": 0
+    },
+    "portatoreCandidates": 1
   },
   "config": {
-    "minCharacters": 200,
+    "minCharacters": 20,
     "maxCharacters": 600,
     "responseTimeLimit": "48h",
-    "version": "1.0.0"
+    "version": "2.0",
+    "availableTones": ["calmo", "poetico", "neutro", "diretto"]
   }
 } 

@@ -15,6 +15,17 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Modal di onboarding -->
+    <div id="onboarding-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h2>Mental Commons è uno spazio per pensieri difficili.</h2>
+                <p>Non è terapia. Non è commento.<br/>È presenza.</p>
+                <button class="modal-button" onclick="completeOnboarding()">Entrare</button>
+            </div>
+        </div>
+    </div>
+
     <main>
         <section class="hero">
             <div class="container">
@@ -42,6 +53,14 @@
             <div class="container">
                 <h2>Affida il tuo pensiero</h2>
                 <p class="form-description">Scrivi quello che pensi. Un altro essere umano lo leggerà e risponderà entro 48 ore.</p>
+                
+                <!-- Sezione storico UCMe (visualizzata solo se presente) -->
+                <div id="ucme-history" class="ucme-history" style="display: none;">
+                    <h3>I tuoi pensieri precedenti</h3>
+                    <div id="history-list" class="history-list">
+                        <!-- Le UCMe precedenti verranno inserite qui via JavaScript -->
+                    </div>
+                </div>
                 
                 <form id="ucme-form" class="ucme-form">
                     <div class="form-group">
@@ -71,12 +90,32 @@
                         <small>Serve solo per inviarti la risposta. Non sarà condivisa.</small>
                     </div>
 
+                    <div class="form-group">
+                        <label for="tone">Tono della risposta desiderato</label>
+                        <select id="tone" name="tone" required>
+                            <option value="calmo">Calmo</option>
+                            <option value="poetico">Poetico</option>
+                            <option value="neutro" selected>Neutro</option>
+                            <option value="diretto">Diretto</option>
+                        </select>
+                        <small>Scegli il tono che preferisci per la risposta del Portatore.</small>
+                    </div>
+
                     <div class="form-group checkbox-group">
                         <label class="checkbox-label">
                             <input type="checkbox" id="acceptance" name="acceptance" required>
                             <span class="checkmark"></span>
                             Accetto che un altro essere umano legga il mio pensiero e mi risponda con autenticità e rispetto.
                         </label>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="portatore" name="portatore">
+                            <span class="checkmark"></span>
+                            Mi piacerebbe diventare un Portatore
+                        </label>
+                        <small>I Portatori sono persone che scelgono di ascoltare e rispondere ai pensieri degli altri.</small>
                     </div>
 
                     <button type="submit" class="submit-button" id="submit-button" disabled>

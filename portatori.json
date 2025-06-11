@@ -1,0 +1,17 @@
+{
+  "portatori": [
+    {
+      "id": "example_portatore_1",
+      "email": "portatore@email.com",
+      "interesse": true,
+      "timestamp": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "stats": {
+    "totalCandidati": 1,
+    "lastUpdated": "2024-01-15T10:30:00Z"
+  },
+  "config": {
+    "version": "2.0"
+  }
+} 
