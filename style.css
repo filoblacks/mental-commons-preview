@@ -654,7 +654,7 @@ body {
 
 .user-screen {
     background: linear-gradient(to bottom, #000 0%, #111 100%);
-    padding: 100px 0 60px;
+    padding: calc(var(--ritual-stats-height, 80px) + 20px) 0 60px;
 }
 
 .user-dashboard {
@@ -923,6 +923,8 @@ body {
     font-size: 1.25rem;
     color: #fff;
     border-bottom: 1px solid #222;
+    /* Definiamo l'altezza come variabile CSS per riutilizzarla */
+    --ritual-stats-height: calc(1.25rem * 1.2 + 2rem + 1px);
 }
 
 .ritual-stats div {
@@ -1421,6 +1423,8 @@ footer p {
         font-size: 1rem;
         gap: 0.25rem;
         padding: 1rem;
+        /* Aggiorniamo l'altezza per il breakpoint tablet */
+        --ritual-stats-height: calc(1rem * 3.2 + 2rem + 1px);
     }
 
     .user-welcome {
@@ -1714,6 +1718,8 @@ footer p {
         font-size: 1rem;
         padding: 0.8rem;
         margin: 1.5rem 0 1rem 0;
+        /* Aggiorniamo l'altezza per il breakpoint mobile */
+        --ritual-stats-height: calc(1rem * 3.4 + 1.6rem + 1px);
     }
 
     /* Profile section mobile */

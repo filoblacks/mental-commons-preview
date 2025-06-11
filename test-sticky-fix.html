@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Sticky Fix - Mental Commons</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Stili specifici per il test */
+        .test-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #222;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 2000;
+            max-width: 300px;
+        }
+        
+        .user-screen {
+            display: block !important;
+        }
+        
+        .test-content {
+            background: #333;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #4CAF50;
+        }
+        
+        .test-content h3 {
+            color: #4CAF50;
+            margin: 0 0 10px 0;
+        }
+        
+        .test-content p {
+            color: #fff;
+            margin: 0;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <strong>Test Sticky Fix</strong><br>
+        Scorri verso il basso per verificare che il contenuto verde non sia coperto dal ritual-stats sticky.
+    </div>
+
+    <!-- Ritual Stats - Sticky Header -->
+    <header class="ritual-stats">
+        <div><span id="ucme-count">42</span> pensieri accolti</div>
+        <div><span id="risposte-count">38</span> risposte inviate</div>
+        <div><span id="portatori-count">12</span> Portatori attivi</div>
+    </header>
+
+    <!-- Area Utente con contenuto di test -->
+    <div id="user-screen" class="screen user-screen">
+        <div class="test-content">
+            <h3>✅ Questo contenuto NON dovrebbe essere coperto dal ritual-stats</h3>
+            <p>Se vedi questo testo completamente visibile senza sovrapposizioni con l'header sticky sopra, allora il fix funziona correttamente.</p>
+        </div>
+        
+        <div class="container">
+            <div class="user-dashboard">
+                <div class="user-header">
+                    <h2 id="user-welcome">Test Area Utente</h2>
+                    <div class="user-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">5</span>
+                            <span class="stat-label">Pensieri condivisi</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">3</span>
+                            <span class="stat-label">Risposte ricevute</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">15</span>
+                            <span class="stat-label">Giorni di presenza</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-content">
+                    <div class="user-section">
+                        <h3>Test Content</h3>
+                        <div class="test-content">
+                            <h3>🎯 Area di test principale</h3>
+                            <p>Questo contenuto dovrebbe essere perfettamente visibile su tutte le dimensioni di schermo:</p>
+                            <ul style="color: #fff; margin: 10px 0;">
+                                <li>Desktop: ✓ Con ritual-stats di ~80px</li>
+                                <li>Tablet (768px): ✓ Con ritual-stats di ~60px</li>
+                                <li>Mobile (480px): ✓ Con ritual-stats di ~55px</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Contenuto di test aggiuntivo -->
+                        <div class="user-ucmes">
+                            <div class="user-ucme-item">
+                                <div class="ucme-text">Test pensiero 1: Questo è un pensiero di test per verificare che il layout funzioni correttamente.</div>
+                                <div class="ucme-meta">
+                                    <span class="ucme-status pending">In attesa</span>
+                                    <span>23/01/2025</span>
+                                </div>
+                            </div>
+                            
+                            <div class="user-ucme-item">
+                                <div class="ucme-text">Test pensiero 2: Un altro pensiero per riempire lo spazio e vedere come si comporta il layout.</div>
+                                <div class="ucme-meta">
+                                    <span class="ucme-status completed">Risposto</span>
+                                    <span>22/01/2025</span>
+                                </div>
+                                <div class="ucme-response">
+                                    Questa è una risposta di test dal Portatore.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="user-section">
+                        <h3>Test Impostazioni</h3>
+                        <div class="user-settings">
+                            <button class="settings-button">Test Button 1</button>
+                            <button class="settings-button">Test Button 2</button>
+                            <button class="settings-button danger">Test Danger Button</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contenuto aggiuntivo per test scroll -->
+        <div style="height: 100vh; background: linear-gradient(to bottom, #111, #000); display: flex; align-items: center; justify-content: center;">
+            <div class="test-content">
+                <h3>📱 Area di test per scroll</h3>
+                <p>Scorri verso l'alto per verificare che il ritual-stats rimanga sticky e non copra il contenuto della user-screen.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Script di test per log delle dimensioni
+        function logTestInfo() {
+            const ritualStats = document.querySelector('.ritual-stats');
+            const userScreen = document.querySelector('.user-screen');
+            
+            if (ritualStats && userScreen) {
+                const ritualStatsHeight = ritualStats.offsetHeight;
+                const userScreenPaddingTop = getComputedStyle(userScreen).paddingTop;
+                
+                console.log('🧪 Test Info:');
+                console.log(`📏 Ritual Stats Height: ${ritualStatsHeight}px`);
+                console.log(`📐 User Screen Padding Top: ${userScreenPaddingTop}`);
+                console.log(`🖥️ Viewport Width: ${window.innerWidth}px`);
+                console.log(`🔧 CSS Variable: ${getComputedStyle(ritualStats).getPropertyValue('--ritual-stats-height')}`);
+            }
+        }
+        
+        // Log info on load and resize
+        window.addEventListener('load', logTestInfo);
+        window.addEventListener('resize', logTestInfo);
+        
+        // Simulazione click per testare interazioni
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('✅ Test page loaded successfully');
+            logTestInfo();
+        });
+    </script>
+</body>
+</html> 
