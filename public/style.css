@@ -32,8 +32,7 @@ body {
     padding: 0.75rem 1rem;
     opacity: 0;
     animation: fadeInNav 0.3s ease-in-out 0.5s forwards;
-    min-height: 70px; /* Aumentato per le statistiche più grandi */
-    position: relative; /* Necessario per positioning assoluto dei bottoni */
+    min-height: 75px; /* Aumentato per statistiche più grandi */
 }
 
 .ritual-actions {
@@ -931,9 +930,9 @@ body {
 .ritual-stats {
     display: flex;
     justify-content: center;
-    gap: 2rem;
+    gap: 2.5rem;
     font-family: 'Inter', sans-serif;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     color: #fff;
     align-items: center;
     flex-wrap: nowrap;
@@ -942,7 +941,7 @@ body {
 .ritual-stats div {
     white-space: nowrap;
     opacity: 0.95;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     text-align: center;
     line-height: 1.2;
 }
@@ -950,8 +949,8 @@ body {
 .ritual-stats strong {
     font-weight: 700; /* Strong per i numeri */
     color: #fff;
-    margin-right: 0.35rem;
-    font-size: 1.2rem;
+    margin-right: 0.4rem;
+    font-size: 1.4rem;
 }
 
 .ritual-stats span {
@@ -1379,21 +1378,21 @@ footer p {
     }
 
     .ritual-stats {
-        gap: 1.5rem;
-        font-size: 0.95rem;
+        gap: 2rem;
+        font-size: 1.05rem;
     }
 
     .ritual-stats div {
-        font-size: 0.95rem;
+        font-size: 1.05rem;
     }
 
     .ritual-stats strong {
-        font-size: 1.05rem;
-        margin-right: 0.3rem;
+        font-size: 1.2rem;
+        margin-right: 0.35rem;
     }
 
     .ritual-stats span {
-        font-size: 1.05rem;
+        font-size: 1.2rem;
     }
 
     .ritual-actions {
@@ -1672,21 +1671,21 @@ footer p {
     }
 
     .ritual-stats {
-        gap: 1rem;
-        font-size: 0.85rem;
+        gap: 1.5rem;
+        font-size: 0.95rem;
     }
 
     .ritual-stats div {
-        font-size: 0.85rem;
+        font-size: 0.95rem;
     }
 
     .ritual-stats strong {
-        font-size: 0.95rem;
-        margin-right: 0.25rem;
+        font-size: 1.1rem;
+        margin-right: 0.3rem;
     }
 
     .ritual-stats span {
-        font-size: 0.95rem;
+        font-size: 1.1rem;
     }
 
     .ritual-actions {
