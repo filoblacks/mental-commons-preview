@@ -15,23 +15,11 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Header con navigazione -->
-    <header class="main-header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo-header">
-                    <img src="logo.svg" alt="Mental Commons" class="logo-small">
-                    <span class="site-name">Mental Commons</span>
-                </div>
-                <nav class="header-nav">
-                    <button id="nav-home" class="nav-button active">Home</button>
-                    <button id="nav-login" class="nav-button">Accedi</button>
-                    <button id="nav-user" class="nav-button" style="display: none;">Area Personale</button>
-                    <button id="nav-logout" class="nav-button" style="display: none;">Esci</button>
-                </nav>
-            </div>
-        </div>
-    </header>
+    <!-- Navigazione semplificata -->
+    <div class="nav-buttons">
+        <a href="index.html">Home</a>
+        <a href="login.html">Accedi</a>
+    </div>
 
     <!-- Modal di onboarding -->
     <div id="onboarding-modal" class="modal-overlay" style="display: none;">
@@ -43,53 +31,6 @@
                     che risponderà con rispetto entro 48 ore.<br/>
                     È un gesto. Non un post.</p>
                 <button class="modal-button" onclick="completeOnboarding()">Entrare</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Schermata Login/Registrazione -->
-    <div id="login-screen" class="screen login-screen" style="display: none;">
-        <div class="container">
-            <div class="login-container">
-                <h2>Accedi al tuo spazio</h2>
-                <p class="login-description">Il tuo spazio personale per vedere tutti i tuoi pensieri e le risposte ricevute.</p>
-                
-                <div class="login-tabs">
-                    <button id="tab-login" class="tab-button active">Accedi</button>
-                    <button id="tab-register" class="tab-button">Registrati</button>
-                </div>
-                
-                <!-- Form Login -->
-                <form id="login-form" class="auth-form">
-                    <div class="form-group">
-                        <label for="login-email">Email</label>
-                        <input type="email" id="login-email" placeholder="nome@email.com" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="login-code">Codice di accesso</label>
-                        <input type="text" id="login-code" placeholder="Il codice che hai ricevuto" required>
-                        <small>Se non hai un codice, <a href="#" id="request-code">richiedine uno</a></small>
-                    </div>
-                    
-                    <button type="submit" class="auth-button">Accedi</button>
-                </form>
-                
-                <!-- Form Registrazione -->
-                <form id="register-form" class="auth-form" style="display: none;">
-                    <div class="form-group">
-                        <label for="register-email">Email</label>
-                        <input type="email" id="register-email" placeholder="nome@email.com" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="register-name">Nome (opzionale)</label>
-                        <input type="text" id="register-name" placeholder="Come preferisci essere chiamato">
-                        <small>Puoi rimanere anonimo se preferisci</small>
-                    </div>
-                    
-                    <button type="submit" class="auth-button">Crea il mio spazio</button>
-                </form>
             </div>
         </div>
     </div>

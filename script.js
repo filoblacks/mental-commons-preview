@@ -59,31 +59,14 @@ function showScreen(screenName) {
 }
 
 function updateNavigation(activeScreen) {
-    // Reset tutti i bottoni
-    document.querySelectorAll('.nav-button').forEach(btn => {
-        btn.classList.remove('active');
-    });
+    // La navigazione ora è gestita tramite nav-buttons semplici
+    // Non ci sono più elementi da aggiornare per l'header
+    // Questa funzione è mantenuta per compatibilità
     
-    // Attiva bottone corretto
-    const activeButton = document.getElementById('nav-' + activeScreen);
-    if (activeButton) {
-        activeButton.classList.add('active');
-    }
+    // Se l'utente è loggato, potremmo aggiornare i link nella nav-buttons
+    // ma per ora manteniamo semplice con i due link fissi
     
-    // Mostra/nascondi bottoni basati su stato login
-    const loginBtn = document.getElementById('nav-login');
-    const userBtn = document.getElementById('nav-user');
-    const logoutBtn = document.getElementById('nav-logout');
-    
-    if (currentUser) {
-        loginBtn.style.display = 'none';
-        userBtn.style.display = 'block';
-        logoutBtn.style.display = 'block';
-    } else {
-        loginBtn.style.display = 'block';
-        userBtn.style.display = 'none';
-        logoutBtn.style.display = 'none';
-    }
+    currentScreen = activeScreen;
 }
 
 // ========================================
@@ -465,8 +448,8 @@ function setupEventListeners() {
 }
 
 function setupNavigationListeners() {
-    document.getElementById('nav-home')?.addEventListener('click', () => showScreen('home'));
-    document.getElementById('nav-login')?.addEventListener('click', () => showScreen('login'));
+    // La navigazione ora è gestita tramite semplici link in nav-buttons
+    // Gestiamo solo l'area utente se necessario
     document.getElementById('nav-user')?.addEventListener('click', () => {
         showScreen('user');
         loadUserDashboard();
@@ -475,35 +458,8 @@ function setupNavigationListeners() {
 }
 
 function setupAuthFormListeners() {
-    // Tab switching
-    document.getElementById('tab-login')?.addEventListener('click', () => {
-        document.getElementById('tab-login').classList.add('active');
-        document.getElementById('tab-register').classList.remove('active');
-        document.getElementById('login-form').style.display = 'block';
-        document.getElementById('register-form').style.display = 'none';
-    });
-    
-    document.getElementById('tab-register')?.addEventListener('click', () => {
-        document.getElementById('tab-register').classList.add('active');
-        document.getElementById('tab-login').classList.remove('active');
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('register-form').style.display = 'block';
-    });
-    
-    // Form submissions
-    document.getElementById('login-form')?.addEventListener('submit', handleLoginForm);
-    document.getElementById('register-form')?.addEventListener('submit', handleRegisterForm);
-    
-    // Request code link
-    document.getElementById('request-code')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        const email = document.getElementById('login-email').value;
-        if (email && isValidEmail(email)) {
-            requestAccessCode(email);
-        } else {
-            showMobileFriendlyAlert('Inserisci prima un indirizzo email valido.');
-        }
-    });
+    // Le funzioni di autenticazione sono ora gestite in login.js
+    // Questa funzione è mantenuta per compatibilità ma può essere vuota
 }
 
 function setupMainFormListeners() {
@@ -551,75 +507,7 @@ function setupUserAreaListeners() {
 // ========================================
 // GESTIONE FORM AUTENTICAZIONE
 // ========================================
-
-function handleLoginForm(event) {
-    event.preventDefault();
-    
-    const email = document.getElementById('login-email').value.trim();
-    const code = document.getElementById('login-code').value.trim();
-    
-    if (!email || !code) {
-        showMobileFriendlyAlert('Compila tutti i campi.');
-        return;
-    }
-    
-    if (!isValidEmail(email)) {
-        showMobileFriendlyAlert('Inserisci un indirizzo email valido.');
-        return;
-    }
-    
-    const result = loginUser(email, code);
-    
-    if (result.error) {
-        showMobileFriendlyAlert(result.error);
-    } else {
-        showMobileFriendlyAlert('Login effettuato con successo!');
-        updateNavigation('user');
-        showScreen('user');
-        loadUserDashboard();
-    }
-}
-
-function handleRegisterForm(event) {
-    event.preventDefault();
-    
-    const email = document.getElementById('register-email').value.trim();
-    const name = document.getElementById('register-name').value.trim();
-    
-    if (!email) {
-        showMobileFriendlyAlert('Inserisci un indirizzo email.');
-        return;
-    }
-    
-    if (!isValidEmail(email)) {
-        showMobileFriendlyAlert('Inserisci un indirizzo email valido.');
-        return;
-    }
-    
-    const result = registerUser(email, name);
-    
-    if (result.error) {
-        showMobileFriendlyAlert(result.error);
-    } else {
-        showMobileFriendlyAlert(result.message);
-        // Passa al tab login e pre-compila email
-        document.getElementById('tab-login').click();
-        document.getElementById('login-email').value = email;
-    }
-}
-
-function requestAccessCode(email) {
-    // In un'implementazione reale, questo farebbe una richiesta al server
-    // Per ora, mostra il codice dell'utente se esiste
-    const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
-    const user = users.find(u => u.email === email);
-    
-    if (user) {
-        showMobileFriendlyAlert(`Il tuo codice di accesso è: ${user.accessCode}`);
-    } else {
-        showMobileFriendlyAlert('Email non trovata. Registrati prima di richiedere un codice.');
-    }
-}
+// (Rimosso - ora gestito in login.js)
 
 // ========================================
 // GESTIONE AREA UTENTE - AZIONI
