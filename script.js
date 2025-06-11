@@ -235,13 +235,19 @@ function updateUIForGuestUser() {
     if (navDashboard) navDashboard.style.display = 'none';
     if (navLogout) navLogout.style.display = 'none';
     
-    // Mostra sezione guest nella homepage
+    // Mostra sezione guest nella homepage - forza la visualizzazione del CTA
     const userWelcome = document.getElementById('user-welcome');
     const mainCta = document.getElementById('main-cta');
     
-    if (userWelcome && mainCta) {
+    if (userWelcome) {
         userWelcome.style.display = 'none';
+    }
+    
+    if (mainCta) {
         mainCta.style.display = 'block';
+        mainCta.style.visibility = 'visible';
+        mainCta.style.opacity = '1';
+        console.log('CTA main reso visibile per utente guest');
     }
     
     // Reset email field
@@ -259,6 +265,35 @@ function updateUIForGuestUser() {
 function generateAccessCode() {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
+
+// Funzione di debug per forzare la visualizzazione del CTA
+function forceShowCTA() {
+    const mainCta = document.getElementById('main-cta');
+    const userWelcome = document.getElementById('user-welcome');
+    
+    if (mainCta) {
+        mainCta.style.display = 'block';
+        mainCta.style.visibility = 'visible';
+        mainCta.style.opacity = '1';
+        console.log('CTA forzato a essere visibile');
+    }
+    
+    if (userWelcome) {
+        userWelcome.style.display = 'none';
+        console.log('User welcome nascosto');
+    }
+}
+
+// Funzione di debug per fare logout veloce
+function debugLogout() {
+    logoutUser();
+    forceShowCTA();
+    console.log('Debug: Logout forzato e CTA mostrato');
+}
+
+// Aggiungi le funzioni al window per il debugging
+window.forceShowCTA = forceShowCTA;
+window.debugLogout = debugLogout;
 
 // ========================================
 // GESTIONE AREA UTENTE
