@@ -18,7 +18,9 @@
     <!-- Navigazione semplificata -->
     <div class="nav-buttons">
         <a href="index.html">Home</a>
-        <a href="login.html">Accedi</a>
+        <a href="login.html" id="nav-login">Accedi</a>
+        <a href="dashboard.html" id="nav-dashboard" style="display: none;">Dashboard</a>
+        <button id="nav-logout" class="nav-logout-btn" style="display: none;">Esci</button>
     </div>
 
     <!-- Modal di onboarding -->
@@ -103,7 +105,16 @@
                     <p>→ <span id="portatori-count">0</span> Portatori attivi</p>
                 </div>
 
-                <button class="cta-button" onclick="scrollToForm()">Scrivi una UCMe</button>
+                <div id="user-welcome" class="user-welcome" style="display: none;">
+                    <h3 id="welcome-message">Bentornato</h3>
+                    <p>Il tuo spazio mentale ti aspetta.</p>
+                    <div class="user-actions">
+                        <a href="dashboard.html" class="user-action-btn">Vai alla tua Dashboard</a>
+                        <button class="cta-button" onclick="scrollToForm()">Scrivi una nuova UCMe</button>
+                    </div>
+                </div>
+
+                <button id="main-cta" class="cta-button" onclick="scrollToForm()">Scrivi una UCMe</button>
             </div>
         </section>
 

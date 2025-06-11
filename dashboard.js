@@ -8,6 +8,7 @@ let risposteData = [];
 // Inizializzazione quando il DOM è caricato
 document.addEventListener('DOMContentLoaded', function() {
     initializeDashboard();
+    initializeNavigation();
 });
 
 async function initializeDashboard() {
@@ -183,4 +184,36 @@ function showErrorMessage(message) {
             <p>${message}</p>
         </div>
     `;
+}
+
+// ========================================
+// GESTIONE NAVIGAZIONE E LOGIN STATE
+// ========================================
+
+function initializeNavigation() {
+    // Controlla se l'utente è loggato
+    const currentUser = JSON.parse(localStorage.getItem('mc-user') || 'null');
+    
+    const navLogin = document.getElementById('nav-login');
+    const navDashboard = document.getElementById('nav-dashboard');
+    const navLogout = document.getElementById('nav-logout');
+    
+    if (currentUser) {
+        // Utente loggato
+        if (navLogin) navLogin.style.display = 'none';
+        if (navDashboard) navDashboard.style.display = 'block';
+        if (navLogout) {
+            navLogout.style.display = 'block';
+            navLogout.onclick = function() {
+                localStorage.removeItem('mc-user');
+                localStorage.removeItem('mc-email');
+                window.location.href = 'index.html';
+            };
+        }
+    } else {
+        // Utente guest
+        if (navLogin) navLogin.style.display = 'block';
+        if (navDashboard) navDashboard.style.display = 'none';
+        if (navLogout) navLogout.style.display = 'none';
+    }
 } 

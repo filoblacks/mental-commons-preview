@@ -108,8 +108,8 @@ async function handleLogin(event) {
     const result = await loginUserWithPassword(email, password);
     
     if (result.success) {
-        // Login riuscito - reindirizza alla home
-        window.location.href = 'index.html';
+        // Login riuscito - reindirizza alla dashboard
+        window.location.href = 'dashboard.html';
     } else {
         showError(result.error);
     }
@@ -143,8 +143,8 @@ async function handleRegister(event) {
     const result = await registerUserWithPassword(email, password);
     
     if (result.success) {
-        // Registrazione riuscita - login automatico e reindirizza
-        window.location.href = 'index.html';
+        // Registrazione riuscita - login automatico e reindirizza alla dashboard
+        window.location.href = 'dashboard.html';
     } else {
         showError(result.error);
     }

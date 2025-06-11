@@ -82,11 +82,14 @@ function checkExistingUser() {
         try {
             currentUser = JSON.parse(savedUser);
             console.log('Utente trovato:', currentUser.email);
+            updateUIForLoggedUser();
             updateNavigation(currentScreen);
         } catch (error) {
             console.error('Errore nel caricamento utente:', error);
             localStorage.removeItem('mc-user');
         }
+    } else {
+        updateUIForGuestUser();
     }
 }
 
@@ -167,8 +170,90 @@ function registerUser(email, name) {
 function logoutUser() {
     currentUser = null;
     localStorage.removeItem('mc-user');
+    localStorage.removeItem('mc-email'); // Rimuove anche l'email per la dashboard
+    updateUIForGuestUser();
     showScreen('home');
     console.log('Logout completato');
+}
+
+// ========================================
+// GESTIONE UI BASED SU LOGIN STATE
+// ========================================
+
+function updateUIForLoggedUser() {
+    if (!currentUser) return;
+    
+    // Aggiorna navigazione
+    const navLogin = document.getElementById('nav-login');
+    const navDashboard = document.getElementById('nav-dashboard');
+    const navLogout = document.getElementById('nav-logout');
+    
+    if (navLogin) navLogin.style.display = 'none';
+    if (navDashboard) navDashboard.style.display = 'block';
+    if (navLogout) {
+        navLogout.style.display = 'block';
+        navLogout.onclick = logoutUser;
+    }
+    
+    // Salva email per dashboard
+    localStorage.setItem('mc-email', currentUser.email);
+    
+    // Aggiorna sezione di benvenuto nella homepage
+    const userWelcome = document.getElementById('user-welcome');
+    const mainCta = document.getElementById('main-cta');
+    const welcomeMessage = document.getElementById('welcome-message');
+    
+    if (userWelcome && mainCta) {
+        userWelcome.style.display = 'block';
+        mainCta.style.display = 'none';
+        
+        if (welcomeMessage) {
+            const name = currentUser.name !== 'Anonimo' ? `, ${currentUser.name}` : '';
+            welcomeMessage.textContent = `Bentornato${name}`;
+        }
+    }
+    
+    // Pre-popola email nel form se presente
+    const emailInput = document.getElementById('email');
+    if (emailInput) {
+        emailInput.value = currentUser.email;
+        emailInput.readOnly = true;
+        emailInput.style.backgroundColor = '#1a1a1a';
+        emailInput.style.opacity = '0.7';
+    }
+    
+    console.log('UI aggiornata per utente loggato:', currentUser.email);
+}
+
+function updateUIForGuestUser() {
+    // Aggiorna navigazione
+    const navLogin = document.getElementById('nav-login');
+    const navDashboard = document.getElementById('nav-dashboard');
+    const navLogout = document.getElementById('nav-logout');
+    
+    if (navLogin) navLogin.style.display = 'block';
+    if (navDashboard) navDashboard.style.display = 'none';
+    if (navLogout) navLogout.style.display = 'none';
+    
+    // Mostra sezione guest nella homepage
+    const userWelcome = document.getElementById('user-welcome');
+    const mainCta = document.getElementById('main-cta');
+    
+    if (userWelcome && mainCta) {
+        userWelcome.style.display = 'none';
+        mainCta.style.display = 'block';
+    }
+    
+    // Reset email field
+    const emailInput = document.getElementById('email');
+    if (emailInput) {
+        emailInput.value = '';
+        emailInput.readOnly = false;
+        emailInput.style.backgroundColor = '';
+        emailInput.style.opacity = '';
+    }
+    
+    console.log('UI aggiornata per utente guest');
 }
 
 function generateAccessCode() {
