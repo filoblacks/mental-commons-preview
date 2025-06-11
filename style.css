@@ -889,21 +889,22 @@ body {
     color: #ddd;
 }
 
+/* ======================================== 
+   RITUAL STATS - STICKY HEADER 
+   ======================================== */
+
 .ritual-stats {
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1000;
     background-color: #000;
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
-    align-items: center;
     font-family: 'Inter', sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     color: #fff;
     border-bottom: 1px solid #222;
-    margin: 3rem 0 2rem 0;
-    transition: opacity 0.2s ease;
 }
 
 .ritual-stats div {
@@ -991,6 +992,34 @@ body {
 
 .cta-button:active {
     transform: translateY(0);
+}
+
+/* ======================================== 
+   INFO SECTION 
+   ======================================== */
+
+.info-section {
+    padding: 4rem 2rem;
+    background-color: #000;
+    color: #ccc;
+}
+
+.info-block {
+    margin-bottom: 3rem;
+}
+
+.info-block h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #fff;
+    font-weight: 400;
+}
+
+.info-block p {
+    line-height: 1.7;
+    color: #ccc;
+    font-size: 1rem;
+    opacity: 0.9;
 }
 
 /* Form Section */
@@ -1353,10 +1382,9 @@ footer p {
 
     .ritual-stats {
         flex-direction: column;
-        gap: 0.5rem;
-        font-size: 1.1rem;
+        font-size: 1rem;
+        gap: 0.25rem;
         padding: 1rem;
-        margin: 2rem 0 1.5rem 0;
     }
 
     .user-welcome {
@@ -1430,6 +1458,18 @@ footer p {
     .cta-button {
         padding: 14px 28px;
         font-size: 1rem;
+    }
+    
+    .info-section {
+        padding: 3rem 1.5rem;
+    }
+    
+    .info-block {
+        margin-bottom: 2.5rem;
+    }
+    
+    .info-block h2 {
+        font-size: 1.3rem;
     }
     
     .form-section {
@@ -1694,6 +1734,22 @@ footer p {
         padding: 16px 24px;
         font-size: 1rem;
         width: 100%;
+    }
+    
+    .info-section {
+        padding: 2.5rem 1rem;
+    }
+    
+    .info-block {
+        margin-bottom: 2rem;
+    }
+    
+    .info-block h2 {
+        font-size: 1.2rem;
+    }
+    
+    .info-block p {
+        font-size: 0.95rem;
     }
     
     .form-section {

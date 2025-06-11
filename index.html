@@ -80,30 +80,20 @@
         </div>
     </div>
 
+    <!-- Ritual Stats - Sticky Header -->
+    <header class="ritual-stats">
+        <div><span id="ucme-count">–</span> pensieri accolti</div>
+        <div><span id="risposte-count">–</span> risposte inviate</div>
+        <div><span id="portatori-count">–</span> Portatori attivi</div>
+    </header>
+
     <main id="home-screen" class="screen home-screen">
+        <!-- Hero Section -->
         <section class="hero">
             <div class="container">
-                <div class="logo-container">
-                    <img src="logo.svg" alt="Mental Commons Logo" class="logo">
-                </div>
+                <img src="logo.svg" alt="Mental Commons Logo" class="logo" />
                 <h1 class="title">Mental Commons</h1>
-                <p class="subtitle">Ogni mente è un mondo. Mental Commons è il loro ponte.</p>
-                
-                <div class="copy-section">
-                    <p>Non è terapia. Non è journaling. Non è self-help.</p>
-                    <p>È uno scambio mentale puro.</p>
-                    <p>Scrivi un pensiero che pesa — e un altro essere umano lo prende sul serio.</p>
-                    <p>Nessun consiglio. Nessuna notifica. Solo una risposta.</p>
-                    <p>Da chi ha scelto di contenere, non di rispondere.</p>
-                    <p>Mental Commons è gratuito.</p>
-                    <p>Perché non si dovrebbe pagare per essere ascoltati.</p>
-                </div>
-
-                <div id="ritual-header" class="ritual-stats">
-                    <div><span id="ucme-count">–</span> pensieri accolti</div>
-                    <div><span id="risposte-count">–</span> risposte inviate</div>
-                    <div><span id="portatori-count">–</span> Portatori attivi</div>
-                </div>
+                <p class="subtitle">Non siamo fatti per pensare da soli.</p>
 
                 <div id="user-welcome" class="user-welcome" style="display: none;">
                     <h3 id="welcome-message">Bentornato</h3>
@@ -114,10 +104,29 @@
                     </div>
                 </div>
 
-                <button id="main-cta" class="cta-button" onclick="scrollToForm()">Scrivi una UCMe</button>
+                <button id="main-cta" class="cta-button" onclick="scrollToForm()">Scrivi la tua UCMe</button>
             </div>
         </section>
 
+        <!-- Info Section -->
+        <section class="info-section">
+            <div class="container">
+                <div class="info-block">
+                    <h2>Cosa sono le UCMe</h2>
+                    <p>Una UCMe è un pensiero difficile. Una riflessione che pesa. La puoi scrivere qui. Verrà letta da una persona, non da un algoritmo.</p>
+                </div>
+                <div class="info-block">
+                    <h2>Chi sono i Depositori</h2>
+                    <p>I Depositori sono chi scrive. Chi affida. Non serve spiegare. Serve fidarsi.</p>
+                </div>
+                <div class="info-block">
+                    <h2>Chi sono i Portatori</h2>
+                    <p>I Portatori leggono con attenzione. E rispondono una volta sola. Con rispetto. Con presenza.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Form Section -->
         <section class="form-section" id="form-section">
             <div class="container">
                 <h2>Affida il tuo pensiero</h2>
@@ -199,10 +208,11 @@
         </section>
     </main>
 
+    <!-- Footer -->
     <footer>
         <div class="container">
             <p>© 2025 — Mental Commons<br/>
-                Il contrario di un social. Il prototipo di una mente comune.</p>
+            Il contrario di un social. Il prototipo di una mente comune.</p>
         </div>
     </footer>
 
