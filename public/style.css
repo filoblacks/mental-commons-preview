@@ -30,15 +30,17 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 1rem;
-    gap: 0.5rem;
+    gap: 1rem;
     opacity: 0;
     animation: fadeInNav 0.3s ease-in-out 0.5s forwards;
+    min-height: 60px; /* Garantisce altezza minima fissa */
 }
 
 .ritual-actions {
     display: flex;
     gap: 0.75rem;
     flex-shrink: 0;
+    align-items: center;
 }
 
 .ritual-actions a {
@@ -931,12 +933,15 @@ body {
     color: #fff;
     flex-grow: 1;
     min-width: 0; /* Permette shrinking */
+    align-items: center;
+    flex-wrap: nowrap; /* Assicura che non vada mai a capo */
 }
 
 .ritual-stats div {
     white-space: nowrap;
     opacity: 0.9;
     font-size: 0.9rem;
+    flex-shrink: 0; /* Previene la riduzione del testo */
 }
 
 .ritual-stats span {
@@ -1362,27 +1367,32 @@ footer p {
     .top-navigation-container {
         padding: 0.5rem 0.75rem;
         gap: 0.5rem;
-        flex-direction: column;
-        align-items: stretch;
+        /* Manteniamo flex-direction: row per evitare che i bottoni vadano sotto */
+        flex-direction: row;
+        align-items: center;
+        min-height: 50px;
     }
 
     .ritual-stats {
-        gap: 0.5rem;
-        font-size: 0.85rem;
-        justify-content: space-between;
-        order: 2;
+        gap: 0.4rem;
+        font-size: 0.8rem;
+        /* Assicura che le statistiche siano sempre sulla stessa riga */
+        flex-wrap: nowrap;
+        min-width: 0;
     }
 
     .ritual-stats div {
-        font-size: 0.8rem;
-        text-align: center;
-        flex: 1;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        flex-shrink: 1;
+        /* Testo più compatto su tablet */
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .ritual-actions {
-        gap: 0.5rem;
-        justify-content: center;
-        order: 1;
+        gap: 0.4rem;
+        flex-shrink: 0;
     }
 
     .ritual-actions a,
@@ -1656,12 +1666,19 @@ footer p {
     }
 
     .ritual-stats {
-        gap: 0.4rem;
-        font-size: 0.8rem;
+        gap: 0.3rem;
+        font-size: 0.75rem;
+        flex-wrap: nowrap;
+        min-width: 0;
     }
 
     .ritual-stats div {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
+        white-space: nowrap;
+        flex-shrink: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
     }
 
     .ritual-actions {
