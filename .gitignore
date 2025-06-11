@@ -8,4 +8,11 @@ node_modules/
 *.log
 
 # Env
-.env 
+.env
+
+# Build
+dist/
+build/
+
+# Archive
+archive/ 

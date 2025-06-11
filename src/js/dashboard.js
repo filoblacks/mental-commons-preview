@@ -56,12 +56,12 @@ function checkUserAccess() {
 async function loadData() {
     try {
         // Carica UCMe
-        const ucmeResponse = await fetch('data.json');
+        const ucmeResponse = await fetch('../../data/data.json');
         const ucmeJson = await ucmeResponse.json();
         ucmeData = ucmeJson.ucmes || [];
         
         // Carica risposte
-        const risposteResponse = await fetch('risposte.json');
+        const risposteResponse = await fetch('../../data/risposte.json');
         const risposteJson = await risposteResponse.json();
         risposteData = risposteJson.risposte || [];
         
