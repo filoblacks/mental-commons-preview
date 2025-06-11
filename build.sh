@@ -10,9 +10,10 @@ echo "==============================="
 echo "📋 Verifica integrità file..."
 
 essential_files=(
-    "index.html"
-    "login.html" 
-    "dashboard.html"
+    "src/html/index.html"
+    "src/html/login.html" 
+    "src/html/dashboard.html"
+    "src/html/reset-user.html"
     "src/css/style.css"
     "src/js/script.js"
     "src/js/login.js"
@@ -42,9 +43,9 @@ echo "✅ Tutti i file essenziali presenti"
 # Controlla che i riferimenti nei file HTML siano corretti
 echo "🔗 Verifica riferimenti..."
 
-if grep -q 'href="src/css/style.css' index.html && 
-   grep -q 'src="src/js/script.js' index.html &&
-   grep -q 'href="public/logo.svg' index.html; then
+if grep -q 'href="css/style.css' src/html/index.html && 
+   grep -q 'src="js/script.js' src/html/index.html &&
+   grep -q 'src="public/logo.svg' src/html/index.html; then
     echo "✅ Riferimenti index.html corretti"
 else
     echo "❌ Riferimenti index.html non corretti"
@@ -61,9 +62,10 @@ fi
 
 mkdir -p dist
 
-# Copia i file necessari per il deployment
-cp index.html login.html dashboard.html reset-user.html dist/
-cp -r src dist/
+# Copia i file necessari per il deployment (da src/html alla root di dist)
+cp src/html/*.html dist/
+cp -r src/css dist/
+cp -r src/js dist/
 cp -r public dist/
 cp -r data dist/
 

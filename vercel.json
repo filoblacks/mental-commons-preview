@@ -1,12 +1,12 @@
 {
   "buildCommand": "bash build.sh",
-  "outputDirectory": ".",
+  "outputDirectory": "src/html",
   "public": true,
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
     {
-      "source": "/src/css/(.*)",
+      "source": "/(.*)\\.css",
       "headers": [
         {
           "key": "Content-Type",
@@ -19,7 +19,7 @@
       ]
     },
     {
-      "source": "/src/js/(.*)",
+      "source": "/(.*)\\.js",
       "headers": [
         {
           "key": "Content-Type",
@@ -32,8 +32,12 @@
       ]
     },
     {
-      "source": "/public/(.*)",
+      "source": "/(.*)\\.svg",
       "headers": [
+        {
+          "key": "Content-Type", 
+          "value": "image/svg+xml"
+        },
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
@@ -41,13 +45,7 @@
       ]
     }
   ],
-  "redirects": [
-    {
-      "source": "/logo.svg",
-      "destination": "/public/logo.svg",
-      "permanent": false
-    }
-  ],
+  "redirects": [],
   "rewrites": [
     {
       "source": "/(.*)",
