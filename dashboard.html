@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Il tuo spazio - Mental Commons</title>
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigazione semplificata -->
+    <div class="nav-buttons">
+        <a href="index.html">Home</a>
+        <a href="login.html">Accedi</a>
+    </div>
+
+    <main class="dashboard-main">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Il tuo spazio mentale</h1>
+                <p class="dashboard-subtitle">Pensieri che hai affidato. Risposte che hai ricevuto.</p>
+            </div>
+
+            <div id="user-verification" class="user-verification">
+                <p>Caricamento del tuo spazio...</p>
+            </div>
+
+            <div id="dashboard-content" class="dashboard-content" style="display: none;">
+                <div id="ucme-blocks" class="ucme-blocks">
+                    <!-- Le UCMe verranno inserite qui via JavaScript -->
+                </div>
+
+                <div class="dashboard-actions">
+                    <a href="index.html#form-section" class="new-ucme-button">Affida un nuovo pensiero</a>
+                </div>
+            </div>
+
+            <div id="no-access" class="no-access" style="display: none;">
+                <h2>Accesso richiesto</h2>
+                <p>Per visualizzare il tuo spazio mentale è necessario accedere con la tua email.</p>
+                <a href="login.html" class="login-link">Accedi al tuo spazio</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2025 — Mental Commons<br/>
+                Il contrario di un social. Il prototipo di una mente comune.</p>
+        </div>
+    </footer>
+
+    <script src="dashboard.js"></script>
+</body>
+</html> 

@@ -23,6 +23,9 @@ function initializeApp() {
     // Inizializza schermata home
     showScreen('home');
     
+    // Carica e mostra contatori poetici
+    loadRitualStats();
+    
     // Setup event listeners
     setupEventListeners();
     
@@ -1125,6 +1128,84 @@ window.addEventListener('load', () => {
     }
 });
 
+// ========================================
+// CONTATORI POETICI
+// ========================================
+
+async function loadRitualStats() {
+    try {
+        // Carica UCMe
+        const ucmeResponse = await fetch('data.json');
+        const ucmeJson = await ucmeResponse.json();
+        const ucmes = ucmeJson.ucmes || [];
+        
+        // Carica risposte
+        let risposte = [];
+        try {
+            const risposteResponse = await fetch('risposte.json');
+            const risposteJson = await risposteResponse.json();
+            risposte = risposteJson.risposte || [];
+        } catch (error) {
+            console.log('File risposte.json non trovato, usando valori di default');
+        }
+        
+        // Calcola statistiche
+        const ucmeCount = ucmes.length;
+        const risposteCount = risposte.length;
+        
+        // Portatori attivi (email uniche nel campo portatore)
+        const portatoriAttivi = new Set(risposte.map(r => r.portatore)).size;
+        
+        // Aggiorna i contatori con animazione fade-in
+        updateStatsWithAnimation(ucmeCount, risposteCount, portatoriAttivi);
+        
+        console.log('Statistiche caricate:', {
+            ucmes: ucmeCount,
+            risposte: risposteCount,
+            portatori: portatoriAttivi
+        });
+        
+    } catch (error) {
+        console.error('Errore nel caricamento delle statistiche:', error);
+        // Mostra valori di default in caso di errore
+        updateStatsWithAnimation(0, 0, 0);
+    }
+}
+
+function updateStatsWithAnimation(ucmeCount, risposteCount, portatoriCount) {
+    // Trova gli elementi
+    const ucmeElement = document.getElementById('ucme-count');
+    const risposteElement = document.getElementById('risposte-count');
+    const portatoriElement = document.getElementById('portatori-count');
+    
+    if (!ucmeElement || !risposteElement || !portatoriElement) {
+        console.warn('Elementi contatori non trovati');
+        return;
+    }
+    
+    // Animazione di fade-in ritardata per effetto poetico
+    setTimeout(() => {
+        ucmeElement.textContent = ucmeCount;
+        ucmeElement.style.opacity = '0';
+        ucmeElement.style.transition = 'opacity 0.8s ease';
+        setTimeout(() => ucmeElement.style.opacity = '1', 100);
+    }, 500);
+    
+    setTimeout(() => {
+        risposteElement.textContent = risposteCount;
+        risposteElement.style.opacity = '0';
+        risposteElement.style.transition = 'opacity 0.8s ease';
+        setTimeout(() => risposteElement.style.opacity = '1', 100);
+    }, 800);
+    
+    setTimeout(() => {
+        portatoriElement.textContent = portatoriCount;
+        portatoriElement.style.opacity = '0';
+        portatoriElement.style.transition = 'opacity 0.8s ease';
+        setTimeout(() => portatoriElement.style.opacity = '1', 100);
+    }, 1100);
+}
+
 // Rendi disponibili le funzioni dalla console
 window.MentalCommons = {
     createTestData,
@@ -1136,5 +1217,6 @@ window.MentalCommons = {
     currentUser: () => currentUser,
     loginUser,
     registerUser,
-    logoutUser
+    logoutUser,
+    loadRitualStats
 }; 

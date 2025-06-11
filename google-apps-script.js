@@ -225,6 +225,99 @@ Mental Commons Team
 }
 
 /**
+ * Notifica il Depositor quando arriva una risposta (nuovo in v3.0)
+ * Questa funzione dovrebbe essere chiamata quando un Portatore aggiunge una risposta
+ */
+function notifyDepositorResponse(ucmeId, depositorEmail) {
+  try {
+    const subject = 'Hai ricevuto una risposta su Mental Commons';
+    
+    const body = `
+Ciao,
+
+Una persona ha letto il tuo pensiero ed ha scritto una risposta per te.
+
+Puoi leggerla accedendo al tuo spazio su mentalcommons.xyz/dashboard?email=${encodeURIComponent(depositorEmail)}
+
+Con rispetto,
+Il team di Mental Commons
+
+---
+Questo è un messaggio automatico. Non rispondere a questa email.
+Mental Commons - Il contrario di un social. Il prototipo di una mente comune.
+    `;
+    
+    // Invia email
+    MailApp.sendEmail({
+      to: depositorEmail,
+      subject: subject,
+      body: body,
+      noReply: true
+    });
+    
+    console.log(`Notifica risposta inviata al Depositor ${depositorEmail} per UCMe: ${ucmeId}`);
+    return true;
+    
+  } catch (error) {
+    console.error('Errore nell\'invio notifica al Depositor:', error);
+    return false;
+  }
+}
+
+/**
+ * Funzione per salvare una nuova risposta e notificare il Depositor (nuovo in v3.0)
+ * Questa funzione può essere chiamata dal Google Sheet quando un Portatore aggiunge una risposta
+ */
+function saveResponseAndNotify(ucmeId, risposta, portatoreEmail) {
+  try {
+    // Trova la UCMe nel foglio
+    const sheet = getOrCreateSheet();
+    const data = sheet.getDataRange().getValues();
+    
+    let ucmeRow = -1;
+    let depositorEmail = '';
+    
+    // Cerca la UCMe tramite ID
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] === ucmeId) { // Colonna A: ID
+        ucmeRow = i + 1; // +1 perché getRange è 1-indexed
+        depositorEmail = data[i][1]; // Colonna B: Email
+        break;
+      }
+    }
+    
+    if (ucmeRow === -1) {
+      throw new Error(`UCMe con ID ${ucmeId} non trovata`);
+    }
+    
+    // Aggiorna il foglio con la risposta
+    sheet.getRange(ucmeRow, 7).setValue('risposto'); // Colonna G: Stato
+    sheet.getRange(ucmeRow, 8).setValue(portatoreEmail); // Colonna H: Portatore Assegnato
+    sheet.getRange(ucmeRow, 9).setValue(risposta); // Colonna I: Risposta
+    sheet.getRange(ucmeRow, 10).setValue(new Date()); // Colonna J: Data Risposta
+    
+    // Notifica il Depositor
+    const notificationSent = notifyDepositorResponse(ucmeId, depositorEmail);
+    
+    console.log(`Risposta salvata per UCMe ${ucmeId}. Notifica inviata: ${notificationSent}`);
+    
+    return {
+      success: true,
+      ucmeId: ucmeId,
+      depositorEmail: depositorEmail,
+      notificationSent: notificationSent
+    };
+    
+  } catch (error) {
+    console.error('Errore nel salvare risposta:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+/**
  * Ottiene il foglio esistente o ne crea uno nuovo (aggiornato per v2.0)
  */
 function getOrCreateSheet() {

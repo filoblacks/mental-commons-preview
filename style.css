@@ -59,6 +59,229 @@ body {
 }
 
 /* ========================================
+   DASHBOARD
+   ======================================== */
+
+.dashboard-main {
+    min-height: 100vh;
+    padding: 6rem 0 4rem 0;
+    background-color: #000;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.dashboard-header h1 {
+    font-size: 2.5rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.dashboard-subtitle {
+    font-size: 1.1rem;
+    color: #ccc;
+    opacity: 0.8;
+}
+
+.user-verification {
+    text-align: center;
+    padding: 4rem 0;
+}
+
+.user-verification p {
+    font-size: 1.1rem;
+    color: #ccc;
+    opacity: 0.8;
+}
+
+.dashboard-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.ucme-blocks {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.ucme-block {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.ucme-block:hover {
+    border-color: #555;
+    background: #151515;
+}
+
+.ucme-block.risposto {
+    border-color: #4a5d23;
+}
+
+.ucme-block.in-attesa {
+    border-color: #5d4a23;
+}
+
+.ucme-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.ucme-status {
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background: #333;
+    color: #fff;
+}
+
+.ucme-block.risposto .ucme-status {
+    background: #4a5d23;
+    color: #a8d568;
+}
+
+.ucme-block.in-attesa .ucme-status {
+    background: #5d4a23;
+    color: #d5a868;
+}
+
+.ucme-date {
+    font-size: 0.85rem;
+    color: #888;
+    margin-left: auto;
+}
+
+.ucme-content {
+    border-top: 1px solid #333;
+    padding-top: 1rem;
+}
+
+.ucme-text {
+    margin-bottom: 1rem;
+}
+
+.ucme-text p {
+    line-height: 1.7;
+    color: #fff;
+    font-size: 1rem;
+}
+
+.ucme-meta {
+    margin-bottom: 1rem;
+}
+
+.ucme-tone {
+    font-size: 0.85rem;
+    color: #888;
+    font-style: italic;
+}
+
+.ucme-response {
+    background: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 1.25rem;
+    margin-top: 1rem;
+}
+
+.ucme-response h4 {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #a8d568;
+    margin-bottom: 0.75rem;
+}
+
+.response-text {
+    line-height: 1.7;
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.response-meta {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.response-date {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.dashboard-actions {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.new-ucme-button {
+    display: inline-block;
+    background: transparent;
+    color: #fff;
+    border: 1px solid #fff;
+    padding: 0.875rem 1.5rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.new-ucme-button:hover {
+    background: #fff;
+    color: #000;
+}
+
+.no-access {
+    text-align: center;
+    padding: 4rem 0;
+}
+
+.no-access h2 {
+    font-size: 1.8rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.no-access p {
+    font-size: 1.1rem;
+    color: #ccc;
+    margin-bottom: 2rem;
+    opacity: 0.8;
+}
+
+.login-link {
+    display: inline-block;
+    background: #fff;
+    color: #000;
+    padding: 0.875rem 1.5rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.login-link:hover {
+    background: #f0f0f0;
+}
+
+/* ========================================
    PAGINA LOGIN
    ======================================== */
 
@@ -447,6 +670,35 @@ body {
     color: #ddd;
 }
 
+.ritual-stats {
+    margin: 3rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #333;
+    opacity: 0.7;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.ritual-stats p {
+    margin-bottom: 0.5rem;
+    color: #ccc;
+    font-size: 0.95rem;
+    font-family: 'Inter', monospace;
+    letter-spacing: 0.5px;
+    text-align: left;
+}
+
+.ritual-stats p:last-child {
+    margin-bottom: 0;
+}
+
+.ritual-stats span {
+    font-weight: 500;
+    color: #fff;
+}
+
 .cta-button {
     background: #fff;
     color: #000;
@@ -797,6 +1049,47 @@ footer p {
         padding: 24px;
     }
 
+    /* Dashboard responsive */
+    .dashboard-main {
+        padding: 4rem 0 2rem 0;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+
+    .dashboard-subtitle {
+        font-size: 1rem;
+    }
+
+    .ucme-block {
+        padding: 1.25rem;
+    }
+
+    .ucme-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .ucme-date {
+        margin-left: 0;
+        font-size: 0.8rem;
+    }
+
+    .ucme-response {
+        padding: 1rem;
+    }
+
+    .ritual-stats {
+        margin: 2rem 0 1.5rem 0;
+        padding: 1.5rem 0;
+    }
+
+    .ritual-stats p {
+        font-size: 0.9rem;
+    }
+
     .hero {
         padding: 60px 0;
         min-height: calc(100vh - 80px);
@@ -969,6 +1262,61 @@ footer p {
     
     .user-section h3 {
         font-size: 1.2rem;
+    }
+
+    /* Dashboard mobile */
+    .dashboard-main {
+        padding: 3rem 0 1.5rem 0;
+    }
+
+    .dashboard-header {
+        margin-bottom: 2.5rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .dashboard-subtitle {
+        font-size: 0.95rem;
+    }
+
+    .ucme-block {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .ucme-status {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.4rem;
+    }
+
+    .ucme-text p {
+        font-size: 0.95rem;
+    }
+
+    .ucme-response {
+        padding: 0.875rem;
+        margin-top: 0.75rem;
+    }
+
+    .response-text {
+        font-size: 0.95rem;
+    }
+
+    .new-ucme-button {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9rem;
+    }
+
+    .ritual-stats {
+        margin: 1.5rem 0 1rem 0;
+        padding: 1.25rem 0;
+    }
+
+    .ritual-stats p {
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
     }
 
     .hero {
