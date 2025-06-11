@@ -1,5 +1,5 @@
 {
-
+  "buildCommand": "bash copy-assets.sh",
   "outputDirectory": "src/html",
   "public": true,
   "cleanUrls": true,
