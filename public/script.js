@@ -825,8 +825,159 @@ function setupNavigationListeners() {
 }
 
 function setupAuthFormListeners() {
-    // Le funzioni di autenticazione sono ora gestite in login.js
-    // Questa funzione è mantenuta per compatibilità ma può essere vuota
+    // Event listener per i tab login/registrazione
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    
+    if (tabLogin && tabRegister && loginForm && registerForm) {
+        // Click sul tab "Accedi"
+        tabLogin.addEventListener('click', function() {
+            // Aggiorna gli stili dei tab
+            tabLogin.classList.add('active');
+            tabRegister.classList.remove('active');
+            
+            // Mostra/nascondi i form
+            loginForm.style.display = 'block';
+            registerForm.style.display = 'none';
+            
+            console.log('Switched to login form');
+        });
+        
+        // Click sul tab "Registrati"
+        tabRegister.addEventListener('click', function() {
+            // Aggiorna gli stili dei tab
+            tabRegister.classList.add('active');
+            tabLogin.classList.remove('active');
+            
+            // Mostra/nascondi i form
+            registerForm.style.display = 'block';
+            loginForm.style.display = 'none';
+            
+            console.log('Switched to register form');
+        });
+        
+        // Event listener per i form submission
+        loginForm.addEventListener('submit', handleLoginSubmit);
+        registerForm.addEventListener('submit', handleRegisterSubmit);
+    }
+}
+
+// ========================================
+// GESTIONE FORM AUTENTICAZIONE
+// ========================================
+
+function handleLoginSubmit(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('login-email')?.value?.trim();
+    const password = document.getElementById('login-password')?.value?.trim();
+    const errorElement = document.getElementById('auth-error');
+    
+    // Reset errori precedenti
+    hideAuthError();
+    
+    if (!email || !password) {
+        showAuthError('Inserisci email e password per accedere.');
+        return;
+    }
+    
+    if (!isValidEmail(email)) {
+        showAuthError('Inserisci un indirizzo email valido.');
+        return;
+    }
+    
+    // Cerca l'utente esistente
+    const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
+    const user = users.find(u => u.email === email && u.password === password);
+    
+    if (user) {
+        // Login riuscito
+        currentUser = user;
+        localStorage.setItem('mc-user', JSON.stringify(currentUser));
+        
+        // Reindirizza alla dashboard
+        window.location.href = 'dashboard.html';
+    } else {
+        showAuthError('Email o password non corretti.');
+    }
+}
+
+function handleRegisterSubmit(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('register-email')?.value?.trim();
+    const password = document.getElementById('register-password')?.value?.trim();
+    const confirmPassword = document.getElementById('register-confirm')?.value?.trim();
+    
+    // Reset errori precedenti
+    hideAuthError();
+    
+    if (!email || !password || !confirmPassword) {
+        showAuthError('Compila tutti i campi per registrarti.');
+        return;
+    }
+    
+    if (!isValidEmail(email)) {
+        showAuthError('Inserisci un indirizzo email valido.');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showAuthError('La password deve essere di almeno 6 caratteri.');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showAuthError('Le password non corrispondono.');
+        return;
+    }
+    
+    // Controlla se l'utente esiste già
+    const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
+    const existingUser = users.find(u => u.email === email);
+    
+    if (existingUser) {
+        showAuthError('Un account con questa email esiste già. Prova ad accedere.');
+        return;
+    }
+    
+    // Crea nuovo utente
+    const newUser = {
+        id: generateUniqueId(),
+        email: email,
+        password: password,
+        name: email.split('@')[0], // Nome default dall'email
+        createdAt: new Date().toISOString()
+    };
+    
+    // Salva l'utente
+    users.push(newUser);
+    localStorage.setItem('mc-users', JSON.stringify(users));
+    
+    // Login automatico
+    currentUser = newUser;
+    localStorage.setItem('mc-user', JSON.stringify(currentUser));
+    
+    // Reindirizza alla dashboard
+    window.location.href = 'dashboard.html';
+}
+
+function showAuthError(message) {
+    const errorElement = document.getElementById('auth-error');
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+    }
+}
+
+function hideAuthError() {
+    const errorElement = document.getElementById('auth-error');
+    if (errorElement) {
+        errorElement.style.display = 'none';
+        errorElement.textContent = '';
+    }
 }
 
 function setupMainFormListeners() {
