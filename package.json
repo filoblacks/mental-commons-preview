@@ -1,11 +1,12 @@
 {
   "name": "mental-commons",
   "version": "3.0.0",
+  "type": "module",
   "description": "Mental Commons - Piattaforma peer-to-peer per la riflessione condivisa",
   "scripts": {
     "dev": "vercel dev",
     "dev-frontend": "python3 -m http.server 8000 --directory src/html",
-    "build": "node scripts/copy-assets.js",
+    "build": "echo 'Build completed - static files only'",
     "deploy": "npm run bump-version && npm run build && vercel --prod",
     "bump-version": "node scripts/update-versions.js bump",
     "update-versions": "node scripts/update-versions.js",
