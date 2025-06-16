@@ -1595,81 +1595,150 @@ function updateStatsWithAnimation(ucmeCount, risposteCount, portatoriCount) {
 }
 
 function showStatsUnavailableMessage() {
-    // Trova gli elementi dei contatori
     const ucmeElement = document.getElementById('ucme-count');
     const risposteElement = document.getElementById('risposte-count');
     const portatoriElement = document.getElementById('portatori-count');
     
-    if (!ucmeElement || !risposteElement || !portatoriElement) {
-        console.warn('Elementi contatori non trovati per messaggio di fallback');
-        return;
-    }
+    if (ucmeElement) ucmeElement.textContent = '?';
+    if (risposteElement) risposteElement.textContent = '?';
+    if (portatoriElement) portatoriElement.textContent = '?';
     
-    // Messaggio sobrio e minimale, coerente con lo stile Mental Commons
-    const fallbackMessage = '·';
-    
-    // Applica il messaggio con lo stesso stile dei numeri normali
-    setTimeout(() => {
-        ucmeElement.textContent = fallbackMessage;
-        ucmeElement.style.opacity = '0';
-        ucmeElement.style.transition = 'opacity 0.8s ease';
-        ucmeElement.style.color = '#8b8b8b'; // Colore più tenue per indicare indisponibilità
-        setTimeout(() => ucmeElement.style.opacity = '1', 100);
-    }, 500);
-    
-    setTimeout(() => {
-        risposteElement.textContent = fallbackMessage;
-        risposteElement.style.opacity = '0';
-        risposteElement.style.transition = 'opacity 0.8s ease';
-        risposteElement.style.color = '#8b8b8b';
-        setTimeout(() => risposteElement.style.opacity = '1', 100);
-    }, 800);
-    
-    setTimeout(() => {
-        portatoriElement.textContent = fallbackMessage;
-        portatoriElement.style.opacity = '0';
-        portatoriElement.style.transition = 'opacity 0.8s ease';
-        portatoriElement.style.color = '#8b8b8b';
-        setTimeout(() => portatoriElement.style.opacity = '1', 100);
-    }, 1100);
-    
-    // Aggiungi un messaggio discreto sotto le statistiche
-    setTimeout(() => {
-        // Cerca un contenitore delle statistiche per aggiungere il messaggio
-        const statsContainer = ucmeElement.closest('.stats-container') || ucmeElement.parentElement?.parentElement;
-        if (statsContainer && !statsContainer.querySelector('.stats-unavailable-note')) {
-            const noteElement = document.createElement('p');
-            noteElement.className = 'stats-unavailable-note';
-            noteElement.style.cssText = `
-                font-size: 11px;
-                color: #8b8b8b;
-                text-align: center;
-                margin-top: 8px;
-                font-style: italic;
-                opacity: 0;
-                transition: opacity 0.8s ease;
-            `;
-            noteElement.textContent = 'Statistiche non disponibili al momento';
-            statsContainer.appendChild(noteElement);
-            
-            // Fade in del messaggio
-            setTimeout(() => noteElement.style.opacity = '0.7', 100);
-        }
-    }, 1400);
+    console.log('📊 Statistiche non disponibili - usando placeholder');
 }
 
-// Rendi disponibili le funzioni dalla console
-window.MentalCommons = {
-    createTestData,
-    clearTestData,
-    getStats,
-    exportAllData,
-    clearAllData,
-    showScreen,
-    currentUser: () => currentUser,
-    loginUser,
-    registerUser,
-    logoutUser,
-    loadRitualStats,
-    showStatsUnavailableMessage
-}; 
+// ========================================
+// FUNZIONI CONSOLE & DEBUG (GLOBALI)
+// ========================================
+
+// Funzione per resettare un utente specifico (accessibile dalla console)
+function resetUser(email) {
+    try {
+        const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
+        const filteredUsers = users.filter(user => user.email !== email);
+        
+        // Rimuovi utente specifico
+        localStorage.setItem('mc-users', JSON.stringify(filteredUsers));
+        
+        // Se era l'utente corrente, rimuovilo
+        const currentUser = JSON.parse(localStorage.getItem('mc-user') || 'null');
+        if (currentUser && currentUser.email === email) {
+            localStorage.removeItem('mc-user');
+            // Reset della UI per guest user
+            updateUIForGuestUser();
+        }
+        
+        console.log(`✅ Utente ${email} rimosso dal sistema`);
+        console.log(`📊 Utenti rimanenti: ${filteredUsers.length}`);
+        
+        // Ricarica dashboard se siamo in quella pagina
+        if (window.location.pathname.includes('dashboard.html')) {
+            location.reload();
+        }
+        
+        return { success: true, message: `Utente ${email} rimosso` };
+        
+    } catch (error) {
+        console.error('Errore nel reset utente:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Funzione per vedere tutti gli utenti (accessibile dalla console)
+function showUsers() {
+    try {
+        const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
+        const currentUser = JSON.parse(localStorage.getItem('mc-user') || 'null');
+        
+        console.log('👥 UTENTI NEL SISTEMA:');
+        console.log('=====================');
+        
+        if (users.length === 0) {
+            console.log('Nessun utente registrato');
+            return { users: [], currentUser: null };
+        }
+        
+        users.forEach((user, i) => {
+            const isCurrent = currentUser && currentUser.email === user.email;
+            console.log(`${i+1}. ${user.email} (${user.name}) ${isCurrent ? '← ATTUALE' : ''}`);
+            console.log(`   Codice: ${user.accessCode || 'N/A'}`);
+            console.log(`   Creato: ${new Date(user.createdAt).toLocaleDateString('it-IT')}`);
+        });
+        
+        if (currentUser) {
+            console.log(`\n🔓 Utente attualmente loggato: ${currentUser.email}`);
+        } else {
+            console.log('\n👤 Nessun utente loggato');
+        }
+        
+        return { users, currentUser };
+        
+    } catch (error) {
+        console.error('Errore nel recuperare utenti:', error);
+        return { error: error.message };
+    }
+}
+
+// Funzione per trovare un utente specifico (accessibile dalla console) 
+function findUser(email) {
+    try {
+        const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
+        const user = users.find(u => u.email === email);
+        
+        if (user) {
+            console.log('👤 UTENTE TROVATO:');
+            console.log('==================');
+            console.log(`Email: ${user.email}`);
+            console.log(`Nome: ${user.name}`);
+            console.log(`ID: ${user.id}`);
+            console.log(`Codice accesso: ${user.accessCode || 'N/A'}`);
+            console.log(`Creato: ${new Date(user.createdAt).toLocaleDateString('it-IT')}`);
+            console.log(`Ultimo login: ${new Date(user.lastLogin).toLocaleDateString('it-IT')}`);
+            console.log(`Portatore: ${user.isPortatore ? 'Sì' : 'No'}`);
+            
+            return user;
+        } else {
+            console.log(`❌ Utente con email "${email}" non trovato`);
+            return null;
+        }
+        
+    } catch (error) {
+        console.error('Errore nella ricerca utente:', error);
+        return { error: error.message };
+    }
+}
+
+// Funzione per reset completo (accessibile dalla console)
+function resetAllData() {
+    try {
+        localStorage.removeItem('mc-users');
+        localStorage.removeItem('mc-user');
+        localStorage.removeItem('mc-ucme-data');
+        localStorage.removeItem('mc-onboarded');
+        localStorage.removeItem('mc-email');
+        
+        // Reset UI
+        if (typeof updateUIForGuestUser === 'function') {
+            updateUIForGuestUser();
+        }
+        
+        console.log('🗑️ Tutti i dati rimossi dal localStorage');
+        console.log('✅ Sistema resettato - puoi ora registrare nuovi utenti');
+        
+        // Ricarica la pagina se necessario
+        if (window.location.pathname.includes('dashboard.html') || window.location.pathname.includes('login.html')) {
+            setTimeout(() => location.reload(), 1000);
+        }
+        
+        return { success: true };
+        
+    } catch (error) {
+        console.error('Errore nel reset dati:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Esponi le funzioni al window per accesso globale
+window.resetUser = resetUser;
+window.showUsers = showUsers; 
+window.findUser = findUser;
+window.resetAllData = resetAllData; 
