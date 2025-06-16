@@ -14,6 +14,11 @@ body {
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    position: relative;
+    min-height: 100vh;
+    /* Aggiungi scroll-padding per il layout mobile */
+    scroll-padding-top: 90px;
 }
 
 /* ========================================
@@ -2809,5 +2814,272 @@ html {
     100% {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* ========================================
+   MOBILE HEADER (solo per mobile)
+   ======================================== */
+
+/* Header mobile nascosto di default (visibile solo su mobile) */
+.mobile-header {
+    display: none;
+}
+
+/* Layout mobile specifico */
+@media (max-width: 768px) {
+    /* Mostra header mobile */
+    .mobile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 1200; /* Sopra al top-navigation-container */
+        background: rgba(0, 0, 0, 0.85);
+        padding: 6px 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 13px;
+        min-height: 36px;
+    }
+    
+    .mobile-header-left {
+        display: flex;
+        align-items: center;
+    }
+    
+    .mobile-logo {
+        height: 20px;
+        width: auto;
+        opacity: 0.9;
+    }
+    
+    .mobile-header-right {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    
+    .mobile-nav-btn {
+        font-size: 12px;
+        color: #fff;
+        padding: 4px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+        text-decoration: none;
+        background: transparent;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        font-weight: 400;
+    }
+    
+    .mobile-nav-btn:hover,
+    .mobile-nav-btn:focus {
+        background-color: rgba(255, 255, 255, 0.9);
+        color: #000;
+        border-color: #fff;
+    }
+    
+    .mobile-logout-btn {
+        cursor: pointer;
+    }
+    
+    /* Adatta il top-navigation-container per mobile */
+    .top-navigation-container {
+        top: 36px; /* Altezza dell'header mobile */
+        z-index: 1100; /* Sotto l'header mobile */
+        min-height: 45px; /* Ridotto per mobile */
+        padding: 6px 8px;
+        background: rgba(0, 0, 0, 0.85);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Nascondi i ritual-actions su mobile (ora sono nell'header) */
+    .ritual-actions {
+        display: none;
+    }
+    
+    /* Adatta le ritual-stats per mobile */
+    .ritual-stats {
+        gap: 1.5rem;
+        font-size: 12px;
+        padding: 0;
+    }
+    
+    .ritual-stats div {
+        font-size: 12px;
+        line-height: 1.3;
+    }
+    
+    .ritual-stats strong {
+        font-size: 13px;
+        margin-right: 0.3rem;
+    }
+    
+    /* Adatta padding del contenuto principale */
+    .hero,
+    .user-screen,
+    .home-screen,
+    main,
+    .dashboard-main,
+    .form-section {
+        padding-top: 90px !important; /* 36px header + 45px sticky + 9px margin */
+    }
+    
+    /* Override specifico per evitare conflitti con CSS esistente */
+    .dashboard-main {
+        padding: 90px 0 4rem 0 !important;
+    }
+}
+
+/* Ottimizzazioni per schermi molto piccoli */
+@media (max-width: 480px) {
+    .mobile-header {
+        padding: 5px 6px;
+        min-height: 32px;
+        font-size: 12px;
+    }
+    
+    .mobile-logo {
+        height: 18px;
+    }
+    
+    .mobile-nav-btn {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
+    
+    .mobile-header-right {
+        gap: 6px;
+    }
+    
+    .top-navigation-container {
+        top: 32px;
+        min-height: 40px;
+        padding: 5px 6px;
+    }
+    
+    .ritual-stats {
+        gap: 1rem;
+        font-size: 11px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .ritual-stats div {
+        font-size: 11px;
+    }
+    
+    .ritual-stats strong {
+        font-size: 12px;
+    }
+    
+    .hero,
+    .user-screen,
+    .home-screen,
+    main,
+    .dashboard-main,
+    .form-section {
+        padding-top: 80px !important; /* 32px header + 40px sticky + 8px margin */
+    }
+    
+    /* Override specifico per dashboard mobile */
+    .dashboard-main {
+        padding: 80px 0 3rem 0 !important;
+    }
+}
+
+/* Ulteriori ottimizzazioni per schermi piccolissimi */
+@media (max-width: 360px) {
+    .mobile-header {
+        min-height: 30px;
+        padding: 4px 5px;
+    }
+    
+    .mobile-logo {
+        height: 16px;
+    }
+    
+    .mobile-nav-btn {
+        font-size: 10px;
+        padding: 2px 5px;
+    }
+    
+    .mobile-header-right {
+        gap: 4px;
+    }
+    
+    .top-navigation-container {
+        top: 30px;
+        min-height: 35px;
+        padding: 4px 5px;
+    }
+    
+    .ritual-stats {
+        gap: 0.5rem;
+        font-size: 10px;
+    }
+    
+    .ritual-stats div {
+        font-size: 10px;
+        text-align: center;
+    }
+    
+    .ritual-stats strong {
+        font-size: 11px;
+        display: block;
+        margin-bottom: 1px;
+        margin-right: 0;
+    }
+    
+    .hero,
+    .user-screen,
+    .home-screen,
+    main,
+    .dashboard-main,
+    .form-section {
+        padding-top: 72px !important; /* 30px header + 35px sticky + 7px margin */
+    }
+    
+    /* Override specifico per dashboard mobile piccolo */
+    .dashboard-main {
+        padding: 72px 0 2.5rem 0 !important;
+    }
+}
+
+/* ========================================
+   LAYOUT ESISTENTE
+   ======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #000;
+    color: #fff;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    position: relative;
+    min-height: 100vh;
+    /* Aggiungi scroll-padding per il layout mobile */
+    scroll-padding-top: 90px;
+}
+
+@media (max-width: 480px) {
+    body {
+        scroll-padding-top: 80px;
+    }
+}
+
+@media (max-width: 360px) {
+    body {
+        scroll-padding-top: 72px;
     }
 }

@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Il tuo spazio - Mental Commons</title>
+    <title>Dashboard - Mental Commons</title>
     <link rel="icon" type="image/svg+xml" href="/logo.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,6 +15,19 @@
     <link rel="stylesheet" href="/style.css?v=2025012305">
 </head>
 <body>
+    <!-- Mobile Header (solo per mobile) -->
+    <div class="mobile-header">
+        <div class="mobile-header-left">
+            <img src="/logo.svg" alt="MC" class="mobile-logo" />
+        </div>
+        <div class="mobile-header-right">
+            <a href="index.html" class="mobile-nav-btn">Home</a>
+            <a href="login.html" id="mobile-nav-login" class="mobile-nav-btn">Accedi</a>
+            <a href="dashboard.html" id="mobile-nav-dashboard" class="mobile-nav-btn" style="display: none;">Dashboard</a>
+            <button id="mobile-nav-logout" class="mobile-nav-btn mobile-logout-btn" style="display: none;">Esci</button>
+        </div>
+    </div>
+
     <!-- Top Navigation Container -->
     <div class="top-navigation-container">
         <!-- Ritual Stats - Sticky Header -->

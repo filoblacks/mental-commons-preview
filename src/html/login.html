@@ -15,6 +15,19 @@
     <link rel="stylesheet" href="/style.css?v=2025012305">
 </head>
 <body>
+    <!-- Mobile Header (solo per mobile) -->
+    <div class="mobile-header">
+        <div class="mobile-header-left">
+            <img src="/logo.svg" alt="MC" class="mobile-logo" />
+        </div>
+        <div class="mobile-header-right">
+            <a href="index.html" class="mobile-nav-btn">Home</a>
+            <a href="login.html" id="mobile-nav-login" class="mobile-nav-btn">Accedi</a>
+            <a href="dashboard.html" id="mobile-nav-dashboard" class="mobile-nav-btn" style="display: none;">Dashboard</a>
+            <button id="mobile-nav-logout" class="mobile-nav-btn mobile-logout-btn" style="display: none;">Esci</button>
+        </div>
+    </div>
+
     <!-- Top Navigation Container -->
     <div class="top-navigation-container">
         <!-- Ritual Stats - Sticky Header -->
@@ -27,7 +40,9 @@
         <!-- Navigazione semplificata -->
         <div class="ritual-actions">
             <a href="index.html">Home</a>
-            <a href="login.html">Accedi</a>
+            <a href="login.html" id="nav-login">Accedi</a>
+            <a href="dashboard.html" id="nav-dashboard" style="display: none;">Dashboard</a>
+            <button id="nav-logout" class="nav-logout-btn" style="display: none;">Esci</button>
         </div>
     </div>
 

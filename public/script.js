@@ -183,7 +183,7 @@ function logoutUser() {
 function updateUIForLoggedUser() {
     if (!currentUser) return;
     
-    // Aggiorna navigazione
+    // Aggiorna navigazione desktop
     const navLogin = document.getElementById('nav-login');
     const navDashboard = document.getElementById('nav-dashboard');
     const navLogout = document.getElementById('nav-logout');
@@ -193,6 +193,18 @@ function updateUIForLoggedUser() {
     if (navLogout) {
         navLogout.style.display = 'block';
         navLogout.onclick = logoutUser;
+    }
+    
+    // Aggiorna navigazione mobile
+    const mobileNavLogin = document.getElementById('mobile-nav-login');
+    const mobileNavDashboard = document.getElementById('mobile-nav-dashboard');
+    const mobileNavLogout = document.getElementById('mobile-nav-logout');
+    
+    if (mobileNavLogin) mobileNavLogin.style.display = 'none';
+    if (mobileNavDashboard) mobileNavDashboard.style.display = 'inline-block';
+    if (mobileNavLogout) {
+        mobileNavLogout.style.display = 'inline-block';
+        mobileNavLogout.onclick = logoutUser;
     }
     
     // Salva email per dashboard
@@ -226,7 +238,7 @@ function updateUIForLoggedUser() {
 }
 
 function updateUIForGuestUser() {
-    // Aggiorna navigazione
+    // Aggiorna navigazione desktop
     const navLogin = document.getElementById('nav-login');
     const navDashboard = document.getElementById('nav-dashboard');
     const navLogout = document.getElementById('nav-logout');
@@ -234,6 +246,15 @@ function updateUIForGuestUser() {
     if (navLogin) navLogin.style.display = 'block';
     if (navDashboard) navDashboard.style.display = 'none';
     if (navLogout) navLogout.style.display = 'none';
+    
+    // Aggiorna navigazione mobile
+    const mobileNavLogin = document.getElementById('mobile-nav-login');
+    const mobileNavDashboard = document.getElementById('mobile-nav-dashboard');
+    const mobileNavLogout = document.getElementById('mobile-nav-logout');
+    
+    if (mobileNavLogin) mobileNavLogin.style.display = 'inline-block';
+    if (mobileNavDashboard) mobileNavDashboard.style.display = 'none';
+    if (mobileNavLogout) mobileNavLogout.style.display = 'none';
     
     // Mostra sezione guest nella homepage - forza la visualizzazione del CTA
     const userWelcome = document.getElementById('user-welcome');
@@ -571,13 +592,15 @@ function setupEventListeners() {
 }
 
 function setupNavigationListeners() {
-    // La navigazione ora è gestita tramite semplici link in nav-buttons
-    // Gestiamo solo l'area utente se necessario
+    // Gestione navigazione desktop
     document.getElementById('nav-user')?.addEventListener('click', () => {
         showScreen('user');
         loadUserDashboard();
     });
     document.getElementById('nav-logout')?.addEventListener('click', logoutUser);
+    
+    // Gestione navigazione mobile
+    document.getElementById('mobile-nav-logout')?.addEventListener('click', logoutUser);
 }
 
 function setupAuthFormListeners() {
@@ -1254,19 +1277,33 @@ window.addEventListener('load', () => {
 
 async function loadRitualStats() {
     try {
-        // Carica UCMe
-        const ucmeResponse = await fetch('data/data.json');
-        const ucmeJson = await ucmeResponse.json();
-        const ucmes = ucmeJson.ucmes || [];
+        // Carica UCMe con controllo di validità della risposta
+        let ucmes = [];
+        try {
+            const ucmeResponse = await fetch('data/data.json');
+            if (!ucmeResponse.ok) {
+                throw new Error(`HTTP ${ucmeResponse.status}: ${ucmeResponse.statusText}`);
+            }
+            const ucmeJson = await ucmeResponse.json();
+            ucmes = ucmeJson.ucmes || [];
+        } catch (error) {
+            console.log('File data.json non disponibile:', error.message);
+            showStatsUnavailableMessage();
+            return;
+        }
         
-        // Carica risposte
+        // Carica risposte con controllo di validità
         let risposte = [];
         try {
             const risposteResponse = await fetch('data/risposte.json');
-            const risposteJson = await risposteResponse.json();
-            risposte = risposteJson.risposte || [];
+            if (risposteResponse.ok) {
+                const risposteJson = await risposteResponse.json();
+                risposte = risposteJson.risposte || [];
+            } else {
+                console.log('File risposte.json non trovato, usando array vuoto');
+            }
         } catch (error) {
-            console.log('File risposte.json non trovato, usando valori di default');
+            console.log('Errore nel caricamento risposte.json:', error.message);
         }
         
         // Calcola statistiche
@@ -1286,9 +1323,8 @@ async function loadRitualStats() {
         });
         
     } catch (error) {
-        console.error('Errore nel caricamento delle statistiche:', error);
-        // Mostra valori di default in caso di errore
-        updateStatsWithAnimation(0, 0, 0);
+        console.error('Errore generale nel caricamento delle statistiche:', error);
+        showStatsUnavailableMessage();
     }
 }
 
@@ -1335,6 +1371,70 @@ function updateStatsWithAnimation(ucmeCount, risposteCount, portatoriCount) {
         portatoriElement.style.transition = 'opacity 0.8s ease';
         setTimeout(() => portatoriElement.style.opacity = '1', 100);
     }, 1100);
+}
+
+function showStatsUnavailableMessage() {
+    // Trova gli elementi dei contatori
+    const ucmeElement = document.getElementById('ucme-count');
+    const risposteElement = document.getElementById('risposte-count');
+    const portatoriElement = document.getElementById('portatori-count');
+    
+    if (!ucmeElement || !risposteElement || !portatoriElement) {
+        console.warn('Elementi contatori non trovati per messaggio di fallback');
+        return;
+    }
+    
+    // Messaggio sobrio e minimale, coerente con lo stile Mental Commons
+    const fallbackMessage = '·';
+    
+    // Applica il messaggio con lo stesso stile dei numeri normali
+    setTimeout(() => {
+        ucmeElement.textContent = fallbackMessage;
+        ucmeElement.style.opacity = '0';
+        ucmeElement.style.transition = 'opacity 0.8s ease';
+        ucmeElement.style.color = '#8b8b8b'; // Colore più tenue per indicare indisponibilità
+        setTimeout(() => ucmeElement.style.opacity = '1', 100);
+    }, 500);
+    
+    setTimeout(() => {
+        risposteElement.textContent = fallbackMessage;
+        risposteElement.style.opacity = '0';
+        risposteElement.style.transition = 'opacity 0.8s ease';
+        risposteElement.style.color = '#8b8b8b';
+        setTimeout(() => risposteElement.style.opacity = '1', 100);
+    }, 800);
+    
+    setTimeout(() => {
+        portatoriElement.textContent = fallbackMessage;
+        portatoriElement.style.opacity = '0';
+        portatoriElement.style.transition = 'opacity 0.8s ease';
+        portatoriElement.style.color = '#8b8b8b';
+        setTimeout(() => portatoriElement.style.opacity = '1', 100);
+    }, 1100);
+    
+    // Aggiungi un messaggio discreto sotto le statistiche
+    setTimeout(() => {
+        // Cerca un contenitore delle statistiche per aggiungere il messaggio
+        const statsContainer = ucmeElement.closest('.stats-container') || ucmeElement.parentElement?.parentElement;
+        if (statsContainer && !statsContainer.querySelector('.stats-unavailable-note')) {
+            const noteElement = document.createElement('p');
+            noteElement.className = 'stats-unavailable-note';
+            noteElement.style.cssText = `
+                font-size: 11px;
+                color: #8b8b8b;
+                text-align: center;
+                margin-top: 8px;
+                font-style: italic;
+                opacity: 0;
+                transition: opacity 0.8s ease;
+            `;
+            noteElement.textContent = 'Statistiche non disponibili al momento';
+            statsContainer.appendChild(noteElement);
+            
+            // Fade in del messaggio
+            setTimeout(() => noteElement.style.opacity = '0.7', 100);
+        }
+    }, 1400);
 }
 
 // Rendi disponibili le funzioni dalla console
