@@ -1,26 +1,39 @@
-// ✅ Endpoint UCMes (recupero) per Vercel Serverless con DEBUG COMPLETO
+// ================================================================
+// MENTAL COMMONS - API UCMES (CARICAMENTO)
+// ================================================================
+// Endpoint per recuperare UCMe salvate nel database Supabase
+
+import { 
+  verifyJWT, 
+  getUserUCMes, 
+  testDatabaseConnection
+} from './supabase.js';
 
 export default async function handler(req, res) {
-  // Log request iniziale FASE 2 - RECUPERO
-  console.log('🟣 FASE 2 DEBUG - UCMES LOAD REQUEST RICEVUTO');
-  console.log('📥 Timestamp:', new Date().toISOString());
-  console.log('📥 Headers ricevuti:', JSON.stringify(req.headers, null, 2));
-  console.log('📥 Metodo:', req.method);
-  console.log('📥 Query params:', JSON.stringify(req.query, null, 2));
-  console.log('📥 User-Agent:', req.headers['user-agent']);
-  console.log('📥 Origin:', req.headers.origin);
-  console.log('📥 Referer:', req.headers.referer);
+  console.log('🟣 ============================================');
+  console.log('🟣 MENTAL COMMONS - API UCMES (LOAD)');
+  console.log('🟣 ============================================');
+  console.log('📥 Request timestamp:', new Date().toISOString());
+  console.log('📥 Method:', req.method);
+  console.log('📥 Headers:', JSON.stringify(req.headers, null, 2));
   
-  // Gestione CORS
+  // ================================================================
+  // CORS HEADERS
+  // ================================================================
+  
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
   if (req.method === 'OPTIONS') {
-    console.log('📥 Risposta CORS OPTIONS inviata');
+    console.log('📥 CORS preflight handled');
     res.status(200).end();
     return;
   }
+  
+  // ================================================================
+  // VALIDAZIONE METODO
+  // ================================================================
   
   if (req.method !== 'GET') {
     console.log('❌ Metodo non valido:', req.method);
@@ -29,126 +42,163 @@ export default async function handler(req, res) {
       message: 'Metodo non consentito. Utilizzare GET.',
       debug: {
         receivedMethod: req.method,
-        expectedMethod: 'GET'
+        expectedMethod: 'GET',
+        apiVersion: '2.0.0'
       }
     });
   }
   
-  console.log('📥 Richiesta recupero UCMe ricevuta');
+  console.log('📥 UCMe load request ricevuto');
   
-  try {
-    // Estrai parametri query
-    const { email, limit, offset } = req.query;
-    
-    console.log('📦 UCMe load - Parametri ricevuti:');
-    console.log('  📧 Email filter:', email);
-    console.log('  📊 Limit:', limit);
-    console.log('  📊 Offset:', offset);
-    
-    // 🔍 SIMULAZIONE RECUPERO UCMe
-    console.log('📥 UCMe load result - INIZIO RECUPERO SIMULATO:');
-    console.log('  🔍 Tipo di storage: MOCK (nessun database connesso)');
-    console.log('  🔍 Recupero da: File JSON statico (non aggiornabile)');
-    console.log('  🔍 Filesystem Vercel: READ-ONLY');
-    console.log('  🔍 Database: NON CONNESSO');
-    
-    // Tenta di leggere da file statico (se esiste)
-    let ucmes = [];
-    let dataSource = 'empty';
-    
-    try {
-      // In ambiente Vercel, possiamo solo leggere file statici inclusi nel build
-      // Il file data.json è statico e non si aggiorna con le nuove UCMe
-      const fs = require('fs');
-      const path = require('path');
-      const dataPath = path.join(process.cwd(), 'data', 'data.json');
-      
-      console.log('  🔍 Tentativo lettura file statico:', dataPath);
-      
-      if (fs.existsSync(dataPath)) {
-        const fileContent = fs.readFileSync(dataPath, 'utf8');
-        const data = JSON.parse(fileContent);
-        ucmes = data.ucmes || [];
-        dataSource = 'static_file';
-        console.log('  ✅ File statico letto con successo');
-        console.log('  📊 UCMe nel file statico:', ucmes.length);
-      } else {
-        console.log('  ❌ File statico non trovato');
-      }
-    } catch (fileError) {
-      console.log('  ❌ Errore lettura file statico:', fileError.message);
-    }
-    
-    // Filtra per email se specificata
-    let filteredUcmes = ucmes;
-    if (email) {
-      filteredUcmes = ucmes.filter(ucme => ucme.email === email);
-      console.log('  🔍 Filtro email applicato:', email);
-      console.log('  📊 UCMe dopo filtro email:', filteredUcmes.length);
-    }
-    
-    // Applica paginazione
-    const limitNum = parseInt(limit) || 10;
-    const offsetNum = parseInt(offset) || 0;
-    const paginatedUcmes = filteredUcmes.slice(offsetNum, offsetNum + limitNum);
-    
-    console.log('✅ UCMe recuperate da mock storage');
-    console.log('📦 UCMe load result - DETTAGLI RECUPERO:');
-    console.log('  📊 Totale UCMe disponibili:', ucmes.length);
-    console.log('  📊 UCMe dopo filtri:', filteredUcmes.length);
-    console.log('  📊 UCMe ritornate (paginazione):', paginatedUcmes.length);
-    console.log('  📁 Fonte dati:', dataSource);
-    console.log('  💾 Persistenza: NO (file statico dal build)');
-    console.log('  📁 File system: READ-ONLY (Vercel serverless)');
-    console.log('  🗄️ Database: NON CONNESSO');
-    console.log('  ⚠️ Le UCMe salvate via API NON sono incluse (solo file statico)');
-    
-    const responseData = {
-      success: true,
-      data: paginatedUcmes,
-      pagination: {
-        total: filteredUcmes.length,
-        limit: limitNum,
-        offset: offsetNum,
-        hasMore: offsetNum + limitNum < filteredUcmes.length
-      },
-      debug: {
-        dataSource: dataSource,
-        staticFileOnly: true,
-        newUcmesIncluded: false,
-        totalAvailable: ucmes.length,
-        afterFilter: filteredUcmes.length,
-        returned: paginatedUcmes.length,
-        persistentStorage: false,
-        databaseConnected: false,
-        vercelEnvironment: 'serverless_readonly',
-        warning: 'UCMe salvate via API non incluse - solo dati statici dal build'
-      }
-    };
-    
-    console.log('📥 UCMe load response preparata');
-    console.log('⚠️ CRITICO: UCMe salvate dinamicamente NON incluse (solo file statico)');
-    
-    res.status(200).json(responseData);
-    
-  } catch (error) {
-    console.error('❌ Errore nel recuperare UCMe:', error);
-    console.error('❌ Stack trace:', error.stack);
-    console.log('📦 UCMe load result - ERRORE:');
-    console.log('  ❌ Errore tipo:', error.name);
-    console.log('  ❌ Errore messaggio:', error.message);
-    console.log('  ❌ Timestamp errore:', new Date().toISOString());
-    
-    res.status(500).json({
+  // ================================================================
+  // AUTENTICAZIONE JWT
+  // ================================================================
+  
+  const authHeader = req.headers.authorization;
+  console.log('🎫 Auth header:', authHeader ? 'PRESENTE' : 'MANCANTE');
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.log('❌ Token di autenticazione mancante o formato errato');
+    return res.status(401).json({
       success: false,
-      message: 'Errore nel recuperare le UCMe. Riprova più tardi.',
+      message: 'Token di autenticazione richiesto per recuperare UCMe',
       debug: {
-        errorType: error.name,
-        errorMessage: error.message,
+        error: 'missing_auth_token',
+        expectedHeader: 'Authorization: Bearer <token>',
+        apiVersion: '2.0.0'
+      }
+    });
+  }
+  
+  const token = authHeader.substring(7);
+  console.log('🎫 Token estratto, lunghezza:', token.length);
+  
+  // Verifica JWT
+  const decoded = verifyJWT(token);
+  if (!decoded) {
+    console.log('❌ Token JWT non valido');
+    return res.status(401).json({
+      success: false,
+      message: 'Token di autenticazione non valido o scaduto',
+      debug: {
+        error: 'invalid_jwt_token',
+        apiVersion: '2.0.0'
+      }
+    });
+  }
+  
+  console.log('✅ Utente autenticato:', decoded.userId);
+  
+  // ================================================================
+  // TEST CONNESSIONE DATABASE
+  // ================================================================
+  
+  console.log('🔍 Test connessione database...');
+  const dbConnected = await testDatabaseConnection();
+  
+  if (!dbConnected) {
+    console.log('❌ Connessione database fallita');
+    return res.status(500).json({
+      success: false,
+      message: 'Errore di connessione al database',
+      debug: {
+        error: 'database_connection_failed',
+        backend: 'supabase',
         timestamp: new Date().toISOString()
       }
     });
   }
   
+  // ================================================================
+  // RECUPERO UCME DAL DATABASE
+  // ================================================================
+  
+  try {
+    console.log('📝 RECUPERO UCME - Caricamento da Supabase:');
+    console.log('  🔍 Tipo di storage: Supabase PostgreSQL');
+    console.log('  🔍 User ID:', decoded.userId);
+    console.log('  🔍 Email:', decoded.email);
+    
+    // Recupera UCMe dell'utente dal database
+    const ucmes = await getUserUCMes(decoded.userId);
+    
+    console.log('✅ UCMe recuperate dal database:', ucmes?.length || 0);
+    
+    // Parametri query per paginazione
+    const { limit, offset } = req.query;
+    const limitNum = parseInt(limit) || 10;
+    const offsetNum = parseInt(offset) || 0;
+    
+    // Applica paginazione
+    const paginatedUcmes = ucmes.slice(offsetNum, offsetNum + limitNum);
+    
+    console.log('📦 UCME LOAD RESULT - SUCCESSO:');
+    console.log('  📊 Totale UCMe utente:', ucmes.length);
+    console.log('  📊 UCMe ritornate (paginazione):', paginatedUcmes.length);
+    console.log('  💾 Persistenza: SÌ (Supabase)');
+    console.log('  🔄 Cross-device: SÌ');
+    console.log('  🗄️ Database connesso: SÌ');
+    
+    const responseData = {
+      success: true,
+      data: paginatedUcmes.map(ucme => ({
+        id: ucme.id,
+        content: ucme.content,
+        title: ucme.title,
+        status: ucme.status,
+        createdAt: ucme.created_at,
+        updatedAt: ucme.updated_at,
+        assignedTo: ucme.assigned_to,
+        responseContent: ucme.response_content,
+        responseAt: ucme.response_at
+      })),
+      pagination: {
+        total: ucmes.length,
+        limit: limitNum,
+        offset: offsetNum,
+        hasMore: offsetNum + limitNum < ucmes.length
+      },
+      user: {
+        id: decoded.userId,
+        email: decoded.email
+      },
+      debug: {
+        loadMethod: 'supabase_database',
+        dataSource: 'persistent_database',
+        persistentStorage: true,
+        storageType: 'postgresql',
+        databaseConnected: true,
+        timestamp: new Date().toISOString(),
+        apiVersion: '2.0.0',
+        backend: 'supabase',
+        crossDevice: true
+      }
+    };
+    
+    console.log('📝 UCMe load response preparata');
+    res.status(200).json(responseData);
+    
+  } catch (error) {
+    // ================================================================
+    // GESTIONE ERRORI
+    // ================================================================
+    
+    console.error('💥 Errore durante il recupero UCMe:', error);
+    console.error('💥 Stack trace:', error.stack);
+    
+    return res.status(500).json({
+      success: false,
+      message: 'Errore interno del server durante il recupero UCMe',
+      debug: {
+        error: error.message,
+        code: error.code || 'unknown',
+        backend: 'supabase',
+        timestamp: new Date().toISOString(),
+        apiVersion: '2.0.0'
+      }
+    });
+  }
+  
   console.log('🔚 Fine processo UCMe load - timestamp:', new Date().toISOString());
+  console.log('🟣 ============================================');
 } 
