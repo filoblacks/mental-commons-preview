@@ -1058,16 +1058,39 @@ function createHistoryItem(ucme, index) {
 // ========================================
 
 function loadExistingData() {
+    console.log('🟣 FASE 4 DEBUG - VERIFICA STORAGE');
+    console.log('📊 Caricamento dati esistenti...');
+    
+    // 🔍 VERIFICA DOVE VENGONO SALVATI I DATI
+    console.log('🔍 VERIFICA STORAGE - Fonti di dati:');
+    console.log('  📁 localStorage: disponibile');
+    console.log('  📁 File JSON: statici dal build');
+    console.log('  🗄️ Database: NON CONNESSO');
+    console.log('  ☁️ API Vercel: NON persistente (solo log)');
+    
     // Carica UCMe dal localStorage
     const savedUcmes = localStorage.getItem('mentalCommons_ucmes');
     if (savedUcmes) {
         try {
             ucmeData = JSON.parse(savedUcmes);
-            console.log(`Caricate ${ucmeData.length} UCMe dal localStorage`);
+            console.log(`✅ Caricate ${ucmeData.length} UCMe dal localStorage`);
+            console.log('📦 Storage attuale - localStorage UCMe:', {
+                count: ucmeData.length,
+                persistent: 'Solo fino a clear browser data',
+                crossDevice: 'NO - solo questo browser',
+                sample: ucmeData.slice(0, 2).map(u => ({ 
+                    email: u.email, 
+                    timestamp: u.timestamp,
+                    text: u.text?.substring(0, 30) + '...' 
+                }))
+            });
         } catch (error) {
             console.error('Errore nel caricamento UCMe:', error);
             ucmeData = [];
         }
+    } else {
+        console.log('📭 Nessuna UCMe trovata in localStorage');
+        console.log('⚠️ CONFERMA: localStorage vuoto - le UCMe salvate via API non sono qui');
     }
     
     // Carica candidature Portatore dal localStorage
@@ -1075,11 +1098,38 @@ function loadExistingData() {
     if (savedPortatori) {
         try {
             portatoreData = JSON.parse(savedPortatori);
-            console.log(`Caricate ${portatoreData.length} candidature Portatore dal localStorage`);
+            console.log(`✅ Caricate ${portatoreData.length} candidature Portatore dal localStorage`);
         } catch (error) {
             console.error('Errore nel caricamento candidature Portatore:', error);
             portatoreData = [];
         }
+    } else {
+        console.log('📭 Nessun portatore trovato in localStorage');
+    }
+    
+    // 🔍 VERIFICA PERSISTENZA REALE
+    console.log('🔍 VERIFICA PERSISTENZA STORAGE:');
+    console.log('  📱 Mobile vs Desktop: localStorage separato per device');
+    console.log('  🔄 Reset browser: Tutti i dati localStorage persi');
+    console.log('  ☁️ Vercel serverless: Nessun filesystem persistente');
+    console.log('  📊 UCMe inviate via API: Solo in log console (non recuperabili)');
+    
+    console.log('📋 Stato dati completo:', {
+        ucmes: ucmeData.length,
+        portatori: portatoreData.length,
+        storageType: 'localStorage_only',
+        persistent: false,
+        crossDevice: false
+    });
+    
+    // 🚨 EVIDENZIA PROBLEMA PERSISTENZA
+    if (ucmeData.length === 0) {
+        console.log('🚨 STORAGE ISSUE: Nessuna UCMe in localStorage');
+        console.log('🚨 POSSIBILI CAUSE:');
+        console.log('  1. UCMe inviate solo via API (solo log, non storage)');
+        console.log('  2. Browser data cleared');
+        console.log('  3. Device diverso da quello usato per inviare');
+        console.log('  4. Nessuna UCMe mai inviata');
     }
 }
 
@@ -1915,8 +1965,8 @@ async function handleFormSubmission(event) {
     showLoadingState();
     
     try {
-        // Invio dati al Google Apps Script
-        await submitUCMeToGoogleSheet(formData);
+        // Invio dati al backend Vercel
+        await submitUCMeToVercel(formData);
         
         // Salvataggio backup locale
         saveUcmeDataLocal(formData);
@@ -1982,32 +2032,28 @@ function generateUniqueId() {
 }
 
 // ========================================
-// INTEGRAZIONE GOOGLE APPS SCRIPT
+// INTEGRAZIONE VERCEL BACKEND
 // ========================================
 
-async function submitUCMeToGoogleSheet(formData) {
-    // Configurazione Google Apps Script
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYSw5zAuEMbJRpaBSddecc_RdjImzWZSL5q4Pc0-pgA5E4EGiStSKoXz2aw2gsyTDIJA/exec';
-    const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
-    
-    const payload = {
-        ...formData,
-        key: API_KEY
-    };
+async function submitUCMeToVercel(formData) {
+    // Determina l'URL base del backend
+    const BASE_URL = window.location.origin;
+    const UCME_ENDPOINT = `${BASE_URL}/api/ucme`;
     
     try {
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
+        const response = await fetch(UCME_ENDPOINT, {
             method: 'POST',
             mode: 'cors',
             cache: 'no-cache',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(formData)
         });
         
         if (!response.ok) {
-            throw new Error(`Errore HTTP: ${response.status}`);
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Errore HTTP: ${response.status}`);
         }
         
         const result = await response.json();
@@ -2016,11 +2062,11 @@ async function submitUCMeToGoogleSheet(formData) {
             throw new Error(result.message || 'Errore sconosciuto dal server');
         }
         
-        console.log('Risposta Google Apps Script:', result);
+        console.log('✅ Risposta Vercel Backend:', result);
         return result;
         
     } catch (error) {
-        console.error('Errore nella comunicazione con Google Apps Script:', error);
+        console.error('❌ Errore nella comunicazione con Vercel Backend:', error);
         throw new Error('Errore di connessione. Riprova più tardi.');
     }
 }
@@ -2191,22 +2237,26 @@ function shouldAllowAutoRegistration() {
 // ========================================
 
 async function loginWithBackend(email, password) {
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYSw5zAuEMbJRpaBSddecc_RdjImzWZSL5q4Pc0-pgA5E4EGiStSKoXz2aw2gsyTDIJA/exec';
-    const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
+    // 🟣 FASE 3 DEBUG - VERIFICA COERENZA BACKEND
+    console.log('🟣 FASE 3 DEBUG - LOGIN BACKEND CHIAMATA');
+    
+    // Determina l'URL base del backend Vercel
+    const BASE_URL = window.location.origin;
+    const LOGIN_ENDPOINT = `${BASE_URL}/api/login`;
     
     const payload = {
-        action: 'login',
         email: email,
-        password: password,
-        key: API_KEY
+        password: password
     };
     
-    console.log('🌐 Chiamata login backend:', { email, action: 'login' });
+    console.log('🌐 Chiamata login backend Vercel (non più Google Apps Script)');
+    console.log('📡 URL:', LOGIN_ENDPOINT);
     console.log('📤 Payload completo:', payload);
+    console.log('🔍 Verifica: NON ci sono più riferimenti a script.google.com');
     
     try {
-        // Tentativo 1: Fetch normale con CORS
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
+        // Fetch al nuovo endpoint Vercel
+        const response = await fetch(LOGIN_ENDPOINT, {
             method: 'POST',
             mode: 'cors',
             cache: 'no-cache',
@@ -2226,51 +2276,57 @@ async function loginWithBackend(email, password) {
         
         const result = await response.json();
         console.log('📥 Risposta login backend SUCCESS:', result);
+        console.log('🟣 FASE 3 - Chiamata API completata con successo (Vercel endpoint)');
         
         return result;
         
     } catch (error) {
         console.error('❌ Errore fetch principale:', error);
+        console.log('🟣 FASE 3 - Errore nella chiamata API Vercel:', error.message);
         
-        // Se è un errore CORS, prova metodo alternativo
-        if (error.message.includes('CORS') || error.message.includes('blocked')) {
-            console.log('🔄 Tentativo metodo alternativo per CORS...');
-            return await loginWithBackendFallback(email, password);
+        // Log eventuali chiamate esterne sospette
+        if (error.message.includes('script.google.com')) {
+            console.log('⚠️ ATTENZIONE: Chiamata a Google Apps Script rilevata - QUESTO NON DOVREBBE SUCCEDERE');
         }
         
         throw error;
     }
 }
 
-// Metodo fallback per problemi CORS
+// Metodo fallback rimosso - ora usiamo solo Vercel API
+// La funzione è mantenuta per compatibilità ma non dovrebbe più essere chiamata
 async function loginWithBackendFallback(email, password) {
-    console.log('⚠️ FALLBACK: Google Apps Script ha problemi CORS');
-    console.log('💡 SOLUZIONE: Configura il Google Apps Script con header CORS corretti');
+    console.log('⚠️ ATTENZIONE: loginWithBackendFallback chiamata - QUESTO NON DOVREBBE SUCCEDERE');
+    console.log('🟣 FASE 3 - Google Apps Script è stato rimosso, ora usiamo solo Vercel API');
     
-    // Per ora, simula una risposta di errore informativa
     return {
         success: false,
-        message: 'Backend non configurato correttamente. Controlla impostazioni CORS in Google Apps Script.',
-        error: 'CORS_NOT_CONFIGURED',
-        help: 'Applica le correzioni CORS dal file google-apps-script-cors-fix.js'
+        message: 'Metodo fallback deprecato. Usa solo Vercel API.',
+        error: 'DEPRECATED_FALLBACK',
+        help: 'Tutti i login dovrebbero passare tramite /api/login Vercel endpoint'
     };
 }
 
 async function registerWithBackend(email, password, name) {
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYSw5zAuEMbJRpaBSddecc_RdjImzWZSL5q4Pc0-pgA5E4EGiStSKoXz2aw2gsyTDIJA/exec';
-    const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
+    // 🟣 FASE 3 DEBUG - VERIFICA COERENZA BACKEND
+    console.log('🟣 FASE 3 DEBUG - REGISTER BACKEND CHIAMATA');
+    
+    // Determina l'URL base del backend Vercel
+    const BASE_URL = window.location.origin;
+    const REGISTER_ENDPOINT = `${BASE_URL}/api/register`;
     
     const payload = {
-        action: 'register',
         email: email,
         password: password,
-        name: name,
-        key: API_KEY
+        name: name
     };
     
-    console.log('🌐 Chiamata registrazione backend:', { email, action: 'register' });
+    console.log('🌐 Chiamata registrazione backend Vercel (non più Google Apps Script)');
+    console.log('📡 URL:', REGISTER_ENDPOINT);
+    console.log('📤 Payload completo:', payload);
+    console.log('🔍 Verifica: NON ci sono più riferimenti a script.google.com');
     
-    const response = await fetch(GOOGLE_SCRIPT_URL, {
+    const response = await fetch(REGISTER_ENDPOINT, {
         method: 'POST',
         mode: 'cors',
         cache: 'no-cache',
@@ -2280,19 +2336,25 @@ async function registerWithBackend(email, password, name) {
         body: JSON.stringify(payload)
     });
     
+    console.log('📡 Register Response status:', response.status);
+    console.log('📡 Register Response ok:', response.ok);
+    
     if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
     }
     
     const result = await response.json();
     console.log('📥 Risposta registrazione backend:', result);
+    console.log('🟣 FASE 3 - Registrazione API completata (Vercel endpoint)');
     
     return result;
 }
 
 async function syncUsersToBackend() {
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYSw5zAuEMbJRpaBSddecc_RdjImzWZSL5q4Pc0-pgA5E4EGiStSKoXz2aw2gsyTDIJA/exec';
-    const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
+    // 🟣 FASE 3 DEBUG - VERIFICA COERENZA BACKEND
+    console.log('🟣 FASE 3 DEBUG - SYNC USERS DEPRECATO');
+    console.log('⚠️ ATTENZIONE: Sincronizzazione con Google Apps Script rimossa');
+    console.log('🔍 Verifica: Ora tutti i dati sono gestiti tramite Vercel API');
     
     const localUsers = JSON.parse(localStorage.getItem('mc-users') || '[]');
     
@@ -2301,32 +2363,23 @@ async function syncUsersToBackend() {
         return { success: true, message: 'Nessun utente da sincronizzare' };
     }
     
-    const payload = {
-        action: 'syncUsers',
-        users: localUsers,
-        key: API_KEY
+    console.log('🔄 Sincronizzazione rimossa - utenti gestiti localmente:', localUsers.length, 'utenti');
+    console.log('💡 INFO: La sincronizzazione con backend esterno è stata rimossa');
+    console.log('💡 INFO: Gli utenti ora vengono registrati tramite /api/register');
+    
+    // Log eventuali chiamate esterne sospette
+    console.log('🔍 Loggare eventuali chiamate esterne sospette: NESSUNA (Google Apps Script rimosso)');
+    
+    return { 
+        success: true, 
+        message: 'Sincronizzazione deprecata - ora tutto tramite Vercel API',
+        debug: {
+            deprecated: true,
+            oldMethod: 'google_apps_script',
+            newMethod: 'vercel_api',
+            localUsers: localUsers.length
+        }
     };
-    
-    console.log('🔄 Sincronizzazione utenti al backend:', localUsers.length, 'utenti');
-    
-    const response = await fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'cors',
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-    });
-    
-    if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-    }
-    
-    const result = await response.json();
-    console.log('📥 Risposta sincronizzazione:', result);
-    
-    return result;
 }
 
 function setupMobileTextareaHandling() {

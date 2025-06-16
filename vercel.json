@@ -1,10 +1,38 @@
 {
   "version": 2,
-  "buildCommand": "bash copy-assets.sh",
-  "outputDirectory": "src/html",
-  "public": true,
   "cleanUrls": true,
   "trailingSlash": false,
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 10
+    }
+  },
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/src/html/index.html"
+    },
+    {
+      "src": "/login",
+      "dest": "/src/html/login.html"
+    },
+    {
+      "src": "/dashboard", 
+      "dest": "/src/html/dashboard.html"
+    },
+    {
+      "src": "/reset-user",
+      "dest": "/src/html/reset-user.html"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*\\.(css|js|svg|ico|png|jpg|jpeg|gif|webp))",
+      "dest": "/public/$1"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)\\.html",

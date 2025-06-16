@@ -1,19 +1,40 @@
 {
   "name": "mental-commons",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Mental Commons - Piattaforma peer-to-peer per la riflessione condivisa",
   "scripts": {
-    "update-versions": "node scripts/update-versions.js",
-    "bump-version": "node scripts/update-versions.js --new",
-    "build": "bash copy-assets.sh && npm run update-versions",
-    "deploy": "vercel --prod",
     "dev": "vercel dev",
-    "start": "vercel dev"
+    "dev-frontend": "python3 -m http.server 8000 --directory src/html",
+    "build": "node scripts/copy-assets.js",
+    "deploy": "npm run bump-version && npm run build && vercel --prod",
+    "bump-version": "node scripts/update-versions.js bump",
+    "update-versions": "node scripts/update-versions.js",
+    "test": "echo \"Tests not implemented yet\" && exit 0",
+    "lint": "echo \"Linting not configured yet\" && exit 0"
   },
-  "keywords": ["mental-health", "peer-to-peer", "reflection"],
+  "keywords": [
+    "mental-health",
+    "peer-to-peer",
+    "reflection",
+    "mindfulness",
+    "community",
+    "sharing"
+  ],
   "author": "Mental Commons Team",
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
-  }
-} 
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/filippodelministro/mental-commons"
+  },
+  "homepage": "https://mental-commons.vercel.app"
+}

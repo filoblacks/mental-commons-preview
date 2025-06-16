@@ -1,0 +1,40 @@
+# ================================================================
+# MENTAL COMMONS - VARIABILI AMBIENTE TEMPLATE
+# ================================================================
+# Copia il contenuto in .env.local e inserisci i tuoi valori reali
+
+# ----------------------------------------------------------------
+# SUPABASE CONFIGURATION
+# ----------------------------------------------------------------
+# Ottieni questi valori dal dashboard Supabase -> Settings -> API
+
+# URL del progetto Supabase (formato: https://xxxxx.supabase.co)
+SUPABASE_URL=https://qinejswhyqzlategopty.supabase.co
+
+# Service Role Key (per operazioni server-side)
+# ⚠️ ATTENZIONE: Mantieni questa chiave segreta! 
+# Non esporla mai nel frontend
+SUPABASE_SERVICE_KEY=tua-service-role-key-qui
+
+# ----------------------------------------------------------------
+# JWT CONFIGURATION (OPZIONALE)
+# ----------------------------------------------------------------
+# Se non specificato, verrà usato un valore di default
+# In produzione, usa una chiave sicura e casuale
+
+JWT_SECRET=tua-chiave-jwt-segreta-qui
+
+# ----------------------------------------------------------------
+# ISTRUZIONI PER L'USO
+# ----------------------------------------------------------------
+# 1. Crea file .env.local nella root del progetto
+# 2. Copia il contenuto sopra e modifica con i tuoi valori reali
+# 3. NON committare mai .env.local nel repository
+# 4. Per produzione, imposta le variabili nel dashboard Vercel
+
+# ----------------------------------------------------------------
+# ESEMPIO DI VALORI (NON FUNZIONANTI)
+# ----------------------------------------------------------------
+# SUPABASE_URL=https://abcdefghijk.supabase.co
+# SUPABASE_SERVICE_KEY=eyJhbGciOiJI...(molto lunga)
+# JWT_SECRET=mental-commons-super-secret-key-2024 
