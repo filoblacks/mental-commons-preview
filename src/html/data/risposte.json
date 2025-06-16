@@ -1,0 +1,16 @@
+{
+  "risposte": [
+    {
+      "id": "resp_example_1",
+      "ucmeId": "example_1",
+      "risposta": "Ti ho letto con attenzione. Il tuo pensiero non ha bisogno di essere perfetto per essere importante. A volte le parole più vere sono quelle che si nascondono nel silenzio. Non c'è fretta di dire tutto subito - c'è chi sa aspettare.",
+      "portatore": "portatore@mentalcommons.xyz",
+      "timestamp": "2024-01-16T15:30:00Z"
+    }
+  ],
+  "stats": {
+    "totalRisposte": 1,
+    "portatoriAttivi": 1,
+    "lastUpdated": "2024-01-16T15:30:00Z"
+  }
+} 

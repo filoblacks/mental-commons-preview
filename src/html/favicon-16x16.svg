@@ -1,0 +1,13 @@
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sfondo nero -->
+  <rect width="16" height="16" fill="#000000"/>
+  
+  <!-- Cerchio sinistro -->
+  <circle cx="6" cy="8" r="3.5" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+  
+  <!-- Cerchio destro -->
+  <circle cx="10" cy="8" r="3.5" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+  
+  <!-- Punto centrale -->
+  <circle cx="8" cy="8" r="0.5" fill="#ffffff"/>
+</svg> 

@@ -1,0 +1,14 @@
+{
+  "name": "mental-commons",
+  "version": "1.0.0",
+  "description": "Mental Commons - Piattaforma peer-to-peer per la riflessione condivisa",
+  "scripts": {
+    "update-versions": "node scripts/update-versions.js",
+    "bump-version": "node scripts/update-versions.js --new",
+    "build": "bash copy-assets.sh && npm run update-versions",
+    "deploy": "bash scripts/deploy.sh"
+  },
+  "keywords": ["mental-health", "peer-to-peer", "reflection"],
+  "author": "Mental Commons Team",
+  "license": "MIT"
+} 
