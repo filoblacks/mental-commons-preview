@@ -634,6 +634,13 @@ function checkAndShowOnboarding() {
 
 function showOnboardingModal() {
     const modal = document.getElementById('onboarding-modal');
+    
+    // Controlla se l'elemento esiste prima di tentare di accedervi
+    if (!modal) {
+        console.log('⚠️ Onboarding modal not found on this page, skipping...');
+        return;
+    }
+    
     modal.style.display = 'flex';
     modal.style.animation = 'fadeIn 0.5s ease-out';
     
@@ -647,6 +654,12 @@ function completeOnboarding() {
     
     // Nascondi modal con animazione
     const modal = document.getElementById('onboarding-modal');
+    
+    if (!modal) {
+        console.log('⚠️ Onboarding modal not found, marking as completed');
+        return;
+    }
+    
     modal.style.animation = 'fadeOut 0.3s ease-out';
     
     setTimeout(() => {
@@ -825,13 +838,23 @@ function setupNavigationListeners() {
 }
 
 function setupAuthFormListeners() {
+    console.log('🔧 setupAuthFormListeners called');
+    
     // Event listener per i tab login/registrazione
     const tabLogin = document.getElementById('tab-login');
     const tabRegister = document.getElementById('tab-register');
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     
+    console.log('🔍 Elements found:', {
+        tabLogin: !!tabLogin,
+        tabRegister: !!tabRegister, 
+        loginForm: !!loginForm,
+        registerForm: !!registerForm
+    });
+    
     if (tabLogin && tabRegister && loginForm && registerForm) {
+        console.log('✅ All elements found, adding event listeners');
         // Click sul tab "Accedi"
         tabLogin.addEventListener('click', function() {
             // Aggiorna gli stili dei tab
@@ -847,6 +870,8 @@ function setupAuthFormListeners() {
         
         // Click sul tab "Registrati"
         tabRegister.addEventListener('click', function() {
+            console.log('🎯 Tab Registrati clicked!');
+            
             // Aggiorna gli stili dei tab
             tabRegister.classList.add('active');
             tabLogin.classList.remove('active');
@@ -855,12 +880,21 @@ function setupAuthFormListeners() {
             registerForm.style.display = 'block';
             loginForm.style.display = 'none';
             
-            console.log('Switched to register form');
+            console.log('✅ Switched to register form');
         });
         
         // Event listener per i form submission
         loginForm.addEventListener('submit', handleLoginSubmit);
         registerForm.addEventListener('submit', handleRegisterSubmit);
+        
+        console.log('🎉 All event listeners added successfully');
+    } else {
+        console.error('❌ Missing elements:', {
+            tabLogin: !tabLogin ? 'MISSING' : 'OK',
+            tabRegister: !tabRegister ? 'MISSING' : 'OK',
+            loginForm: !loginForm ? 'MISSING' : 'OK', 
+            registerForm: !registerForm ? 'MISSING' : 'OK'
+        });
     }
 }
 
