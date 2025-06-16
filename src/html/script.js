@@ -82,7 +82,7 @@ function updateNavigation(activeScreen) {
 // ========================================
 
 function initializeDashboard() {
-    console.log('Inizializzazione dashboard...');
+    console.log('🔄 Inizializzazione dashboard...');
     
     // Elementi della dashboard
     const userVerification = document.getElementById('user-verification');
@@ -90,48 +90,92 @@ function initializeDashboard() {
     const noAccess = document.getElementById('no-access');
     
     if (!userVerification || !dashboardContent || !noAccess) {
-        console.error('Elementi dashboard mancanti nel DOM');
+        console.error('❌ Elementi dashboard mancanti nel DOM:', {
+            userVerification: !!userVerification,
+            dashboardContent: !!dashboardContent,
+            noAccess: !!noAccess
+        });
         return;
     }
+
+    console.log('✅ Tutti gli elementi DOM trovati');
     
     setTimeout(() => {
         try {
+            console.log('🔍 Controllo stato utente...');
+            
             // Verifica se l'utente è loggato
             if (!currentUser) {
-                console.log('Utente non loggato, mostro schermata di accesso');
+                console.log('⚠️ Utente non loggato, mostro schermata di accesso');
                 userVerification.style.display = 'none';
                 noAccess.style.display = 'block';
                 return;
             }
             
-            console.log('Utente loggato:', currentUser.email);
+            console.log('✅ Utente loggato:', currentUser.email);
+            console.log('📊 Dati ucmeData disponibili:', ucmeData.length, 'UCMe totali');
             
             // Carica i dati dell'utente
+            console.log('🔄 Caricamento dati dashboard...');
             const userData = loadDashboardData(currentUser.email);
-            console.log('Dati dashboard:', userData);
+            console.log('📋 Dati dashboard ricevuti:', JSON.stringify({
+                isEmpty: userData?.isEmpty,
+                ucmesLength: userData?.ucmes?.length,
+                hasUser: !!userData?.user,
+                hasStats: !!userData?.stats
+            }, null, 2));
             
             // Verifica validità dei dati
-            if (!userData || (!userData.ucmes && !userData.isEmpty)) {
-                console.log('Dati non validi o non disponibili');
+            if (!userData) {
+                console.error('❌ userData è null o undefined');
+                updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
+                return;
+            }
+
+            if (!userData.ucmes && !userData.isEmpty) {
+                console.error('❌ Struttura dati non valida:', userData);
                 updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
                 return;
             }
             
+            console.log('🎨 Rendering dashboard avviato...');
+            
             // Rendering della dashboard
             if (userData.isEmpty) {
-                console.log('Dati vuoti, mostro dashboard vuota');
+                console.log('📝 Dati vuoti, mostro dashboard vuota');
                 renderEmptyDashboard();
             } else {
-                console.log('Rendering dashboard con dati:', userData.ucmes.length, 'UCMe trovate');
+                console.log('📝 Rendering dashboard con dati:', userData.ucmes.length, 'UCMe trovate');
                 renderDashboard(userData);
             }
             
-            // Nascondi caricamento e mostra contenuto
+            console.log('🔄 Aggiornamento UI - nascondo caricamento e mostro contenuto...');
+            
+            // Nascondi caricamento e mostra contenuto - SEMPRE, anche se ci sono errori nel rendering
             userVerification.style.display = 'none';
             dashboardContent.style.display = 'block';
             
+            console.log('✅ Dashboard completamente caricata e visualizzata');
+            
         } catch (error) {
-            console.error('Errore durante caricamento dashboard:', error);
+            console.error('❌ Errore durante caricamento dashboard:', error);
+            console.error('Stack trace:', error.stack);
+            
+            // Anche in caso di errore, mostra sempre l'UI base
+            userVerification.style.display = 'none';
+            dashboardContent.style.display = 'block';
+            
+            // Mostra messaggio di errore nel contenuto
+            const ucmeBlocks = document.getElementById('ucme-blocks');
+            if (ucmeBlocks) {
+                ucmeBlocks.innerHTML = `
+                    <div class="empty-dashboard">
+                        <p>❌ Si è verificato un errore nel caricamento del tuo spazio.</p>
+                        <p>Ricarica la pagina o riprova più tardi.</p>
+                    </div>
+                `;
+            }
+            
             updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
         }
     }, 500); // Piccolo delay per dare feedback visivo del caricamento
@@ -139,13 +183,43 @@ function initializeDashboard() {
 
 function loadDashboardData(email) {
     try {
-        // Carica UCMe dell'utente
-        const userUcmes = ucmeData.filter(ucme => ucme.email === email);
+        console.log('🔍 Caricamento dati dashboard per email:', email);
+        console.log('📊 ucmeData completo:', ucmeData);
         
-        console.log('UCMe trovate per', email, ':', userUcmes.length);
+        // Verifica che ucmeData sia un array valido
+        if (!Array.isArray(ucmeData)) {
+            console.error('❌ ucmeData non è un array valido:', typeof ucmeData, ucmeData);
+            return {
+                isEmpty: true,
+                ucmes: [],
+                user: currentUser
+            };
+        }
+        
+        // Carica UCMe dell'utente
+        const userUcmes = ucmeData.filter(ucme => {
+            console.log('🔍 Verifica UCMe:', {
+                ucmeEmail: ucme.email,
+                targetEmail: email,
+                match: ucme.email === email
+            });
+            return ucme.email === email;
+        });
+        
+        console.log('✅ UCMe trovate per', email, ':', userUcmes.length);
+        
+        // Log dettagliato delle UCMe trovate
+        if (userUcmes.length > 0) {
+            console.log('📋 UCMe dell\'utente:', userUcmes.map(ucme => ({
+                text: ucme.text?.substring(0, 50) + '...',
+                timestamp: ucme.timestamp,
+                hasResponse: !!ucme.response
+            })));
+        }
         
         // Se non ci sono UCMe, restituisce struttura vuota
         if (userUcmes.length === 0) {
+            console.log('📝 Nessuna UCMe trovata, ritorno struttura vuota');
             return {
                 isEmpty: true,
                 ucmes: [],
@@ -154,9 +228,19 @@ function loadDashboardData(email) {
         }
         
         // Ordina UCMe per timestamp (più recenti prima)
-        const sortedUcmes = userUcmes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        console.log('🔄 Ordinamento UCMe per timestamp...');
+        const sortedUcmes = userUcmes.sort((a, b) => {
+            const dateA = new Date(a.timestamp || 0);
+            const dateB = new Date(b.timestamp || 0);
+            return dateB - dateA;
+        });
         
-        return {
+        console.log('✅ UCMe ordinate:', sortedUcmes.map(ucme => ({
+            text: ucme.text?.substring(0, 30) + '...',
+            timestamp: ucme.timestamp
+        })));
+        
+        const dashboardData = {
             isEmpty: false,
             ucmes: sortedUcmes,
             user: currentUser,
@@ -167,34 +251,74 @@ function loadDashboardData(email) {
             }
         };
         
+        console.log('✅ Dati dashboard preparati:', {
+            isEmpty: dashboardData.isEmpty,
+            ucmesCount: dashboardData.ucmes.length,
+            stats: dashboardData.stats
+        });
+        
+        return dashboardData;
+        
     } catch (error) {
-        console.error('Errore nel caricamento dati dashboard:', error);
+        console.error('❌ Errore nel caricamento dati dashboard:', error);
+        console.error('Stack trace:', error.stack);
         return null;
     }
 }
 
 function renderDashboard(data) {
     try {
+        console.log('🎨 Rendering dashboard con dati:', data);
+        
         // Aggiorna informazioni profilo
+        console.log('👤 Aggiornamento informazioni profilo...');
         updateProfileInfo(data.user);
+        console.log('✅ Informazioni profilo aggiornate');
         
         // Renderizza le UCMe
+        console.log('📝 Rendering UCMe blocks...');
         renderUcmeBlocks(data.ucmes);
+        console.log('✅ UCMe blocks renderizzate');
         
-        console.log('Dashboard renderizzata con successo');
+        console.log('✅ Dashboard renderizzata con successo');
         
     } catch (error) {
-        console.error('Errore nel rendering dashboard:', error);
+        console.error('❌ Errore nel rendering dashboard:', error);
+        console.error('Stack trace:', error.stack);
+        
+        // In caso di errore, mostra comunque un contenuto base
+        const ucmeBlocks = document.getElementById('ucme-blocks');
+        if (ucmeBlocks) {
+            ucmeBlocks.innerHTML = `
+                <div class="empty-dashboard">
+                    <p>❌ Errore nella visualizzazione dei tuoi pensieri.</p>
+                    <p>Ricarica la pagina per riprovare.</p>
+                </div>
+            `;
+        }
+        
+        // Fallback per le informazioni profilo
+        try {
+            updateProfileInfo(data.user);
+        } catch (profileError) {
+            console.error('❌ Errore anche nell\'aggiornamento profilo:', profileError);
+        }
+        
         updateDashboardStatus('Errore nella visualizzazione del tuo spazio.');
     }
 }
 
 function renderEmptyDashboard() {
     try {
+        console.log('📝 Rendering dashboard vuota...');
+        
         // Aggiorna informazioni profilo
+        console.log('👤 Aggiornamento informazioni profilo per dashboard vuota...');
         updateProfileInfo(currentUser);
+        console.log('✅ Informazioni profilo aggiornate');
         
         // Mostra messaggio per dashboard vuota
+        console.log('📝 Inserimento messaggio dashboard vuota...');
         const ucmeBlocks = document.getElementById('ucme-blocks');
         if (ucmeBlocks) {
             ucmeBlocks.innerHTML = `
@@ -203,26 +327,86 @@ function renderEmptyDashboard() {
                     <p>Quando condividerai la tua prima UCMe, apparirà qui.</p>
                 </div>
             `;
+            console.log('✅ Messaggio dashboard vuota inserito');
+        } else {
+            console.error('❌ Elemento ucme-blocks non trovato nel DOM');
         }
         
-        console.log('Dashboard vuota renderizzata');
+        console.log('✅ Dashboard vuota renderizzata');
         
     } catch (error) {
-        console.error('Errore nel rendering dashboard vuota:', error);
+        console.error('❌ Errore nel rendering dashboard vuota:', error);
+        console.error('Stack trace:', error.stack);
+        
+        // Fallback per le informazioni profilo
+        try {
+            updateProfileInfo(currentUser);
+        } catch (profileError) {
+            console.error('❌ Errore anche nell\'aggiornamento profilo:', profileError);
+        }
+        
+        // Fallback per il contenuto
+        const ucmeBlocks = document.getElementById('ucme-blocks');
+        if (ucmeBlocks) {
+            ucmeBlocks.innerHTML = `
+                <div class="empty-dashboard">
+                    <p>❌ Errore nella visualizzazione.</p>
+                    <p>Ricarica la pagina per riprovare.</p>
+                </div>
+            `;
+        }
+        
         updateDashboardStatus('Errore nella visualizzazione del tuo spazio.');
     }
 }
 
 function renderUcmeBlocks(ucmes) {
-    const container = document.getElementById('ucme-blocks');
-    if (!container) return;
-    
-    container.innerHTML = '';
-    
-    ucmes.forEach((ucme, index) => {
-        const ucmeBlock = createDashboardUcmeBlock(ucme, index);
-        container.appendChild(ucmeBlock);
-    });
+    try {
+        console.log('📝 Rendering blocchi UCMe:', ucmes.length, 'elementi');
+        
+        const container = document.getElementById('ucme-blocks');
+        if (!container) {
+            console.error('❌ Container ucme-blocks non trovato nel DOM');
+            return;
+        }
+        
+        console.log('✅ Container ucme-blocks trovato');
+        container.innerHTML = '';
+        
+        if (!ucmes || ucmes.length === 0) {
+            console.log('⚠️ Nessuna UCMe da renderizzare');
+            return;
+        }
+        
+        ucmes.forEach((ucme, index) => {
+            try {
+                console.log(`📝 Creazione blocco UCMe ${index + 1}/${ucmes.length}:`, ucme.text?.substring(0, 50) + '...');
+                const ucmeBlock = createDashboardUcmeBlock(ucme, index);
+                container.appendChild(ucmeBlock);
+                console.log(`✅ Blocco UCMe ${index + 1} creato e aggiunto`);
+            } catch (blockError) {
+                console.error(`❌ Errore nella creazione blocco UCMe ${index + 1}:`, blockError);
+                // Continua con il prossimo blocco
+            }
+        });
+        
+        console.log('✅ Rendering blocchi UCMe completato');
+        
+    } catch (error) {
+        console.error('❌ Errore durante rendering blocchi UCMe:', error);
+        console.error('Stack trace:', error.stack);
+        
+        // Fallback: mostra almeno un messaggio di errore
+        const container = document.getElementById('ucme-blocks');
+        if (container) {
+            container.innerHTML = `
+                <div class="empty-dashboard">
+                    <p>❌ Errore nella visualizzazione dei tuoi pensieri.</p>
+                    <p>Ricarica la pagina per riprovare.</p>
+                </div>
+            `;
+        }
+    }
 }
 
 function createDashboardUcmeBlock(ucme, index) {
@@ -269,20 +453,68 @@ function createDashboardUcmeBlock(ucme, index) {
 }
 
 function updateProfileInfo(user) {
-    const profileEmail = document.getElementById('profile-email');
-    const profileName = document.getElementById('profile-name');
-    const profileCreated = document.getElementById('profile-created');
-    const profileLastLogin = document.getElementById('profile-last-login');
-    
-    if (profileEmail) profileEmail.textContent = user.email;
-    if (profileName) profileName.textContent = user.name || 'Non specificato';
-    if (profileCreated) {
-        const createdDate = new Date(user.createdAt || Date.now()).toLocaleDateString('it-IT');
-        profileCreated.textContent = createdDate;
-    }
-    if (profileLastLogin) {
-        const lastLoginDate = new Date(user.lastLogin || Date.now()).toLocaleDateString('it-IT');
-        profileLastLogin.textContent = lastLoginDate;
+    try {
+        console.log('👤 Aggiornamento profilo per:', user);
+        
+        const profileEmail = document.getElementById('profile-email');
+        const profileName = document.getElementById('profile-name');
+        const profileCreated = document.getElementById('profile-created');
+        const profileLastLogin = document.getElementById('profile-last-login');
+        
+        console.log('📊 Elementi profilo trovati:', {
+            profileEmail: !!profileEmail,
+            profileName: !!profileName,
+            profileCreated: !!profileCreated,
+            profileLastLogin: !!profileLastLogin
+        });
+        
+        if (profileEmail) {
+            profileEmail.textContent = user.email || 'Email non disponibile';
+            console.log('✅ Email profilo aggiornata');
+        }
+        
+        if (profileName) {
+            profileName.textContent = user.name || 'Non specificato';
+            console.log('✅ Nome profilo aggiornato');
+        }
+        
+        if (profileCreated) {
+            try {
+                const createdDate = new Date(user.createdAt || Date.now()).toLocaleDateString('it-IT');
+                profileCreated.textContent = createdDate;
+                console.log('✅ Data creazione profilo aggiornata');
+            } catch (dateError) {
+                console.error('❌ Errore nella formattazione data creazione:', dateError);
+                profileCreated.textContent = 'Data non disponibile';
+            }
+        }
+        
+        if (profileLastLogin) {
+            try {
+                const lastLoginDate = new Date(user.lastLogin || Date.now()).toLocaleDateString('it-IT');
+                profileLastLogin.textContent = lastLoginDate;
+                console.log('✅ Data ultimo accesso aggiornata');
+            } catch (dateError) {
+                console.error('❌ Errore nella formattazione data ultimo accesso:', dateError);
+                profileLastLogin.textContent = 'Data non disponibile';
+            }
+        }
+        
+        console.log('✅ Profilo completamente aggiornato');
+        
+    } catch (error) {
+        console.error('❌ Errore durante aggiornamento profilo:', error);
+        console.error('Stack trace:', error.stack);
+        
+        // Fallback: tenta di aggiornare almeno l'email se possibile
+        try {
+            const profileEmail = document.getElementById('profile-email');
+            if (profileEmail && user && user.email) {
+                profileEmail.textContent = user.email;
+            }
+        } catch (fallbackError) {
+            console.error('❌ Errore anche nel fallback email:', fallbackError);
+        }
     }
 }
 
@@ -1927,3 +2159,61 @@ window.resetUser = resetUser;
 window.showUsers = showUsers; 
 window.findUser = findUser;
 window.resetAllData = resetAllData; 
+
+// ========================================
+// FUNZIONI DI DEBUG PER DASHBOARD
+// ========================================
+
+// Funzione di debug che può essere chiamata dalla console per diagnosticare problemi dashboard
+function debugDashboard() {
+    console.log('🔍 === DEBUG DASHBOARD ===');
+    
+    // Verifica elementi DOM
+    console.log('📊 Verifica elementi DOM:');
+    const userVerification = document.getElementById('user-verification');
+    const dashboardContent = document.getElementById('dashboard-content');
+    const noAccess = document.getElementById('no-access');
+    const ucmeBlocks = document.getElementById('ucme-blocks');
+    
+    console.log({
+        userVerification: !!userVerification,
+        userVerificationDisplay: userVerification?.style.display,
+        dashboardContent: !!dashboardContent,
+        dashboardContentDisplay: dashboardContent?.style.display,
+        noAccess: !!noAccess,
+        noAccessDisplay: noAccess?.style.display,
+        ucmeBlocks: !!ucmeBlocks
+    });
+    
+    // Verifica stato utente
+    console.log('👤 Stato utente corrente:');
+    console.log({
+        currentUser: currentUser,
+        hasCurrentUser: !!currentUser,
+        currentUserEmail: currentUser?.email
+    });
+    
+    // Verifica dati
+    console.log('📊 Stato dati:');
+    console.log({
+        ucmeDataType: typeof ucmeData,
+        ucmeDataLength: Array.isArray(ucmeData) ? ucmeData.length : 'N/A',
+        ucmeDataSample: Array.isArray(ucmeData) ? ucmeData.slice(0, 2) : ucmeData
+    });
+    
+    // Se utente è loggato, prova a caricare i suoi dati
+    if (currentUser) {
+        console.log('🔄 Test caricamento dati utente...');
+        try {
+            const userData = loadDashboardData(currentUser.email);
+            console.log('✅ Dati utente caricati:', userData);
+        } catch (error) {
+            console.error('❌ Errore nel caricamento dati utente:', error);
+        }
+    }
+    
+    console.log('🔍 === FINE DEBUG DASHBOARD ===');
+}
+
+// Rendi la funzione disponibile globalmente per debug
+window.debugDashboard = debugDashboard;
