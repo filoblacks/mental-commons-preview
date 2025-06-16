@@ -1399,12 +1399,28 @@ async function testBackendLogin() {
     
     if (email && password) {
         try {
+            console.log('🔍 Debug test backend iniziato...');
+            console.log('📡 URL:', 'https://script.google.com/macros/s/AKfycbwBV2QrQpzKtmC-_w1fG8lPy3V_d04SLPxnpSOBwfXi9qLXhTGCR95qym85Qlpuwu2ozQ/exec');
+            console.log('📤 Payload:', { action: 'login', email, password: '[HIDDEN]' });
+            
             const result = await loginWithBackend(email, password);
-            alert(`Test login: ${result.success ? 'SUCCESS' : 'FAILED'}\n${result.message}`);
-            console.log('🧪 Test backend login:', result);
+            alert(`✅ Test login: ${result.success ? 'SUCCESS' : 'FAILED'}\n${result.message}`);
+            console.log('🧪 Test backend login SUCCESS:', result);
         } catch (error) {
-            alert(`Errore test: ${error.message}`);
-            console.error('❌ Errore test backend:', error);
+            // Debug dettagliato errore
+            console.error('❌ Errore completo:', error);
+            console.error('❌ Stack trace:', error.stack);
+            console.error('❌ Message:', error.message);
+            console.error('❌ Name:', error.name);
+            
+            let errorMsg = error.message;
+            if (error.message.includes('CORS')) {
+                errorMsg = 'ERRORE CORS: Configura Google Apps Script con accesso "Anyone"';
+            } else if (error.message.includes('Failed to fetch')) {
+                errorMsg = 'ERRORE CONNESSIONE: Verifica URL Google Apps Script';
+            }
+            
+            alert(`❌ Errore test: ${errorMsg}`);
         }
     }
 }
@@ -2182,7 +2198,7 @@ async function loginWithBackend(email, password) {
     
     const response = await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
-        mode: 'cors',
+        mode: 'no-cors', // 🔧 Workaround temporaneo CORS
         cache: 'no-cache',
         headers: {
             'Content-Type': 'application/json',
