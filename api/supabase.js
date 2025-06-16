@@ -35,7 +35,6 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 
 const SALT_ROUNDS = 10;
 const JWT_SECRET = process.env.JWT_SECRET || 'mental-commons-secret-key-change-in-production';
-const JWT_EXPIRES_IN = '24h';
 
 // Hash password con bcrypt
 export async function hashPassword(password) {
@@ -74,7 +73,7 @@ export function generateJWT(userId, email) {
       exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 ore
     };
     
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+    const token = jwt.sign(payload, JWT_SECRET);
     console.log('✅ JWT generato con successo');
     return token;
   } catch (error) {
