@@ -1343,9 +1343,13 @@ function showDebugPanel() {
         <div><strong>💾 LocalStorage:</strong> ${debugInfo.localStorage ? '✅' : '❌'}</div>
         <div><strong>📱 Mobile:</strong> ${isMobileDevice() ? '✅' : '❌'}</div>
         <div style="margin-top: 10px;">
-            <button onclick="debugLoginIssues()" style="background: #2196F3; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">Log Debug</button>
-            <button onclick="showUsers()" style="background: #FF9800; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">Show Users</button>
-            <button onclick="createTestUser()" style="background: #4CAF50; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">Crea Test User</button>
+            <button onclick="debugLoginIssues()" style="background: #2196F3; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; margin: 2px; font-size: 11px;">Debug</button>
+            <button onclick="showUsers()" style="background: #FF9800; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; margin: 2px; font-size: 11px;">Users</button>
+            <button onclick="createTestUser()" style="background: #4CAF50; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; margin: 2px; font-size: 11px;">Crea</button>
+        </div>
+        <div style="margin-top: 5px;">
+            <button onclick="syncUsersToBackendDebug()" style="background: #9C27B0; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; margin: 2px; font-size: 11px;">Sync ⬆️</button>
+            <button onclick="testBackendLogin()" style="background: #795548; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; margin: 2px; font-size: 11px;">Test Backend</button>
         </div>
     `;
     
@@ -1373,6 +1377,34 @@ function createTestUser() {
             }
         } else {
             alert('❌ Errore: Utente già esistente');
+        }
+    }
+}
+
+// Funzioni debug per backend
+async function syncUsersToBackendDebug() {
+    try {
+        const result = await syncUsersToBackend();
+        alert(`Sync risultato: ${result.message}`);
+        console.log('📤 Sync completata:', result);
+    } catch (error) {
+        alert(`Errore sync: ${error.message}`);
+        console.error('❌ Errore sync:', error);
+    }
+}
+
+async function testBackendLogin() {
+    const email = prompt('Email per test backend:', 'test@email.com');
+    const password = prompt('Password per test backend:', 'password123');
+    
+    if (email && password) {
+        try {
+            const result = await loginWithBackend(email, password);
+            alert(`Test login: ${result.success ? 'SUCCESS' : 'FAILED'}\n${result.message}`);
+            console.log('🧪 Test backend login:', result);
+        } catch (error) {
+            alert(`Errore test: ${error.message}`);
+            console.error('❌ Errore test backend:', error);
         }
     }
 }
@@ -1422,7 +1454,7 @@ window.debugMC = {
 // GESTIONE FORM AUTENTICAZIONE
 // ========================================
 
-function handleLoginSubmit(event) {
+async function handleLoginSubmit(event) {
     event.preventDefault();
     
     const email = document.getElementById('login-email')?.value?.trim();
@@ -1453,6 +1485,22 @@ function handleLoginSubmit(event) {
         console.log('❌ Email non valida:', email);
         showAuthError('Inserisci un indirizzo email valido.');
         return;
+    }
+    
+    // 🚀 NUOVO: Prova prima con backend centralizzato
+    try {
+        console.log('🌐 Tentativo login con backend centralizzato...');
+        const result = await loginWithBackend(email, password);
+        
+        if (result.success) {
+            console.log('✅ Login backend riuscito:', result.user);
+            currentUser = result.user;
+            localStorage.setItem('mc-user', JSON.stringify(currentUser));
+            window.location.href = 'dashboard.html';
+            return;
+        }
+    } catch (error) {
+        console.log('⚠️ Backend non disponibile, fallback a localStorage:', error.message);
     }
     
     // Cerca l'utente esistente
@@ -1568,7 +1616,7 @@ function handleLoginSubmit(event) {
     }
 }
 
-function handleRegisterSubmit(event) {
+async function handleRegisterSubmit(event) {
     event.preventDefault();
     
     const email = document.getElementById('register-email')?.value?.trim();
@@ -1607,6 +1655,28 @@ function handleRegisterSubmit(event) {
         showAuthError('Le password non corrispondono.');
         return;
     }
+    
+    // 🚀 NUOVO: Prova prima con backend centralizzato
+    try {
+        console.log('🌐 Tentativo registrazione con backend centralizzato...');
+        const result = await registerWithBackend(email, password, email.split('@')[0]);
+        
+        if (result.success) {
+            console.log('✅ Registrazione backend riuscita:', result.user);
+            currentUser = result.user;
+            localStorage.setItem('mc-user', JSON.stringify(currentUser));
+            showAuthError('Account creato con successo! Reindirizzamento...');
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1000);
+            return;
+        }
+    } catch (error) {
+        console.log('⚠️ Backend non disponibile, fallback a localStorage:', error.message);
+    }
+    
+    // Fallback localStorage (codice originale)
+    console.log('📱 Fallback a registrazione localStorage...');
     
     // Controlla se l'utente esiste già
     const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
@@ -2091,6 +2161,116 @@ function shouldAllowAutoRegistration() {
     });
     
     return isDevelopment;
+}
+
+// ========================================
+// BACKEND CENTRALIZZATO PER UTENTI
+// ========================================
+
+async function loginWithBackend(email, password) {
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbze7pDyLOD_1lrg5v8hO6VC3Y9YXoTIZTcXlGZxeUFh8RNdCAJ1G7LweMWgBdZNOFZ4/exec';
+    const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
+    
+    const payload = {
+        action: 'login',
+        email: email,
+        password: password,
+        key: API_KEY
+    };
+    
+    console.log('🌐 Chiamata login backend:', { email, action: 'login' });
+    
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('📥 Risposta login backend:', result);
+    
+    return result;
+}
+
+async function registerWithBackend(email, password, name) {
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbze7pDyLOD_1lrg5v8hO6VC3Y9YXoTIZTcXlGZxeUFh8RNdCAJ1G7LweMWgBdZNOFZ4/exec';
+    const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
+    
+    const payload = {
+        action: 'register',
+        email: email,
+        password: password,
+        name: name,
+        key: API_KEY
+    };
+    
+    console.log('🌐 Chiamata registrazione backend:', { email, action: 'register' });
+    
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('📥 Risposta registrazione backend:', result);
+    
+    return result;
+}
+
+async function syncUsersToBackend() {
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbze7pDyLOD_1lrg5v8hO6VC3Y9YXoTIZTcXlGZxeUFh8RNdCAJ1G7LweMWgBdZNOFZ4/exec';
+    const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
+    
+    const localUsers = JSON.parse(localStorage.getItem('mc-users') || '[]');
+    
+    if (localUsers.length === 0) {
+        console.log('📭 Nessun utente locale da sincronizzare');
+        return { success: true, message: 'Nessun utente da sincronizzare' };
+    }
+    
+    const payload = {
+        action: 'syncUsers',
+        users: localUsers,
+        key: API_KEY
+    };
+    
+    console.log('🔄 Sincronizzazione utenti al backend:', localUsers.length, 'utenti');
+    
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('📥 Risposta sincronizzazione:', result);
+    
+    return result;
 }
 
 function setupMobileTextareaHandling() {
