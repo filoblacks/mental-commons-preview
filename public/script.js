@@ -20,8 +20,13 @@ function initializeApp() {
     // Controlla se utente già loggato
     checkExistingUser();
     
-    // Inizializza schermata home
-    showScreen('home');
+    // Controlla se siamo nella pagina dashboard e inizializzala
+    if (window.location.pathname.includes('dashboard.html')) {
+        initializeDashboard();
+    } else {
+        // Inizializza schermata home
+        showScreen('home');
+    }
     
     // Carica e mostra contatori poetici
     loadRitualStats();
@@ -70,6 +75,222 @@ function updateNavigation(activeScreen) {
     // ma per ora manteniamo semplice con i due link fissi
     
     currentScreen = activeScreen;
+}
+
+// ========================================
+// GESTIONE DASHBOARD
+// ========================================
+
+function initializeDashboard() {
+    console.log('Inizializzazione dashboard...');
+    
+    // Elementi della dashboard
+    const userVerification = document.getElementById('user-verification');
+    const dashboardContent = document.getElementById('dashboard-content');
+    const noAccess = document.getElementById('no-access');
+    
+    if (!userVerification || !dashboardContent || !noAccess) {
+        console.error('Elementi dashboard mancanti nel DOM');
+        return;
+    }
+    
+    setTimeout(() => {
+        try {
+            // Verifica se l'utente è loggato
+            if (!currentUser) {
+                console.log('Utente non loggato, mostro schermata di accesso');
+                userVerification.style.display = 'none';
+                noAccess.style.display = 'block';
+                return;
+            }
+            
+            console.log('Utente loggato:', currentUser.email);
+            
+            // Carica i dati dell'utente
+            const userData = loadDashboardData(currentUser.email);
+            console.log('Dati dashboard:', userData);
+            
+            // Verifica validità dei dati
+            if (!userData || (!userData.ucmes && !userData.isEmpty)) {
+                console.log('Dati non validi o non disponibili');
+                updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
+                return;
+            }
+            
+            // Rendering della dashboard
+            if (userData.isEmpty) {
+                console.log('Dati vuoti, mostro dashboard vuota');
+                renderEmptyDashboard();
+            } else {
+                console.log('Rendering dashboard con dati:', userData.ucmes.length, 'UCMe trovate');
+                renderDashboard(userData);
+            }
+            
+            // Nascondi caricamento e mostra contenuto
+            userVerification.style.display = 'none';
+            dashboardContent.style.display = 'block';
+            
+        } catch (error) {
+            console.error('Errore durante caricamento dashboard:', error);
+            updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
+        }
+    }, 500); // Piccolo delay per dare feedback visivo del caricamento
+}
+
+function loadDashboardData(email) {
+    try {
+        // Carica UCMe dell'utente
+        const userUcmes = ucmeData.filter(ucme => ucme.email === email);
+        
+        console.log('UCMe trovate per', email, ':', userUcmes.length);
+        
+        // Se non ci sono UCMe, restituisce struttura vuota
+        if (userUcmes.length === 0) {
+            return {
+                isEmpty: true,
+                ucmes: [],
+                user: currentUser
+            };
+        }
+        
+        // Ordina UCMe per timestamp (più recenti prima)
+        const sortedUcmes = userUcmes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        return {
+            isEmpty: false,
+            ucmes: sortedUcmes,
+            user: currentUser,
+            stats: {
+                total: sortedUcmes.length,
+                withResponse: sortedUcmes.filter(ucme => ucme.response).length,
+                pending: sortedUcmes.filter(ucme => !ucme.response).length
+            }
+        };
+        
+    } catch (error) {
+        console.error('Errore nel caricamento dati dashboard:', error);
+        return null;
+    }
+}
+
+function renderDashboard(data) {
+    try {
+        // Aggiorna informazioni profilo
+        updateProfileInfo(data.user);
+        
+        // Renderizza le UCMe
+        renderUcmeBlocks(data.ucmes);
+        
+        console.log('Dashboard renderizzata con successo');
+        
+    } catch (error) {
+        console.error('Errore nel rendering dashboard:', error);
+        updateDashboardStatus('Errore nella visualizzazione del tuo spazio.');
+    }
+}
+
+function renderEmptyDashboard() {
+    try {
+        // Aggiorna informazioni profilo
+        updateProfileInfo(currentUser);
+        
+        // Mostra messaggio per dashboard vuota
+        const ucmeBlocks = document.getElementById('ucme-blocks');
+        if (ucmeBlocks) {
+            ucmeBlocks.innerHTML = `
+                <div class="empty-dashboard">
+                    <p>Non hai ancora affidato nessun pensiero.</p>
+                    <p>Quando condividerai la tua prima UCMe, apparirà qui.</p>
+                </div>
+            `;
+        }
+        
+        console.log('Dashboard vuota renderizzata');
+        
+    } catch (error) {
+        console.error('Errore nel rendering dashboard vuota:', error);
+        updateDashboardStatus('Errore nella visualizzazione del tuo spazio.');
+    }
+}
+
+function renderUcmeBlocks(ucmes) {
+    const container = document.getElementById('ucme-blocks');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    ucmes.forEach((ucme, index) => {
+        const ucmeBlock = createDashboardUcmeBlock(ucme, index);
+        container.appendChild(ucmeBlock);
+    });
+}
+
+function createDashboardUcmeBlock(ucme, index) {
+    const block = document.createElement('div');
+    block.className = `ucme-block ${ucme.response ? 'risposto' : 'in-attesa'}`;
+    block.style.animationDelay = `${index * 0.1}s`;
+    
+    const date = new Date(ucme.timestamp);
+    const formattedDate = date.toLocaleDateString('it-IT', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    const statusText = ucme.response ? 'Risposta ricevuta' : 'In attesa di risposta';
+    
+    block.innerHTML = `
+        <div class="ucme-header">
+            <span class="ucme-status">${statusText}</span>
+            <span class="ucme-date">${formattedDate}</span>
+        </div>
+        <div class="ucme-content">
+            <div class="ucme-text">
+                <p>${ucme.text}</p>
+            </div>
+            <div class="ucme-meta">
+                <span class="ucme-tone">Tono: ${ucme.tone || 'neutro'}</span>
+            </div>
+            ${ucme.response ? `
+                <div class="ucme-response">
+                    <h4>Risposta del Portatore</h4>
+                    <div class="response-text">${ucme.response}</div>
+                    <div class="response-meta">
+                        <span class="response-date">${new Date(ucme.responseDate || ucme.timestamp).toLocaleDateString('it-IT')}</span>
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+    `;
+    
+    return block;
+}
+
+function updateProfileInfo(user) {
+    const profileEmail = document.getElementById('profile-email');
+    const profileName = document.getElementById('profile-name');
+    const profileCreated = document.getElementById('profile-created');
+    const profileLastLogin = document.getElementById('profile-last-login');
+    
+    if (profileEmail) profileEmail.textContent = user.email;
+    if (profileName) profileName.textContent = user.name || 'Non specificato';
+    if (profileCreated) {
+        const createdDate = new Date(user.createdAt || Date.now()).toLocaleDateString('it-IT');
+        profileCreated.textContent = createdDate;
+    }
+    if (profileLastLogin) {
+        const lastLoginDate = new Date(user.lastLogin || Date.now()).toLocaleDateString('it-IT');
+        profileLastLogin.textContent = lastLoginDate;
+    }
+}
+
+function updateDashboardStatus(message) {
+    const userVerification = document.getElementById('user-verification');
+    if (userVerification) {
+        userVerification.innerHTML = `<p>${message}</p>`;
+    }
 }
 
 // ========================================
