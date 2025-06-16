@@ -5,16 +5,6 @@
   "public": true,
   "cleanUrls": true,
   "trailingSlash": false,
-  "builds": [
-    {
-      "src": "src/api/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "src/html/**",
-      "use": "@vercel/static"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)\\.html",
@@ -97,13 +87,6 @@
           "value": "Origin, X-Requested-With, Content-Type, Accept, Authorization"
         }
       ]
-    }
-  ],
-  "redirects": [],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/src/api/$1"
     }
   ]
 } 
