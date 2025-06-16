@@ -15,16 +15,6 @@
       "use": "@vercel/static"
     }
   ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/src/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/src/html/$1"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)\\.html",
@@ -110,5 +100,10 @@
     }
   ],
   "redirects": [],
-  "rewrites": []
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/src/api/$1"
+    }
+  ]
 } 
