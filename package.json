@@ -6,18 +6,14 @@
     "update-versions": "node scripts/update-versions.js",
     "bump-version": "node scripts/update-versions.js --new",
     "build": "bash copy-assets.sh && npm run update-versions",
-    "deploy": "bash scripts/deploy.sh",
-    "dev:backend": "node src/backend/index.js",
-    "start": "node src/backend/index.js"
+    "deploy": "vercel --prod",
+    "dev": "vercel dev",
+    "start": "vercel dev"
   },
   "keywords": ["mental-health", "peer-to-peer", "reflection"],
   "author": "Mental Commons Team",
   "license": "MIT",
-  "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5"
-  },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   }
 } 
