@@ -1964,7 +1964,7 @@ function generateUniqueId() {
 
 async function submitUCMeToGoogleSheet(formData) {
     // Configurazione Google Apps Script
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbze7pDyLOD_1lrg5v8hO6VC3Y9YXoTIZTcXlGZxeUFh8RNdCAJ1G7LweMWgBdZNOFZ4/exec';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBV2QrQpzKtmC-_w1fG8lPy3V_d04SLPxnpSOBwfXi9qLXhTGCR95qym85Qlpuwu2ozQ/exec';
     const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
     
     const payload = {
@@ -2168,7 +2168,7 @@ function shouldAllowAutoRegistration() {
 // ========================================
 
 async function loginWithBackend(email, password) {
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbze7pDyLOD_1lrg5v8hO6VC3Y9YXoTIZTcXlGZxeUFh8RNdCAJ1G7LweMWgBdZNOFZ4/exec';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBV2QrQpzKtmC-_w1fG8lPy3V_d04SLPxnpSOBwfXi9qLXhTGCR95qym85Qlpuwu2ozQ/exec';
     const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
     
     const payload = {
@@ -2201,7 +2201,7 @@ async function loginWithBackend(email, password) {
 }
 
 async function registerWithBackend(email, password, name) {
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbze7pDyLOD_1lrg5v8hO6VC3Y9YXoTIZTcXlGZxeUFh8RNdCAJ1G7LweMWgBdZNOFZ4/exec';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBV2QrQpzKtmC-_w1fG8lPy3V_d04SLPxnpSOBwfXi9qLXhTGCR95qym85Qlpuwu2ozQ/exec';
     const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
     
     const payload = {
@@ -2235,7 +2235,7 @@ async function registerWithBackend(email, password, name) {
 }
 
 async function syncUsersToBackend() {
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbze7pDyLOD_1lrg5v8hO6VC3Y9YXoTIZTcXlGZxeUFh8RNdCAJ1G7LweMWgBdZNOFZ4/exec';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBV2QrQpzKtmC-_w1fG8lPy3V_d04SLPxnpSOBwfXi9qLXhTGCR95qym85Qlpuwu2ozQ/exec';
     const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
     
     const localUsers = JSON.parse(localStorage.getItem('mc-users') || '[]');

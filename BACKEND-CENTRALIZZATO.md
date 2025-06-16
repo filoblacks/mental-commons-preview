@@ -57,7 +57,7 @@ try {
 ### **Passo 1: Aggiorna Google Apps Script**
 
 1. Apri il Google Apps Script esistente: 
-   `https://script.google.com/macros/s/AKfycbze...`
+   `https://script.google.com/macros/s/AKfycbwBV2QrQpzKtmC-_w1fG8lPy3V_d04SLPxnpSOBwfXi9qLXhTGCR95qym85Qlpuwu2ozQ/exec`
 
 2. **Aggiungi** il codice da `scripts/google-apps-script-users.js` 
 
