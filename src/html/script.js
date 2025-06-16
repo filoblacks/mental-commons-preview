@@ -1400,7 +1400,7 @@ async function testBackendLogin() {
     if (email && password) {
         try {
             console.log('🔍 Debug test backend iniziato...');
-            console.log('📡 URL:', 'https://script.google.com/macros/s/AKfycbwBV2QrQpzKtmC-_w1fG8lPy3V_d04SLPxnpSOBwfXi9qLXhTGCR95qym85Qlpuwu2ozQ/exec');
+            console.log('📡 URL:', 'https://script.google.com/macros/s/AKfycbzYSw5zAuEMbJRpaBSddecc_RdjImzWZSL5q4Pc0-pgA5E4EGiStSKoXz2aw2gsyTDIJA/exec');
             console.log('📤 Payload:', { action: 'login', email, password: '[HIDDEN]' });
             
             const result = await loginWithBackend(email, password);
@@ -1414,13 +1414,20 @@ async function testBackendLogin() {
             console.error('❌ Name:', error.name);
             
             let errorMsg = error.message;
-            if (error.message.includes('CORS')) {
-                errorMsg = 'ERRORE CORS: Configura Google Apps Script con accesso "Anyone"';
-            } else if (error.message.includes('Failed to fetch')) {
-                errorMsg = 'ERRORE CONNESSIONE: Verifica URL Google Apps Script';
+            let helpMsg = '';
+            
+            if (error.message.includes('CORS') || error.message.includes('blocked')) {
+                errorMsg = '🚨 ERRORE CORS';
+                helpMsg = '\n\n🔧 SOLUZIONE:\n1. Apri Google Apps Script\n2. Sostituisci funzioni doOptions() e createResponse()\n3. Deploy con accesso "Anyone"\n4. Usa codice da google-apps-script-cors-fix.js';
+            } else if (error.message.includes('Failed to fetch') || error.message.includes('HTTP 0')) {
+                errorMsg = '🌐 ERRORE CONNESSIONE';
+                helpMsg = '\n\n🔧 POSSIBILI CAUSE:\n1. Google Apps Script offline\n2. URL non corretto\n3. Configurazione CORS mancante';
+            } else if (error.message.includes('HTTP')) {
+                errorMsg = `📡 ERRORE SERVER: ${error.message}`;
+                helpMsg = '\n\n🔧 Controlla log Google Apps Script per dettagli';
             }
             
-            alert(`❌ Errore test: ${errorMsg}`);
+            alert(`❌ ${errorMsg}${helpMsg}`);
         }
     }
 }
@@ -1980,7 +1987,7 @@ function generateUniqueId() {
 
 async function submitUCMeToGoogleSheet(formData) {
     // Configurazione Google Apps Script
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBV2QrQpzKtmC-_w1fG8lPy3V_d04SLPxnpSOBwfXi9qLXhTGCR95qym85Qlpuwu2ozQ/exec';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYSw5zAuEMbJRpaBSddecc_RdjImzWZSL5q4Pc0-pgA5E4EGiStSKoXz2aw2gsyTDIJA/exec';
     const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
     
     const payload = {
@@ -2184,7 +2191,7 @@ function shouldAllowAutoRegistration() {
 // ========================================
 
 async function loginWithBackend(email, password) {
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBV2QrQpzKtmC-_w1fG8lPy3V_d04SLPxnpSOBwfXi9qLXhTGCR95qym85Qlpuwu2ozQ/exec';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYSw5zAuEMbJRpaBSddecc_RdjImzWZSL5q4Pc0-pgA5E4EGiStSKoXz2aw2gsyTDIJA/exec';
     const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
     
     const payload = {
@@ -2195,29 +2202,62 @@ async function loginWithBackend(email, password) {
     };
     
     console.log('🌐 Chiamata login backend:', { email, action: 'login' });
+    console.log('📤 Payload completo:', payload);
     
-    const response = await fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors', // 🔧 Workaround temporaneo CORS
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-    });
-    
-    if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+    try {
+        // Tentativo 1: Fetch normale con CORS
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        console.log('📡 Response status:', response.status);
+        console.log('📡 Response ok:', response.ok);
+        console.log('📡 Response headers:', [...response.headers.entries()]);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('📥 Risposta login backend SUCCESS:', result);
+        
+        return result;
+        
+    } catch (error) {
+        console.error('❌ Errore fetch principale:', error);
+        
+        // Se è un errore CORS, prova metodo alternativo
+        if (error.message.includes('CORS') || error.message.includes('blocked')) {
+            console.log('🔄 Tentativo metodo alternativo per CORS...');
+            return await loginWithBackendFallback(email, password);
+        }
+        
+        throw error;
     }
+}
+
+// Metodo fallback per problemi CORS
+async function loginWithBackendFallback(email, password) {
+    console.log('⚠️ FALLBACK: Google Apps Script ha problemi CORS');
+    console.log('💡 SOLUZIONE: Configura il Google Apps Script con header CORS corretti');
     
-    const result = await response.json();
-    console.log('📥 Risposta login backend:', result);
-    
-    return result;
+    // Per ora, simula una risposta di errore informativa
+    return {
+        success: false,
+        message: 'Backend non configurato correttamente. Controlla impostazioni CORS in Google Apps Script.',
+        error: 'CORS_NOT_CONFIGURED',
+        help: 'Applica le correzioni CORS dal file google-apps-script-cors-fix.js'
+    };
 }
 
 async function registerWithBackend(email, password, name) {
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBV2QrQpzKtmC-_w1fG8lPy3V_d04SLPxnpSOBwfXi9qLXhTGCR95qym85Qlpuwu2ozQ/exec';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYSw5zAuEMbJRpaBSddecc_RdjImzWZSL5q4Pc0-pgA5E4EGiStSKoXz2aw2gsyTDIJA/exec';
     const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
     
     const payload = {
@@ -2251,7 +2291,7 @@ async function registerWithBackend(email, password, name) {
 }
 
 async function syncUsersToBackend() {
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBV2QrQpzKtmC-_w1fG8lPy3V_d04SLPxnpSOBwfXi9qLXhTGCR95qym85Qlpuwu2ozQ/exec';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYSw5zAuEMbJRpaBSddecc_RdjImzWZSL5q4Pc0-pgA5E4EGiStSKoXz2aw2gsyTDIJA/exec';
     const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
     
     const localUsers = JSON.parse(localStorage.getItem('mc-users') || '[]');
