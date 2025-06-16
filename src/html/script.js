@@ -1344,7 +1344,8 @@ function showDebugPanel() {
         <div><strong>📱 Mobile:</strong> ${isMobileDevice() ? '✅' : '❌'}</div>
         <div style="margin-top: 10px;">
             <button onclick="debugLoginIssues()" style="background: #2196F3; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">Log Debug</button>
-            <button onclick="showUsers()" style="background: #FF9800; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">Show Users</button>
+            <button onclick="showUsers()" style="background: #FF9800; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">Show Users</button>
+            <button onclick="createTestUser()" style="background: #4CAF50; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">Crea Test User</button>
         </div>
     `;
     
@@ -1354,6 +1355,26 @@ function showDebugPanel() {
     
     document.body.appendChild(panel);
     console.log('🔍 Pannello debug mostrato');
+}
+
+// Funzione per creare utente test rapidamente
+function createTestUser() {
+    const email = prompt('Email utente test:', 'test@email.com');
+    const password = prompt('Password utente test:', 'password123');
+    
+    if (email && password) {
+        const result = debugMC.createQuickUser(email, password);
+        if (result) {
+            alert(`✅ Utente creato: ${email}`);
+            // Aggiorna debug panel se aperto
+            const panel = document.getElementById('debug-panel');
+            if (panel) {
+                showDebugPanel();
+            }
+        } else {
+            alert('❌ Errore: Utente già esistente');
+        }
+    }
 }
 
 // Esponi le funzioni di debug globalmente per testing
@@ -1368,6 +1389,32 @@ window.debugMC = {
         const user = users.find(u => u.email === email && u.password === password);
         console.log('🧪 Risultato:', user ? 'SUCCESSO' : 'FALLITO');
         return !!user;
+    },
+    createQuickUser: (email, password) => {
+        console.log('🚀 Creazione utente rapida:', { email, password });
+        const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
+        
+        // Controlla se esiste già
+        if (users.find(u => u.email === email)) {
+            console.log('❌ Utente già esistente');
+            return false;
+        }
+        
+        // Crea nuovo utente
+        const newUser = {
+            id: 'quick_' + Date.now(),
+            email: email,
+            password: password,
+            name: email.split('@')[0],
+            createdAt: new Date().toISOString(),
+            lastLogin: new Date().toISOString(),
+            isPortatore: false
+        };
+        
+        users.push(newUser);
+        localStorage.setItem('mc-users', JSON.stringify(users));
+        console.log('✅ Utente creato:', newUser);
+        return newUser;
     }
 };
 
@@ -1493,12 +1540,31 @@ function handleLoginSubmit(event) {
         if (userByEmail) {
             console.log('💡 SUGGERIMENTO: Email trovata ma password non corrisponde');
             console.log('💡 Verifica se ci sono caratteri nascosti o problemi di encoding');
+            showAuthError('Email o password non corretti.');
         } else {
             console.log('💡 SUGGERIMENTO: Email non trovata nel sistema');
             console.log('💡 Emails registrate:', users.map(u => u.email));
+            
+            // 🚀 NUOVO: Auto-registrazione per ambienti di sviluppo
+            if (shouldAllowAutoRegistration()) {
+                console.log('🚀 Tentativo auto-registrazione per ambiente sviluppo...');
+                const autoUser = debugMC.createQuickUser(email, password);
+                if (autoUser) {
+                    console.log('✅ Utente auto-creato, riprovando login...');
+                    currentUser = autoUser;
+                    localStorage.setItem('mc-user', JSON.stringify(currentUser));
+                    showAuthError('Account creato automaticamente. Login in corso...');
+                    
+                    // Reindirizza alla dashboard dopo 1 secondo
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                    return;
+                }
+            }
+            
+            showAuthError('Email non trovata. Prova a registrarti o contatta il supporto.');
         }
-        
-        showAuthError('Email o password non corretti.');
     }
 }
 
@@ -2003,6 +2069,28 @@ function setupMobileDebugTrigger() {
     });
     
     console.log('📱 Debug trigger (triplo tap) configurato per mobile');
+}
+
+// 🔧 Funzione per determinare se permettere auto-registrazione
+function shouldAllowAutoRegistration() {
+    // Permetti auto-registrazione in ambienti di sviluppo
+    const isDevelopment = 
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname.includes('preview') ||
+        window.location.hostname.includes('dev') ||
+        window.location.hostname.includes('test') ||
+        window.location.port !== '' || // Qualsiasi porta diversa da 80/443
+        window.location.protocol === 'file:'; // File locale
+    
+    console.log('🔍 Ambiente rilevato:', {
+        hostname: window.location.hostname,
+        port: window.location.port,
+        protocol: window.location.protocol,
+        isDevelopment: isDevelopment
+    });
+    
+    return isDevelopment;
 }
 
 function setupMobileTextareaHandling() {
