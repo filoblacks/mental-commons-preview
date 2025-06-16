@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Backend Centralizzato - Mental Commons</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+        
+        .debug-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+        
+        .debug-section h3 {
+            color: #2d3748;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #cbd5e0;
+        }
+        
+        .status-indicator.success {
+            background: #48bb78;
+        }
+        
+        .status-indicator.error {
+            background: #f56565;
+        }
+        
+        .status-indicator.loading {
+            background: #ed8936;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .test-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .log-output {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-top: 15px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #4a5568;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .success-msg {
+            color: #38a169;
+            font-weight: 600;
+        }
+        
+        .error-msg {
+            color: #e53e3e;
+            font-weight: 600;
+        }
+        
+        .info-msg {
+            color: #3182ce;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Debug Backend Centralizzato</h1>
+            <p>Strumento di debug per il database utenti di Mental Commons</p>
+        </div>
+
+        <!-- Sezione Connettività -->
+        <div class="debug-section">
+            <h3>
+                <span class="status-indicator" id="connectivity-status"></span>
+                1. Test Connettività Google Apps Script
+            </h3>
+            <p>Verifica la connessione al backend centralizzato</p>
+            <button class="test-button" onclick="testConnectivity()">Test Connessione</button>
+            <button class="test-button" onclick="testCORS()">Test CORS</button>
+            <div id="connectivity-log" class="log-output" style="display: none;"></div>
+        </div>
+
+        <!-- Sezione Registrazione -->
+        <div class="debug-section">
+            <h3>
+                <span class="status-indicator" id="register-status"></span>
+                2. Test Registrazione Utente
+            </h3>
+            <div class="input-group">
+                <label for="reg-email">Email:</label>
+                <input type="email" id="reg-email" value="test@mentalcommons.it">
+            </div>
+            <div class="input-group">
+                <label for="reg-password">Password:</label>
+                <input type="password" id="reg-password" value="test123">
+            </div>
+            <div class="input-group">
+                <label for="reg-name">Nome:</label>
+                <input type="text" id="reg-name" value="Test User">
+            </div>
+            <button class="test-button" onclick="testRegistration()">Test Registrazione</button>
+            <div id="register-log" class="log-output" style="display: none;"></div>
+        </div>
+
+        <!-- Sezione Login -->
+        <div class="debug-section">
+            <h3>
+                <span class="status-indicator" id="login-status"></span>
+                3. Test Login Utente
+            </h3>
+            <div class="input-group">
+                <label for="login-email">Email:</label>
+                <input type="email" id="login-email" value="test@mentalcommons.it">
+            </div>
+            <div class="input-group">
+                <label for="login-password">Password:</label>
+                <input type="password" id="login-password" value="test123">
+            </div>
+            <button class="test-button" onclick="testLogin()">Test Login</button>
+            <div id="login-log" class="log-output" style="display: none;"></div>
+        </div>
+
+        <!-- Sezione Sincronizzazione -->
+        <div class="debug-section">
+            <h3>
+                <span class="status-indicator" id="sync-status"></span>
+                4. Test Sincronizzazione localStorage
+            </h3>
+            <p>Verifica la migrazione degli utenti localStorage → Google Sheet</p>
+            <button class="test-button" onclick="createLocalUsers()">Crea Utenti Test Locali</button>
+            <button class="test-button" onclick="testSync()">Test Sincronizzazione</button>
+            <button class="test-button" onclick="showLocalUsers()">Mostra Utenti Locali</button>
+            <div id="sync-log" class="log-output" style="display: none;"></div>
+        </div>
+
+        <!-- Sezione Database -->
+        <div class="debug-section">
+            <h3>
+                <span class="status-indicator" id="database-status"></span>
+                5. Verifica Database
+            </h3>
+            <p>Controllo integrità e struttura del database centralizzato</p>
+            <button class="test-button" onclick="checkDatabaseStructure()">Verifica Struttura</button>
+            <button class="test-button" onclick="clearLocalData()">Clear localStorage</button>
+            <div id="database-log" class="log-output" style="display: none;"></div>
+        </div>
+
+        <!-- Sezione Cache & Incognito Tests -->
+        <div class="debug-section">
+            <h3>
+                <span class="status-indicator" id="cache-status"></span>
+                6. Test Cache & Browser
+            </h3>
+            <p>Verifica comportamento con cache e in modalità incognito</p>
+            <button class="test-button" onclick="testCacheHeaders()">Test Cache Headers</button>
+            <button class="test-button" onclick="testIncognitoMode()">Test Modalità Incognito</button>
+            <button class="test-button" onclick="clearAllCache()">Clear All Cache</button>
+            <div id="cache-log" class="log-output" style="display: none;"></div>
+        </div>
+
+        <!-- Sezione Cross-Platform Tests -->
+        <div class="debug-section">
+            <h3>
+                <span class="status-indicator" id="platform-status"></span>
+                7. Test Cross-Platform
+            </h3>
+            <p>Verifica funzionalità su diversi dispositivi e browser</p>
+            <button class="test-button" onclick="detectEnvironment()">Rileva Ambiente</button>
+            <button class="test-button" onclick="testMobileCompatibility()">Test Mobile</button>
+            <button class="test-button" onclick="testDesktopCompatibility()">Test Desktop</button>
+            <div id="platform-log" class="log-output" style="display: none;"></div>
+        </div>
+
+        <!-- Sezione URL Update -->
+        <div class="debug-section">
+            <h3>🔗 Aggiorna URL Backend</h3>
+            <p>Dopo il deploy, aggiorna l'URL del backend qui:</p>
+            <div class="input-group">
+                <label for="backend-url">Nuovo URL Google Apps Script:</label>
+                <input type="url" id="backend-url" value="https://script.google.com/macros/s/AKfycbzG1sVoOrsrziMFHNLkGb6osUe1VnbBtSByTV23_Y9kda9qaCATqm3Zwxpr8-eeDBef8A/exec" style="width: 100%; font-size: 12px;">
+            </div>
+            <button class="test-button" onclick="updateBackendUrl()">Aggiorna URL</button>
+            <button class="test-button" onclick="testNewUrl()">Test Nuovo URL</button>
+        </div>
+
+        <!-- Log Generale -->
+        <div class="debug-section">
+            <h3>🔍 Log Debug Completo</h3>
+            <button class="test-button" onclick="clearLogs()">Clear Logs</button>
+            <button class="test-button" onclick="exportLogs()">Export Logs</button>
+            <div id="main-log" class="log-output"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configurazione
+        const BACKEND_URL = 'https://mental-commons.vercel.app';
+        const API_KEY = 'mc_2024_filippo_1201_aB3xY9zK2m';
+        
+        let logs = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toISOString();
+            const logEntry = `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            logs.push(logEntry);
+            
+            const mainLog = document.getElementById('main-log');
+            const colorMap = {
+                success: '#48bb78',
+                error: '#f56565',
+                warning: '#ed8936',
+                info: '#3182ce'
+            };
+            
+            mainLog.innerHTML += `<span style="color: ${colorMap[type] || '#e2e8f0'}">${logEntry}</span>\n`;
+            mainLog.scrollTop = mainLog.scrollHeight;
+            console.log(logEntry);
+        }
+        
+        function updateStatus(sectionId, status) {
+            const indicator = document.getElementById(`${sectionId}-status`);
+            indicator.className = `status-indicator ${status}`;
+        }
+        
+        function showSectionLog(sectionId, content) {
+            const logElement = document.getElementById(`${sectionId}-log`);
+            logElement.style.display = 'block';
+            logElement.textContent = content;
+        }
+        
+                 // Test 1: Connettività
+         async function testConnectivity() {
+             updateStatus('connectivity', 'loading');
+             log('🌐 Inizio test connettività...', 'info');
+             
+             try {
+                 const response = await fetch(getCurrentBackendUrl(), {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'ping',
+                        key: API_KEY
+                    })
+                });
+                
+                log(`📡 Response Status: ${response.status}`, 'info');
+                log(`📡 Response OK: ${response.ok}`, 'info');
+                log(`📡 Response Headers: ${JSON.stringify([...response.headers.entries()])}`, 'info');
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    log(`✅ Connessione riuscita: ${JSON.stringify(result)}`, 'success');
+                    updateStatus('connectivity', 'success');
+                    showSectionLog('connectivity', `✅ Connessione OK\n${JSON.stringify(result, null, 2)}`);
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                log(`❌ Errore connessione: ${error.message}`, 'error');
+                updateStatus('connectivity', 'error');
+                showSectionLog('connectivity', `❌ Errore: ${error.message}\n\nPossibili cause:\n- Google Apps Script offline\n- URL non corretto\n- Problemi CORS`);
+            }
+        }
+        
+                 // Test CORS specifico
+         async function testCORS() {
+             log('🔍 Test CORS specifico...', 'info');
+             
+             try {
+                 // Test OPTIONS request
+                 const optionsResponse = await fetch(getCurrentBackendUrl(), {
+                    method: 'OPTIONS',
+                    mode: 'cors'
+                });
+                
+                log(`OPTIONS Response: ${optionsResponse.status}`, 'info');
+                log(`CORS Headers: ${JSON.stringify([...optionsResponse.headers.entries()])}`, 'info');
+                
+                if (optionsResponse.ok) {
+                    log('✅ CORS configurato correttamente', 'success');
+                } else {
+                    log('⚠️ CORS potrebbe non essere configurato', 'warning');
+                }
+            } catch (error) {
+                log(`❌ Errore CORS: ${error.message}`, 'error');
+                log('💡 Applica le correzioni dal file google-apps-script-cors-fix.js', 'info');
+            }
+        }
+        
+        // Test 2: Registrazione
+        async function testRegistration() {
+            updateStatus('register', 'loading');
+            log('📝 Inizio test registrazione...', 'info');
+            
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const name = document.getElementById('reg-name').value;
+            
+                         try {
+                 const response = await fetch(getCurrentBackendUrl(), {
+                     method: 'POST',
+                     mode: 'cors',
+                     headers: {
+                         'Content-Type': 'application/json',
+                     },
+                     body: JSON.stringify({
+                         action: 'register',
+                        email: email,
+                        password: password,
+                        name: name,
+                        key: API_KEY
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    log(`✅ Registrazione riuscita: ${email}`, 'success');
+                    updateStatus('register', 'success');
+                    showSectionLog('register', `✅ Utente registrato\n${JSON.stringify(result, null, 2)}`);
+                } else {
+                    log(`⚠️ Registrazione fallita: ${result.message}`, 'warning');
+                    updateStatus('register', 'error');
+                    showSectionLog('register', `⚠️ Errore: ${result.message}\n${JSON.stringify(result, null, 2)}`);
+                }
+            } catch (error) {
+                log(`❌ Errore registrazione: ${error.message}`, 'error');
+                updateStatus('register', 'error');
+                showSectionLog('register', `❌ Errore: ${error.message}`);
+            }
+        }
+        
+        // Test 3: Login
+        async function testLogin() {
+            updateStatus('login', 'loading');
+            log('🔑 Inizio test login...', 'info');
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+                         try {
+                 const response = await fetch(getCurrentBackendUrl(), {
+                     method: 'POST',
+                     mode: 'cors',
+                     headers: {
+                         'Content-Type': 'application/json',
+                     },
+                     body: JSON.stringify({
+                         action: 'login',
+                        email: email,
+                        password: password,
+                        key: API_KEY
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    log(`✅ Login riuscito: ${email}`, 'success');
+                    updateStatus('login', 'success');
+                    showSectionLog('login', `✅ Login OK\n${JSON.stringify(result, null, 2)}`);
+                } else {
+                    log(`⚠️ Login fallito: ${result.message}`, 'warning');
+                    updateStatus('login', 'error');
+                    showSectionLog('login', `⚠️ Errore: ${result.message}\n${JSON.stringify(result, null, 2)}`);
+                }
+            } catch (error) {
+                log(`❌ Errore login: ${error.message}`, 'error');
+                updateStatus('login', 'error');
+                showSectionLog('login', `❌ Errore: ${error.message}`);
+            }
+        }
+        
+        // Test 4: Sincronizzazione
+        function createLocalUsers() {
+            const testUsers = [
+                { email: 'local1@test.com', password: 'pass1', name: 'User 1' },
+                { email: 'local2@test.com', password: 'pass2', name: 'User 2' },
+                { email: 'local3@test.com', password: 'pass3', name: 'User 3' }
+            ];
+            
+            localStorage.setItem('mc-users', JSON.stringify(testUsers));
+            log(`✅ Creati ${testUsers.length} utenti test in localStorage`, 'success');
+            showSectionLog('sync', `✅ Utenti test creati:\n${JSON.stringify(testUsers, null, 2)}`);
+        }
+        
+        async function testSync() {
+            updateStatus('sync', 'loading');
+            log('🔄 Inizio test sincronizzazione...', 'info');
+            
+            const localUsers = JSON.parse(localStorage.getItem('mc-users') || '[]');
+            
+            if (localUsers.length === 0) {
+                log('⚠️ Nessun utente locale da sincronizzare', 'warning');
+                updateStatus('sync', 'error');
+                showSectionLog('sync', '⚠️ Nessun utente locale trovato\nPrima crea degli utenti test');
+                return;
+            }
+            
+            try {
+                                 const response = await fetch(getCurrentBackendUrl(), {
+                     method: 'POST',
+                     mode: 'cors',
+                     headers: {
+                         'Content-Type': 'application/json',
+                     },
+                     body: JSON.stringify({
+                         action: 'syncUsers',
+                        users: localUsers,
+                        key: API_KEY
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    log(`✅ Sincronizzazione riuscita: ${localUsers.length} utenti`, 'success');
+                    updateStatus('sync', 'success');
+                    showSectionLog('sync', `✅ Sincronizzazione OK\n${JSON.stringify(result, null, 2)}`);
+                } else {
+                    log(`⚠️ Sincronizzazione fallita: ${result.message}`, 'warning');
+                    updateStatus('sync', 'error');
+                    showSectionLog('sync', `⚠️ Errore: ${result.message}\n${JSON.stringify(result, null, 2)}`);
+                }
+            } catch (error) {
+                log(`❌ Errore sincronizzazione: ${error.message}`, 'error');
+                updateStatus('sync', 'error');
+                showSectionLog('sync', `❌ Errore: ${error.message}`);
+            }
+        }
+        
+        function showLocalUsers() {
+            const localUsers = JSON.parse(localStorage.getItem('mc-users') || '[]');
+            log(`📋 Utenti locali: ${localUsers.length}`, 'info');
+            showSectionLog('sync', `📋 Utenti in localStorage:\n${JSON.stringify(localUsers, null, 2)}`);
+        }
+        
+        // Test 5: Database
+        async function checkDatabaseStructure() {
+            updateStatus('database', 'loading');
+            log('🗄️ Verifica struttura database...', 'info');
+            
+            try {
+                // Prova a ottenere informazioni sul database
+                                 const response = await fetch(getCurrentBackendUrl(), {
+                     method: 'POST',
+                     mode: 'cors',
+                     headers: {
+                         'Content-Type': 'application/json',
+                     },
+                     body: JSON.stringify({
+                         action: 'getUser',
+                        email: 'test@mentalcommons.it',
+                        key: API_KEY
+                    })
+                });
+                
+                const result = await response.json();
+                
+                log(`📊 Struttura database verificata`, 'success');
+                updateStatus('database', 'success');
+                showSectionLog('database', `📊 Database accessibile\n${JSON.stringify(result, null, 2)}`);
+                
+            } catch (error) {
+                log(`❌ Errore verifica database: ${error.message}`, 'error');
+                updateStatus('database', 'error');
+                showSectionLog('database', `❌ Database non accessibile: ${error.message}`);
+            }
+        }
+        
+        function clearLocalData() {
+            localStorage.removeItem('mc-users');
+            localStorage.removeItem('mc-current-user');
+            log('🗑️ localStorage pulito', 'info');
+            showSectionLog('database', '🗑️ Dati locali rimossi\nLocalStorage pulito');
+        }
+        
+        // Utility
+        function clearLogs() {
+            logs = [];
+            document.getElementById('main-log').innerHTML = '';
+            log('🧹 Logs puliti', 'info');
+        }
+        
+        function exportLogs() {
+            const logContent = logs.join('\n');
+            const blob = new Blob([logContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `mental-commons-debug-${new Date().toISOString().split('T')[0]}.log`;
+            a.click();
+            URL.revokeObjectURL(url);
+            log('📄 Logs esportati', 'success');
+        }
+        
+        // Test Cache Headers
+        async function testCacheHeaders() {
+            updateStatus('cache', 'loading');
+            log('🗄️ Test cache headers...', 'info');
+            
+            try {
+                const response = await fetch(getCurrentBackendUrl(), {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache', // Force no cache
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    },
+                    body: JSON.stringify({
+                        action: 'ping',
+                        key: API_KEY,
+                        timestamp: Date.now() // Force unique request
+                    })
+                });
+                
+                const cacheControl = response.headers.get('Cache-Control');
+                const pragma = response.headers.get('Pragma');
+                const expires = response.headers.get('Expires');
+                
+                log(`Cache-Control: ${cacheControl}`, 'info');
+                log(`Pragma: ${pragma}`, 'info');
+                log(`Expires: ${expires}`, 'info');
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    updateStatus('cache', 'success');
+                    showSectionLog('cache', `✅ Cache test OK\nHeaders:\n- Cache-Control: ${cacheControl}\n- Pragma: ${pragma}\n- Expires: ${expires}\n\nResponse:\n${JSON.stringify(result, null, 2)}`);
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`❌ Errore cache test: ${error.message}`, 'error');
+                updateStatus('cache', 'error');
+                showSectionLog('cache', `❌ Errore: ${error.message}`);
+            }
+        }
+        
+        // Test Incognito Mode
+        function testIncognitoMode() {
+            log('🕵️ Test modalità incognito...', 'info');
+            
+            const isIncognito = checkIncognitoMode();
+            const localStorage = testLocalStorageAccess();
+            const sessionStorage = testSessionStorageAccess();
+            
+            const report = `🕵️ Modalità Incognito: ${isIncognito ? 'SI' : 'NO'}
+📦 localStorage: ${localStorage ? 'Disponibile' : 'Bloccato'}
+💾 sessionStorage: ${sessionStorage ? 'Disponibile' : 'Bloccato'}
+
+Raccomandazioni:
+${isIncognito ? '- Test in incognito per evitare cache CORS' : '- Considera test anche in incognito'}
+${localStorage ? '- localStorage funziona normalmente' : '- Fallback necessario per localStorage'}`;
+            
+            updateStatus('cache', isIncognito ? 'success' : 'error');
+            showSectionLog('cache', report);
+            log(report, 'info');
+        }
+        
+        function checkIncognitoMode() {
+            try {
+                localStorage.setItem('test', '1');
+                localStorage.removeItem('test');
+                return false; // Not incognito
+            } catch {
+                return true; // Likely incognito
+            }
+        }
+        
+        function testLocalStorageAccess() {
+            try {
+                localStorage.setItem('test', '1');
+                localStorage.removeItem('test');
+                return true;
+            } catch {
+                return false;
+            }
+        }
+        
+        function testSessionStorageAccess() {
+            try {
+                sessionStorage.setItem('test', '1');
+                sessionStorage.removeItem('test');
+                return true;
+            } catch {
+                return false;
+            }
+        }
+        
+        function clearAllCache() {
+            if (testLocalStorageAccess()) {
+                localStorage.clear();
+                log('🗑️ localStorage cleared', 'success');
+            }
+            
+            if (testSessionStorageAccess()) {
+                sessionStorage.clear();
+                log('🗑️ sessionStorage cleared', 'success');
+            }
+            
+            // Clear any Mental Commons specific data
+            ['mc-users', 'mc-current-user', 'mc-ucme-data', 'mc-debug-logs'].forEach(key => {
+                try {
+                    localStorage.removeItem(key);
+                    sessionStorage.removeItem(key);
+                } catch {}
+            });
+            
+            showSectionLog('cache', '🗑️ Cache completamente pulita\n- localStorage cleared\n- sessionStorage cleared\n- Mental Commons data removed\n\n💡 Ricarica la pagina per test completo');
+            updateStatus('cache', 'success');
+            log('✅ Cache completamente pulita', 'success');
+        }
+        
+        // Test Environment Detection
+        function detectEnvironment() {
+            updateStatus('platform', 'loading');
+            log('🌍 Rilevamento ambiente...', 'info');
+            
+            const env = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                cookieEnabled: navigator.cookieEnabled,
+                onLine: navigator.onLine,
+                viewport: {
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                },
+                screen: {
+                    width: screen.width,
+                    height: screen.height,
+                    orientation: screen.orientation?.type || 'unknown'
+                },
+                mobile: isMobileDevice(),
+                touch: 'ontouchstart' in window,
+                standalone: window.matchMedia('(display-mode: standalone)').matches
+            };
+            
+            const report = `🌍 Ambiente Rilevato:
+📱 Mobile: ${env.mobile ? 'SI' : 'NO'}
+👆 Touch: ${env.touch ? 'SI' : 'NO'}
+📊 Viewport: ${env.viewport.width}x${env.viewport.height}
+🖥️ Screen: ${env.screen.width}x${env.screen.height}
+🧭 Orientamento: ${env.screen.orientation}
+📶 Online: ${env.onLine ? 'SI' : 'NO'}
+🍪 Cookies: ${env.cookieEnabled ? 'Abilitati' : 'Disabilitati'}
+🌐 Lingua: ${env.language}
+📱 Standalone: ${env.standalone ? 'SI (PWA)' : 'NO'}
+
+User Agent: ${env.userAgent}`;
+            
+            updateStatus('platform', 'success');
+            showSectionLog('platform', report);
+            log('✅ Ambiente rilevato', 'success');
+        }
+        
+        function testMobileCompatibility() {
+            log('📱 Test compatibilità mobile...', 'info');
+            
+            const tests = {
+                viewport: window.innerWidth <= 768,
+                touch: 'ontouchstart' in window,
+                orientation: screen.orientation !== undefined,
+                deviceMotion: 'DeviceMotionEvent' in window,
+                deviceOrientation: 'DeviceOrientationEvent' in window,
+                vibration: 'vibrate' in navigator,
+                geolocation: 'geolocation' in navigator
+            };
+            
+            const passed = Object.values(tests).filter(Boolean).length;
+            const total = Object.keys(tests).length;
+            
+            const report = `📱 Test Mobile Compatibility:
+✅ Passed: ${passed}/${total}
+
+Dettagli:
+${Object.entries(tests).map(([test, pass]) => 
+    `${pass ? '✅' : '❌'} ${test}: ${pass ? 'Supportato' : 'Non supportato'}`
+).join('\n')}
+
+${passed >= 4 ? '🎉 Ottima compatibilità mobile!' : '⚠️ Compatibilità limitata'}`;
+            
+            updateStatus('platform', passed >= 4 ? 'success' : 'error');
+            showSectionLog('platform', report);
+        }
+        
+        function testDesktopCompatibility() {
+            log('🖥️ Test compatibilità desktop...', 'info');
+            
+            const tests = {
+                wideViewport: window.innerWidth > 1024,
+                mouse: !('ontouchstart' in window),
+                keyboard: true, // Assume keyboard presence
+                localStorage: testLocalStorageAccess(),
+                sessionStorage: testSessionStorageAccess(),
+                fetch: 'fetch' in window,
+                promise: 'Promise' in window,
+                async: true // Modern browsers
+            };
+            
+            const passed = Object.values(tests).filter(Boolean).length;
+            const total = Object.keys(tests).length;
+            
+            const report = `🖥️ Test Desktop Compatibility:
+✅ Passed: ${passed}/${total}
+
+Dettagli:
+${Object.entries(tests).map(([test, pass]) => 
+    `${pass ? '✅' : '❌'} ${test}: ${pass ? 'Supportato' : 'Non supportato'}`
+).join('\n')}
+
+${passed >= 6 ? '🎉 Ottima compatibilità desktop!' : '⚠️ Compatibilità limitata'}`;
+            
+            updateStatus('platform', passed >= 6 ? 'success' : 'error');
+            showSectionLog('platform', report);
+        }
+        
+        // URL Management
+        function getCurrentBackendUrl() {
+            const urlInput = document.getElementById('backend-url');
+            return urlInput ? urlInput.value : BACKEND_URL;
+        }
+        
+        function updateBackendUrl() {
+            const newUrl = document.getElementById('backend-url').value;
+            if (newUrl && newUrl.includes('script.google.com')) {
+                // Update global variable
+                window.CURRENT_BACKEND_URL = newUrl;
+                log(`🔗 URL backend aggiornato: ${newUrl}`, 'success');
+                
+                // Update all test functions to use new URL
+                log('💡 Ora puoi ri-eseguire tutti i test con il nuovo URL', 'info');
+            } else {
+                log('❌ URL non valido. Deve essere un URL Google Apps Script', 'error');
+            }
+        }
+        
+        async function testNewUrl() {
+            const newUrl = getCurrentBackendUrl();
+            log(`🧪 Test nuovo URL: ${newUrl}`, 'info');
+            
+            try {
+                const response = await fetch(newUrl, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'ping',
+                        key: API_KEY
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    log(`✅ Nuovo URL funziona: ${JSON.stringify(result)}`, 'success');
+                    
+                    // Update all test functions
+                    window.BACKEND_URL = newUrl;
+                    log('🔄 URL aggiornato globalmente. Tutti i test useranno il nuovo URL.', 'info');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                log(`❌ Errore test nuovo URL: ${error.message}`, 'error');
+            }
+        }
+        
+        // Inizializzazione
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Debug tool avviato', 'info');
+            log(`🔗 URL Backend: ${BACKEND_URL}`, 'info');
+            log(`🔑 API Key: ${API_KEY}`, 'info');
+        });
+    </script>
+</body>
+</html>
