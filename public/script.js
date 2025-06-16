@@ -1449,5 +1449,6 @@ window.MentalCommons = {
     loginUser,
     registerUser,
     logoutUser,
-    loadRitualStats
+    loadRitualStats,
+    showStatsUnavailableMessage
 }; 
