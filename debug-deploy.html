@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Deploy - Mental Commons</title>
+    <style>
+        body {
+            font-family: monospace;
+            margin: 20px;
+            background: #f0f0f0;
+        }
+        .test-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+        }
+        .success { border-left: 5px solid #4CAF50; }
+        .error { border-left: 5px solid #f44336; }
+        .pending { border-left: 5px solid #ff9800; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Deploy Mental Commons</h1>
+    <p>Timestamp: <span id="timestamp"></span></p>
+    <p>Domain: <span id="domain"></span></p>
+    
+    <h2>📁 File Structure Check</h2>
+    <div id="file-tests"></div>
+    
+    <h2>🌐 Network Tests</h2>
+    <div id="network-tests"></div>
+    
+    <h2>📊 Report</h2>
+    <div id="report"></div>
+
+    <script>
+        document.getElementById('timestamp').textContent = new Date().toISOString();
+        document.getElementById('domain').textContent = window.location.hostname;
+        
+        const filesToTest = [
+            '/style.css',
+            '/script.js', 
+            '/logo.svg',
+            '/favicon.svg',
+            '/favicon-32x32.svg',
+            '/favicon-16x16.svg',
+            '/favicon.ico'
+        ];
+        
+        let results = {};
+        
+        async function testFile(url) {
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                return {
+                    status: response.status,
+                    ok: response.ok,
+                    headers: Object.fromEntries(response.headers.entries())
+                };
+            } catch (error) {
+                return {
+                    status: 0,
+                    ok: false,
+                    error: error.message
+                };
+            }
+        }
+        
+        async function runTests() {
+            const fileContainer = document.getElementById('file-tests');
+            const networkContainer = document.getElementById('network-tests');
+            
+            for (const file of filesToTest) {
+                // File structure test
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'test-item pending';
+                fileDiv.innerHTML = `<strong>${file}</strong> - Testing...`;
+                fileContainer.appendChild(fileDiv);
+                
+                // Network test
+                const result = await testFile(file);
+                results[file] = result;
+                
+                if (result.ok) {
+                    fileDiv.className = 'test-item success';
+                    fileDiv.innerHTML = `<strong>${file}</strong> - ✅ OK (${result.status})`;
+                } else {
+                    fileDiv.className = 'test-item error';
+                    fileDiv.innerHTML = `<strong>${file}</strong> - ❌ FAILED (${result.status}) ${result.error || ''}`;
+                }
+                
+                // Add network details
+                const networkDiv = document.createElement('div');
+                networkDiv.className = 'test-item';
+                networkDiv.innerHTML = `
+                    <strong>${file}</strong><br>
+                    Status: ${result.status}<br>
+                    Headers: <pre>${JSON.stringify(result.headers, null, 2)}</pre>
+                `;
+                networkContainer.appendChild(networkDiv);
+            }
+            
+            // Generate report
+            const successful = Object.values(results).filter(r => r.ok).length;
+            const total = filesToTest.length;
+            
+            document.getElementById('report').innerHTML = `
+                <div class="test-item ${successful === total ? 'success' : 'error'}">
+                    <h3>Summary: ${successful}/${total} files working</h3>
+                    <p>Success rate: ${((successful/total)*100).toFixed(1)}%</p>
+                    <p>Domain: ${window.location.hostname}</p>
+                    <p>User Agent: ${navigator.userAgent}</p>
+                </div>
+            `;
+        }
+        
+        runTests();
+    </script>
+</body>
+</html> 

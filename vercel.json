@@ -13,6 +13,34 @@
       "destination": "/index.html"
     },
     {
+      "source": "/style.css",
+      "destination": "/style.css"
+    },
+    {
+      "source": "/script.js",
+      "destination": "/script.js"
+    },
+    {
+      "source": "/logo.svg",
+      "destination": "/logo.svg"
+    },
+    {
+      "source": "/favicon.svg",
+      "destination": "/favicon.svg"
+    },
+    {
+      "source": "/favicon-32x32.svg",
+      "destination": "/favicon-32x32.svg"
+    },
+    {
+      "source": "/favicon-16x16.svg",
+      "destination": "/favicon-16x16.svg"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/favicon.ico"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     }
