@@ -5,7 +5,7 @@
 // Descrizione: Gestione JWT persistente con localStorage e scadenza 30 giorni
 
 // ================================================================
-// CONFIGURAZIONE
+// CONFIGURAZIONE E STATO GLOBALE AUTH LOADING
 // ================================================================
 
 const AUTH_CONFIG = {
@@ -14,6 +14,135 @@ const AUTH_CONFIG = {
     EXPIRY_BUFFER: 5 * 60 * 1000, // 5 minuti di buffer prima della scadenza
     API_BASE_URL: `${window.location.origin}/api`
 };
+
+// STATO GLOBALE ANTI-FLICKER
+window.authLoading = true;
+window.authReady = false;
+
+/**
+ * 🚀 INIZIALIZZAZIONE IMMEDIATA ANTI-FLICKER
+ * Eseguita appena il browser carica questo script, prima del DOM ready
+ */
+(function initImmediateAuth() {
+    console.log('🚀 ============================================');
+    console.log('🚀 INIZIALIZZAZIONE IMMEDIATA ANTI-FLICKER');
+    console.log('🚀 ============================================');
+    
+    // Aggiungi classe auth-loading al body
+    if (document.body) {
+        document.body.classList.add('auth-loading');
+    } else {
+        // Se il body non è ancora caricato, usa un observer
+        const observer = new MutationObserver(function(mutations, obs) {
+            if (document.body) {
+                document.body.classList.add('auth-loading');
+                obs.disconnect();
+            }
+        });
+        observer.observe(document.documentElement, {childList: true, subtree: true});
+    }
+    
+    // Esegui controllo auth immediato
+    try {
+        const immediateAuthResult = checkAuthImmediate();
+        console.log('🔍 Controllo auth immediato completato:', immediateAuthResult);
+    } catch (error) {
+        console.error('❌ Errore controllo auth immediato:', error);
+    }
+})();
+
+/**
+ * 🔍 CONTROLLO AUTH IMMEDIATO (SINCRONO)
+ * Verifica token in localStorage senza chiamate API
+ */
+function checkAuthImmediate() {
+    try {
+        const token = localStorage.getItem(AUTH_CONFIG.TOKEN_KEY);
+        const userJson = localStorage.getItem(AUTH_CONFIG.USER_KEY);
+        
+        if (!token || !userJson) {
+            console.log('👤 Nessun token/utente trovato - stato guest');
+            window.authLoading = false;
+            window.authReady = true;
+            return { isAuthenticated: false, immediate: true };
+        }
+        
+        const user = JSON.parse(userJson);
+        
+        // Verifica validità token (solo scadenza)
+        if (isTokenExpired(token)) {
+            console.log('⏰ Token scaduto - pulizia automatica');
+            clearAuthData();
+            window.authLoading = false;
+            window.authReady = true;
+            return { isAuthenticated: false, expired: true, immediate: true };
+        }
+        
+        console.log('✅ Token valido trovato - utente autenticato');
+        window.authLoading = false;
+        window.authReady = true;
+        return { 
+            isAuthenticated: true, 
+            user, 
+            token,
+            immediate: true
+        };
+    } catch (error) {
+        console.error('❌ Errore controllo auth immediato:', error);
+        clearAuthData();
+        window.authLoading = false;
+        window.authReady = true;
+        return { isAuthenticated: false, error: true, immediate: true };
+    }
+}
+
+/**
+ * 🎯 FINALIZZA SETUP AUTH UI
+ * Chiamata quando DOM è pronto per aggiornare la UI
+ */
+function finalizeAuthUI() {
+    console.log('🎯 ============================================');
+    console.log('🎯 FINALIZZAZIONE UI AUTH');
+    console.log('🎯 ============================================');
+    
+    // Mostra spinner durante verifica finale
+    showAuthSpinner();
+    
+    // Controllo auth completo (con eventuali validazioni backend)
+    const authResult = checkAuth();
+    
+    // Rimuovi classe loading e aggiungi ready
+    if (document.body) {
+        document.body.classList.remove('auth-loading');
+        document.body.classList.add('auth-ready');
+    }
+    
+    // Nascondi spinner
+    hideAuthSpinner();
+    
+    console.log('✅ UI Auth finalizzata');
+    return authResult;
+}
+
+/**
+ * 🔄 MOSTRA SPINNER AUTH
+ */
+function showAuthSpinner() {
+    const spinners = document.querySelectorAll('.auth-loading-spinner');
+    spinners.forEach(spinner => {
+        spinner.style.display = 'inline-block';
+    });
+}
+
+/**
+ * 🔄 NASCONDI SPINNER AUTH
+ */
+function hideAuthSpinner() {
+    const spinners = document.querySelectorAll('.auth-loading-spinner');
+    spinners.forEach(spinner => {
+        spinner.style.display = 'none';
+    });
+}
 
 // ================================================================
 // UTILITY JWT
@@ -328,6 +457,12 @@ window.PersistentAuth = {
     // Controlli principali
     checkAuth,
     forceLogout,
+    
+    // Anti-flicker
+    checkAuthImmediate,
+    finalizeAuthUI,
+    showAuthSpinner,
+    hideAuthSpinner,
     
     // Gestione dati
     saveAuthData,

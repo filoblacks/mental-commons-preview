@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Anti-Flicker - Mental Commons</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        body {
+            font-family: Inter, system-ui, sans-serif;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #fff;
+            line-height: 1.6;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        .status.success {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: #22c55e;
+            color: #22c55e;
+        }
+        .status.warning {
+            background: rgba(251, 146, 60, 0.1);
+            border-color: #fb923c;
+            color: #fb923c;
+        }
+        .status.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        .test-nav {
+            background: #111;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #333;
+        }
+        .test-nav a {
+            color: #666;
+            text-decoration: none;
+            margin-right: 15px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .auth-ready .test-nav a {
+            opacity: 1;
+        }
+        .test-nav a:hover {
+            background: #333;
+            color: #fff;
+        }
+        .test-button {
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #444;
+        }
+        pre {
+            background: #111;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body class="auth-loading">
+    <div class="test-container">
+        <h1>🧪 Test Sistema Anti-Flicker</h1>
+        <p>Questo test verifica che il sistema di autenticazione prevenga il flicker della navigazione.</p>
+        
+        <div id="test-results">
+            <!-- I risultati dei test verranno inseriti qui -->
+        </div>
+        
+        <div class="test-nav">
+            <h3>Navigazione Test (dovrebbe essere invisibile fino al load):</h3>
+            <a href="index.html">Home</a>
+            <a href="dashboard.html" id="nav-dashboard">Dashboard</a>
+            <a href="login.html" id="nav-login">
+                Accedi<span class="auth-loading-spinner" style="display: none;"></span>
+            </a>
+            <a href="profile.html" id="nav-profile">Profilo</a>
+        </div>
+        
+        <div class="test-controls">
+            <h3>Controlli Test:</h3>
+            <button class="test-button" onclick="testAuthLoading()">🔍 Test Auth Loading</button>
+            <button class="test-button" onclick="testAuthReady()">✅ Test Auth Ready</button>
+            <button class="test-button" onclick="testSpinner()">🔄 Test Spinner</button>
+            <button class="test-button" onclick="testLogout()">🚪 Test Logout</button>
+            <button class="test-button" onclick="simulateLogin()">🔑 Simula Login</button>
+            <button class="test-button" onclick="refreshPage()">🔄 Refresh Pagina</button>
+        </div>
+        
+        <div id="test-logs">
+            <h3>Log Test:</h3>
+            <pre id="log-output"></pre>
+        </div>
+    </div>
+
+    <script src="/auth.js"></script>
+    <script>
+        // ================================================================
+        // TEST ANTI-FLICKER SYSTEM
+        // ================================================================
+        
+        let testResults = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}`;
+            console.log(logMessage);
+            
+            const logOutput = document.getElementById('log-output');
+            if (logOutput) {
+                logOutput.textContent += logMessage + '\n';
+                logOutput.scrollTop = logOutput.scrollHeight;
+            }
+        }
+        
+        function addTestResult(test, status, message) {
+            testResults.push({ test, status, message, timestamp: Date.now() });
+            updateTestResults();
+        }
+        
+        function updateTestResults() {
+            const container = document.getElementById('test-results');
+            container.innerHTML = '<h3>Risultati Test:</h3>';
+            
+            testResults.forEach(result => {
+                const div = document.createElement('div');
+                div.className = `status ${result.status}`;
+                div.innerHTML = `
+                    <strong>${result.test}</strong><br>
+                    ${result.message}
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        // ================================================================
+        // TEST FUNCTIONS
+        // ================================================================
+        
+        function testAuthLoading() {
+            log('🧪 Testing auth loading state...');
+            
+            const hasLoadingClass = document.body.classList.contains('auth-loading');
+            const hasReadyClass = document.body.classList.contains('auth-ready');
+            const authLoadingGlobal = window.authLoading;
+            const authReadyGlobal = window.authReady;
+            
+            log(`Body classes: loading=${hasLoadingClass}, ready=${hasReadyClass}`);
+            log(`Global vars: loading=${authLoadingGlobal}, ready=${authReadyGlobal}`);
+            
+            if (hasLoadingClass && !hasReadyClass) {
+                addTestResult('Auth Loading State', 'success', 'Stato loading corretto');
+            } else {
+                addTestResult('Auth Loading State', 'warning', 'Stato loading non attivo');
+            }
+        }
+        
+        function testAuthReady() {
+            log('🧪 Testing auth ready state...');
+            
+            // Forza passaggio a ready
+            if (document.body) {
+                document.body.classList.remove('auth-loading');
+                document.body.classList.add('auth-ready');
+            }
+            
+            window.authLoading = false;
+            window.authReady = true;
+            
+            const hasReadyClass = document.body.classList.contains('auth-ready');
+            
+            if (hasReadyClass) {
+                addTestResult('Auth Ready State', 'success', 'Passaggio a ready completato');
+            } else {
+                addTestResult('Auth Ready State', 'error', 'Errore nel passaggio a ready');
+            }
+        }
+        
+        function testSpinner() {
+            log('🧪 Testing spinner...');
+            
+            if (typeof window.PersistentAuth !== 'undefined') {
+                window.PersistentAuth.showAuthSpinner();
+                setTimeout(() => {
+                    window.PersistentAuth.hideAuthSpinner();
+                    addTestResult('Spinner Test', 'success', 'Spinner mostrato e nascosto correttamente');
+                }, 2000);
+            } else {
+                addTestResult('Spinner Test', 'error', 'PersistentAuth non disponibile');
+            }
+        }
+        
+        function testLogout() {
+            log('🧪 Testing logout...');
+            
+            if (typeof window.PersistentAuth !== 'undefined') {
+                window.PersistentAuth.forceLogout('Test logout');
+                addTestResult('Logout Test', 'success', 'Logout eseguito');
+            } else {
+                addTestResult('Logout Test', 'error', 'PersistentAuth non disponibile');
+            }
+        }
+        
+        function simulateLogin() {
+            log('🧪 Simulating login...');
+            
+            // Simula dati utente
+            const fakeUser = {
+                id: 'test-123',
+                email: 'test@example.com',
+                name: 'Test User'
+            };
+            
+            const fakeToken = 'fake-jwt-token-for-testing';
+            
+            if (typeof window.PersistentAuth !== 'undefined') {
+                window.PersistentAuth.saveAuthData(fakeUser, fakeToken);
+                addTestResult('Simulate Login', 'success', 'Login simulato salvato');
+            } else {
+                // Fallback
+                localStorage.setItem('mental_commons_user', JSON.stringify(fakeUser));
+                localStorage.setItem('mental_commons_token', fakeToken);
+                addTestResult('Simulate Login', 'warning', 'Login simulato (fallback)');
+            }
+        }
+        
+        function refreshPage() {
+            log('🧪 Refreshing page...');
+            window.location.reload();
+        }
+        
+        // ================================================================
+        // INITIALIZATION
+        // ================================================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Test page loaded');
+            
+            // Test iniziale
+            setTimeout(() => {
+                testAuthLoading();
+                
+                // Dopo 2 secondi, simula il completamento auth
+                setTimeout(() => {
+                    testAuthReady();
+                }, 2000);
+            }, 100);
+        });
+        
+        // Log variabili globali auth
+        setInterval(() => {
+            if (window.authLoading !== undefined || window.authReady !== undefined) {
+                log(`Status: loading=${window.authLoading}, ready=${window.authReady}`);
+            }
+        }, 5000);
+    </script>
+</body>
+</html> 

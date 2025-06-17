@@ -120,10 +120,23 @@ function initializeApp() {
 }
 
 function continueInitialization() {
-    // Inizializza sistema di autenticazione persistente
+    // Finalizza UI auth (rimuove loading, completa la verifica)
     if (typeof window.PersistentAuth !== 'undefined') {
-        console.log('🚀 Inizializzo sistema autenticazione persistente...');
-        window.PersistentAuth.init();
+        console.log('🚀 Finalizzando autenticazione anti-flicker...');
+        const authResult = window.PersistentAuth.finalizeAuthUI();
+        
+        // Aggiorna currentUser basato sul risultato
+        if (authResult.isAuthenticated) {
+            currentUser = authResult.user;
+            updateUIForLoggedUser();
+        } else {
+            currentUser = null;
+            updateUIForGuestUser();
+        }
+    } else {
+        // Fallback al sistema precedente
+        console.log('⚠️ Sistema persistente non disponibile, usando controllo classico');
+        checkExistingUser();
     }
     
     // Mostra onboarding se necessario
@@ -131,9 +144,6 @@ function continueInitialization() {
     
     // Carica dati esistenti 
     loadExistingData();
-    
-    // Controlla se utente già loggato (ora da localStorage persistente)
-    checkExistingUser();
     
     // Controlla se siamo nella pagina dashboard e inizializzala
     console.log("🔍 Rilevamento pagina corrente:", {
@@ -796,10 +806,23 @@ function logoutUser() {
         console.log('👤 Logout di:', currentUser.email);
     }
     
+    // Mostra spinner durante logout
+    if (typeof window.PersistentAuth !== 'undefined') {
+        window.PersistentAuth.showAuthSpinner();
+    }
+    
     // Usa il nuovo sistema di autenticazione persistente se disponibile
     if (typeof window.PersistentAuth !== 'undefined') {
         console.log('🔄 Usando sistema persistente per logout...');
         window.PersistentAuth.forceLogout('Manual logout');
+        
+        // Aggiorna variabili locali
+        currentUser = null;
+        updateUIForGuestUser();
+        showScreen('home');
+        
+        // Nascondi spinner
+        window.PersistentAuth.hideAuthSpinner();
     } else {
         // Fallback al sistema precedente
         console.log('⚠️ Sistema persistente non disponibile, usando logout classico');
@@ -1775,9 +1798,13 @@ async function handleRegisterSubmit(event) {
     console.log('📝 MENTAL COMMONS - REGISTER ATTEMPT');
     console.log('📝 ============================================');
     console.log('📤 Register data:', { 
+        name,
+        surname: surname || 'NON SPECIFICATO',
         email, 
         password: password ? '[PRESENTE]' : '[MANCANTE]',
         confirmPassword: confirmPassword ? '[PRESENTE]' : '[MANCANTE]',
+        nameLength: name?.length,
+        surnameLength: surname?.length,
         emailLength: email?.length,
         passwordLength: password?.length,
         timestamp: new Date().toISOString(),
@@ -1789,10 +1816,34 @@ async function handleRegisterSubmit(event) {
     // Reset errori precedenti
     hideAuthError();
     
-    if (!email || !password || !confirmPassword) {
+    if (!name || !email || !password || !confirmPassword) {
         console.log('❌ Campi registrazione mancanti');
-        showAuthError('Compila tutti i campi per registrarti.');
+        showAuthError('Compila tutti i campi obbligatori per registrarti.');
         return;
+    }
+    
+    // Validazione nome
+    if (name.length < 2) {
+        console.log('❌ Nome troppo corto:', name.length);
+        showAuthError('Il nome deve essere di almeno 2 caratteri.');
+        return;
+    }
+    
+    // Validazione surname opzionale
+    if (surname && surname.length > 100) {
+        console.log('❌ Cognome troppo lungo:', surname.length);
+        showAuthError('Il cognome deve essere massimo 100 caratteri.');
+        return;
+    }
+    
+    // Validazione formato surname
+    if (surname && surname.trim() !== '') {
+        const surnameRegex = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ\s\-']+$/;
+        if (!surnameRegex.test(surname.trim())) {
+            console.log('❌ Formato cognome non valido:', surname);
+            showAuthError('Il cognome può contenere solo lettere, spazi, apostrofi e trattini.');
+            return;
+        }
     }
     
     if (!isValidEmail(email)) {
@@ -1818,7 +1869,7 @@ async function handleRegisterSubmit(event) {
         console.log('🌐 Tentativo registrazione con SUPABASE (UNICA FONTE)...');
         console.log('🔍 Endpoint:', `${window.location.origin}/api/register`);
         
-        const result = await registerWithBackend(email, password, email.split('@')[0]);
+        const result = await registerWithBackend(email, password, name, surname);
         
         console.log('📥 Risposta Supabase registrazione ricevuta:');
         console.log('  ✅ Success:', result.success);
@@ -2406,7 +2457,7 @@ async function loginWithBackendFallback(email, password) {
     };
 }
 
-async function registerWithBackend(email, password, name) {
+async function registerWithBackend(email, password, name, surname = null) {
     // 🟣 FASE 3 DEBUG - VERIFICA COERENZA BACKEND
     console.log('🟣 FASE 3 DEBUG - REGISTER BACKEND CHIAMATA');
     
@@ -2417,7 +2468,8 @@ async function registerWithBackend(email, password, name) {
     const payload = {
         email: email,
         password: password,
-        name: name
+        name: name,
+        surname: surname
     };
     
     console.log('🌐 Chiamata registrazione backend Vercel (non più Google Apps Script)');

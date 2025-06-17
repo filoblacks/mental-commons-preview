@@ -3726,43 +3726,165 @@ body {
 }
 
 /* ================================================================
-   MENTAL COMMONS 3.0 - CSS COMPLETO E RESPONSIVE
+   NAVBAR PULITA E COERENTE - MENTAL COMMONS 3.0
    ================================================================ */
 
-/* AUTH LOADING STATES - PREVIENE FLICKER */
+/* Pulsanti navbar coerenti - testo bianco con bordi */
+.ritual-actions a {
+    color: #fff !important;
+    border: 1px solid #fff !important;
+    background: transparent !important;
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    font-size: 16px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.ritual-actions a:hover {
+    background: #fff !important;
+    color: #000 !important;
+}
+
+/* Icona profilo pulita e visibile */
+.nav-profile-btn {
+    color: #fff !important;
+    border: 1px solid #fff !important;
+    background: transparent !important;
+    padding: 8px !important;
+    border-radius: 6px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.nav-profile-btn svg {
+    width: 24px !important;
+    height: 24px !important;
+    stroke: #fff !important;
+    opacity: 1 !important;
+}
+
+.nav-profile-btn:hover {
+    background: #fff !important;
+}
+
+.nav-profile-btn:hover svg {
+    stroke: #000 !important;
+}
+
+/* Mobile navbar coerente */
+.mobile-nav-btn {
+    color: #fff !important;
+    border: 1px solid #fff !important;
+    background: transparent !important;
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    text-decoration: none;
+}
+
+.mobile-nav-btn:hover {
+    background: #fff !important;
+    color: #000 !important;
+}
+
+.mobile-profile-btn {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.mobile-profile-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+    stroke: #fff !important;
+    opacity: 1 !important;
+}
+
+.mobile-profile-btn:hover svg {
+    stroke: #000 !important;
+}
+
+/* ================================================================
+   SISTEMA ANTI-FLICKER AUTH LOADING - COMPLETO
+   ================================================================ */
+
+/* Nascondi navigazione durante loading iniziale */
 .auth-loading .ritual-actions,
 .auth-loading .mobile-header-right {
     visibility: hidden;
 }
 
+/* Spinner di caricamento elegante */
 .auth-loading-spinner {
     display: inline-block;
-    width: 16px;
-    height: 16px;
-    border: 2px solid #333;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 50%;
-    border-top-color: #666;
-    animation: spin 1s ease-in-out infinite;
-    margin-left: 8px;
+    border-top-color: rgba(255, 255, 255, 0.6);
+    animation: auth-spin 1s linear infinite;
+    margin-left: 6px;
+    vertical-align: middle;
 }
 
-@keyframes spin {
+@keyframes auth-spin {
     to { transform: rotate(360deg); }
 }
 
+/* Mostra navigazione quando auth è pronta */
 .auth-ready .ritual-actions,
 .auth-ready .mobile-header-right {
     visibility: visible;
 }
 
-/* Hide navigation elements initially to prevent flicker */
+/* Transizione smooth per elementi di navigazione */
 .ritual-actions > a,
 .mobile-header-right > a {
     opacity: 0;
-    transition: opacity 0.2s ease-in-out;
+    transition: opacity 0.3s ease-in-out;
 }
 
 .auth-ready .ritual-actions > a,
 .auth-ready .mobile-header-right > a {
     opacity: 1;
+}
+
+/* Placeholder durante loading per evitare layout shift */
+.auth-loading .ritual-actions::after {
+    content: "Verifica accesso...";
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+    display: inline-block;
+    animation: auth-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes auth-pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+}
+
+/* Performance ottimizzate */
+.ritual-actions,
+.mobile-header-right {
+    will-change: visibility, opacity;
+}
+
+.auth-loading-spinner {
+    will-change: transform;
 }
