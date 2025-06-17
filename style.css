@@ -3223,75 +3223,52 @@ body {
     letter-spacing: -0.01em;
 }
 
-.demo-box {
+.demo-boxes {
     max-width: 960px;
     margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 48px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 48px;
-    opacity: 0;
-    transform: translateY(24px);
-    animation: fadeInUp 0.8s ease-out 0.3s forwards;
-}
-
-.demo-item {
-    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 24px;
+    align-items: center;
+}
+
+.demo-box {
+    width: 100%;
+    max-width: 600px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 24px;
+    opacity: 0;
+    transform: translateY(24px);
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.demo-box:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.demo-box:nth-child(2) {
+    animation-delay: 0.4s;
 }
 
 .demo-label {
     font-family: 'Inter', sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
-    color: #fff;
+    color: #EEE;
     text-transform: uppercase;
     letter-spacing: 1px;
-    opacity: 0.6;
-}
-
-.demo-ucme .demo-label {
-    color: #6FCF97;
-}
-
-.demo-response .demo-label {
-    color: #56CCF2;
+    margin-bottom: 16px;
+    opacity: 0.7;
 }
 
 .demo-text {
     font-family: 'Inter', sans-serif;
     font-size: 1rem;
-    line-height: 1.5;
-    color: #fff;
-    opacity: 0.9;
+    line-height: 1.6;
+    color: #EEE;
     font-style: italic;
-    position: relative;
-    padding: 16px 0;
-}
-
-.demo-text::before {
-    content: '"';
-    position: absolute;
-    left: -8px;
-    top: 8px;
-    font-size: 1.25rem;
-    color: rgba(255, 255, 255, 0.3);
-    font-family: 'Inter', sans-serif;
-    font-style: normal;
-}
-
-.demo-text::after {
-    content: '"';
-    font-size: 1.25rem;
-    color: rgba(255, 255, 255, 0.3);
-    font-family: 'Inter', sans-serif;
-    font-style: normal;
-    margin-left: 4px;
 }
 
 @keyframes fadeInUp {
@@ -3353,10 +3330,12 @@ body {
         margin-bottom: 40px;
     }
     
+    .demo-boxes {
+        gap: 20px;
+    }
+    
     .demo-box {
-        grid-template-columns: 1fr;
-        gap: 32px;
-        padding: 32px;
+        padding: 20px;
     }
     
     .demo-text {
@@ -3407,29 +3386,22 @@ body {
         margin-bottom: 32px;
     }
     
+    .demo-boxes {
+        gap: 16px;
+    }
+    
     .demo-box {
-        padding: 24px;
-        gap: 24px;
+        padding: 20px;
     }
     
     .demo-label {
         font-size: 0.8rem;
+        margin-bottom: 12px;
     }
     
     .demo-text {
         font-size: 0.9rem;
-        padding: 12px 0;
-    }
-    
-    .demo-text::before {
-        font-size: 1.125rem;
-        left: -6px;
-        top: 6px;
-    }
-    
-    .demo-text::after {
-        font-size: 1.125rem;
-        margin-left: 2px;
+        line-height: 1.5;
     }
 }
 
