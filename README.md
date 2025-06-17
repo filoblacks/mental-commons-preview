@@ -2,83 +2,135 @@
 
 Mental Commons è una piattaforma peer-to-peer per la riflessione condivisa. Permette a chiunque di condividere un pensiero difficile, confuso o importante (una "UCMe") e ricevere una risposta autentica da un'altra persona.
 
+**Niente diagnosi, niente terapia, niente guru. Solo umani che si pensano a vicenda.**
+
 ## 🏗️ Struttura del Progetto
 
 ```
 /mental-commons/
 │
-├── public/                # File pubblici statici
-│   ├── logo.svg          # Logo del progetto
-│   └── favicon.ico       # Favicon
+├── api/                   # API Serverless (Vercel Functions)
+│   ├── login.js          # Endpoint autenticazione
+│   ├── register.js       # Endpoint registrazione
+│   ├── ucme.js           # Endpoint gestione UCMe
+│   ├── ucmes.js          # Endpoint elenco UCMe
+│   ├── ping.js           # Endpoint health check
+│   ├── users.js          # Endpoint gestione utenti
+│   └── supabase.js       # Configurazione database
 │
-├── src/                   # Codice sorgente front-end
-│   ├── assets/            # Fonts, immagini, icone extra
-│   ├── css/
-│   │   └── style.css     # Stili principali
-│   ├── js/
-│   │   ├── script.js     # Script principale homepage
-│   │   ├── dashboard.js  # Script dashboard utente
-│   │   ├── login.js      # Script autenticazione
-│   │   └── test-ucme-function.js # Script di test
-│   └── html/             # Template HTML (backup)
-│       ├── index.html
-│       ├── login.html
-│       ├── dashboard.html
-│       ├── reset-user.html
-│       └── components/   # Componenti riutilizzabili (futuro)
-│
-├── data/                 # Archivi e database statici (JSON)
+├── data/                 # Dati statici (JSON)
 │   ├── data.json        # UCMe (pensieri) degli utenti
 │   ├── risposte.json    # Risposte dei portatori
 │   └── portatori.json   # Dati dei portatori
 │
-├── scripts/              # Script esterni (GAS, CLI, ecc.)
-│   └── google-apps-script.js # Integrazione Google Sheets
+├── scripts/              # Script utilità
+│   ├── deploy.sh        # Script di deploy
+│   ├── generate-favicons.sh # Generazione favicon
+│   └── update-versions.js # Aggiornamento versioni
 │
-├── docs/                 # Documentazione del progetto
-│   ├── README.md         # Documentazione tecnica originale
-│   ├── CORS_FIX_INSTRUCTIONS.md
+├── docs/                 # Documentazione
+│   ├── PROJECT-DOCUMENTATION.md
+│   ├── README.md
 │   ├── DASHBOARD_UPGRADE_README.md
-│   └── SETUP_GOOGLE_INTEGRATION.md
+│   ├── VERSIONING.md
+│   ├── legacy-tests/     # File di test archiviati
+│   ├── legacy-sql/       # File SQL archiviati
+│   └── legacy-notes/     # Documentazione legacy
 │
-├── index.html           # Homepage (punto di accesso)
+├── index.html           # Homepage principale
 ├── login.html           # Pagina di login
 ├── dashboard.html       # Dashboard utente
 ├── reset-user.html      # Utility reset dati
-├── .gitignore
-└── README.md            # Questo file
+├── script.js            # JavaScript principale
+├── style.css            # Stili CSS
+├── logo.svg             # Logo del progetto
+├── favicon.svg          # Favicon SVG
+├── favicon-16x16.svg    # Favicon 16x16
+├── favicon-32x32.svg    # Favicon 32x32
+├── favicon.ico          # Favicon ICO
+├── supabase-schema.sql  # Schema database consolidato
+├── vercel.json          # Configurazione Vercel
+├── package.json         # Dipendenze Node.js
+├── version.json         # Versione del progetto
+└── env-template.txt     # Template variabili ambiente
 ```
 
-## 🚀 Come iniziare
+## 🚀 Deploy e Sviluppo
 
-1. Apri `index.html` nel browser per accedere all'applicazione
-2. Compila una UCMe (Unità Cognitiva Mentale) - un pensiero autentico
-3. Ricevi una risposta da un Portatore entro 48 ore
+### Prerequisiti
+- Node.js >= 18.0.0
+- Account Vercel
+- Database Supabase
+
+### Setup Locale
+```bash
+# Installa dipendenze
+npm install
+
+# Copia template environment
+cp env-template.txt .env
+
+# Avvia server di sviluppo
+npm run dev
+```
+
+### Deploy
+```bash
+# Deploy su Vercel
+npm run deploy
+```
 
 ## 📋 Funzionalità principali
 
-- **Deposita pensieri**: Condividi riflessioni private e importanti
-- **Portatori umani**: Ricevi risposte autentiche, non automatiche
-- **Dashboard personale**: Gestisci i tuoi pensieri e risposte
-- **Sistema di autenticazione**: Accesso sicuro ai tuoi dati
+### 🔄 Flusso Base
+1. **Deposita**: L'utente scrive una UCMe (Unità Cognitiva Mentale)
+2. **Assegna**: Il sistema abbina la UCMe a un Portatore
+3. **Risposta**: Il Portatore risponde entro 48h
+4. **Chiusura**: Il Depositor riceve la risposta
 
-## 🔧 Sviluppo
+### 🤝 Ruoli
+- **Depositor**: Chiunque con un pensiero da condividere
+- **Portatore**: Utente formato per rispondere con empatia
 
-La struttura è stata riorganizzata per essere modulare e scalabile:
+### 💰 Caratteristiche
+- **Freemium**: Accesso gratuito per tutti
+- **Microdonazioni**: Ringraziamenti opzionali 1-5€
+- **B2B**: Pacchetti aziendali e scolastici
 
-- I file HTML principali sono accessibili dalla root per compatibilità
-- I sorgenti sono organizzati in `src/` per chiarezza
-- I dati JSON sono separati in `data/` per facilità di gestione
-- La documentazione è raccolta in `docs/`
+## 🔧 Architettura Tecnica
 
-## 📖 Documentazione
+### Stack Tecnologico
+- **Frontend**: HTML5, CSS3, JavaScript Vanilla
+- **Backend**: Node.js serverless (Vercel Functions)
+- **Database**: Supabase (PostgreSQL)
+- **Hosting**: Vercel
+- **Autenticazione**: JWT + bcrypt
 
-Per informazioni tecniche dettagliate, consulta i file in `docs/`:
+### API Endpoints
+- `POST /api/register` - Registrazione utente
+- `POST /api/login` - Login utente
+- `POST /api/ucme` - Creazione UCMe
+- `GET /api/ucmes` - Elenco UCMe
+- `GET /api/ping` - Health check
 
-- [Setup Google Integration](docs/SETUP_GOOGLE_INTEGRATION.md)
-- [Dashboard Upgrade](docs/DASHBOARD_UPGRADE_README.md) 
-- [CORS Fix Instructions](docs/CORS_FIX_INSTRUCTIONS.md)
+### Database
+Il database è strutturato con:
+- **users**: Utenti registrati
+- **ucmes**: Pensieri condivisi
+- **user_sessions**: Sessioni di login
+
+Schema completo in `supabase-schema.sql`
+
+## 📊 Metriche Chiave
+- % di UCMe con risposta entro 48h
+- Utenti attivi mensili (Depositor/Portatori)
+- Portamenti completati
+- Tasso di donazioni per UCMe
+
+## 🌟 Filosofia
+
+Mental Commons non è terapia né self-help. È uno strumento cognitivo per l'epoca dell'overload informativo. Le persone hanno bisogno di pensare insieme, e questa piattaforma offre uno spazio digitale dove i pensieri fragili vengono contenuti da umani reali.
 
 ---
 
-*Mental Commons - Il contrario di un social. Il prototipo di una mente comune.* 
+*Il contrario di un social. Il prototipo di una mente comune.* 

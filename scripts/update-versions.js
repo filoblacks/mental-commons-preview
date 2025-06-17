@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // Legge la configurazione delle versioni
 function readVersionConfig() {
@@ -69,7 +69,7 @@ function updateVersionConfig(newVersion) {
 // Main function
 function main() {
     const args = process.argv.slice(2);
-    const shouldGenerateNew = args.includes('--new');
+    const shouldGenerateNew = args.includes('--new') || args.includes('bump');
     
     console.log('🔄 Aggiornamento versioni file CSS e JS...\n');
     
@@ -89,12 +89,12 @@ function main() {
     console.log(`📦 Versione CSS: ${cssVersion}`);
     console.log(`📦 Versione JS: ${jsVersion}\n`);
     
-    // Lista dei file HTML da aggiornare
+    // Lista dei file HTML da aggiornare (ora nella root)
     const htmlFiles = [
-        'src/html/index.html',
-        'src/html/login.html',
-        'src/html/dashboard.html',
-        'src/html/reset-user.html'
+        'index.html',
+        'login.html', 
+        'dashboard.html',
+        'reset-user.html'
     ];
     
     // Aggiorna ogni file HTML
