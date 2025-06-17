@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Commons - Test Sistema Login</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            margin: 15px 0;
+        }
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 20px;
+            margin: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            width: 100%;
+            margin: 8px 0;
+            box-sizing: border-box;
+        }
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .warning { color: #fbbf24; }
+        .info { color: #60a5fa; }
+        .highlight { color: #fde047; }
+        h1 { text-align: center; margin-bottom: 30px; }
+        h2 { color: #fde047; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Mental Commons - Test Sistema Login</h1>
+        <p style="text-align: center; opacity: 0.8;">Verifica se il login usa localStorage o Supabase</p>
+
+        <!-- SEZIONE 1: Test Login -->
+        <div class="section">
+            <h2>🔐 Test Login Utente</h2>
+            <input type="email" id="email" placeholder="Inserisci email" value="">
+            <input type="password" id="password" placeholder="Inserisci password" value="">
+            <button onclick="testLogin()">🧪 Test Login</button>
+            <button onclick="interceptLogin()">🕵️ Intercetta Login</button>
+            <div id="login-log" class="log"></div>
+        </div>
+
+        <!-- SEZIONE 2: Analisi localStorage -->
+        <div class="section">
+            <h2>💾 Analisi localStorage</h2>
+            <button onclick="analyzeStorage()">🔍 Analizza Storage</button>
+            <button onclick="clearStorage()">🗑️ Pulisci localStorage</button>
+            <div id="storage-log" class="log"></div>
+        </div>
+
+        <!-- SEZIONE 3: Test API -->
+        <div class="section">
+            <h2>🌐 Test API Supabase</h2>
+            <button onclick="testSupabaseAPI()">🔗 Test Connessione</button>
+            <button onclick="listSupabaseUsers()">👥 Lista Utenti Supabase</button>
+            <div id="api-log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info', targetId = 'login-log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById(targetId);
+            const colorClass = type === 'error' ? 'error' : 
+                              type === 'success' ? 'success' : 
+                              type === 'warning' ? 'warning' : 
+                              type === 'highlight' ? 'highlight' : 'info';
+            
+            logElement.innerHTML += `<span class="${colorClass}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // Test login con intercettazione
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                log('❌ Inserisci email e password', 'error');
+                return;
+            }
+
+            document.getElementById('login-log').innerHTML = '';
+            log('🔐 ============================================', 'highlight');
+            log('🔐 TEST LOGIN SISTEMA', 'highlight');
+            log('🔐 ============================================', 'highlight');
+            
+            log(`📧 Email: ${email}`, 'info');
+            log(`🔑 Password: [${password.length} caratteri]`, 'info');
+            
+            // Intercetta fetch per vedere tutte le chiamate
+            const originalFetch = window.fetch;
+            let interceptedCalls = [];
+            
+            window.fetch = function(...args) {
+                interceptedCalls.push({
+                    url: args[0],
+                    options: args[1],
+                    timestamp: new Date().toISOString()
+                });
+                log(`🌐 FETCH: ${args[0]}`, 'warning');
+                if (args[1] && args[1].body) {
+                    log(`   📤 Body: ${args[1].body.substring(0, 100)}`, 'info');
+                }
+                return originalFetch.apply(this, args);
+            };
+
+            try {
+                // Simula il login
+                log('🚀 Invio richiesta login...', 'info');
+                
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
+                
+                log(`📡 Risposta ricevuta:`, 'info');
+                log(`   Status: ${response.status}`, 'info');
+                log(`   OK: ${response.ok}`, 'info');
+                log(`   Result: ${JSON.stringify(result, null, 2)}`, 'info');
+
+                if (response.ok && result.success) {
+                    log('✅ LOGIN RIUSCITO via Supabase!', 'success');
+                    
+                    // Controlla cosa è stato salvato nel localStorage
+                    log('\n🔍 Controllo localStorage post-login:', 'info');
+                    analyzeStorageAfterLogin();
+                    
+                } else {
+                    log('❌ LOGIN FALLITO via Supabase', 'error');
+                    log(`   Messaggio: ${result.message || 'Errore sconosciuto'}`, 'error');
+                    
+                    // Potrebbe esserci fallback a localStorage
+                    log('\n🔍 Verifico fallback localStorage...', 'warning');
+                    checkLocalStorageFallback(email, password);
+                }
+
+            } catch (error) {
+                log(`❌ Errore rete: ${error.message}`, 'error');
+                
+                // Controlla fallback localStorage in caso di errore rete
+                log('\n🔍 Verifico fallback localStorage per errore rete...', 'warning');
+                checkLocalStorageFallback(email, password);
+            }
+            
+            // Ripristina fetch originale
+            window.fetch = originalFetch;
+            
+            // Mostra tutte le chiamate intercettate
+            log('\n📋 CHIAMATE INTERCETTATE:', 'highlight');
+            interceptedCalls.forEach((call, index) => {
+                log(`${index + 1}. ${call.url}`, 'info');
+                if (call.options) {
+                    log(`   Method: ${call.options.method || 'GET'}`, 'info');
+                }
+            });
+        }
+
+        // Controlla se c'è fallback a localStorage
+        function checkLocalStorageFallback(email, password) {
+            // Cerca utenti in localStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                
+                try {
+                    const parsed = JSON.parse(value);
+                    
+                    if (Array.isArray(parsed)) {
+                        const user = parsed.find(u => u.email === email);
+                        if (user) {
+                            log(`🎯 UTENTE TROVATO in localStorage (${key})!`, 'warning');
+                            log(`   Password match: ${user.password === password || user.accessCode === password}`, 'info');
+                            return true;
+                        }
+                    } else if (parsed && parsed.email === email) {
+                        log(`🎯 UTENTE TROVATO in localStorage (${key})!`, 'warning');
+                        log(`   Password match: ${parsed.password === password || parsed.accessCode === password}`, 'info');
+                        return true;
+                    }
+                } catch (e) {
+                    // Non è JSON, continua
+                }
+            }
+            
+            log('🔍 Nessun utente trovato in localStorage', 'info');
+            return false;
+        }
+
+        // Analizza localStorage dopo login
+        function analyzeStorageAfterLogin() {
+            const sessionKeys = [];
+            const persistentKeys = [];
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                
+                if (key.includes('session') || key.includes('current') || key.includes('logged')) {
+                    sessionKeys.push({key, value: value.substring(0, 50) + (value.length > 50 ? '...' : '')});
+                } else {
+                    persistentKeys.push({key, value: value.substring(0, 50) + (value.length > 50 ? '...' : '')});
+                }
+            }
+            
+            log('📊 Chiavi di sessione:', 'info');
+            sessionKeys.forEach(item => {
+                log(`   ${item.key}: ${item.value}`, 'info');
+            });
+            
+            log('📊 Chiavi persistenti:', 'info');
+            persistentKeys.forEach(item => {
+                log(`   ${item.key}: ${item.value}`, 'info');
+            });
+        }
+
+        // Analizza tutto il localStorage
+        function analyzeStorage() {
+            document.getElementById('storage-log').innerHTML = '';
+            log('💾 ============================================', 'highlight', 'storage-log');
+            log('💾 ANALISI COMPLETA LOCALSTORAGE', 'highlight', 'storage-log');
+            log('💾 ============================================', 'highlight', 'storage-log');
+            
+            log(`📊 Totale chiavi: ${localStorage.length}`, 'info', 'storage-log');
+            
+            if (localStorage.length === 0) {
+                log('❌ localStorage completamente vuoto!', 'error', 'storage-log');
+                return;
+            }
+            
+            // Categorizza le chiavi
+            const userKeys = [];
+            const systemKeys = [];
+            const otherKeys = [];
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                
+                const keyInfo = {
+                    key: key,
+                    size: value ? value.length : 0,
+                    preview: value ? (value.length > 100 ? value.substring(0, 100) + '...' : value) : 'null'
+                };
+                
+                if (key.toLowerCase().includes('user') || key.toLowerCase().includes('mc-') || 
+                    key.toLowerCase().includes('mental') || key.toLowerCase().includes('auth')) {
+                    userKeys.push(keyInfo);
+                } else if (key.toLowerCase().includes('session') || key.toLowerCase().includes('token') ||
+                          key.toLowerCase().includes('current') || key.toLowerCase().includes('logged')) {
+                    systemKeys.push(keyInfo);
+                } else {
+                    otherKeys.push(keyInfo);
+                }
+            }
+            
+            log('👥 CHIAVI UTENTI:', 'success', 'storage-log');
+            userKeys.forEach(item => {
+                log(`   🔑 ${item.key} (${item.size} char)`, 'info', 'storage-log');
+                log(`      📄 ${item.preview}`, 'info', 'storage-log');
+            });
+            
+            log('\n🔧 CHIAVI SISTEMA:', 'warning', 'storage-log');
+            systemKeys.forEach(item => {
+                log(`   🔑 ${item.key} (${item.size} char)`, 'info', 'storage-log');
+                log(`      📄 ${item.preview}`, 'info', 'storage-log');
+            });
+            
+            log('\n📦 ALTRE CHIAVI:', 'info', 'storage-log');
+            otherKeys.forEach(item => {
+                log(`   🔑 ${item.key} (${item.size} char)`, 'info', 'storage-log');
+                log(`      📄 ${item.preview}`, 'info', 'storage-log');
+            });
+        }
+
+        // Test API Supabase
+        async function testSupabaseAPI() {
+            document.getElementById('api-log').innerHTML = '';
+            log('🌐 ============================================', 'highlight', 'api-log');
+            log('🌐 TEST API SUPABASE', 'highlight', 'api-log');
+            log('🌐 ============================================', 'highlight', 'api-log');
+            
+            try {
+                log('🔗 Test connessione...', 'info', 'api-log');
+                const response = await fetch('/api/ping');
+                const result = await response.json();
+                
+                if (response.ok) {
+                    log('✅ Connessione Supabase OK', 'success', 'api-log');
+                    log(`   Status: ${response.status}`, 'info', 'api-log');
+                    log(`   Response: ${JSON.stringify(result, null, 2)}`, 'info', 'api-log');
+                } else {
+                    log('❌ Problema connessione Supabase', 'error', 'api-log');
+                    log(`   Status: ${response.status}`, 'error', 'api-log');
+                    log(`   Error: ${JSON.stringify(result, null, 2)}`, 'error', 'api-log');
+                }
+            } catch (error) {
+                log(`❌ Errore rete: ${error.message}`, 'error', 'api-log');
+            }
+        }
+
+        // Lista utenti Supabase
+        async function listSupabaseUsers() {
+            log('👥 Lista utenti Supabase...', 'info', 'api-log');
+            
+            try {
+                const response = await fetch('/api/users');
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    log(`✅ Trovati ${result.users.length} utenti in Supabase`, 'success', 'api-log');
+                    result.users.forEach((user, index) => {
+                        log(`${index + 1}. ${user.email} (ID: ${user.id})`, 'info', 'api-log');
+                        log(`   Nome: ${user.name || 'N/A'}`, 'info', 'api-log');
+                        log(`   Creato: ${user.created_at || 'N/A'}`, 'info', 'api-log');
+                    });
+                } else {
+                    log('❌ Errore recupero utenti Supabase', 'error', 'api-log');
+                    log(`   Messaggio: ${result.message || 'Errore sconosciuto'}`, 'error', 'api-log');
+                }
+            } catch (error) {
+                log(`❌ Errore rete: ${error.message}`, 'error', 'api-log');
+            }
+        }
+
+        // Pulisci localStorage
+        function clearStorage() {
+            if (confirm('⚠️ Sei sicuro di voler pulire TUTTO il localStorage? Questa azione non può essere annullata.')) {
+                const keysCount = localStorage.length;
+                localStorage.clear();
+                log(`🗑️ localStorage pulito! Rimosse ${keysCount} chiavi.`, 'warning', 'storage-log');
+                analyzeStorage();
+            }
+        }
+
+        // Intercetta sistema di login
+        function interceptLogin() {
+            log('🕵️ ============================================', 'highlight');
+            log('🕵️ INTERCETTAZIONE SISTEMA LOGIN', 'highlight');
+            log('🕵️ ============================================', 'highlight');
+            
+            // Intercetta tutte le chiamate al localStorage
+            const originalSetItem = localStorage.setItem;
+            const originalGetItem = localStorage.getItem;
+            
+            localStorage.setItem = function(key, value) {
+                log(`📝 localStorage.setItem("${key}", "${value.substring(0, 50)}${value.length > 50 ? '...' : ''}")`, 'warning');
+                return originalSetItem.call(this, key, value);
+            };
+            
+            localStorage.getItem = function(key) {
+                const value = originalGetItem.call(this, key);
+                log(`📖 localStorage.getItem("${key}") = "${value ? value.substring(0, 50) + (value.length > 50 ? '...' : '') : 'null'}"`, 'info');
+                return value;
+            };
+            
+            log('✅ Intercettazione attivata. Fai login per vedere le chiamate.', 'success');
+            
+            // Ripristina dopo 2 minuti
+            setTimeout(() => {
+                localStorage.setItem = originalSetItem;
+                localStorage.getItem = originalGetItem;
+                log('🔄 Intercettazione disattivata.', 'info');
+            }, 120000);
+        }
+
+        // Auto-analisi all'avvio
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                analyzeStorage();
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

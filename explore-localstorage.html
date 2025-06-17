@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Commons - Esplorazione localStorage</title>
+    <style>
+        body {
+            font-family: monospace;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #000;
+            color: #00ff00;
+        }
+        .section {
+            border: 1px solid #333;
+            margin: 20px 0;
+            padding: 15px;
+            background: #111;
+        }
+        .log {
+            background: #000;
+            border: 1px solid #444;
+            padding: 10px;
+            height: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        button {
+            background: #333;
+            color: #fff;
+            border: 1px solid #666;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #555;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .warning { color: #ffaa00; }
+        .info { color: #00aaff; }
+        .key-item {
+            background: #222;
+            border: 1px solid #444;
+            margin: 5px 0;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Mental Commons - Esplorazione localStorage</h1>
+    <p>Trova tutti gli utenti nascosti nel localStorage</p>
+
+    <!-- SEZIONE 1: Esplorazione Completa -->
+    <div class="section">
+        <h2>🕵️ ESPLORAZIONE COMPLETA LOCALSTORAGE</h2>
+        <button onclick="exploreAllLocalStorage()">🔍 Esplora Tutto localStorage</button>
+        <button onclick="searchForUsers()">👥 Cerca Pattern Utenti</button>
+        <button onclick="testCurrentLogin()">🔐 Test Login Attuale</button>
+        <div id="exploration-log" class="log"></div>
+    </div>
+
+    <!-- SEZIONE 2: Dettagli Chiavi -->
+    <div class="section">
+        <h2>🗝️ DETTAGLI CHIAVI TROVATE</h2>
+        <div id="keys-container"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info', targetId = 'exploration-log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById(targetId);
+            const colorClass = type === 'error' ? 'error' : 
+                              type === 'success' ? 'success' : 
+                              type === 'warning' ? 'warning' : 'info';
+            
+            logElement.innerHTML += `<span class="${colorClass}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // Esplora tutto il localStorage
+        function exploreAllLocalStorage() {
+            document.getElementById('exploration-log').innerHTML = '';
+            document.getElementById('keys-container').innerHTML = '';
+            
+            log('🔍 ============================================', 'info');
+            log('🔍 ESPLORAZIONE COMPLETA LOCALSTORAGE', 'info');
+            log('🔍 ============================================', 'info');
+            
+            log(`📊 Numero totale chiavi: ${localStorage.length}`, 'info');
+            
+            if (localStorage.length === 0) {
+                log('❌ localStorage completamente vuoto!', 'error');
+                return;
+            }
+            
+            let foundKeys = [];
+            
+            // Itera su tutte le chiavi
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                
+                foundKeys.push({
+                    key: key,
+                    value: value,
+                    size: value ? value.length : 0,
+                    type: detectValueType(value)
+                });
+                
+                log(`🔑 Chiave ${i + 1}: "${key}"`, 'success');
+                log(`   📏 Dimensione: ${value ? value.length : 0} caratteri`, 'info');
+                log(`   🏷️ Tipo rilevato: ${detectValueType(value)}`, 'info');
+                
+                // Mostra preview del contenuto
+                if (value) {
+                    const preview = value.length > 200 ? value.substring(0, 200) + '...' : value;
+                    log(`   👀 Preview: ${preview}`, 'info');
+                    
+                    // Prova a fare parse se sembra JSON
+                    if (value.startsWith('{') || value.startsWith('[')) {
+                        try {
+                            const parsed = JSON.parse(value);
+                            log(`   ✅ JSON valido - Tipo: ${Array.isArray(parsed) ? 'Array' : 'Object'}`, 'success');
+                            
+                            if (Array.isArray(parsed)) {
+                                log(`   📊 Array con ${parsed.length} elementi`, 'info');
+                                if (parsed.length > 0) {
+                                    log(`   🎯 Primo elemento: ${JSON.stringify(parsed[0]).substring(0, 100)}`, 'info');
+                                }
+                            } else {
+                                const keys = Object.keys(parsed);
+                                log(`   📊 Object con chiavi: ${keys.join(', ')}`, 'info');
+                            }
+                        } catch (e) {
+                            log(`   ❌ JSON non valido: ${e.message}`, 'warning');
+                        }
+                    }
+                }
+                
+                log('', 'info'); // Riga vuota
+            }
+            
+            // Mostra riepilogo
+            log('📋 RIEPILOGO CHIAVI TROVATE:', 'info');
+            foundKeys.forEach((item, index) => {
+                log(`${index + 1}. "${item.key}" (${item.type}, ${item.size} char)`, 'info');
+            });
+            
+            // Crea interfaccia per esplorare le chiavi
+            createKeysInterface(foundKeys);
+        }
+
+        // Rileva il tipo di valore
+        function detectValueType(value) {
+            if (!value) return 'empty';
+            if (value.startsWith('{')) return 'object';
+            if (value.startsWith('[')) return 'array';
+            if (value === 'true' || value === 'false') return 'boolean';
+            if (!isNaN(value)) return 'number';
+            return 'string';
+        }
+
+        // Crea interfaccia per esplorare le chiavi
+        function createKeysInterface(foundKeys) {
+            const container = document.getElementById('keys-container');
+            
+            foundKeys.forEach((item, index) => {
+                const keyDiv = document.createElement('div');
+                keyDiv.className = 'key-item';
+                keyDiv.innerHTML = `
+                    <h4>🔑 ${item.key}</h4>
+                    <div>Tipo: ${item.type} | Dimensione: ${item.size} caratteri</div>
+                    <button onclick="analyzeKey('${item.key}')">🔍 Analizza Dettagli</button>
+                    <button onclick="searchForUserPatterns('${item.key}')">👤 Cerca Pattern Utente</button>
+                    <div id="analysis-${index}" style="background:#000;margin-top:10px;padding:10px;display:none;"></div>
+                `;
+                container.appendChild(keyDiv);
+            });
+        }
+
+        // Analizza una chiave specifica
+        function analyzeKey(keyName) {
+            const value = localStorage.getItem(keyName);
+            const index = Array.from(document.querySelectorAll('.key-item h4')).findIndex(h => h.textContent.includes(keyName));
+            const analysisDiv = document.getElementById(`analysis-${index}`);
+            
+            if (!analysisDiv) return;
+            
+            analysisDiv.style.display = 'block';
+            analysisDiv.innerHTML = `<h5>📊 Analisi dettagliata: ${keyName}</h5>`;
+            
+            if (!value) {
+                analysisDiv.innerHTML += `<div class="error">❌ Valore vuoto</div>`;
+                return;
+            }
+            
+            analysisDiv.innerHTML += `<div class="info">📏 Lunghezza: ${value.length} caratteri</div>`;
+            
+            // Prova parsing JSON
+            try {
+                const parsed = JSON.parse(value);
+                analysisDiv.innerHTML += `<div class="success">✅ JSON valido</div>`;
+                
+                if (Array.isArray(parsed)) {
+                    analysisDiv.innerHTML += `<div class="info">📊 Array con ${parsed.length} elementi</div>`;
+                    
+                    // Analizza ogni elemento per pattern utente
+                    parsed.forEach((item, i) => {
+                        if (item && typeof item === 'object') {
+                            const hasEmail = item.email || item.Email || item.EMAIL;
+                            const hasPassword = item.password || item.Password || item.pass || item.accessCode;
+                            const hasName = item.name || item.Name || item.nome;
+                            const hasId = item.id || item.ID || item._id;
+                            
+                            if (hasEmail || hasPassword || hasName) {
+                                analysisDiv.innerHTML += `<div class="warning">👤 POSSIBILE UTENTE ${i + 1}:</div>`;
+                                if (hasEmail) analysisDiv.innerHTML += `<div class="info">   📧 Email: ${hasEmail}</div>`;
+                                if (hasName) analysisDiv.innerHTML += `<div class="info">   👤 Nome: ${hasName}</div>`;
+                                if (hasId) analysisDiv.innerHTML += `<div class="info">   🆔 ID: ${hasId}</div>`;
+                                if (hasPassword) analysisDiv.innerHTML += `<div class="info">   🔑 Password: [PRESENTE]</div>`;
+                            }
+                        }
+                    });
+                } else {
+                    // Oggetto singolo
+                    const keys = Object.keys(parsed);
+                    analysisDiv.innerHTML += `<div class="info">📊 Oggetto con chiavi: ${keys.join(', ')}</div>`;
+                    
+                    const hasEmail = parsed.email || parsed.Email || parsed.EMAIL;
+                    const hasPassword = parsed.password || parsed.Password || parsed.pass || parsed.accessCode;
+                    const hasName = parsed.name || parsed.Name || parsed.nome;
+                    
+                    if (hasEmail || hasPassword || hasName) {
+                        analysisDiv.innerHTML += `<div class="warning">👤 POSSIBILE UTENTE SINGOLO:</div>`;
+                        if (hasEmail) analysisDiv.innerHTML += `<div class="info">   📧 Email: ${hasEmail}</div>`;
+                        if (hasName) analysisDiv.innerHTML += `<div class="info">   👤 Nome: ${hasName}</div>`;
+                        if (hasPassword) analysisDiv.innerHTML += `<div class="info">   🔑 Password: [PRESENTE]</div>`;
+                    }
+                }
+                
+                // Mostra JSON formattato (troncato)
+                const jsonString = JSON.stringify(parsed, null, 2);
+                const truncatedJson = jsonString.length > 500 ? jsonString.substring(0, 500) + '...' : jsonString;
+                analysisDiv.innerHTML += `<div class="info">📄 JSON:</div><pre style="color:#aaa;font-size:10px;">${truncatedJson}</pre>`;
+                
+            } catch (e) {
+                analysisDiv.innerHTML += `<div class="warning">⚠️ Non è JSON valido</div>`;
+                const preview = value.length > 300 ? value.substring(0, 300) + '...' : value;
+                analysisDiv.innerHTML += `<div class="info">📄 Contenuto:</div><pre style="color:#aaa;font-size:10px;">${preview}</pre>`;
+            }
+        }
+
+        // Cerca pattern utenti in tutte le chiavi
+        function searchForUsers() {
+            log('👥 ============================================', 'info');
+            log('👥 RICERCA PATTERN UTENTI', 'info');
+            log('👥 ============================================', 'info');
+            
+            let foundUsers = [];
+            
+            // Pattern comuni per identificare utenti
+            const userPatterns = [
+                'user', 'users', 'utent', 'account', 'login', 'auth',
+                'mc-', 'mental', 'commons', 'portator'
+            ];
+            
+            // Cerca in tutte le chiavi
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                
+                // Controlla se la chiave contiene pattern utente
+                const keyMatchesPattern = userPatterns.some(pattern => 
+                    key.toLowerCase().includes(pattern.toLowerCase())
+                );
+                
+                if (keyMatchesPattern) {
+                    log(`🎯 Chiave sospetta trovata: "${key}"`, 'warning');
+                    
+                    try {
+                        const parsed = JSON.parse(value);
+                        
+                        if (Array.isArray(parsed)) {
+                            log(`   📊 Array con ${parsed.length} elementi`, 'info');
+                            parsed.forEach((item, index) => {
+                                if (item && typeof item === 'object' && item.email) {
+                                    foundUsers.push({
+                                        source: key,
+                                        index: index,
+                                        user: item
+                                    });
+                                    log(`   ✅ UTENTE TROVATO: ${item.email}`, 'success');
+                                }
+                            });
+                        } else if (parsed && typeof parsed === 'object' && parsed.email) {
+                            foundUsers.push({
+                                source: key,
+                                index: -1,
+                                user: parsed
+                            });
+                            log(`   ✅ UTENTE SINGOLO TROVATO: ${parsed.email}`, 'success');
+                        }
+                    } catch (e) {
+                        log(`   ❌ Errore parsing: ${e.message}`, 'error');
+                    }
+                }
+            }
+            
+            log(`\n📊 TOTALE UTENTI TROVATI: ${foundUsers.length}`, foundUsers.length > 0 ? 'success' : 'warning');
+            
+            if (foundUsers.length > 0) {
+                log('📋 DETTAGLIO UTENTI:', 'info');
+                foundUsers.forEach((item, index) => {
+                    log(`${index + 1}. Email: ${item.user.email}`, 'success');
+                    log(`   Fonte: ${item.source}`, 'info');
+                    log(`   Nome: ${item.user.name || 'N/A'}`, 'info');
+                    log(`   Password: ${item.user.password ? '[PRESENTE]' : '[MANCANTE]'}`, 'info');
+                    log(`   ID: ${item.user.id || 'N/A'}`, 'info');
+                });
+                
+                // Salva risultati per migrazione
+                window.foundUsersForMigration = foundUsers;
+                log('\n✅ Utenti salvati in window.foundUsersForMigration per migrazione', 'success');
+            }
+            
+            return foundUsers;
+        }
+
+        // Test del sistema di login attuale
+        function testCurrentLogin() {
+            log('🔐 ============================================', 'info');
+            log('🔐 TEST LOGIN ATTUALE', 'info');
+            log('🔐 ============================================', 'info');
+            
+            // Cerca utenti prima
+            const users = searchForUsers();
+            
+            if (users.length === 0) {
+                log('❌ Nessun utente trovato per testare login', 'error');
+                return;
+            }
+            
+            log(`🧪 Testerò il login per ${users.length} utenti trovati...`, 'info');
+            
+            // Test ogni utente
+            users.forEach(async (userItem, index) => {
+                const user = userItem.user;
+                log(`\n🔐 Test ${index + 1}: ${user.email}`, 'info');
+                
+                try {
+                    // Simula chiamata all'API di login
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: user.email,
+                            password: user.password || user.accessCode || 'test123'
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        log(`   ✅ ${user.email}: Login Supabase OK`, 'success');
+                    } else {
+                        log(`   ❌ ${user.email}: Login Supabase FAILED - ${result.message}`, 'error');
+                        log(`   💡 Questo utente è solo in localStorage!`, 'warning');
+                    }
+                    
+                } catch (error) {
+                    log(`   ❌ ${user.email}: Errore rete - ${error.message}`, 'error');
+                }
+            });
+        }
+
+        // Auto-start exploration
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                exploreAllLocalStorage();
+            }, 1000);
+        });
+
+        // Funzione helper per la migrazione
+        window.getMigrationData = function() {
+            const users = searchForUsers();
+            return users.map(item => item.user);
+        };
+    </script>
+</body>
+</html> 

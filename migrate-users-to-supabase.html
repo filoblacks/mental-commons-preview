@@ -186,50 +186,109 @@
             log('🔍 ANALISI UTENTI ESISTENTI', 'info');
             log('🔍 ============================================', 'info');
 
-            // Cerca in tutte le possibili chiavi localStorage
-            const possibleKeys = [
-                'mc-users',           // Lista utenti principale
-                'mc-user',            // Utente corrente
-                'mental_commons_users', // Possibile nome alternativo
-                'mentalCommons_users'   // Altro possibile nome
-            ];
+            log('📋 Scansione completa localStorage...', 'info');
+            log(`🔍 Esplorazione di tutte le ${localStorage.length} chiavi presenti...`, 'info');
 
             let allUsers = [];
             let uniqueUsers = new Map();
+            let foundKeys = [];
 
-            log('📋 Scansione localStorage...', 'info');
+            // STEP 1: Esplora TUTTE le chiavi del localStorage
+            const userPatterns = [
+                'user', 'users', 'utent', 'account', 'login', 'auth',
+                'mc-', 'mental', 'commons', 'portator', 'depositor'
+            ];
 
-            possibleKeys.forEach(key => {
-                const data = localStorage.getItem(key);
-                if (data) {
-                    log(`✅ Trovato ${key}: ${data.length} caratteri`, 'success');
+            // Scansiona ogni chiave nel localStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+
+                // Controlla se la chiave può contenere utenti
+                const isUserKey = userPatterns.some(pattern => 
+                    key.toLowerCase().includes(pattern.toLowerCase())
+                ) || key.length > 10; // Chiavi lunghe potrebbero essere utenti
+
+                if (isUserKey && value) {
+                    foundKeys.push(key);
+                    log(`🔑 Chiave sospetta: "${key}" (${value.length} caratteri)`, 'info');
                     
                     try {
-                        if (key === 'mc-user') {
-                            // Singolo utente
-                            const user = JSON.parse(data);
-                            if (user && user.email) {
-                                allUsers.push(user);
-                                log(`   👤 Utente singolo: ${user.email}`, 'info');
-                            }
-                        } else {
-                            // Array di utenti
-                            const users = JSON.parse(data);
-                            if (Array.isArray(users)) {
-                                allUsers = allUsers.concat(users);
-                                log(`   👥 Array utenti: ${users.length} utenti`, 'info');
-                                users.forEach(user => {
-                                    if (user && user.email) {
-                                        log(`      - ${user.email}`, 'info');
-                                    }
-                                });
-                            }
+                        const parsed = JSON.parse(value);
+                        
+                        if (Array.isArray(parsed)) {
+                            log(`   📊 Array con ${parsed.length} elementi`, 'info');
+                            parsed.forEach((item, index) => {
+                                if (item && typeof item === 'object' && (item.email || item.Email)) {
+                                    allUsers.push({
+                                        ...item,
+                                        email: item.email || item.Email,
+                                        _source: key,
+                                        _index: index
+                                    });
+                                    log(`   ✅ Utente trovato: ${item.email || item.Email}`, 'success');
+                                }
+                            });
+                        } else if (parsed && typeof parsed === 'object' && (parsed.email || parsed.Email)) {
+                            allUsers.push({
+                                ...parsed,
+                                email: parsed.email || parsed.Email,
+                                _source: key,
+                                _index: -1
+                            });
+                            log(`   ✅ Utente singolo trovato: ${parsed.email || parsed.Email}`, 'success');
                         }
                     } catch (e) {
-                        log(`❌ Errore parsing ${key}: ${e.message}`, 'error');
+                        // Non è JSON, potrebbe essere un singolo valore
+                        if (value.includes('@') && value.includes('.')) {
+                            log(`   📧 Possibile email trovata: ${value}`, 'warning');
+                            allUsers.push({
+                                email: value,
+                                _source: key,
+                                _index: -1,
+                                _rawValue: true
+                            });
+                        } else {
+                            log(`   ❌ Errore parsing: ${e.message}`, 'warning');
+                        }
                     }
-                } else {
-                    log(`➖ ${key}: non trovato`, 'warning');
+                }
+            }
+
+            // STEP 2: Controlla anche le chiavi tradizionali specifiche (se non già trovate)
+            const traditionalKeys = ['mc-users', 'mc-user', 'mental_commons_users', 'mentalCommons_users'];
+            traditionalKeys.forEach(key => {
+                if (!foundKeys.includes(key)) {
+                    const data = localStorage.getItem(key);
+                    if (data) {
+                        foundKeys.push(key);
+                        log(`✅ Chiave tradizionale trovata: ${key}`, 'success');
+                        
+                        try {
+                            if (key === 'mc-user') {
+                                // Singolo utente
+                                const user = JSON.parse(data);
+                                if (user && user.email) {
+                                    allUsers.push(user);
+                                    log(`   👤 Utente singolo: ${user.email}`, 'info');
+                                }
+                            } else {
+                                // Array di utenti
+                                const users = JSON.parse(data);
+                                if (Array.isArray(users)) {
+                                    allUsers = allUsers.concat(users);
+                                    log(`   👥 Array utenti: ${users.length} utenti`, 'info');
+                                    users.forEach(user => {
+                                        if (user && user.email) {
+                                            log(`      - ${user.email}`, 'info');
+                                        }
+                                    });
+                                }
+                            }
+                        } catch (e) {
+                            log(`❌ Errore parsing ${key}: ${e.message}`, 'error');
+                        }
+                    }
                 }
             });
 
@@ -254,15 +313,26 @@
             existingUsers = Array.from(uniqueUsers.values());
 
             log('📊 RISULTATI ANALISI:', 'info');
+            log(`   🔍 Chiavi scansionate: ${localStorage.length}`, 'info');
+            log(`   🔑 Chiavi con possibili utenti: ${foundKeys.length}`, 'info');
             log(`   📁 Utenti totali trovati: ${allUsers.length}`, 'info');
             log(`   👤 Utenti unici (deduplicati): ${existingUsers.length}`, 'success');
 
             if (existingUsers.length === 0) {
                 log('⚠️ Nessun utente trovato in localStorage', 'warning');
                 log('💡 Possibili cause:', 'info');
-                log('   - localStorage già pulito', 'info');
-                log('   - Utenti mai creati localmente', 'info');
-                log('   - Nomi chiavi diverse da quelle cercate', 'info');
+                log('   - localStorage effettivamente vuoto', 'info');
+                log('   - Utenti in formato non riconosciuto', 'info');
+                log('   - Dati corrotti o criptati', 'info');
+                
+                // Debug: mostra tutte le chiavi presenti
+                log('🔍 DEBUG - Tutte le chiavi presenti:', 'info');
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    const value = localStorage.getItem(key);
+                    const preview = value ? (value.length > 50 ? value.substring(0, 50) + '...' : value) : 'null';
+                    log(`   ${i + 1}. "${key}" = "${preview}"`, 'info');
+                }
             } else {
                 log('📋 Dettaglio utenti da migrare:', 'info');
                 existingUsers.forEach((user, index) => {
