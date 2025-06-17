@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Autenticazione Persistente - Mental Commons</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .test-section h3 {
+            color: #4CAF50;
+            margin-top: 0;
+        }
+        .test-result {
+            background: #222;
+            border-left: 4px solid #4CAF50;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .test-result.error {
+            border-left-color: #f44336;
+            background: #331111;
+        }
+        .test-result.warning {
+            border-left-color: #ff9800;
+            background: #332211;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button.danger {
+            background: #f44336;
+        }
+        button.danger:hover {
+            background: #da190b;
+        }
+        .token-info {
+            font-family: monospace;
+            font-size: 12px;
+            background: #222;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Test Autenticazione Persistente</h1>
+        <p>Questa pagina testa il nuovo sistema di autenticazione persistente di Mental Commons.</p>
+        
+        <div class="test-section">
+            <h3>📚 Sistema Auth Caricato</h3>
+            <div id="auth-system-status"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔍 Stato Autenticazione</h3>
+            <button onclick="checkAuthStatus()">Controlla Stato</button>
+            <div id="auth-status"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🎫 Informazioni Token</h3>
+            <button onclick="showTokenInfo()">Mostra Info Token</button>
+            <div id="token-info"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>💾 Storage Browser</h3>
+            <button onclick="showStorageInfo()">Mostra Storage</button>
+            <div id="storage-info"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔗 Test Chiamate API</h3>
+            <button onclick="testApiCall()">Test API Ping</button>
+            <button onclick="testTokenValidation()">Test Validazione Token</button>
+            <div id="api-test-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🚪 Test Logout</h3>
+            <button onclick="testLogout()" class="danger">Forza Logout</button>
+            <div id="logout-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🧹 Pulizia</h3>
+            <button onclick="clearAllStorage()" class="danger">Pulisci Tutti i Dati</button>
+            <div id="cleanup-results"></div>
+        </div>
+    </div>
+
+    <!-- Include il sistema di autenticazione -->
+    <script src="/auth.js"></script>
+    <script>
+        // Test functions
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const className = type === 'error' ? 'error' : type === 'warning' ? 'warning' : '';
+            element.innerHTML += `<div class="test-result ${className}">${message}</div>`;
+        }
+
+        function clear(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        // Test 1: Sistema Auth Caricato
+        function checkAuthSystemLoaded() {
+            if (typeof window.PersistentAuth !== 'undefined') {
+                log('auth-system-status', '✅ Sistema PersistentAuth caricato correttamente');
+                log('auth-system-status', `📚 Funzioni disponibili: ${Object.keys(window.PersistentAuth).join(', ')}`);
+            } else {
+                log('auth-system-status', '❌ Sistema PersistentAuth NON caricato', 'error');
+            }
+        }
+
+        // Test 2: Stato Autenticazione
+        function checkAuthStatus() {
+            clear('auth-status');
+            
+            if (typeof window.PersistentAuth === 'undefined') {
+                log('auth-status', '❌ Sistema non caricato', 'error');
+                return;
+            }
+
+            const authResult = window.PersistentAuth.checkAuth();
+            
+            if (authResult.isAuthenticated) {
+                log('auth-status', '✅ Utente AUTENTICATO');
+                log('auth-status', `👤 Email: ${authResult.user.email}`);
+                log('auth-status', `👤 Nome: ${authResult.user.name}`);
+                log('auth-status', `🎫 Token valido fino a: ${authResult.tokenInfo.expiresAt}`);
+                log('auth-status', `📅 Giorni rimanenti: ${authResult.tokenInfo.daysUntilExpiry}`);
+            } else {
+                log('auth-status', '❌ Utente NON autenticato');
+                if (authResult.expired) {
+                    log('auth-status', '⏰ Token scaduto', 'warning');
+                }
+            }
+        }
+
+        // Test 3: Info Token
+        function showTokenInfo() {
+            clear('token-info');
+            
+            const token = localStorage.getItem('mental_commons_token');
+            
+            if (!token) {
+                log('token-info', '❌ Nessun token trovato in localStorage', 'warning');
+                return;
+            }
+
+            log('token-info', '✅ Token trovato in localStorage');
+            
+            if (typeof window.PersistentAuth !== 'undefined') {
+                const tokenInfo = window.PersistentAuth.getTokenInfo(token);
+                if (tokenInfo) {
+                    log('token-info', `<div class="token-info">
+                        <strong>Token Info:</strong><br>
+                        User ID: ${tokenInfo.userId}<br>
+                        Email: ${tokenInfo.email}<br>
+                        Emesso: ${tokenInfo.issuedAt}<br>
+                        Scade: ${tokenInfo.expiresAt}<br>
+                        Giorni rimanenti: ${tokenInfo.daysUntilExpiry}<br>
+                        Scaduto: ${tokenInfo.isExpired ? 'SÌ' : 'NO'}
+                    </div>`);
+                } else {
+                    log('token-info', '❌ Impossibile decodificare il token', 'error');
+                }
+            }
+        }
+
+        // Test 4: Storage Info
+        function showStorageInfo() {
+            clear('storage-info');
+            
+            const localStorage_token = localStorage.getItem('mental_commons_token');
+            const localStorage_user = localStorage.getItem('mental_commons_user');
+            const sessionStorage_token = sessionStorage.getItem('mental_commons_token');
+            const sessionStorage_user = sessionStorage.getItem('mental_commons_user');
+            
+            log('storage-info', `<div class="token-info">
+                <strong>localStorage:</strong><br>
+                Token: ${localStorage_token ? 'PRESENTE (' + localStorage_token.length + ' chars)' : 'ASSENTE'}<br>
+                User: ${localStorage_user ? 'PRESENTE' : 'ASSENTE'}<br><br>
+                
+                <strong>sessionStorage:</strong><br>
+                Token: ${sessionStorage_token ? 'PRESENTE (' + sessionStorage_token.length + ' chars)' : 'ASSENTE'}<br>
+                User: ${sessionStorage_user ? 'PRESENTE' : 'ASSENTE'}
+            </div>`);
+        }
+
+        // Test 5: Chiamate API
+        async function testApiCall() {
+            try {
+                log('api-test-results', '🔄 Test chiamata API /ping...');
+                
+                const response = await fetch('/api/ping');
+                const result = await response.json();
+                
+                if (response.ok) {
+                    log('api-test-results', '✅ API /ping risponde correttamente');
+                } else {
+                    log('api-test-results', '❌ API /ping errore: ' + result.message, 'error');
+                }
+            } catch (error) {
+                log('api-test-results', '❌ Errore chiamata API: ' + error.message, 'error');
+            }
+        }
+
+        async function testTokenValidation() {
+            try {
+                log('api-test-results', '🔄 Test validazione token...');
+                
+                const token = localStorage.getItem('mental_commons_token');
+                if (!token) {
+                    log('api-test-results', '❌ Nessun token da validare', 'warning');
+                    return;
+                }
+
+                const response = await fetch('/api/validate-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ token })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.valid) {
+                    log('api-test-results', '✅ Token valido secondo il backend');
+                    log('api-test-results', `📊 Scade: ${result.data.expiresAt}, Giorni: ${result.data.daysToExpiry}`);
+                } else {
+                    log('api-test-results', '❌ Token non valido: ' + result.message, 'error');
+                }
+            } catch (error) {
+                log('api-test-results', '❌ Errore validazione token: ' + error.message, 'error');
+            }
+        }
+
+        // Test 6: Logout
+        function testLogout() {
+            clear('logout-results');
+            
+            if (typeof window.PersistentAuth === 'undefined') {
+                log('logout-results', '❌ Sistema non caricato', 'error');
+                return;
+            }
+
+            log('logout-results', '🚪 Eseguendo logout...');
+            window.PersistentAuth.forceLogout('Test logout');
+            
+            setTimeout(() => {
+                log('logout-results', '✅ Logout eseguito');
+                checkAuthStatus();
+            }, 1000);
+        }
+
+        // Test 7: Pulizia
+        function clearAllStorage() {
+            clear('cleanup-results');
+            
+            if (typeof window.PersistentAuth !== 'undefined') {
+                window.PersistentAuth.clearAuthData();
+                log('cleanup-results', '✅ Dati autenticazione puliti');
+            }
+            
+            // Pulizia manuale aggiuntiva
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            log('cleanup-results', '✅ Storage completo pulito');
+        }
+
+        // Inizializzazione
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔄 Inizializzazione test...');
+            checkAuthSystemLoaded();
+            
+            if (typeof window.PersistentAuth !== 'undefined') {
+                window.PersistentAuth.init();
+            }
+        });
+    </script>
+</body>
+</html> 

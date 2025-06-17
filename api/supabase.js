@@ -112,11 +112,11 @@ export function generateJWT(userId, email) {
       userId,
       email,
       iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 ore
+      exp: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60) // 30 giorni
     };
     
     const token = jwt.sign(payload, JWT_SECRET);
-    console.log('✅ JWT generato con successo');
+    console.log('✅ JWT generato con successo (scadenza: 30 giorni)');
     return token;
   } catch (error) {
     console.error('❌ Errore generazione JWT:', error);

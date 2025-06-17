@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css?v=202506172240">
+    <link rel="stylesheet" href="/style.css?v=202506172257">
 </head>
 <body>
     <!-- Mobile Header (solo per mobile) -->
@@ -25,8 +25,12 @@
         <div class="mobile-header-right">
             <a href="index.html" class="mobile-nav-btn">Home</a>
             <a href="login.html" id="mobile-nav-login" class="mobile-nav-btn">Accedi</a>
-            <a href="dashboard.html" id="mobile-nav-dashboard" class="mobile-nav-btn" style="display: none;">Dashboard</a>
-            <button id="mobile-nav-logout" class="mobile-nav-btn mobile-logout-btn" style="display: none;">Esci</button>
+            <a href="dashboard.html" id="mobile-nav-dashboard" class="mobile-nav-btn mobile-profile-btn" style="display: none;" title="Profilo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </a>
         </div>
     </div>
 
@@ -43,15 +47,54 @@
         <div class="ritual-actions">
             <a href="index.html">Home</a>
             <a href="login.html" id="nav-login">Accedi</a>
-            <a href="dashboard.html" id="nav-dashboard" style="display: none;">Dashboard</a>
-            <button id="nav-logout" class="nav-logout-btn" style="display: none;">Esci</button>
+            <a href="dashboard.html" id="nav-dashboard" class="nav-profile-btn" style="display: none;" title="Profilo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </a>
         </div>
     </div>
 
     <main class="dashboard-main">
         <div class="container">
+            <!-- Nuova sezione profilo in alto -->
+            <div id="profile-header" class="profile-header" style="display: none;">
+                <div class="profile-header-content">
+                    <div class="profile-header-info">
+                        <div class="profile-avatar">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <div class="profile-header-details">
+                            <h3 id="profile-header-email">utente@example.com</h3>
+                            <p>Il tuo spazio mentale</p>
+                        </div>
+                    </div>
+                    <div class="profile-header-actions">
+                        <button id="edit-profile-header-btn" class="profile-header-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3l-6.5 6.5-4 1 1-4 6.5-6.5z"></path>
+                            </svg>
+                            Modifica profilo
+                        </button>
+                        <button id="logout-header-btn" class="profile-header-btn logout-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16,17 21,12 16,7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            Esci
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="dashboard-header">
-                <h1>Il tuo spazio mentale</h1>
+                <h1>I tuoi pensieri</h1>
                 <p class="dashboard-subtitle">Pensieri che hai affidato. Risposte che hai ricevuto.</p>
             </div>
 
@@ -68,34 +111,10 @@
                     <a href="index.html#form-section" class="new-ucme-button">Affida un nuovo pensiero</a>
                 </div>
 
-                <!-- Sezione Gestione Profilo -->
+                <!-- Sezione Gestione Profilo (spostata in basso e semplificata) -->
                 <div class="profile-section">
-                    <h2>Gestione Profilo</h2>
+                    <h2>Gestione Account</h2>
                     
-                    <!-- Info Profilo -->
-                    <div class="profile-info">
-                        <h3>Le tue informazioni</h3>
-                        <div class="profile-details">
-                            <div class="profile-detail">
-                                <span class="detail-label">Email:</span>
-                                <span id="profile-email" class="detail-value">-</span>
-                            </div>
-                            <div class="profile-detail">
-                                <span class="detail-label">Nome:</span>
-                                <span id="profile-name" class="detail-value">-</span>
-                            </div>
-                            <div class="profile-detail">
-                                <span class="detail-label">Membro dal:</span>
-                                <span id="profile-created" class="detail-value">-</span>
-                            </div>
-                            <div class="profile-detail">
-                                <span class="detail-label">Ultimo accesso:</span>
-                                <span id="profile-last-login" class="detail-value">-</span>
-                            </div>
-                        </div>
-                        <button id="edit-profile-btn" class="profile-action-btn">Modifica Profilo</button>
-                    </div>
-
                     <!-- Form Modifica Profilo (inizialmente nascosto) -->
                     <div id="edit-profile-form" class="edit-profile-form" style="display: none;">
                         <h3>Modifica Profilo</h3>
@@ -125,7 +144,6 @@
 
                     <!-- Azioni Account -->
                     <div class="account-actions">
-                        <h3>Azioni Account</h3>
                         <div class="action-buttons">
                             <button id="export-data-btn" class="profile-action-btn">Esporta i tuoi dati</button>
                             <button id="delete-account-btn" class="profile-danger-btn">Elimina Account</button>
@@ -149,6 +167,7 @@
         </div>
     </footer>
 
-    <script src="/script.js?v=202506172240"></script>
+    <script src="/auth.js?v=202506172252"></script>
+    <script src="/script.js?v=202506172257"></script>
 </body>
 </html> 

@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css?v=202506172240">
+    <link rel="stylesheet" href="/style.css?v=202506172257">
 </head>
 <body>
     <!-- Mobile Header (solo per mobile) -->
@@ -25,8 +25,12 @@
         <div class="mobile-header-right">
             <a href="index.html" class="mobile-nav-btn">Home</a>
             <a href="login.html" id="mobile-nav-login" class="mobile-nav-btn">Accedi</a>
-            <a href="dashboard.html" id="mobile-nav-dashboard" class="mobile-nav-btn" style="display: none;">Dashboard</a>
-            <button id="mobile-nav-logout" class="mobile-nav-btn mobile-logout-btn" style="display: none;">Esci</button>
+            <a href="dashboard.html" id="mobile-nav-dashboard" class="mobile-nav-btn mobile-profile-btn" style="display: none;" title="Profilo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </a>
         </div>
     </div>
 
@@ -43,8 +47,12 @@
         <div class="ritual-actions">
             <a href="index.html">Home</a>
             <a href="login.html" id="nav-login">Accedi</a>
-            <a href="dashboard.html" id="nav-dashboard" style="display: none;">Dashboard</a>
-            <button id="nav-logout" class="nav-logout-btn" style="display: none;">Esci</button>
+            <a href="dashboard.html" id="nav-dashboard" class="nav-profile-btn" style="display: none;" title="Profilo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </a>
         </div>
     </div>
 
@@ -90,6 +98,7 @@
         </div>
     </div>
 
-    <script src="/script.js?v=202506172240"></script>
+    <script src="/auth.js?v=202506172252"></script>
+    <script src="/script.js?v=202506172257"></script>
 </body>
 </html> 

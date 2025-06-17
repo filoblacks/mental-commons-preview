@@ -120,13 +120,19 @@ function initializeApp() {
 }
 
 function continueInitialization() {
+    // Inizializza sistema di autenticazione persistente
+    if (typeof window.PersistentAuth !== 'undefined') {
+        console.log('🚀 Inizializzo sistema autenticazione persistente...');
+        window.PersistentAuth.init();
+    }
+    
     // Mostra onboarding se necessario
     checkAndShowOnboarding();
     
-    // Carica dati esistenti (ora principalmente da sessionStorage)
+    // Carica dati esistenti 
     loadExistingData();
     
-    // Controlla se utente già loggato (ora da sessionStorage)
+    // Controlla se utente già loggato (ora da localStorage persistente)
     checkExistingUser();
     
     // Controlla se siamo nella pagina dashboard e inizializzala
@@ -719,43 +725,59 @@ function updateDashboardStatus(message) {
 // ========================================
 
 function checkExistingUser() {
-    // 🔍 DEBUG: Controllo stato autenticazione
+    // 🔍 DEBUG: Controllo stato autenticazione PERSISTENTE
     console.log('🔍 ============================================');
-    console.log('🔍 CONTROLLO AUTENTICAZIONE ESISTENTE');
+    console.log('🔍 CONTROLLO AUTENTICAZIONE PERSISTENTE');
     console.log('🔍 ============================================');
     
-    // Controlla sessionStorage (non localStorage)
-    const savedUser = sessionStorage.getItem('mental_commons_user');
-    const savedToken = sessionStorage.getItem('mental_commons_token');
-    
-    console.log('🔍 Verifica sessionStorage:');
-    console.log('  👤 User data:', savedUser ? 'PRESENTE' : 'MANCANTE');
-    console.log('  🎫 Token:', savedToken ? 'PRESENTE' : 'MANCANTE');
-    
-    if (savedUser && savedToken) {
-        try {
-            currentUser = JSON.parse(savedUser);
-            console.log('✅ Utente autenticato trovato:', currentUser.email);
+    // Usa il nuovo sistema di autenticazione persistente
+    if (typeof window.PersistentAuth !== 'undefined') {
+        const authResult = window.PersistentAuth.checkAuth();
+        
+        if (authResult.isAuthenticated) {
+            currentUser = authResult.user;
+            console.log('✅ Utente autenticato trovato (PERSISTENTE):', currentUser.email);
             console.log('🔍 Dati utente:');
             console.log('  📧 Email:', currentUser.email);
             console.log('  👤 Nome:', currentUser.name);
             console.log('  🆔 ID:', currentUser.id);
+            console.log('  🎫 Token scade:', authResult.tokenInfo.expiresAt);
+            console.log('  📅 Giorni rimanenti:', authResult.tokenInfo.daysUntilExpiry);
             
             updateUIForLoggedUser();
             updateNavigation(currentScreen);
             
             console.log('✅ UI aggiornata per utente autenticato');
-        } catch (error) {
-            console.error('❌ Errore nel parsing dei dati utente:', error);
-            console.log('🧹 Pulizia sessionStorage...');
-            sessionStorage.removeItem('mental_commons_user');
-            sessionStorage.removeItem('mental_commons_token');
+        } else {
+            if (authResult.expired) {
+                console.log('⏰ Sessione scaduta automaticamente');
+                showMobileFriendlyAlert('La tua sessione è scaduta. Effettua nuovamente il login.');
+            }
+            console.log('👤 Nessun utente autenticato trovato');
+            console.log('🔄 Configurazione UI per utente guest...');
             updateUIForGuestUser();
         }
     } else {
-        console.log('👤 Nessun utente autenticato trovato');
-        console.log('🔄 Configurazione UI per utente guest...');
-        updateUIForGuestUser();
+        // Fallback al sistema precedente se il nuovo non è caricato
+        console.log('⚠️ Sistema persistente non caricato, fallback a sessionStorage');
+        
+        const savedUser = sessionStorage.getItem('mental_commons_user');
+        const savedToken = sessionStorage.getItem('mental_commons_token');
+        
+        if (savedUser && savedToken) {
+            try {
+                currentUser = JSON.parse(savedUser);
+                updateUIForLoggedUser();
+                updateNavigation(currentScreen);
+            } catch (error) {
+                console.error('❌ Errore nel parsing dei dati utente:', error);
+                sessionStorage.removeItem('mental_commons_user');
+                sessionStorage.removeItem('mental_commons_token');
+                updateUIForGuestUser();
+            }
+        } else {
+            updateUIForGuestUser();
+        }
     }
 }
 
@@ -774,24 +796,35 @@ function logoutUser() {
         console.log('👤 Logout di:', currentUser.email);
     }
     
-    // Pulisci TUTTI i dati di sessione
-    currentUser = null;
-    sessionStorage.removeItem('mental_commons_user');
-    sessionStorage.removeItem('mental_commons_token');
-    
-    // Pulisci anche eventuali residui localStorage (pulizia completa)
-    localStorage.removeItem('mc-user');
-    localStorage.removeItem('mc-email');
-    localStorage.removeItem('mc-users');
-    localStorage.removeItem('mc-onboarded');
-    localStorage.removeItem('mentalCommons_ucmes');
-    localStorage.removeItem('mentalCommons_portatori');
-    
-    console.log('🧹 Tutti i dati di sessione puliti');
-    console.log('🔄 Aggiornamento UI per guest...');
-    
-    updateUIForGuestUser();
-    showScreen('home');
+    // Usa il nuovo sistema di autenticazione persistente se disponibile
+    if (typeof window.PersistentAuth !== 'undefined') {
+        console.log('🔄 Usando sistema persistente per logout...');
+        window.PersistentAuth.forceLogout('Manual logout');
+    } else {
+        // Fallback al sistema precedente
+        console.log('⚠️ Sistema persistente non disponibile, usando logout classico');
+        
+        // Pulisci TUTTI i dati di sessione
+        currentUser = null;
+        sessionStorage.removeItem('mental_commons_user');
+        sessionStorage.removeItem('mental_commons_token');
+        
+        // Pulisci anche localStorage
+        localStorage.removeItem('mental_commons_user');
+        localStorage.removeItem('mental_commons_token');
+        localStorage.removeItem('mc-user');
+        localStorage.removeItem('mc-email');
+        localStorage.removeItem('mc-users');
+        localStorage.removeItem('mc-onboarded');
+        localStorage.removeItem('mentalCommons_ucmes');
+        localStorage.removeItem('mentalCommons_portatori');
+        
+        console.log('🧹 Tutti i dati di sessione puliti');
+        console.log('🔄 Aggiornamento UI per guest...');
+        
+        updateUIForGuestUser();
+        showScreen('home');
+    }
     
     console.log('✅ Logout completato');
 }
@@ -1680,14 +1713,20 @@ async function handleLoginSubmit(event) {
         if (result.success && result.user && result.token) {
             console.log('✅ Login Supabase riuscito');
             
-            // Salva SOLO per sessione corrente (non localStorage persistente)
             currentUser = result.user;
             
-            // Salva token per sessione 
-            sessionStorage.setItem('mental_commons_token', result.token);
-            sessionStorage.setItem('mental_commons_user', JSON.stringify(currentUser));
+            // Usa il nuovo sistema di autenticazione persistente
+            if (typeof window.PersistentAuth !== 'undefined') {
+                console.log('💾 Salvando dati con sistema persistente...');
+                window.PersistentAuth.saveAuthData(currentUser, result.token);
+            } else {
+                // Fallback: salva in localStorage direttamente
+                console.log('⚠️ Sistema persistente non disponibile, salvando in localStorage');
+                localStorage.setItem('mental_commons_token', result.token);
+                localStorage.setItem('mental_commons_user', JSON.stringify(currentUser));
+            }
             
-            console.log('💾 Dati salvati in sessionStorage (non localStorage)');
+            console.log('💾 Dati salvati in localStorage (PERSISTENTE)');
             console.log('🔄 Reindirizzamento a dashboard...');
             
             window.location.href = 'dashboard.html';
@@ -1788,14 +1827,20 @@ async function handleRegisterSubmit(event) {
         if (result.success && result.user && result.token) {
             console.log('✅ Registrazione Supabase riuscita');
             
-            // Salva SOLO per sessione corrente (non localStorage persistente)
             currentUser = result.user;
             
-            // Salva token per sessione 
-            sessionStorage.setItem('mental_commons_token', result.token);
-            sessionStorage.setItem('mental_commons_user', JSON.stringify(currentUser));
+            // Usa il nuovo sistema di autenticazione persistente
+            if (typeof window.PersistentAuth !== 'undefined') {
+                console.log('💾 Salvando dati con sistema persistente...');
+                window.PersistentAuth.saveAuthData(currentUser, result.token);
+            } else {
+                // Fallback: salva in localStorage direttamente
+                console.log('⚠️ Sistema persistente non disponibile, salvando in localStorage');
+                localStorage.setItem('mental_commons_token', result.token);
+                localStorage.setItem('mental_commons_user', JSON.stringify(currentUser));
+            }
             
-            console.log('💾 Dati salvati in sessionStorage (non localStorage)');
+            console.log('💾 Dati salvati in localStorage (PERSISTENTE)');
             console.log('🔄 Reindirizzamento a dashboard...');
             
             showAuthError('Account creato con successo! Reindirizzamento...');
