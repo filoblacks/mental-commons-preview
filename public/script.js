@@ -10,14 +10,123 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
+// ========================================
+// AUTO-MIGRAZIONE UTENTI DA LOCALSTORAGE A SUPABASE
+// ========================================
+
+async function autoMigrateUsersToSupabase() {
+    console.log('🔄 ============================================');
+    console.log('🔄 AUTO-MIGRAZIONE UTENTI LOCALSTORAGE -> SUPABASE');
+    console.log('🔄 ============================================');
+    
+    // Cerca utenti esistenti in localStorage
+    const localUsers = JSON.parse(localStorage.getItem('mc-users') || '[]');
+    const currentUser = localStorage.getItem('mc-user');
+    
+    let usersToMigrate = [...localUsers];
+    
+    // Aggiungi anche l'utente corrente se presente
+    if (currentUser) {
+        try {
+            const user = JSON.parse(currentUser);
+            if (user && user.email && !usersToMigrate.find(u => u.email === user.email)) {
+                usersToMigrate.push(user);
+            }
+        } catch (e) {
+            console.log('⚠️ Errore parsing utente corrente:', e.message);
+        }
+    }
+    
+    if (usersToMigrate.length === 0) {
+        console.log('✅ Nessun utente localStorage da migrare');
+        return { migrated: 0, failed: 0, duplicates: 0 };
+    }
+    
+    console.log(`📊 Trovati ${usersToMigrate.length} utenti da migrare:`, usersToMigrate.map(u => u.email));
+    
+    let migrationStats = {
+        migrated: 0,
+        failed: 0,
+        duplicates: 0,
+        total: usersToMigrate.length
+    };
+    
+    // Prova migrazione per ogni utente
+    for (let i = 0; i < usersToMigrate.length; i++) {
+        const user = usersToMigrate[i];
+        console.log(`\n👤 Migrazione ${i + 1}/${usersToMigrate.length}: ${user.email}`);
+        
+        try {
+            const result = await registerWithBackend(
+                user.email, 
+                user.password || user.accessCode || 'legacy_password', 
+                user.name || user.email.split('@')[0]
+            );
+            
+            if (result.success) {
+                console.log(`   ✅ ${user.email}: Migrato con successo`);
+                migrationStats.migrated++;
+            } else if (result.message && result.message.includes('già esiste')) {
+                console.log(`   🔄 ${user.email}: Già esistente in Supabase (OK)`);
+                migrationStats.duplicates++;
+            } else {
+                console.log(`   ❌ ${user.email}: Fallimento - ${result.message}`);
+                migrationStats.failed++;
+            }
+        } catch (error) {
+            console.log(`   ❌ ${user.email}: Errore critico - ${error.message}`);
+            migrationStats.failed++;
+        }
+        
+        // Pausa breve per non sovraccaricare il server
+        await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    
+    console.log('\n📊 RISULTATI MIGRAZIONE:');
+    console.log(`   ✅ Migrati: ${migrationStats.migrated}`);
+    console.log(`   🔄 Duplicati: ${migrationStats.duplicates}`);
+    console.log(`   ❌ Falliti: ${migrationStats.failed}`);
+    
+    // Se la migrazione è andata a buon fine, offri di pulire localStorage
+    if (migrationStats.failed === 0 && (migrationStats.migrated > 0 || migrationStats.duplicates > 0)) {
+        console.log('🧹 Migrazione completata con successo');
+        console.log('💡 localStorage sarà pulito al logout per completare la transizione');
+        
+        // Salva flag per indicare che la migrazione è completata
+        localStorage.setItem('mc-migration-completed', 'true');
+    }
+    
+    return migrationStats;
+}
+
+// ========================================
+// INIZIALIZZAZIONE APP (AGGIORNATA)
+// ========================================
+
 function initializeApp() {
+    console.log('🔄 Inizializzazione Mental Commons 3.0...');
+    
+    // 1. Prima di tutto, esegui migrazione automatica se necessario
+    autoMigrateUsersToSupabase().then(migrationStats => {
+        console.log('🔄 Auto-migrazione completata:', migrationStats);
+        
+        // 2. Poi continua con l'inizializzazione normale
+        continueInitialization();
+    }).catch(error => {
+        console.error('❌ Errore durante auto-migrazione:', error);
+        // Continua comunque l'inizializzazione anche se la migrazione fallisce
+        continueInitialization();
+    });
+}
+
+function continueInitialization() {
     // Mostra onboarding se necessario
     checkAndShowOnboarding();
     
-    // Carica dati esistenti dal localStorage
+    // Carica dati esistenti (ora principalmente da sessionStorage)
     loadExistingData();
     
-    // Controlla se utente già loggato
+    // Controlla se utente già loggato (ora da sessionStorage)
     checkExistingUser();
     
     // Controlla se siamo nella pagina dashboard e inizializzala
@@ -48,7 +157,7 @@ function initializeApp() {
     // Setup mobile optimizations
     setupMobileOptimizations();
     
-    console.log('Mental Commons 3.0 inizializzato');
+        console.log('✅ Mental Commons 3.0 inizializzato con migrazione automatica');
 }
 
 // ========================================
@@ -610,103 +719,81 @@ function updateDashboardStatus(message) {
 // ========================================
 
 function checkExistingUser() {
-    const savedUser = localStorage.getItem('mc-user');
-    if (savedUser) {
+    // 🔍 DEBUG: Controllo stato autenticazione
+    console.log('🔍 ============================================');
+    console.log('🔍 CONTROLLO AUTENTICAZIONE ESISTENTE');
+    console.log('🔍 ============================================');
+    
+    // Controlla sessionStorage (non localStorage)
+    const savedUser = sessionStorage.getItem('mental_commons_user');
+    const savedToken = sessionStorage.getItem('mental_commons_token');
+    
+    console.log('🔍 Verifica sessionStorage:');
+    console.log('  👤 User data:', savedUser ? 'PRESENTE' : 'MANCANTE');
+    console.log('  🎫 Token:', savedToken ? 'PRESENTE' : 'MANCANTE');
+    
+    if (savedUser && savedToken) {
         try {
             currentUser = JSON.parse(savedUser);
-            console.log('Utente trovato:', currentUser.email);
+            console.log('✅ Utente autenticato trovato:', currentUser.email);
+            console.log('🔍 Dati utente:');
+            console.log('  📧 Email:', currentUser.email);
+            console.log('  👤 Nome:', currentUser.name);
+            console.log('  🆔 ID:', currentUser.id);
+            
             updateUIForLoggedUser();
             updateNavigation(currentScreen);
+            
+            console.log('✅ UI aggiornata per utente autenticato');
         } catch (error) {
-            console.error('Errore nel caricamento utente:', error);
-            localStorage.removeItem('mc-user');
+            console.error('❌ Errore nel parsing dei dati utente:', error);
+            console.log('🧹 Pulizia sessionStorage...');
+            sessionStorage.removeItem('mental_commons_user');
+            sessionStorage.removeItem('mental_commons_token');
+            updateUIForGuestUser();
         }
     } else {
+        console.log('👤 Nessun utente autenticato trovato');
+        console.log('🔄 Configurazione UI per utente guest...');
         updateUIForGuestUser();
     }
 }
 
-function createUser(email, name = null, accessCode = null) {
-    const user = {
-        id: generateUniqueId(),
-        email: email,
-        name: name || 'Anonimo',
-        accessCode: accessCode || generateAccessCode(),
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-        isPortatore: false
-    };
-    
-    // Salva utente
-    currentUser = user;
-    localStorage.setItem('mc-user', JSON.stringify(user));
-    
-    console.log('Nuovo utente creato:', email);
-    return user;
-}
-
-function loginUser(email, accessCode) {
-    // In un'implementazione reale, questo dovrebbe verificare con un server
-    // Per ora, creiamo/troviamo l'utente localmente
-    
-    const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
-    let user = users.find(u => u.email === email);
-    
-    if (!user) {
-        // Se non esiste, chiedi se vuole registrarsi
-        return { error: 'Email non trovata. Vuoi registrarti?' };
-    }
-    
-    if (user.accessCode !== accessCode) {
-        return { error: 'Codice di accesso non valido.' };
-    }
-    
-    // Login riuscito
-    user.lastLogin = new Date().toISOString();
-    currentUser = user;
-    localStorage.setItem('mc-user', JSON.stringify(user));
-    
-    // Aggiorna nella lista utenti
-    const userIndex = users.findIndex(u => u.id === user.id);
-    users[userIndex] = user;
-    localStorage.setItem('mc-users', JSON.stringify(users));
-    
-    console.log('Login riuscito per:', email);
-    return { success: true, user: user };
-}
-
-function registerUser(email, name) {
-    const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
-    
-    // Controlla se email già esiste
-    if (users.find(u => u.email === email)) {
-        return { error: 'Email già registrata. Prova ad accedere.' };
-    }
-    
-    // Crea nuovo utente
-    const user = createUser(email, name);
-    
-    // Aggiungi alla lista utenti
-    users.push(user);
-    localStorage.setItem('mc-users', JSON.stringify(users));
-    
-    // Simula invio email con codice di accesso
-    console.log('Codice di accesso per', email, ':', user.accessCode);
-    
-    return { 
-        success: true, 
-        user: user,
-        message: `Registrazione completata! Il tuo codice di accesso è: ${user.accessCode}`
-    };
-}
+// ❌ FUNZIONI DEPRECATE - RIMOSSE PER CENTRALIZZAZIONE SUPABASE
+// Le seguenti funzioni sono state rimosse perché ora usiamo SOLO Supabase:
+// - createUser() -> Ora gestito da /api/register
+// - loginUser() -> Ora gestito da /api/login  
+// - registerUser() -> Ora gestito da /api/register
 
 function logoutUser() {
+    console.log('🚪 ============================================');
+    console.log('🚪 LOGOUT UTENTE');
+    console.log('🚪 ============================================');
+    
+    if (currentUser) {
+        console.log('👤 Logout di:', currentUser.email);
+    }
+    
+    // Pulisci TUTTI i dati di sessione
     currentUser = null;
+    sessionStorage.removeItem('mental_commons_user');
+    sessionStorage.removeItem('mental_commons_token');
+    
+    // Pulisci anche eventuali residui localStorage (pulizia completa)
     localStorage.removeItem('mc-user');
-    localStorage.removeItem('mc-email'); // Rimuove anche l'email per la dashboard
+    localStorage.removeItem('mc-email');
+    localStorage.removeItem('mc-users');
+    localStorage.removeItem('mc-onboarded');
+    localStorage.removeItem('mentalCommons_ucmes');
+    localStorage.removeItem('mentalCommons_portatori');
+    
+    console.log('🧹 Tutti i dati di sessione puliti');
+    console.log('🔄 Aggiornamento UI per guest...');
+    
     updateUIForGuestUser();
     showScreen('home');
-    console.log('Logout completato');
+    
+    console.log('✅ Logout completato');
 }
 
 // ========================================
@@ -1444,14 +1531,15 @@ async function syncUsersToBackendDebug() {
 }
 
 async function testBackendLogin() {
-    const email = prompt('Email per test backend:', 'test@email.com');
-    const password = prompt('Password per test backend:', 'password123');
+    const email = prompt('Email test:');
+    const password = prompt('Password test:');
     
     if (email && password) {
         try {
             console.log('🔍 Debug test backend iniziato...');
-            console.log('📡 URL:', 'https://script.google.com/macros/s/AKfycbzYSw5zAuEMbJRpaBSddecc_RdjImzWZSL5q4Pc0-pgA5E4EGiStSKoXz2aw2gsyTDIJA/exec');
+            console.log('📡 Endpoint:', `${window.location.origin}/api/login`);
             console.log('📤 Payload:', { action: 'login', email, password: '[HIDDEN]' });
+            console.log('🔧 Backend: SUPABASE (Google Apps Script RIMOSSO)');
             
             const result = await loginWithBackend(email, password);
             alert(`✅ Test login: ${result.success ? 'SUCCESS' : 'FAILED'}\n${result.message}`);
@@ -1468,13 +1556,13 @@ async function testBackendLogin() {
             
             if (error.message.includes('CORS') || error.message.includes('blocked')) {
                 errorMsg = '🚨 ERRORE CORS';
-                helpMsg = '\n\n🔧 SOLUZIONE:\n1. Apri Google Apps Script\n2. Sostituisci funzioni doOptions() e createResponse()\n3. Deploy con accesso "Anyone"\n4. Usa codice da google-apps-script-cors-fix.js';
+                helpMsg = '\n\n🔧 SOLUZIONE:\n1. Verifica configurazione CORS Vercel\n2. Controlla header Access-Control-Allow-Origin\n3. Verifica che l\'API sia online';
             } else if (error.message.includes('Failed to fetch') || error.message.includes('HTTP 0')) {
                 errorMsg = '🌐 ERRORE CONNESSIONE';
-                helpMsg = '\n\n🔧 POSSIBILI CAUSE:\n1. Google Apps Script offline\n2. URL non corretto\n3. Configurazione CORS mancante';
+                helpMsg = '\n\n🔧 POSSIBILI CAUSE:\n1. API Vercel offline\n2. URL endpoint non corretto\n3. Problemi di rete';
             } else if (error.message.includes('HTTP')) {
                 errorMsg = `📡 ERRORE SERVER: ${error.message}`;
-                helpMsg = '\n\n🔧 Controlla log Google Apps Script per dettagli';
+                helpMsg = '\n\n🔧 Controlla log Vercel e Supabase per dettagli';
             }
             
             alert(`❌ ${errorMsg}${helpMsg}`);
@@ -1482,44 +1570,57 @@ async function testBackendLogin() {
     }
 }
 
-// Esponi le funzioni di debug globalmente per testing
+// Esponi le funzioni di debug aggiornate per Supabase
 window.debugMC = {
     showPanel: showDebugPanel,
     debug: debugLoginIssues,
-    users: () => JSON.parse(localStorage.getItem('mc-users') || '[]'),
-    clearUsers: () => localStorage.removeItem('mc-users'),
-    testLogin: (email, password) => {
-        console.log('🧪 Test login:', { email, password });
-        const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
-        const user = users.find(u => u.email === email && u.password === password);
-        console.log('🧪 Risultato:', user ? 'SUCCESSO' : 'FALLITO');
-        return !!user;
+    // ❌ FUNZIONI DEPRECATE - localStorage non più usato per utenti
+    users: () => {
+        console.log('⚠️ DEPRECATO: Gli utenti sono ora gestiti solo in Supabase');
+        console.log('🔍 Per debug, controlla sessionStorage:', {
+            user: sessionStorage.getItem('mental_commons_user'),
+            token: sessionStorage.getItem('mental_commons_token')
+        });
+        return [];
     },
-    createQuickUser: (email, password) => {
-        console.log('🚀 Creazione utente rapida:', { email, password });
-        const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
-        
-        // Controlla se esiste già
-        if (users.find(u => u.email === email)) {
-            console.log('❌ Utente già esistente');
-            return false;
+    clearUsers: () => {
+        console.log('⚠️ DEPRECATO: Pulizia localStorage non necessaria');
+        console.log('🔄 Eseguo logout completo invece...');
+        logoutUser();
+    },
+    testLogin: async (email, password) => {
+        console.log('🧪 Test login Supabase:', { email, password: '[HIDDEN]' });
+        try {
+            const result = await loginWithBackend(email, password);
+            console.log('🧪 Risultato:', result.success ? 'SUCCESSO' : 'FALLITO');
+            console.log('🧪 Dettagli:', result);
+            return result;
+        } catch (error) {
+            console.log('🧪 Errore:', error.message);
+            return { success: false, error: error.message };
         }
-        
-        // Crea nuovo utente
-        const newUser = {
-            id: 'quick_' + Date.now(),
-            email: email,
-            password: password,
-            name: email.split('@')[0],
-            createdAt: new Date().toISOString(),
-            lastLogin: new Date().toISOString(),
-            isPortatore: false
-        };
-        
-        users.push(newUser);
-        localStorage.setItem('mc-users', JSON.stringify(users));
-        console.log('✅ Utente creato:', newUser);
-        return newUser;
+    },
+    testRegister: async (email, password, name) => {
+        console.log('🧪 Test registrazione Supabase:', { email, password: '[HIDDEN]', name });
+        try {
+            const result = await registerWithBackend(email, password, name);
+            console.log('🧪 Risultato:', result.success ? 'SUCCESSO' : 'FALLITO');
+            console.log('🧪 Dettagli:', result);
+            return result;
+        } catch (error) {
+            console.log('🧪 Errore:', error.message);
+            return { success: false, error: error.message };
+        }
+    },
+    currentUser: () => {
+        console.log('👤 Utente corrente:');
+        console.log('  sessionStorage:', sessionStorage.getItem('mental_commons_user'));
+        console.log('  currentUser var:', currentUser);
+        return currentUser;
+    },
+    logout: () => {
+        console.log('🚪 Logout di debug...');
+        logoutUser();
     }
 };
 
@@ -1532,17 +1633,20 @@ async function handleLoginSubmit(event) {
     
     const email = document.getElementById('login-email')?.value?.trim();
     const password = document.getElementById('login-password')?.value?.trim();
-    const errorElement = document.getElementById('auth-error');
     
-    // 🔍 DEBUG: Log dei dati inviati
-    console.log('📤 Dati inviati al login:', { 
+    // 🔍 DEBUG: Log dettagliato per troubleshooting cross-device
+    console.log('🔐 ============================================');
+    console.log('🔐 MENTAL COMMONS - LOGIN ATTEMPT');
+    console.log('🔐 ============================================');
+    console.log('📤 Login data:', { 
         email, 
         password: password ? '[PRESENTE]' : '[MANCANTE]',
         emailLength: email?.length,
         passwordLength: password?.length,
-        emailCharCodes: email ? email.split('').map(c => c.charCodeAt(0)) : [],
-        userAgent: navigator.userAgent,
-        isMobile: isMobileDevice()
+        timestamp: new Date().toISOString(),
+        device: navigator.userAgent,
+        isMobile: isMobileDevice(),
+        origin: window.location.origin
     });
     
     // Reset errori precedenti
@@ -1560,132 +1664,61 @@ async function handleLoginSubmit(event) {
         return;
     }
     
-    // 🚀 NUOVO: Prova prima con backend centralizzato
+    // 🚀 SOLO SUPABASE - NESSUN FALLBACK LOCALE
     try {
-        console.log('🌐 Tentativo login con backend centralizzato...');
+        console.log('🌐 Tentativo login con SUPABASE (UNICA FONTE)...');
+        console.log('🔍 Endpoint:', `${window.location.origin}/api/login`);
+        
         const result = await loginWithBackend(email, password);
         
-        if (result.success) {
-            console.log('✅ Login backend riuscito:', result.user);
+        console.log('📥 Risposta Supabase ricevuta:');
+        console.log('  ✅ Success:', result.success);
+        console.log('  👤 User data:', result.user ? 'PRESENTE' : 'MANCANTE');
+        console.log('  🎫 Token:', result.token ? 'PRESENTE' : 'MANCANTE');
+        console.log('  💬 Message:', result.message);
+        
+        if (result.success && result.user && result.token) {
+            console.log('✅ Login Supabase riuscito');
+            
+            // Salva SOLO per sessione corrente (non localStorage persistente)
             currentUser = result.user;
-            localStorage.setItem('mc-user', JSON.stringify(currentUser));
+            
+            // Salva token per sessione 
+            sessionStorage.setItem('mental_commons_token', result.token);
+            sessionStorage.setItem('mental_commons_user', JSON.stringify(currentUser));
+            
+            console.log('💾 Dati salvati in sessionStorage (non localStorage)');
+            console.log('🔄 Reindirizzamento a dashboard...');
+            
             window.location.href = 'dashboard.html';
             return;
+        } else {
+            console.log('❌ Login fallito - risposta Supabase non valida');
+            showAuthError(result.message || 'Errore durante il login. Verifica email e password.');
+            return;
         }
+        
     } catch (error) {
-        console.log('⚠️ Backend non disponibile, fallback a localStorage:', error.message);
-    }
-    
-    // Cerca l'utente esistente
-    const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
-    console.log('🔍 Utenti registrati nel sistema:', users.length);
-    console.log('🔍 Email degli utenti:', users.map(u => ({ 
-        email: u.email, 
-        emailCharCodes: u.email.split('').map(c => c.charCodeAt(0)),
-        hasPassword: !!u.password 
-    })));
-    
-    // 🔍 DEBUG: Confronto case insensitive e controllo caratteri speciali
-    const userByEmail = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (userByEmail) {
-        console.log('✅ Utente trovato con email (case insensitive)');
-        console.log('🔍 Confronto password:', {
-            inputPassword: password,
-            storedPassword: userByEmail.password,
-            areEqual: userByEmail.password === password,
-            inputCharCodes: password.split('').map(c => c.charCodeAt(0)),
-            storedCharCodes: userByEmail.password.split('').map(c => c.charCodeAt(0))
-        });
-    } else {
-        console.log('❌ Nessun utente trovato con questa email (anche case insensitive)');
-    }
-    
-    // 🔧 VERSIONE MIGLIORATA: Cerca con più tolleranza per problemi mobile
-    let user = null;
-    
-    // Metodo 1: Confronto case sensitive esatto (originale)
-    user = users.find(u => u.email === email && u.password === password);
-    if (user) {
-        console.log('✅ Login riuscito con confronto esatto');
-    }
-    
-    // Metodo 2: Se non trovato, prova con email case insensitive
-    if (!user) {
-        user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-        if (user) {
-            console.log('✅ Login riuscito con email case insensitive');
-        }
-    }
-    
-    // Metodo 3: Se non trovato, prova con entrambi case insensitive
-    if (!user) {
-        user = users.find(u => 
-            u.email.toLowerCase() === email.toLowerCase() && 
-            u.password.toLowerCase() === password.toLowerCase()
-        );
-        if (user) {
-            console.log('✅ Login riuscito con entrambi case insensitive');
-        }
-    }
-    
-    // Metodo 4: Se non trovato, prova a rimuovere spazi extra dovuti a mobile
-    if (!user) {
-        const cleanEmail = email.replace(/\s+/g, '');
-        const cleanPassword = password.replace(/\s+/g, '');
-        user = users.find(u => 
-            u.email.toLowerCase().replace(/\s+/g, '') === cleanEmail.toLowerCase() && 
-            u.password === cleanPassword
-        );
-        if (user) {
-            console.log('✅ Login riuscito dopo pulizia spazi extra');
-        }
-    }
-    
-    console.log('📥 Risultato ricerca utente finale:', { 
-        found: !!user,
-        totalMethods: 4
-    });
-    
-    if (user) {
-        console.log('✅ Login riuscito per:', email);
-        // Login riuscito
-        currentUser = user;
-        localStorage.setItem('mc-user', JSON.stringify(currentUser));
+        console.error('❌ Errore CRITICO durante login Supabase:', error);
+        console.error('Stack trace:', error.stack);
         
-        // Reindirizza alla dashboard
-        window.location.href = 'dashboard.html';
-    } else {
-        console.log('❌ Login fallito - credenziali non corrette dopo tutti i tentativi');
+        // 🚨 NESSUN FALLBACK - SOLO SUPABASE
+        console.log('🚨 NESSUN FALLBACK - LOGIN FALLITO');
+        console.log('🔍 Possibili cause:');
+        console.log('  1. Account non esistente nel database Supabase');
+        console.log('  2. Password errata');
+        console.log('  3. Problemi di connessione al database');
+        console.log('  4. Configurazione Supabase non corretta');
         
-        // 🔍 DEBUG: Mostra suggerimenti per debug
-        if (userByEmail) {
-            console.log('💡 SUGGERIMENTO: Email trovata ma password non corrisponde');
-            console.log('💡 Verifica se ci sono caratteri nascosti o problemi di encoding');
+        if (error.message.includes('404')) {
+            showAuthError('Account non trovato. Registrati per accedere.');
+        } else if (error.message.includes('401')) {
             showAuthError('Email o password non corretti.');
         } else {
-            console.log('💡 SUGGERIMENTO: Email non trovata nel sistema');
-            console.log('💡 Emails registrate:', users.map(u => u.email));
-            
-            // 🚀 NUOVO: Auto-registrazione per ambienti di sviluppo
-            if (shouldAllowAutoRegistration()) {
-                console.log('🚀 Tentativo auto-registrazione per ambiente sviluppo...');
-                const autoUser = debugMC.createQuickUser(email, password);
-                if (autoUser) {
-                    console.log('✅ Utente auto-creato, riprovando login...');
-                    currentUser = autoUser;
-                    localStorage.setItem('mc-user', JSON.stringify(currentUser));
-                    showAuthError('Account creato automaticamente. Login in corso...');
-                    
-                    // Reindirizza alla dashboard dopo 1 secondo
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 1000);
-                    return;
-                }
-            }
-            
-            showAuthError('Email non trovata. Prova a registrarti o contatta il supporto.');
+            showAuthError('Errore di connessione. Riprova più tardi.');
         }
+        
+        return;
     }
 }
 
@@ -1696,89 +1729,108 @@ async function handleRegisterSubmit(event) {
     const password = document.getElementById('register-password')?.value?.trim();
     const confirmPassword = document.getElementById('register-confirm')?.value?.trim();
     
-    // 🔍 DEBUG: Log dei dati registrazione
-    console.log('📤 Dati inviati alla registrazione:', { 
+    // 🔍 DEBUG: Log dettagliato per troubleshooting cross-device
+    console.log('📝 ============================================');
+    console.log('📝 MENTAL COMMONS - REGISTER ATTEMPT');
+    console.log('📝 ============================================');
+    console.log('📤 Register data:', { 
         email, 
         password: password ? '[PRESENTE]' : '[MANCANTE]',
         confirmPassword: confirmPassword ? '[PRESENTE]' : '[MANCANTE]',
         emailLength: email?.length,
         passwordLength: password?.length,
-        isMobile: isMobileDevice()
+        timestamp: new Date().toISOString(),
+        device: navigator.userAgent,
+        isMobile: isMobileDevice(),
+        origin: window.location.origin
     });
     
     // Reset errori precedenti
     hideAuthError();
     
     if (!email || !password || !confirmPassword) {
+        console.log('❌ Campi registrazione mancanti');
         showAuthError('Compila tutti i campi per registrarti.');
         return;
     }
     
     if (!isValidEmail(email)) {
+        console.log('❌ Email registrazione non valida:', email);
         showAuthError('Inserisci un indirizzo email valido.');
         return;
     }
     
     if (password.length < 6) {
+        console.log('❌ Password troppo corta:', password.length);
         showAuthError('La password deve essere di almeno 6 caratteri.');
         return;
     }
     
     if (password !== confirmPassword) {
+        console.log('❌ Password non corrispondenti');
         showAuthError('Le password non corrispondono.');
         return;
     }
     
-    // 🚀 NUOVO: Prova prima con backend centralizzato
+    // 🚀 SOLO SUPABASE - NESSUN FALLBACK LOCALE
     try {
-        console.log('🌐 Tentativo registrazione con backend centralizzato...');
+        console.log('🌐 Tentativo registrazione con SUPABASE (UNICA FONTE)...');
+        console.log('🔍 Endpoint:', `${window.location.origin}/api/register`);
+        
         const result = await registerWithBackend(email, password, email.split('@')[0]);
         
-        if (result.success) {
-            console.log('✅ Registrazione backend riuscita:', result.user);
+        console.log('📥 Risposta Supabase registrazione ricevuta:');
+        console.log('  ✅ Success:', result.success);
+        console.log('  👤 User data:', result.user ? 'PRESENTE' : 'MANCANTE');
+        console.log('  🎫 Token:', result.token ? 'PRESENTE' : 'MANCANTE');
+        console.log('  💬 Message:', result.message);
+        
+        if (result.success && result.user && result.token) {
+            console.log('✅ Registrazione Supabase riuscita');
+            
+            // Salva SOLO per sessione corrente (non localStorage persistente)
             currentUser = result.user;
-            localStorage.setItem('mc-user', JSON.stringify(currentUser));
+            
+            // Salva token per sessione 
+            sessionStorage.setItem('mental_commons_token', result.token);
+            sessionStorage.setItem('mental_commons_user', JSON.stringify(currentUser));
+            
+            console.log('💾 Dati salvati in sessionStorage (non localStorage)');
+            console.log('🔄 Reindirizzamento a dashboard...');
+            
             showAuthError('Account creato con successo! Reindirizzamento...');
             setTimeout(() => {
                 window.location.href = 'dashboard.html';
             }, 1000);
             return;
+        } else {
+            console.log('❌ Registrazione fallita - risposta Supabase non valida');
+            showAuthError(result.message || 'Errore durante la registrazione. Riprova.');
+            return;
         }
+        
     } catch (error) {
-        console.log('⚠️ Backend non disponibile, fallback a localStorage:', error.message);
-    }
-    
-    // Fallback localStorage (codice originale)
-    console.log('📱 Fallback a registrazione localStorage...');
-    
-    // Controlla se l'utente esiste già
-    const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
-    const existingUser = users.find(u => u.email === email);
-    
-    if (existingUser) {
-        showAuthError('Un account con questa email esiste già. Prova ad accedere.');
+        console.error('❌ Errore CRITICO durante registrazione Supabase:', error);
+        console.error('Stack trace:', error.stack);
+        
+        // 🚨 NESSUN FALLBACK - SOLO SUPABASE
+        console.log('🚨 NESSUN FALLBACK - REGISTRAZIONE FALLITA');
+        console.log('🔍 Possibili cause:');
+        console.log('  1. Email già esistente nel database Supabase');
+        console.log('  2. Problemi di validazione dati');
+        console.log('  3. Problemi di connessione al database');
+        console.log('  4. Configurazione Supabase non corretta');
+        
+        if (error.message.includes('409')) {
+            showAuthError('Un account con questa email esiste già. Prova ad accedere.');
+        } else if (error.message.includes('400')) {
+            showAuthError('Dati non validi. Controlla email e password.');
+        } else {
+            showAuthError('Errore di connessione. Riprova più tardi.');
+        }
+        
         return;
     }
-    
-    // Crea nuovo utente
-    const newUser = {
-        id: generateUniqueId(),
-        email: email,
-        password: password,
-        name: email.split('@')[0], // Nome default dall'email
-        createdAt: new Date().toISOString()
-    };
-    
-    // Salva l'utente
-    users.push(newUser);
-    localStorage.setItem('mc-users', JSON.stringify(users));
-    
-    // Login automatico
-    currentUser = newUser;
-    localStorage.setItem('mc-user', JSON.stringify(currentUser));
-    
-    // Reindirizza alla dashboard
-    window.location.href = 'dashboard.html';
 }
 
 function showAuthError(message) {

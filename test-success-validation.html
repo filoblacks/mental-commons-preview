@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Commons - Test Finale Successo ✅</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            position: relative;
+        }
+        .test-success {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+        .test-failed {
+            border-color: #dc3545;
+            background: #fff8f8;
+        }
+        .status-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+        }
+        .success { color: #28a745; }
+        .failed { color: #dc3545; }
+        .pending { color: #ffc107; }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 40px; }
+        h3 { color: #495057; margin-top: 0; }
+        .test-details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .overall-status {
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 Mental Commons - Test Finale Successo</h1>
+        
+        <div id="overall-status" class="overall-status">
+            <span id="overall-text">Test in corso...</span>
+        </div>
+
+        <div class="test-section" id="register-test">
+            <div class="status-icon" id="register-icon">⏳</div>
+            <h3>1. Test Registrazione</h3>
+            <p>Creazione nuovo utente con password e dati persistenti</p>
+            <div class="test-details" id="register-details">In attesa...</div>
+        </div>
+
+        <div class="test-section" id="login-test">
+            <div class="status-icon" id="login-icon">⏳</div>
+            <h3>2. Test Login</h3>
+            <p>Autenticazione utente e generazione JWT token</p>
+            <div class="test-details" id="login-details">In attesa...</div>
+        </div>
+
+        <div class="test-section" id="ucme-save-test">
+            <div class="status-icon" id="ucme-save-icon">⏳</div>
+            <h3>3. Test Salvataggio UCMe</h3>
+            <p>Salvataggio pensiero con autenticazione JWT</p>
+            <div class="test-details" id="ucme-save-details">In attesa...</div>
+        </div>
+
+        <div class="test-section" id="ucme-load-test">
+            <div class="status-icon" id="ucme-load-icon">⏳</div>
+            <h3>4. Test Caricamento UCMe</h3>
+            <p>Recupero UCMe salvate dal database persistente</p>
+            <div class="test-details" id="ucme-load-details">In attesa...</div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn" onclick="runAllTests()">🚀 Esegui Test Completi</button>
+            <button class="btn" onclick="location.reload()">🔄 Reset</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://mental-commons.vercel.app/api';
+        let testResults = {
+            register: false,
+            login: false,
+            ucmeSave: false,
+            ucmeLoad: false
+        };
+        let userToken = null;
+
+        async function runAllTests() {
+            console.log('🚀 AVVIO TEST COMPLETI MENTAL COMMONS BACKEND');
+            
+            // Reset stato
+            testResults = { register: false, login: false, ucmeSave: false, ucmeLoad: false };
+            userToken = null;
+            
+            updateOverallStatus();
+            
+            try {
+                // Test 1: Registrazione
+                await testRegistration();
+                
+                // Test 2: Login
+                await testLogin();
+                
+                // Test 3: Salvataggio UCMe
+                await testUCMeSave();
+                
+                // Test 4: Caricamento UCMe
+                await testUCMeLoad();
+                
+                // Risultato finale
+                updateOverallStatus();
+                
+            } catch (error) {
+                console.error('❌ Errore generale nei test:', error);
+                updateOverallStatus();
+            }
+        }
+
+        async function testRegistration() {
+            updateTestStatus('register', 'pending', 'Test registrazione in corso...');
+            
+            try {
+                const timestamp = Date.now();
+                const testUser = {
+                    name: 'Test Success User',
+                    email: `success${timestamp}@mentalcommons.it`,
+                    password: 'test123'
+                };
+                
+                console.log('📝 Registrazione utente:', testUser.email);
+                
+                const response = await fetch(`${API_BASE}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testUser)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.user && result.token) {
+                    testResults.register = true;
+                    userToken = result.token;
+                    
+                    updateTestStatus('register', 'success', 
+                        `✅ SUCCESSO\n` +
+                        `Email: ${result.user.email}\n` +
+                        `ID: ${result.user.id}\n` +
+                        `Token JWT: ${result.token.substring(0, 50)}...\n` +
+                        `Backend: ${result.debug.backend}\n` +
+                        `Storage: ${result.debug.persistentStorage ? 'Persistente' : 'Temporaneo'}`
+                    );
+                    
+                    console.log('✅ Registrazione SUCCESSO');
+                } else {
+                    throw new Error(result.message || 'Registrazione fallita');
+                }
+                
+            } catch (error) {
+                console.error('❌ Registrazione FALLITA:', error);
+                updateTestStatus('register', 'failed', `❌ FALLITO: ${error.message}`);
+            }
+        }
+
+        async function testLogin() {
+            updateTestStatus('login', 'pending', 'Test login in corso...');
+            
+            try {
+                if (!userToken) {
+                    throw new Error('Token non disponibile dalla registrazione');
+                }
+                
+                // Otteniamo email dal token per il login
+                const tokenPayload = JSON.parse(atob(userToken.split('.')[1]));
+                const userEmail = tokenPayload.email;
+                
+                console.log('🔑 Login utente:', userEmail);
+                
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: userEmail,
+                        password: 'test123'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.user && result.token) {
+                    testResults.login = true;
+                    userToken = result.token; // Aggiorna token
+                    
+                    updateTestStatus('login', 'success',
+                        `✅ SUCCESSO\n` +
+                        `Email: ${result.user.email}\n` +
+                        `ID: ${result.user.id}\n` +
+                        `Nuovo Token: ${result.token.substring(0, 50)}...\n` +
+                        `Backend: ${result.debug.backend}\n` +
+                        `Login Method: ${result.debug.loginMethod}`
+                    );
+                    
+                    console.log('✅ Login SUCCESSO');
+                } else {
+                    throw new Error(result.message || 'Login fallito');
+                }
+                
+            } catch (error) {
+                console.error('❌ Login FALLITO:', error);
+                updateTestStatus('login', 'failed', `❌ FALLITO: ${error.message}`);
+            }
+        }
+
+        async function testUCMeSave() {
+            updateTestStatus('ucme-save', 'pending', 'Test salvataggio UCMe in corso...');
+            
+            try {
+                if (!userToken) {
+                    throw new Error('Token JWT non disponibile');
+                }
+                
+                const ucmeData = {
+                    content: `UCMe di test finale - ${new Date().toISOString()}. Questo è un test per verificare che il backend Mental Commons funzioni al 100% con salvataggio persistente cross-device.`,
+                    title: 'Test UCMe Finale Successo'
+                };
+                
+                console.log('📝 Salvataggio UCMe...');
+                
+                const response = await fetch(`${API_BASE}/ucme`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(ucmeData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.ucme) {
+                    testResults.ucmeSave = true;
+                    
+                    updateTestStatus('ucme-save', 'success',
+                        `✅ SUCCESSO\n` +
+                        `UCMe ID: ${result.ucme.id}\n` +
+                        `Titolo: ${result.ucme.title}\n` +
+                        `Status: ${result.ucme.status}\n` +
+                        `Created: ${result.ucme.createdAt}\n` +
+                        `Backend: ${result.debug.backend}\n` +
+                        `Storage: ${result.debug.persistentStorage ? 'Persistente' : 'Temporaneo'}`
+                    );
+                    
+                    console.log('✅ Salvataggio UCMe SUCCESSO');
+                } else {
+                    throw new Error(result.message || 'Salvataggio UCMe fallito');
+                }
+                
+            } catch (error) {
+                console.error('❌ Salvataggio UCMe FALLITO:', error);
+                updateTestStatus('ucme-save', 'failed', `❌ FALLITO: ${error.message}`);
+            }
+        }
+
+        async function testUCMeLoad() {
+            updateTestStatus('ucme-load', 'pending', 'Test caricamento UCMe in corso...');
+            
+            try {
+                if (!userToken) {
+                    throw new Error('Token JWT non disponibile');
+                }
+                
+                console.log('📥 Caricamento UCMe...');
+                
+                const response = await fetch(`${API_BASE}/ucmes`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && Array.isArray(result.data)) {
+                    testResults.ucmeLoad = true;
+                    
+                    updateTestStatus('ucme-load', 'success',
+                        `✅ SUCCESSO\n` +
+                        `UCMe caricate: ${result.data.length}\n` +
+                        `Totale disponibili: ${result.pagination.total}\n` +
+                        `Fonte dati: ${result.debug.dataSource}\n` +
+                        `Database connesso: ${result.debug.databaseConnected ? 'SÌ' : 'NO'}\n` +
+                        `Storage: ${result.debug.persistentStorage ? 'Persistente' : 'Temporaneo'}\n` +
+                        `Cross-device: ${result.debug.crossDevice ? 'SÌ' : 'NO'}`
+                    );
+                    
+                    console.log('✅ Caricamento UCMe SUCCESSO');
+                } else {
+                    throw new Error(result.message || 'Caricamento UCMe fallito');
+                }
+                
+            } catch (error) {
+                console.error('❌ Caricamento UCMe FALLITO:', error);
+                updateTestStatus('ucme-load', 'failed', `❌ FALLITO: ${error.message}`);
+            }
+        }
+
+        function updateTestStatus(testName, status, details) {
+            const section = document.getElementById(`${testName}-test`);
+            const icon = document.getElementById(`${testName}-icon`);
+            const detailsDiv = document.getElementById(`${testName}-details`);
+            
+            // Rimuovi classi precedenti
+            section.classList.remove('test-success', 'test-failed');
+            
+            switch (status) {
+                case 'success':
+                    section.classList.add('test-success');
+                    icon.textContent = '✅';
+                    icon.className = 'status-icon success';
+                    break;
+                case 'failed':
+                    section.classList.add('test-failed');
+                    icon.textContent = '❌';
+                    icon.className = 'status-icon failed';
+                    break;
+                case 'pending':
+                    icon.textContent = '⏳';
+                    icon.className = 'status-icon pending';
+                    break;
+            }
+            
+            detailsDiv.textContent = details;
+        }
+
+        function updateOverallStatus() {
+            const total = Object.keys(testResults).length;
+            const passed = Object.values(testResults).filter(Boolean).length;
+            const percentage = Math.round((passed / total) * 100);
+            
+            const overallDiv = document.getElementById('overall-status');
+            const textDiv = document.getElementById('overall-text');
+            
+            if (passed === total) {
+                overallDiv.style.background = '#d4edda';
+                overallDiv.style.color = '#155724';
+                overallDiv.style.border = '2px solid #c3e6cb';
+                textDiv.textContent = `🎉 SUCCESSO COMPLETO! Tutti i test passati (${passed}/${total} - ${percentage}%)`;
+                console.log('🎉 MENTAL COMMONS BACKEND: 100% FUNZIONANTE!');
+            } else if (passed > 0) {
+                overallDiv.style.background = '#fff3cd';
+                overallDiv.style.color = '#856404';
+                overallDiv.style.border = '2px solid #ffeaa7';
+                textDiv.textContent = `⚠️ Parzialmente funzionante (${passed}/${total} - ${percentage}%)`;
+            } else {
+                overallDiv.style.background = '#f8d7da';
+                overallDiv.style.color = '#721c24';
+                overallDiv.style.border = '2px solid #f5c6cb';
+                textDiv.textContent = `❌ Test falliti (${passed}/${total} - ${percentage}%)`;
+            }
+        }
+
+        // Avvia automaticamente i test al caricamento
+        window.onload = () => {
+            console.log('🚀 Pagina caricata - test disponibili');
+            updateOverallStatus();
+        };
+    </script>
+</body>
+</html> 

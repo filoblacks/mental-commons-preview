@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Accedi - Mental Commons</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.svg">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css?v=202506161811">
+</head>
+<body>
+    <!-- Mobile Header (solo per mobile) -->
+    <div class="mobile-header">
+        <div class="mobile-header-left">
+            <img src="/logo.svg" alt="MC" class="mobile-logo" />
+        </div>
+        <div class="mobile-header-right">
+            <a href="index.html" class="mobile-nav-btn">Home</a>
+            <a href="login.html" id="mobile-nav-login" class="mobile-nav-btn">Accedi</a>
+            <a href="dashboard.html" id="mobile-nav-dashboard" class="mobile-nav-btn" style="display: none;">Dashboard</a>
+            <button id="mobile-nav-logout" class="mobile-nav-btn mobile-logout-btn" style="display: none;">Esci</button>
+        </div>
+    </div>
+
+    <!-- Top Navigation Container -->
+    <div class="top-navigation-container">
+        <!-- Ritual Stats - Sticky Header -->
+        <header class="ritual-stats">
+            <div><strong><span id="ucme-count">–</span></strong> pensieri accolti</div>
+            <div><strong><span id="risposte-count">–</span></strong> risposte inviate</div>
+            <div><strong><span id="portatori-count">–</span></strong> Portatori attivi</div>
+        </header>
+        
+        <!-- Navigazione semplificata -->
+        <div class="ritual-actions">
+            <a href="index.html">Home</a>
+            <a href="login.html" id="nav-login">Accedi</a>
+            <a href="dashboard.html" id="nav-dashboard" style="display: none;">Dashboard</a>
+            <button id="nav-logout" class="nav-logout-btn" style="display: none;">Esci</button>
+        </div>
+    </div>
+
+    <!-- Contenitore login centrato -->
+    <div class="login-container">
+        <div class="login-form-wrapper">
+            <h2>Accedi al tuo spazio</h2>
+            <p class="login-description">Il tuo spazio personale per vedere tutti i tuoi pensieri e le risposte ricevute.</p>
+            
+            <!-- Tab switch -->
+            <div class="tab-switch">
+                <button id="tab-login" class="tab-btn active">Accedi</button>
+                <button id="tab-register" class="tab-btn">Registrati</button>
+            </div>
+            
+            <!-- Messaggio di errore -->
+            <div id="auth-error" class="auth-error" style="display: none;"></div>
+            
+            <!-- Form Login -->
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <input type="email" id="login-email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="login-password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="auth-button">Accedi</button>
+            </form>
+            
+            <!-- Form Registrazione -->
+            <form id="register-form" class="auth-form" style="display: none;">
+                <div class="form-group">
+                    <input type="email" id="register-email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="register-password" placeholder="Password" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="register-confirm" placeholder="Conferma password" required>
+                </div>
+                <button type="submit" class="auth-button">Registrati</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/script.js?v=202506161811"></script>
+</body>
+</html> 
