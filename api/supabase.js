@@ -12,22 +12,64 @@ import jwt from 'jsonwebtoken';
 // CONFIGURAZIONE SUPABASE
 // ================================================================
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+// ================================================================
+// 🟣 LAZY LOADING - RISOLUZIONE PROBLEMA IMPORT/ENV
+// ================================================================
+// Il client Supabase viene creato solo quando necessario, 
+// dopo che le variabili d'ambiente sono state caricate
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('❌ ERRORE: Variabili ambiente Supabase mancanti');
-  console.error('   SUPABASE_URL:', supabaseUrl ? '✅ Presente' : '❌ Mancante');
-  console.error('   SUPABASE_SERVICE_KEY:', supabaseServiceKey ? '✅ Presente' : '❌ Mancante');
-}
+let supabase = null;
 
-// Client Supabase con service key (bypass RLS)
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
+function getSupabaseClient() {
+  if (!supabase) {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+
+    // ================================================================
+    // 🟣 FASE 1 - VERIFICA CONNESSIONE BACKEND ↔ DATABASE
+    // ================================================================
+    console.log('🟣 ============================================');
+    console.log('🟣 FASE 1 - VERIFICA CONNESSIONE SUPABASE');
+    console.log('🟣 ============================================');
+    console.log("🔑 Supabase URL:", supabaseUrl);
+    console.log("🔑 Supabase KEY (masked):", supabaseServiceKey ? supabaseServiceKey.slice(0, 10) + '...' + supabaseServiceKey.slice(-5) : 'MANCANTE');
+    console.log("🔑 URL Type:", typeof supabaseUrl);
+    console.log("🔑 KEY Type:", typeof supabaseServiceKey);
+    console.log("🔑 URL Length:", supabaseUrl?.length || 0);
+    console.log("🔑 KEY Length:", supabaseServiceKey?.length || 0);
+    console.log("🔍 URL Match Pattern:", supabaseUrl?.includes('supabase.co') ? '✅ VALIDO' : '❌ FORMATO ERRATO');
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('❌ ERRORE: Variabili ambiente Supabase mancanti');
+      console.error('   SUPABASE_URL:', supabaseUrl ? '✅ Presente' : '❌ Mancante');
+      console.error('   SUPABASE_SERVICE_KEY:', supabaseServiceKey ? '✅ Presente' : '❌ Mancante');
+      throw new Error('Variabili ambiente Supabase mancanti');
+    }
+
+    // Client Supabase con service key (bypass RLS)
+    supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      },
+      global: {
+        headers: {
+          'apikey': supabaseServiceKey,
+          'Authorization': `Bearer ${supabaseServiceKey}`
+        }
+      }
+    });
+
+    // 🟣 FASE 1 - VERIFICA CLIENT SUPABASE CONFIGURAZIONE
+    console.log("🔍 Client Supabase configurato:");
+    console.log("  - Auth auto refresh:", false);
+    console.log("  - Persist session:", false);
+    console.log("  - Global headers set:", true);
+    console.log("  - Service key in use:", !!supabaseServiceKey);
   }
-});
+  
+  return supabase;
+}
 
 // ================================================================
 // UTILITÀ PASSWORD E JWT
@@ -99,29 +141,78 @@ export function verifyJWT(token) {
 // OPERAZIONI DATABASE - UTENTI
 // ================================================================
 
+// Recupera tutti gli utenti
+export async function getAllUsers() {
+  try {
+    console.log('👥 Recuperando tutti gli utenti dal database...');
+    
+    const { data, error } = await getSupabaseClient()
+      .from('users')
+      .select('id, email, name, role, is_active, created_at, last_login')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('❌ Errore recupero utenti:', error);
+      throw error;
+    }
+    
+    console.log('✅ Recuperati', data?.length || 0, 'utenti');
+    return data || [];
+  } catch (error) {
+    console.error('❌ Errore recupero tutti gli utenti:', error);
+    throw error;
+  }
+}
+
 // Trova utente per email
 export async function findUserByEmail(email) {
   try {
+    // 🟣 FASE 2 - TRACCIAMENTO COMPLETO API
+    console.log('🟣 ============================================');
+    console.log('🟣 FASE 2 - TRACCIAMENTO findUserByEmail');
+    console.log('🟣 ============================================');
+    console.log('📥 Input ricevuto:', { email, emailType: typeof email, emailLength: email?.length });
+    
+    // Query da eseguire
+    const queryInfo = {
+      table: 'users',
+      select: '*',
+      filter: { email: email },
+      operation: 'SELECT'
+    };
+    console.log('📤 Query generata:', JSON.stringify(queryInfo, null, 2));
+    
     console.log('👤 Ricerca utente per email:', email);
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabaseClient()
       .from('users')
       .select('*')
       .eq('email', email)
       .single();
     
+    // Log del risultato completo
+    console.log('📥 Query result RAW:', { data, error });
+    console.log('📊 Risultato analisi:'); 
+    console.log('  - Data presente:', !!data);
+    console.log('  - Error presente:', !!error);
+    console.log('  - Error code:', error?.code);
+    console.log('  - Error message:', error?.message);
+    console.log('  - Error details:', error?.details);
+    
     if (error) {
+      console.log('⚠ Query error completo:', JSON.stringify(error, null, 2));
       if (error.code === 'PGRST116') {
-        console.log('👤 Utente non trovato');
+        console.log('👤 Utente non trovato (PGRST116 - No rows)');
         return null;
       }
       throw error;
     }
     
     console.log('✅ Utente trovato:', data.id);
+    console.log('📊 Dati utente trovati:', JSON.stringify(data, null, 2));
     return data;
   } catch (error) {
-    console.error('❌ Errore ricerca utente:', error);
+    console.error('❌ Errore ricerca utente completo:', JSON.stringify(error, null, 2));
     throw error;
   }
 }
@@ -129,33 +220,65 @@ export async function findUserByEmail(email) {
 // Crea nuovo utente
 export async function createUser(email, password, name) {
   try {
+    // 🟣 FASE 2 - TRACCIAMENTO COMPLETO API
+    console.log('🟣 ============================================');
+    console.log('🟣 FASE 2 - TRACCIAMENTO createUser');
+    console.log('🟣 ============================================');
+    console.log('📥 Input ricevuto:', { 
+      email, 
+      name, 
+      emailType: typeof email, 
+      nameType: typeof name,
+      passwordPresent: !!password,
+      passwordLength: password?.length 
+    });
+    
     console.log('👤 Creando nuovo utente:', email);
     
     // Hash password
     const passwordHash = await hashPassword(password);
     
+    // Dati da inserire
+    const insertData = {
+      email,
+      password_hash: passwordHash,
+      name,
+      role: 'user',
+      is_active: true
+    };
+    
+    console.log('📤 Query INSERT da eseguire:');
+    console.log('  - Table: users');
+    console.log('  - Operation: INSERT');
+    console.log('  - Data:', JSON.stringify({ ...insertData, password_hash: '[HIDDEN]' }, null, 2));
+    
     // Inserisci utente
-    const { data, error } = await supabase
+    const { data, error } = await getSupabaseClient()
       .from('users')
-      .insert({
-        email,
-        password_hash: passwordHash,
-        name,
-        role: 'user',
-        is_active: true
-      })
+      .insert(insertData)
       .select()
       .single();
     
+    // Log del risultato completo
+    console.log('📥 Query INSERT result RAW:', { data: data ? '[USER_DATA]' : null, error });
+    console.log('📊 Risultato analisi:'); 
+    console.log('  - Data presente:', !!data);
+    console.log('  - Error presente:', !!error);
+    console.log('  - Error code:', error?.code);
+    console.log('  - Error message:', error?.message);
+    console.log('  - Error details:', error?.details);
+    console.log('  - Error hint:', error?.hint);
+    
     if (error) {
-      console.error('❌ Errore creazione utente:', error);
+      console.error('❌ Errore creazione utente completo:', JSON.stringify(error, null, 2));
       throw error;
     }
     
     console.log('✅ Utente creato con successo:', data.id);
+    console.log('📊 Dati utente creato:', JSON.stringify({ ...data, password_hash: '[HIDDEN]' }, null, 2));
     return data;
   } catch (error) {
-    console.error('❌ Errore creazione utente:', error);
+    console.error('❌ Errore creazione utente completo:', JSON.stringify(error, null, 2));
     throw error;
   }
 }
@@ -165,7 +288,7 @@ export async function updateLastLogin(userId) {
   try {
     console.log('👤 Aggiornando ultimo login per:', userId);
     
-    const { error } = await supabase
+    const { error } = await getSupabaseClient()
       .from('users')
       .update({ last_login: new Date().toISOString() })
       .eq('id', userId);
@@ -189,19 +312,33 @@ export async function saveUCMe(userId, content, title = null) {
     console.log('📝 Contenuto length:', content?.length);
     console.log('📝 Titolo:', title);
     
-    const { data, error } = await supabase
+    // 🟣 FASE 2 - LOGGING PAYLOAD DETTAGLIATO UCMe
+    const insertPayload = {
+      user_id: userId,
+      content,
+      title,
+      status: 'attesa'
+    };
+    
+    console.log('📤 Supabase UCMe insert payload:', insertPayload);
+    console.log('📤 Query target table: ucmes');
+    console.log('📤 Query type: INSERT');
+    
+    const { data, error } = await getSupabaseClient()
       .from('ucmes')
-      .insert({
-        user_id: userId,
-        content,
-        title,
-        status: 'attesa'
-      })
+      .insert(insertPayload)
       .select()
       .single();
     
+    console.log('📥 Supabase UCMe insert result:', data);
+    console.log('⚠ Supabase UCMe insert error:', error);
+    
     if (error) {
-      console.error('❌ Errore salvataggio UCMe:', error);
+      console.error('❌ DETTAGLIO ERRORE SUPABASE UCMe:');
+      console.error('   Codice:', error.code);
+      console.error('   Messaggio:', error.message);
+      console.error('   Dettagli:', error.details);
+      console.error('   Hint:', error.hint);
       throw error;
     }
     
@@ -218,7 +355,7 @@ export async function getUserUCMes(userId) {
   try {
     console.log('📝 Recuperando UCMe per utente:', userId);
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabaseClient()
       .from('ucmes')
       .select('*')
       .eq('user_id', userId)
@@ -249,7 +386,7 @@ export async function saveUserSession(userId, token, deviceInfo = null) {
     // Hash del token per sicurezza
     const tokenHash = await bcrypt.hash(token, 5);
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabaseClient()
       .from('user_sessions')
       .insert({
         user_id: userId,
@@ -279,7 +416,7 @@ export async function testDatabaseConnection() {
   try {
     console.log('🔍 Test connessione database...');
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabaseClient()
       .from('users')
       .select('count')
       .limit(1);
@@ -299,8 +436,114 @@ export async function testDatabaseConnection() {
 
 // Log configurazione
 export function logConfiguration() {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+  
   console.log('🔧 CONFIGURAZIONE SUPABASE:');
   console.log('   URL:', supabaseUrl ? '✅ Configurato' : '❌ Mancante');
   console.log('   Service Key:', supabaseServiceKey ? '✅ Configurato' : '❌ Mancante');
   console.log('   JWT Secret:', JWT_SECRET !== 'mental-commons-secret-key-change-in-production' ? '✅ Personalizzato' : '⚠️ Default');
+}
+
+// ================================================================
+// 🟣 FASE 4 - TEST RLS E PERMESSI
+// ================================================================
+
+export async function testRLSPolicies() {
+  try {
+    console.log('🟣 ============================================');
+    console.log('🟣 FASE 4 - TEST RLS E PERMESSI');
+    console.log('🟣 ============================================');
+    
+    // Test 1: Verifica connessione con service key
+    console.log('🔍 Test 1: Verifica connessione service key...');
+    const { data: testSelect, error: testError } = await getSupabaseClient()
+      .from('users')
+      .select('*', { count: 'exact' })
+      .limit(1);
+    
+    console.log('📊 Service key test result:');
+    console.log('  - Query eseguita:', 'SELECT count(*) FROM users LIMIT 1');
+    console.log('  - Dati ricevuti:', !!testSelect);
+    console.log('  - Errore presente:', !!testError);
+    console.log('  - Errore dettaglio:', testError ? JSON.stringify(testError, null, 2) : 'Nessuno');
+    
+    // Test 2: Verifica RLS status sulle tabelle principali
+    const tables = ['users', 'ucmes', 'user_sessions'];
+    const rlsTests = {};
+    
+    for (const table of tables) {
+      console.log(`🔍 Test RLS per tabella: ${table}`);
+      const testResult = await checkRLSBlocking(table, 'SELECT');
+      rlsTests[table] = testResult;
+    }
+    
+    return {
+      serviceKeyWorking: !testError,
+      rlsTests,
+      errors: {
+        serviceKey: testError
+      }
+    };
+  } catch (error) {
+    console.error('❌ Errore test RLS completo:', JSON.stringify(error, null, 2));
+    return {
+      serviceKeyWorking: false,
+      rlsTests: {},
+      errors: { general: error }
+    };
+  }
+}
+
+// Funzione helper per verificare se una query è bloccata da RLS
+export async function checkRLSBlocking(tableName, operation = 'SELECT') {
+  try {
+    console.log(`🔍 Verifica RLS blocking per ${tableName} (${operation})...`);
+    
+    let query;
+    switch (operation.toUpperCase()) {
+      case 'SELECT':
+        query = getSupabaseClient().from(tableName).select('*').limit(1);
+        break;
+      case 'COUNT':
+        query = getSupabaseClient().from(tableName).select('*', { count: 'exact' }).limit(0);
+        break;
+      default:
+        query = getSupabaseClient().from(tableName).select('*').limit(1);
+    }
+    
+    const { data, error } = await query;
+    
+    const isBlocked = error && (
+      error.message?.includes('row-level security') ||
+      error.message?.includes('permission denied') ||
+      error.message?.includes('policy') ||
+      error.code === '42501' ||
+      error.code === 'PGRST301'
+    );
+    
+    console.log(`📊 RLS Check ${tableName}:${operation}:`);
+    console.log('  - Query eseguita:', !!data || !!error);
+    console.log('  - Bloccata da RLS:', isBlocked);
+    console.log('  - Errore RLS:', isBlocked ? error.message : 'No');
+    console.log('  - Dati ricevuti:', !!data);
+    console.log('  - Errore completo:', error ? JSON.stringify(error, null, 2) : 'Nessuno');
+    
+    return {
+      table: tableName,
+      operation,
+      blocked: isBlocked,
+      error: error,
+      hasData: !!data
+    };
+  } catch (error) {
+    console.error(`❌ Errore check RLS per ${tableName}:`, error);
+    return {
+      table: tableName,
+      operation,
+      blocked: true,
+      error: error,
+      hasData: false
+    };
+  }
 } 
