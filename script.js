@@ -1764,6 +1764,8 @@ async function handleLoginSubmit(event) {
 async function handleRegisterSubmit(event) {
     event.preventDefault();
     
+    const name = document.getElementById('register-name')?.value?.trim();
+    const surname = document.getElementById('register-surname')?.value?.trim();
     const email = document.getElementById('register-email')?.value?.trim();
     const password = document.getElementById('register-password')?.value?.trim();
     const confirmPassword = document.getElementById('register-confirm')?.value?.trim();

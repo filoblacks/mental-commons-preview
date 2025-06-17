@@ -3724,3 +3724,45 @@ body {
     color: #fff;
     text-align: right;
 }
+
+/* ================================================================
+   MENTAL COMMONS 3.0 - CSS COMPLETO E RESPONSIVE
+   ================================================================ */
+
+/* AUTH LOADING STATES - PREVIENE FLICKER */
+.auth-loading .ritual-actions,
+.auth-loading .mobile-header-right {
+    visibility: hidden;
+}
+
+.auth-loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #333;
+    border-radius: 50%;
+    border-top-color: #666;
+    animation: spin 1s ease-in-out infinite;
+    margin-left: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.auth-ready .ritual-actions,
+.auth-ready .mobile-header-right {
+    visibility: visible;
+}
+
+/* Hide navigation elements initially to prevent flicker */
+.ritual-actions > a,
+.mobile-header-right > a {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.auth-ready .ritual-actions > a,
+.auth-ready .mobile-header-right > a {
+    opacity: 1;
+}
