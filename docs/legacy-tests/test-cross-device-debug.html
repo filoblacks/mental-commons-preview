@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Commons - Debug Cross-Device</title>
+    <style>
+        body {
+            font-family: monospace;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #000;
+            color: #00ff00;
+        }
+        .section {
+            border: 1px solid #333;
+            margin: 20px 0;
+            padding: 15px;
+            background: #111;
+        }
+        .log {
+            background: #000;
+            border: 1px solid #444;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        button {
+            background: #333;
+            color: #fff;
+            border: 1px solid #666;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #555;
+        }
+        input {
+            background: #222;
+            color: #fff;
+            border: 1px solid #666;
+            padding: 8px;
+            margin: 5px;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .warning { color: #ffaa00; }
+        .info { color: #00aaff; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Mental Commons - Debug Cross-Device</h1>
+    <p>Sistema di diagnostica per risolvere problemi di login cross-device</p>
+
+    <!-- SEZIONE 1: Diagnosi Sistema -->
+    <div class="section">
+        <h2>📊 DIAGNOSI SISTEMA</h2>
+        <button onclick="runSystemDiagnostics()">🔍 Esegui Diagnostica Completa</button>
+        <div id="system-log" class="log"></div>
+    </div>
+
+    <!-- SEZIONE 2: Test Login/Registrazione -->
+    <div class="section">
+        <h2>🔐 TEST LOGIN/REGISTRAZIONE</h2>
+        <div>
+            <input type="email" id="test-email" placeholder="Email test">
+            <input type="password" id="test-password" placeholder="Password test">
+            <input type="text" id="test-name" placeholder="Nome (per registrazione)">
+        </div>
+        <div>
+            <button onclick="testLogin()">🔑 Test Login</button>
+            <button onclick="testRegister()">📝 Test Registrazione</button>
+            <button onclick="testLogout()">🚪 Test Logout</button>
+        </div>
+        <div id="auth-log" class="log"></div>
+    </div>
+
+    <!-- SEZIONE 3: Verifica Database -->
+    <div class="section">
+        <h2>🗄️ VERIFICA DATABASE SUPABASE</h2>
+        <button onclick="testDatabaseConnection()">🔗 Test Connessione</button>
+        <button onclick="listUsers()">👥 Lista Utenti (se autorizzato)</button>
+        <div id="db-log" class="log"></div>
+    </div>
+
+    <!-- SEZIONE 4: Pulizia Storage -->
+    <div class="section">
+        <h2>🧹 PULIZIA STORAGE</h2>
+        <button onclick="clearAllStorage()">🗑️ Pulisci Tutto</button>
+        <button onclick="showStorageContent()">📋 Mostra Contenuto Storage</button>
+        <div id="storage-log" class="log"></div>
+    </div>
+
+    <script>
+        // Funzioni di logging
+        function log(message, type = 'info', targetId = 'system-log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById(targetId);
+            const colorClass = type === 'error' ? 'error' : 
+                              type === 'success' ? 'success' : 
+                              type === 'warning' ? 'warning' : 'info';
+            
+            logElement.innerHTML += `<span class="${colorClass}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // API Functions
+        async function apiCall(endpoint, data = null, method = 'GET') {
+            const baseUrl = window.location.origin;
+            const url = `${baseUrl}${endpoint}`;
+            
+            log(`📡 Chiamata ${method} a: ${url}`, 'info', 'system-log');
+            
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                    log(`📤 Payload: ${JSON.stringify(data, null, 2)}`, 'info', 'system-log');
+                }
+                
+                const response = await fetch(url, options);
+                const result = await response.json();
+                
+                log(`📥 Response Status: ${response.status}`, response.ok ? 'success' : 'error', 'system-log');
+                log(`📥 Response Data: ${JSON.stringify(result, null, 2)}`, 'info', 'system-log');
+                
+                return { success: response.ok, data: result, status: response.status };
+            } catch (error) {
+                log(`❌ Errore API: ${error.message}`, 'error', 'system-log');
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Diagnostica Sistema
+        async function runSystemDiagnostics() {
+            document.getElementById('system-log').innerHTML = '';
+            
+            log('🔍 ============================================', 'info');
+            log('🔍 DIAGNOSTICA SISTEMA MENTAL COMMONS', 'info');
+            log('🔍 ============================================', 'info');
+            
+            // 1. Verifica ambiente
+            log('1️⃣ VERIFICA AMBIENTE:', 'info');
+            log(`   🌐 Origin: ${window.location.origin}`, 'info');
+            log(`   📱 User Agent: ${navigator.userAgent}`, 'info');
+            log(`   💾 localStorage disponibile: ${typeof Storage !== "undefined"}`, 'info');
+            log(`   💾 sessionStorage disponibile: ${typeof sessionStorage !== "undefined"}`, 'info');
+            
+            // 2. Verifica storage
+            log('2️⃣ VERIFICA STORAGE:', 'info');
+            const sessionUser = sessionStorage.getItem('mental_commons_user');
+            const sessionToken = sessionStorage.getItem('mental_commons_token');
+            const localUser = localStorage.getItem('mc-user');
+            
+            log(`   🎫 sessionStorage token: ${sessionToken ? 'PRESENTE' : 'MANCANTE'}`, sessionToken ? 'success' : 'warning');
+            log(`   👤 sessionStorage user: ${sessionUser ? 'PRESENTE' : 'MANCANTE'}`, sessionUser ? 'success' : 'warning');
+            log(`   🗂️ localStorage user (legacy): ${localUser ? 'PRESENTE' : 'MANCANTE'}`, localUser ? 'warning' : 'success');
+            
+            if (sessionUser) {
+                try {
+                    const user = JSON.parse(sessionUser);
+                    log(`   📧 User email: ${user.email}`, 'success');
+                    log(`   👤 User name: ${user.name}`, 'success');
+                    log(`   🆔 User ID: ${user.id}`, 'success');
+                } catch (e) {
+                    log(`   ❌ Errore parsing user: ${e.message}`, 'error');
+                }
+            }
+            
+            // 3. Test API endpoints
+            log('3️⃣ TEST API ENDPOINTS:', 'info');
+            
+            const pingResult = await apiCall('/api/ping');
+            if (pingResult.success) {
+                log('   ✅ /api/ping: OK', 'success');
+            } else {
+                log('   ❌ /api/ping: FAILED', 'error');
+            }
+            
+            log('✅ Diagnostica completata', 'success');
+        }
+
+        // Test Login
+        async function testLogin() {
+            const email = document.getElementById('test-email').value;
+            const password = document.getElementById('test-password').value;
+            
+            if (!email || !password) {
+                log('❌ Inserisci email e password per il test', 'error', 'auth-log');
+                return;
+            }
+            
+            document.getElementById('auth-log').innerHTML = '';
+            log('🔐 Test Login iniziato...', 'info', 'auth-log');
+            
+            const result = await apiCall('/api/login', { email, password }, 'POST');
+            
+            if (result.success) {
+                log('✅ Login riuscito!', 'success', 'auth-log');
+                if (result.data.user) {
+                    sessionStorage.setItem('mental_commons_user', JSON.stringify(result.data.user));
+                    sessionStorage.setItem('mental_commons_token', result.data.token);
+                    log('💾 Dati salvati in sessionStorage', 'success', 'auth-log');
+                }
+            } else {
+                log('❌ Login fallito', 'error', 'auth-log');
+            }
+        }
+
+        // Test Registrazione
+        async function testRegister() {
+            const email = document.getElementById('test-email').value;
+            const password = document.getElementById('test-password').value;
+            const name = document.getElementById('test-name').value || email.split('@')[0];
+            
+            if (!email || !password) {
+                log('❌ Inserisci email e password per il test', 'error', 'auth-log');
+                return;
+            }
+            
+            document.getElementById('auth-log').innerHTML = '';
+            log('📝 Test Registrazione iniziato...', 'info', 'auth-log');
+            
+            const result = await apiCall('/api/register', { email, password, name }, 'POST');
+            
+            if (result.success) {
+                log('✅ Registrazione riuscita!', 'success', 'auth-log');
+                if (result.data.user) {
+                    sessionStorage.setItem('mental_commons_user', JSON.stringify(result.data.user));
+                    sessionStorage.setItem('mental_commons_token', result.data.token);
+                    log('💾 Dati salvati in sessionStorage', 'success', 'auth-log');
+                }
+            } else {
+                log('❌ Registrazione fallita', 'error', 'auth-log');
+            }
+        }
+
+        // Test Logout
+        function testLogout() {
+            document.getElementById('auth-log').innerHTML = '';
+            log('🚪 Test Logout...', 'info', 'auth-log');
+            
+            sessionStorage.removeItem('mental_commons_user');
+            sessionStorage.removeItem('mental_commons_token');
+            
+            log('✅ Logout completato', 'success', 'auth-log');
+        }
+
+        // Test Database Connection
+        async function testDatabaseConnection() {
+            document.getElementById('db-log').innerHTML = '';
+            log('🔗 Test connessione database...', 'info', 'db-log');
+            
+            const result = await apiCall('/api/ping');
+            
+            if (result.success) {
+                log('✅ Database connesso correttamente', 'success', 'db-log');
+            } else {
+                log('❌ Problema connessione database', 'error', 'db-log');
+            }
+        }
+
+        // Lista Utenti (per debug)
+        async function listUsers() {
+            document.getElementById('db-log').innerHTML = '';
+            log('👥 Tentativo lista utenti...', 'info', 'db-log');
+            log('⚠️ Questa funzione potrebbe non essere disponibile per sicurezza', 'warning', 'db-log');
+            
+            // Questa chiamata potrebbe fallire per motivi di sicurezza
+            const result = await apiCall('/api/users');
+            
+            if (result.success) {
+                log('✅ Lista utenti ricevuta', 'success', 'db-log');
+            } else {
+                log('❌ Lista utenti non disponibile (normale per sicurezza)', 'warning', 'db-log');
+            }
+        }
+
+        // Pulizia Storage
+        function clearAllStorage() {
+            document.getElementById('storage-log').innerHTML = '';
+            log('🧹 Pulizia storage completa...', 'info', 'storage-log');
+            
+            // SessionStorage
+            sessionStorage.clear();
+            log('✅ sessionStorage pulito', 'success', 'storage-log');
+            
+            // LocalStorage (legacy)
+            const keysToRemove = [
+                'mc-user', 'mc-users', 'mc-email', 'mc-onboarded',
+                'mentalCommons_ucmes', 'mentalCommons_portatori'
+            ];
+            
+            keysToRemove.forEach(key => {
+                if (localStorage.getItem(key)) {
+                    localStorage.removeItem(key);
+                    log(`🗑️ Rimosso localStorage.${key}`, 'success', 'storage-log');
+                }
+            });
+            
+            log('✅ Pulizia completata', 'success', 'storage-log');
+        }
+
+        // Mostra contenuto storage
+        function showStorageContent() {
+            document.getElementById('storage-log').innerHTML = '';
+            log('📋 Contenuto Storage:', 'info', 'storage-log');
+            
+            log('📱 SessionStorage:', 'info', 'storage-log');
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                const value = sessionStorage.getItem(key);
+                log(`   ${key}: ${value.substring(0, 100)}${value.length > 100 ? '...' : ''}`, 'info', 'storage-log');
+            }
+            
+            log('💾 LocalStorage:', 'info', 'storage-log');
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                log(`   ${key}: ${value.substring(0, 100)}${value.length > 100 ? '...' : ''}`, 'info', 'storage-log');
+            }
+        }
+
+        // Auto-run diagnostics on load
+        window.addEventListener('load', () => {
+            setTimeout(runSystemDiagnostics, 1000);
+        });
+    </script>
+</body>
+</html> 

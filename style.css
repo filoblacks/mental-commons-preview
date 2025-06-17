@@ -3104,3 +3104,298 @@ body {
         scroll-padding-top: 72px;
     }
 }
+
+/* ========================================
+   HOW IT WORKS SECTION
+   ======================================== */
+
+.how-it-works-section {
+    padding: 5rem 2rem;
+    background-color: #000;
+    position: relative;
+    overflow: hidden;
+}
+
+.how-it-works-section h2 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin-bottom: 4rem;
+    text-align: center;
+    color: #fff;
+    letter-spacing: -0.01em;
+}
+
+.how-it-works-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.how-it-works-steps::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 16.66%;
+    right: 16.66%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #333 25%, #333 75%, transparent);
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.step {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.step:nth-child(1) { animation-delay: 0.2s; }
+.step:nth-child(2) { animation-delay: 0.4s; }
+.step:nth-child(3) { animation-delay: 0.6s; }
+
+.step-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    background: #111;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+    border: 1px solid #333;
+    transition: all 0.3s ease;
+}
+
+.step:hover .step-icon {
+    background: #1a1a1a;
+    border-color: #fff;
+    transform: translateY(-5px);
+}
+
+.step h3 {
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+    color: #fff;
+}
+
+.step p {
+    font-size: 1rem;
+    color: #ccc;
+    line-height: 1.6;
+    opacity: 0.9;
+}
+
+/* ========================================
+   DEMO SECTION
+   ======================================== */
+
+.demo-section {
+    padding: 5rem 2rem;
+    background: linear-gradient(to bottom, #000 0%, #0a0a0a 100%);
+    position: relative;
+}
+
+.demo-section h2 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin-bottom: 3rem;
+    text-align: center;
+    color: #fff;
+    letter-spacing: -0.01em;
+}
+
+.demo-box {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 2.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.8s ease-out 0.3s forwards;
+}
+
+.demo-item {
+    position: relative;
+}
+
+.demo-item h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+}
+
+.demo-ucme h3 {
+    color: #a8d568;
+}
+
+.demo-response h3 {
+    color: #68b3d5;
+}
+
+.demo-item p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #ccc;
+    font-style: italic;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.demo-item p::before {
+    content: '"';
+    position: absolute;
+    left: 0;
+    top: -0.2rem;
+    font-size: 2rem;
+    color: #666;
+    font-family: Georgia, serif;
+}
+
+.demo-item p::after {
+    content: '"';
+    font-size: 2rem;
+    color: #666;
+    font-family: Georgia, serif;
+    margin-left: 0.2rem;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   RESPONSIVE DESIGN - HOW IT WORKS & DEMO
+   ======================================== */
+
+@media (max-width: 768px) {
+    .how-it-works-section {
+        padding: 4rem 1.5rem;
+    }
+    
+    .how-it-works-section h2 {
+        font-size: 2rem;
+        margin-bottom: 3rem;
+    }
+    
+    .how-it-works-steps {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+    
+    .how-it-works-steps::before {
+        display: none;
+    }
+    
+    .step-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 2.5rem;
+    }
+    
+    .demo-section {
+        padding: 4rem 1.5rem;
+    }
+    
+    .demo-section h2 {
+        font-size: 2rem;
+        margin-bottom: 2.5rem;
+    }
+    
+    .demo-box {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 2rem;
+    }
+    
+    .demo-item p {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .how-it-works-section {
+        padding: 3rem 1rem;
+    }
+    
+    .how-it-works-section h2 {
+        font-size: 1.8rem;
+        margin-bottom: 2.5rem;
+    }
+    
+    .how-it-works-steps {
+        gap: 2rem;
+    }
+    
+    .step-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .step h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .step p {
+        font-size: 0.9rem;
+    }
+    
+    .demo-section {
+        padding: 3rem 1rem;
+    }
+    
+    .demo-section h2 {
+        font-size: 1.8rem;
+        margin-bottom: 2rem;
+    }
+    
+    .demo-box {
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+    
+    .demo-item h3 {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .demo-item p {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        padding-left: 1rem;
+    }
+    
+    .demo-item p::before {
+        font-size: 1.5rem;
+    }
+    
+    .demo-item p::after {
+        font-size: 1.5rem;
+    }
+}
+
+/* Info Section */

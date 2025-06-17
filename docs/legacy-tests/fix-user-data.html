@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Commons - Fix Dati Utente</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            margin: 15px 0;
+        }
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 20px;
+            margin: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            width: 100%;
+            margin: 8px 0;
+            box-sizing: border-box;
+        }
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .warning { color: #fbbf24; }
+        .info { color: #60a5fa; }
+        .highlight { color: #fde047; }
+        h1 { text-align: center; margin-bottom: 30px; }
+        h2 { color: #fde047; margin-bottom: 15px; }
+        .user-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Mental Commons - Fix Dati Utente</h1>
+        <p style="text-align: center; opacity: 0.8;">Ricostruisci e migra i dati utente da UCMe esistenti</p>
+
+        <!-- SEZIONE 1: Analisi Dati Esistenti -->
+        <div class="section">
+            <h2>🔍 Analisi Dati Esistenti</h2>
+            <button onclick="analyzeExistingData()">🔍 Analizza localStorage</button>
+            <button onclick="testServerConnection()">🔗 Test Server</button>
+            <div id="analysis-log" class="log"></div>
+        </div>
+
+        <!-- SEZIONE 2: Ricostruzione Utente -->
+        <div class="section">
+            <h2>👤 Ricostruzione Dati Utente</h2>
+            <div id="user-reconstruction"></div>
+            <input type="text" id="user-name" placeholder="Nome utente (opzionale)" value="">
+            <input type="password" id="user-password" placeholder="Password per l'account" value="">
+            <button onclick="reconstructUser()" id="reconstruct-btn" disabled>🔧 Ricostruisci Utente</button>
+            <div id="reconstruction-log" class="log"></div>
+        </div>
+
+        <!-- SEZIONE 3: Migrazione a Supabase -->
+        <div class="section">
+            <h2>🚀 Migrazione a Supabase</h2>
+            <button onclick="migrateToSupabase()" id="migrate-btn" disabled>🚀 Migra a Supabase</button>
+            <button onclick="cleanupLocalStorage()" id="cleanup-btn" disabled>🧹 Pulisci localStorage</button>
+            <div id="migration-log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let reconstructedUser = null;
+        let existingData = null;
+
+        function log(message, type = 'info', targetId = 'analysis-log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById(targetId);
+            const colorClass = type === 'error' ? 'error' : 
+                              type === 'success' ? 'success' : 
+                              type === 'warning' ? 'warning' : 
+                              type === 'highlight' ? 'highlight' : 'info';
+            
+            logElement.innerHTML += `<span class="${colorClass}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // Analizza i dati esistenti nel localStorage
+        function analyzeExistingData() {
+            document.getElementById('analysis-log').innerHTML = '';
+            log('🔍 ============================================', 'highlight');
+            log('🔍 ANALISI DATI ESISTENTI', 'highlight');
+            log('🔍 ============================================', 'highlight');
+
+            // Estrai tutti i dati rilevanti
+            const mcOnboarded = localStorage.getItem('mc-onboarded');
+            const config = localStorage.getItem('mentalCommons_config');
+            const ucmes = localStorage.getItem('mentalCommons_ucmes');
+
+            existingData = {
+                onboarded: mcOnboarded,
+                config: config ? JSON.parse(config) : null,
+                ucmes: ucmes ? JSON.parse(ucmes) : []
+            };
+
+            log('📊 DATI TROVATI:', 'info');
+            log(`✅ Onboarding completato: ${mcOnboarded}`, 'success');
+            
+            if (existingData.config) {
+                log('✅ Configurazione trovata:', 'success');
+                log(`   Script URL: ${existingData.config.scriptUrl}`, 'info');
+                log(`   API Key: ${existingData.config.apiKey}`, 'info');
+                log('   ⚠️ ATTENZIONE: Usa ancora Google Apps Script!', 'warning');
+            }
+
+            if (existingData.ucmes && existingData.ucmes.length > 0) {
+                log(`✅ Trovate ${existingData.ucmes.length} UCMe:`, 'success');
+                
+                // Estrai email uniche dalle UCMe
+                const emails = [...new Set(existingData.ucmes.map(ucme => ucme.email))];
+                log(`📧 Email trovate: ${emails.join(', ')}`, 'info');
+                
+                existingData.ucmes.forEach((ucme, index) => {
+                    log(`${index + 1}. UCMe ID: ${ucme.id}`, 'info');
+                    log(`   📧 Email: ${ucme.email}`, 'info');
+                    log(`   📝 Testo: ${ucme.text.substring(0, 50)}${ucme.text.length > 50 ? '...' : ''}`, 'info');
+                    log(`   📅 Data: ${new Date(ucme.timestamp).toLocaleString()}`, 'info');
+                    log(`   📊 Status: ${ucme.status}`, 'info');
+                });
+
+                // Prepara ricostruzione utente
+                if (emails.length === 1) {
+                    log('🎯 UTENTE IDENTIFICATO:', 'highlight');
+                    log(`   Email: ${emails[0]}`, 'success');
+                    log(`   UCMe totali: ${existingData.ucmes.length}`, 'info');
+                    log(`   Prima UCMe: ${new Date(existingData.ucmes[0].timestamp).toLocaleDateString()}`, 'info');
+                    
+                    // Mostra card utente
+                    showUserCard(emails[0]);
+                    
+                    // Abilita ricostruzione
+                    document.getElementById('reconstruct-btn').disabled = false;
+                } else if (emails.length > 1) {
+                    log('⚠️ MULTIPLE EMAIL TROVATE:', 'warning');
+                    emails.forEach(email => log(`   - ${email}`, 'warning'));
+                    log('🔧 Ricostruzione manuale necessaria', 'warning');
+                }
+            } else {
+                log('❌ Nessuna UCMe trovata', 'error');
+                log('💡 L\'utente potrebbe non aver mai inviato UCMe', 'info');
+                log('💡 Oppure localStorage è stato pulito', 'info');
+                
+                // Abilita creazione manuale utente
+                log('\n🔧 CREAZIONE MANUALE UTENTE:', 'highlight');
+                log('Inserisci email e password per creare l\'account', 'info');
+                showManualUserCreation();
+            }
+
+            log('\n🔧 PROSSIMI PASSI:', 'highlight');
+            log('1. Ricostruire dati utente completi', 'info');
+            log('2. Creare account Supabase', 'info');
+            log('3. Migrare UCMe esistenti', 'info');
+            log('4. Pulire localStorage legacy', 'info');
+        }
+
+        // Mostra card con dati utente ricostruiti
+        function showUserCard(email) {
+            const container = document.getElementById('user-reconstruction');
+            const firstUcme = existingData.ucmes[0];
+            const userName = email.split('@')[0]; // Nome di default dall'email
+            
+            container.innerHTML = `
+                <div class="user-card">
+                    <h3>👤 Utente Identificato</h3>
+                    <div><strong>📧 Email:</strong> ${email}</div>
+                    <div><strong>👤 Nome suggerito:</strong> ${userName}</div>
+                    <div><strong>📅 Prima attività:</strong> ${new Date(firstUcme.timestamp).toLocaleDateString()}</div>
+                    <div><strong>📊 UCMe totali:</strong> ${existingData.ucmes.length}</div>
+                    <div><strong>🔧 Stato:</strong> <span class="warning">Da ricostruire</span></div>
+                </div>
+            `;
+            
+            // Pre-compila nome utente
+            document.getElementById('user-name').value = userName;
+        }
+
+        // Mostra interfaccia per creazione manuale utente
+        function showManualUserCreation() {
+            const container = document.getElementById('user-reconstruction');
+            
+            container.innerHTML = `
+                <div class="user-card">
+                    <h3>🔧 Creazione Manuale Utente</h3>
+                    <div><strong>📧 Email:</strong> <input type="email" id="manual-email" placeholder="canepanerifilippo@gmail.com" style="width:100%;margin:5px 0;"></div>
+                    <div><strong>👤 Nome:</strong> <input type="text" id="manual-name" placeholder="Nome utente" style="width:100%;margin:5px 0;"></div>
+                    <div><strong>🔧 Stato:</strong> <span class="warning">Da creare</span></div>
+                    <button onclick="createManualUser()" style="margin-top:10px;">👤 Crea Utente</button>
+                </div>
+            `;
+            
+            // Pre-compila con email nota
+            document.getElementById('manual-email').value = 'canepanerifilippo@gmail.com';
+            document.getElementById('manual-name').value = 'canepanerifilippo';
+        }
+
+        // Crea utente manualmente
+        function createManualUser() {
+            const email = document.getElementById('manual-email').value;
+            const name = document.getElementById('manual-name').value;
+            const password = document.getElementById('user-password').value;
+
+            if (!email || !name || !password) {
+                log('❌ Compila tutti i campi: email, nome e password', 'error', 'reconstruction-log');
+                return;
+            }
+
+            // Crea dati utente fittizi
+            existingData = {
+                onboarded: true,
+                config: null,
+                ucmes: [{
+                    id: 'manual_' + Date.now(),
+                    email: email,
+                    text: 'Account creato manualmente',
+                    timestamp: new Date().toISOString(),
+                    status: 'manual'
+                }]
+            };
+
+            log('✅ Dati utente creati manualmente', 'success', 'reconstruction-log');
+            log(`   📧 Email: ${email}`, 'info', 'reconstruction-log');
+            log(`   👤 Nome: ${name}`, 'info', 'reconstruction-log');
+
+            // Abilita ricostruzione
+            document.getElementById('reconstruct-btn').disabled = false;
+            
+            // Aggiorna interfaccia
+            showUserCard(email);
+        }
+
+        // Test connessione server
+        async function testServerConnection() {
+            log('🔗 Test connessione server...', 'info');
+            
+            // Prova prima localhost:3000, poi fallback a path relativo
+            const endpoints = [
+                'http://localhost:3000/api/ping',
+                '/api/ping'
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    log(`🔍 Tentativo: ${endpoint}`, 'info');
+                    const response = await fetch(endpoint);
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        log('✅ Server raggiungibile', 'success');
+                        log(`   Endpoint: ${endpoint}`, 'info');
+                        log(`   Status: ${response.status}`, 'info');
+                        log(`   Response: ${JSON.stringify(result, null, 2)}`, 'info');
+                        
+                        // Salva endpoint funzionante
+                        window.serverEndpoint = endpoint.replace('/api/ping', '');
+                        log(`✅ Endpoint salvato: ${window.serverEndpoint}`, 'success');
+                        return true;
+                    }
+                } catch (error) {
+                    log(`❌ ${endpoint} fallito: ${error.message}`, 'warning');
+                }
+            }
+            
+            log('❌ Nessun server raggiungibile', 'error');
+            log('💡 Assicurati che il server sia avviato: node server-dev.js', 'warning');
+            log('💡 Oppure apri questo file da http://localhost:3000/fix-user-data.html', 'warning');
+            return false;
+        }
+
+        // Ricostruisci dati utente completi
+        function reconstructUser() {
+            if (!existingData || !existingData.ucmes || existingData.ucmes.length === 0) {
+                log('❌ Nessun dato da cui ricostruire l\'utente', 'error', 'reconstruction-log');
+                return;
+            }
+
+            document.getElementById('reconstruction-log').innerHTML = '';
+            log('🔧 ============================================', 'highlight', 'reconstruction-log');
+            log('🔧 RICOSTRUZIONE DATI UTENTE', 'highlight', 'reconstruction-log');
+            log('🔧 ============================================', 'highlight', 'reconstruction-log');
+
+            const email = existingData.ucmes[0].email;
+            const userName = document.getElementById('user-name').value || email.split('@')[0];
+            const password = document.getElementById('user-password').value;
+
+            if (!password) {
+                log('❌ Inserisci una password per l\'account', 'error', 'reconstruction-log');
+                return;
+            }
+
+            // Ricostruisci utente completo
+            reconstructedUser = {
+                id: 'legacy_' + Date.now(),
+                email: email,
+                name: userName,
+                password: password,
+                created_at: existingData.ucmes[0].timestamp, // Data della prima UCMe
+                last_login: new Date().toISOString(),
+                is_portatore: false,
+                legacy_migration: true,
+                ucmes_count: existingData.ucmes.length,
+                first_ucme_date: existingData.ucmes[0].timestamp,
+                migration_date: new Date().toISOString()
+            };
+
+            log('✅ UTENTE RICOSTRUITO:', 'success', 'reconstruction-log');
+            log(`   📧 Email: ${reconstructedUser.email}`, 'info', 'reconstruction-log');
+            log(`   👤 Nome: ${reconstructedUser.name}`, 'info', 'reconstruction-log');
+            log(`   🆔 ID: ${reconstructedUser.id}`, 'info', 'reconstruction-log');
+            log(`   📅 Account creato: ${new Date(reconstructedUser.created_at).toLocaleDateString()}`, 'info', 'reconstruction-log');
+            log(`   📊 UCMe associate: ${reconstructedUser.ucmes_count}`, 'info', 'reconstruction-log');
+            log(`   🔧 Migrazione: ${reconstructedUser.migration_date}`, 'info', 'reconstruction-log');
+
+            // Aggiorna card utente
+            const container = document.getElementById('user-reconstruction');
+            container.innerHTML = `
+                <div class="user-card">
+                    <h3>✅ Utente Ricostruito</h3>
+                    <div><strong>📧 Email:</strong> ${reconstructedUser.email}</div>
+                    <div><strong>👤 Nome:</strong> ${reconstructedUser.name}</div>
+                    <div><strong>🆔 ID:</strong> ${reconstructedUser.id}</div>
+                    <div><strong>📅 Account:</strong> ${new Date(reconstructedUser.created_at).toLocaleDateString()}</div>
+                    <div><strong>📊 UCMe:</strong> ${reconstructedUser.ucmes_count}</div>
+                    <div><strong>🔧 Stato:</strong> <span class="success">Pronto per migrazione</span></div>
+                </div>
+            `;
+
+            // Abilita migrazione
+            document.getElementById('migrate-btn').disabled = false;
+            log('🚀 Ricostruzione completata. Migrazione abilitata.', 'success', 'reconstruction-log');
+        }
+
+        // Migra utente a Supabase
+        async function migrateToSupabase() {
+            if (!reconstructedUser) {
+                log('❌ Nessun utente ricostruito da migrare', 'error', 'migration-log');
+                return;
+            }
+
+            document.getElementById('migration-log').innerHTML = '';
+            log('🚀 ============================================', 'highlight', 'migration-log');
+            log('🚀 MIGRAZIONE A SUPABASE', 'highlight', 'migration-log');
+            log('🚀 ============================================', 'highlight', 'migration-log');
+
+            // Verifica endpoint server
+            const baseUrl = window.serverEndpoint || 'http://localhost:3000';
+            log(`🔗 Usando endpoint: ${baseUrl}`, 'info', 'migration-log');
+
+            try {
+                // STEP 1: Crea utente in Supabase
+                log('👤 Creazione utente in Supabase...', 'info', 'migration-log');
+                log(`📤 Dati invio: ${JSON.stringify({
+                    email: reconstructedUser.email,
+                    name: reconstructedUser.name,
+                    legacy_migration: true
+                }, null, 2)}`, 'info', 'migration-log');
+                
+                const userResponse = await fetch(`${baseUrl}/api/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: reconstructedUser.email,
+                        password: reconstructedUser.password,
+                        name: reconstructedUser.name,
+                        legacy_migration: true
+                    })
+                });
+
+                log(`📡 Response status: ${userResponse.status}`, 'info', 'migration-log');
+                log(`📡 Response ok: ${userResponse.ok}`, 'info', 'migration-log');
+                
+                const userResult = await userResponse.json();
+
+                if (userResponse.ok && userResult.success) {
+                    log('✅ Utente creato in Supabase', 'success', 'migration-log');
+                    log(`   ID Supabase: ${userResult.user.id}`, 'info', 'migration-log');
+                    
+                    // STEP 2: Test login
+                    log('🔐 Test login con nuovo account...', 'info', 'migration-log');
+                    
+                    const loginResponse = await fetch(`${baseUrl}/api/login`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: reconstructedUser.email,
+                            password: reconstructedUser.password
+                        })
+                    });
+
+                    log(`📡 Login response status: ${loginResponse.status}`, 'info', 'migration-log');
+                    const loginResult = await loginResponse.json();
+
+                    if (loginResponse.ok && loginResult.success) {
+                        log('✅ Login test riuscito', 'success', 'migration-log');
+                        
+                        // STEP 3: Migra UCMe (se necessario)
+                        if (existingData.ucmes && existingData.ucmes.length > 0) {
+                            log('📝 Migrazione UCMe esistenti...', 'info', 'migration-log');
+                            // Qui potresti migrare le UCMe se necessario
+                            log(`ℹ️ ${existingData.ucmes.length} UCMe mantenute in localStorage per ora`, 'info', 'migration-log');
+                        }
+
+                        // STEP 4: Aggiorna configurazione
+                        log('⚙️ Aggiornamento configurazione...', 'info', 'migration-log');
+                        
+                        // Rimuovi configurazione legacy Google Apps Script
+                        localStorage.removeItem('mentalCommons_config');
+                        log('🗑️ Configurazione Google Apps Script rimossa', 'warning', 'migration-log');
+                        
+                        // Salva sessione utente (usando sessionStorage invece di localStorage)
+                        sessionStorage.setItem('mc-current-user', JSON.stringify({
+                            id: userResult.user.id,
+                            email: reconstructedUser.email,
+                            name: reconstructedUser.name,
+                            loginTime: new Date().toISOString(),
+                            migrated: true
+                        }));
+                        
+                        log('✅ MIGRAZIONE COMPLETATA!', 'highlight', 'migration-log');
+                        log('🎉 Account ora funziona cross-device via Supabase', 'success', 'migration-log');
+                        
+                        // Abilita cleanup
+                        document.getElementById('cleanup-btn').disabled = false;
+                        
+                    } else {
+                        log('❌ Login test fallito', 'error', 'migration-log');
+                        log(`   Errore: ${loginResult.message}`, 'error', 'migration-log');
+                    }
+                    
+                } else {
+                    log('❌ Errore creazione utente', 'error', 'migration-log');
+                    log(`   Status: ${userResponse.status}`, 'error', 'migration-log');
+                    log(`   Errore: ${userResult.message || 'Errore sconosciuto'}`, 'error', 'migration-log');
+                    
+                    if (userResult.message && userResult.message.includes('already exists')) {
+                        log('💡 L\'utente esiste già! Prova il login diretto.', 'warning', 'migration-log');
+                    }
+                }
+
+            } catch (error) {
+                log(`❌ Errore durante migrazione: ${error.message}`, 'error', 'migration-log');
+            }
+        }
+
+        // Pulizia localStorage
+        function cleanupLocalStorage() {
+            if (!confirm('⚠️ Sei sicuro di voler pulire i dati legacy dal localStorage?\n\nQuesta azione rimuoverà:\n- Configurazione Google Apps Script\n- Flag onboarding legacy\n\nLe UCMe saranno mantenute per sicurezza.')) {
+                return;
+            }
+
+            log('🧹 ============================================', 'highlight', 'migration-log');
+            log('🧹 PULIZIA LOCALSTORAGE', 'highlight', 'migration-log');
+            log('🧹 ============================================', 'highlight', 'migration-log');
+
+            // Rimuovi solo i dati legacy, mantieni UCMe per sicurezza
+            const itemsToRemove = [
+                'mentalCommons_config',  // Configurazione Google Apps Script
+                'mc-onboarded'           // Flag onboarding legacy
+            ];
+
+            itemsToRemove.forEach(item => {
+                if (localStorage.getItem(item)) {
+                    localStorage.removeItem(item);
+                    log(`🗑️ Rimosso: ${item}`, 'warning', 'migration-log');
+                } else {
+                    log(`ℹ️ Non trovato: ${item}`, 'info', 'migration-log');
+                }
+            });
+
+            log('✅ Pulizia completata', 'success', 'migration-log');
+            log('ℹ️ UCMe mantenute in localStorage per sicurezza', 'info', 'migration-log');
+            log('🎉 Sistema ora usa SOLO Supabase per autenticazione', 'highlight', 'migration-log');
+        }
+
+        // Auto-start
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                analyzeExistingData();
+                testServerConnection();
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

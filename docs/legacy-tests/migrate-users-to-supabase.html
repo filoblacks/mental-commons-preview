@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Commons - Migrazione Utenti a Supabase</title>
+    <style>
+        body {
+            font-family: monospace;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #000;
+            color: #00ff00;
+        }
+        .section {
+            border: 1px solid #333;
+            margin: 20px 0;
+            padding: 15px;
+            background: #111;
+        }
+        .log {
+            background: #000;
+            border: 1px solid #444;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        button {
+            background: #333;
+            color: #fff;
+            border: 1px solid #666;
+            padding: 15px 25px;
+            margin: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #555;
+        }
+        button:disabled {
+            background: #222;
+            color: #666;
+            cursor: not-allowed;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .warning { color: #ffaa00; }
+        .info { color: #00aaff; }
+        .stats {
+            background: #111;
+            border: 1px solid #333;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .progress {
+            background: #222;
+            height: 20px;
+            border: 1px solid #666;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            background: #00ff00;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔄 Mental Commons - Migrazione Utenti a Supabase</h1>
+    <p>Script per migrare gli account esistenti da localStorage a database Supabase centralizzato</p>
+
+    <!-- SEZIONE 1: Analisi Utenti Esistenti -->
+    <div class="section">
+        <h2>📊 ANALISI UTENTI ESISTENTI</h2>
+        <button onclick="analyzeExistingUsers()">🔍 Analizza Utenti in localStorage</button>
+        <div id="analysis-stats" class="stats"></div>
+        <div id="analysis-log" class="log"></div>
+    </div>
+
+    <!-- SEZIONE 2: Migrazione -->
+    <div class="section">
+        <h2>🚀 MIGRAZIONE A SUPABASE</h2>
+        <button id="migrate-btn" onclick="startMigration()" disabled>⚡ Avvia Migrazione</button>
+        <button onclick="testSupabaseConnection()">🔗 Test Connessione Supabase</button>
+        <div class="progress">
+            <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+        </div>
+        <div id="migration-stats" class="stats"></div>
+        <div id="migration-log" class="log"></div>
+    </div>
+
+    <!-- SEZIONE 3: Verifica Post-Migrazione -->
+    <div class="section">
+        <h2>✅ VERIFICA POST-MIGRAZIONE</h2>
+        <button onclick="verifyMigration()">🔍 Verifica Migrazione Completata</button>
+        <button onclick="cleanupLocalStorage()" disabled id="cleanup-btn">🧹 Pulisci localStorage (DOPO verifica)</button>
+        <div id="verification-log" class="log"></div>
+    </div>
+
+    <script>
+        let existingUsers = [];
+        let migrationResults = {
+            success: 0,
+            failed: 0,
+            duplicates: 0,
+            total: 0
+        };
+
+        // Funzioni di logging
+        function log(message, type = 'info', targetId = 'analysis-log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById(targetId);
+            const colorClass = type === 'error' ? 'error' : 
+                              type === 'success' ? 'success' : 
+                              type === 'warning' ? 'warning' : 'info';
+            
+            logElement.innerHTML += `<span class="${colorClass}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            // Log anche in console per debug
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        // Update progress bar
+        function updateProgress(current, total) {
+            const percentage = total > 0 ? (current / total) * 100 : 0;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+        }
+
+        // Update statistics
+        function updateStats(elementId, stats) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `
+                <h3>📊 Statistiche:</h3>
+                <div>Total utenti: ${stats.total}</div>
+                <div>✅ Successi: ${stats.success}</div>
+                <div>❌ Fallimenti: ${stats.failed}</div>
+                <div>🔄 Duplicati: ${stats.duplicates}</div>
+                <div>⏳ Rimanenti: ${stats.total - stats.success - stats.failed - stats.duplicates}</div>
+            `;
+        }
+
+        // API call helper
+        async function apiCall(endpoint, data = null, method = 'GET') {
+            const baseUrl = window.location.origin;
+            const url = `${baseUrl}${endpoint}`;
+            
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(url, options);
+                const result = await response.json();
+                
+                return { 
+                    success: response.ok, 
+                    data: result, 
+                    status: response.status,
+                    statusText: response.statusText
+                };
+            } catch (error) {
+                return { 
+                    success: false, 
+                    error: error.message,
+                    status: 0,
+                    statusText: 'Network Error'
+                };
+            }
+        }
+
+        // Analizza utenti esistenti in localStorage
+        function analyzeExistingUsers() {
+            document.getElementById('analysis-log').innerHTML = '';
+            log('🔍 ============================================', 'info');
+            log('🔍 ANALISI UTENTI ESISTENTI', 'info');
+            log('🔍 ============================================', 'info');
+
+            log('📋 Scansione completa localStorage...', 'info');
+            log(`🔍 Esplorazione di tutte le ${localStorage.length} chiavi presenti...`, 'info');
+
+            let allUsers = [];
+            let uniqueUsers = new Map();
+            let foundKeys = [];
+
+            // STEP 1: Esplora TUTTE le chiavi del localStorage
+            const userPatterns = [
+                'user', 'users', 'utent', 'account', 'login', 'auth',
+                'mc-', 'mental', 'commons', 'portator', 'depositor'
+            ];
+
+            // Scansiona ogni chiave nel localStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+
+                // Controlla se la chiave può contenere utenti
+                const isUserKey = userPatterns.some(pattern => 
+                    key.toLowerCase().includes(pattern.toLowerCase())
+                ) || key.length > 10; // Chiavi lunghe potrebbero essere utenti
+
+                if (isUserKey && value) {
+                    foundKeys.push(key);
+                    log(`🔑 Chiave sospetta: "${key}" (${value.length} caratteri)`, 'info');
+                    
+                    try {
+                        const parsed = JSON.parse(value);
+                        
+                        if (Array.isArray(parsed)) {
+                            log(`   📊 Array con ${parsed.length} elementi`, 'info');
+                            parsed.forEach((item, index) => {
+                                if (item && typeof item === 'object' && (item.email || item.Email)) {
+                                    allUsers.push({
+                                        ...item,
+                                        email: item.email || item.Email,
+                                        _source: key,
+                                        _index: index
+                                    });
+                                    log(`   ✅ Utente trovato: ${item.email || item.Email}`, 'success');
+                                }
+                            });
+                        } else if (parsed && typeof parsed === 'object' && (parsed.email || parsed.Email)) {
+                            allUsers.push({
+                                ...parsed,
+                                email: parsed.email || parsed.Email,
+                                _source: key,
+                                _index: -1
+                            });
+                            log(`   ✅ Utente singolo trovato: ${parsed.email || parsed.Email}`, 'success');
+                        }
+                    } catch (e) {
+                        // Non è JSON, potrebbe essere un singolo valore
+                        if (value.includes('@') && value.includes('.')) {
+                            log(`   📧 Possibile email trovata: ${value}`, 'warning');
+                            allUsers.push({
+                                email: value,
+                                _source: key,
+                                _index: -1,
+                                _rawValue: true
+                            });
+                        } else {
+                            log(`   ❌ Errore parsing: ${e.message}`, 'warning');
+                        }
+                    }
+                }
+            }
+
+            // STEP 2: Controlla anche le chiavi tradizionali specifiche (se non già trovate)
+            const traditionalKeys = ['mc-users', 'mc-user', 'mental_commons_users', 'mentalCommons_users'];
+            traditionalKeys.forEach(key => {
+                if (!foundKeys.includes(key)) {
+                    const data = localStorage.getItem(key);
+                    if (data) {
+                        foundKeys.push(key);
+                        log(`✅ Chiave tradizionale trovata: ${key}`, 'success');
+                        
+                        try {
+                            if (key === 'mc-user') {
+                                // Singolo utente
+                                const user = JSON.parse(data);
+                                if (user && user.email) {
+                                    allUsers.push(user);
+                                    log(`   👤 Utente singolo: ${user.email}`, 'info');
+                                }
+                            } else {
+                                // Array di utenti
+                                const users = JSON.parse(data);
+                                if (Array.isArray(users)) {
+                                    allUsers = allUsers.concat(users);
+                                    log(`   👥 Array utenti: ${users.length} utenti`, 'info');
+                                    users.forEach(user => {
+                                        if (user && user.email) {
+                                            log(`      - ${user.email}`, 'info');
+                                        }
+                                    });
+                                }
+                            }
+                        } catch (e) {
+                            log(`❌ Errore parsing ${key}: ${e.message}`, 'error');
+                        }
+                    }
+                }
+            });
+
+            // Deduplica utenti per email
+            allUsers.forEach(user => {
+                if (user && user.email && !uniqueUsers.has(user.email)) {
+                    // Standardizza struttura utente
+                    const standardUser = {
+                        id: user.id || 'legacy_' + Date.now(),
+                        email: user.email,
+                        password: user.password || user.accessCode || 'legacy_password',
+                        name: user.name || user.email.split('@')[0],
+                        createdAt: user.createdAt || new Date().toISOString(),
+                        lastLogin: user.lastLogin || new Date().toISOString(),
+                        isPortatore: user.isPortatore || false,
+                        legacy: true // Flag per identificare utenti migrati
+                    };
+                    uniqueUsers.set(user.email, standardUser);
+                }
+            });
+
+            existingUsers = Array.from(uniqueUsers.values());
+
+            log('📊 RISULTATI ANALISI:', 'info');
+            log(`   🔍 Chiavi scansionate: ${localStorage.length}`, 'info');
+            log(`   🔑 Chiavi con possibili utenti: ${foundKeys.length}`, 'info');
+            log(`   📁 Utenti totali trovati: ${allUsers.length}`, 'info');
+            log(`   👤 Utenti unici (deduplicati): ${existingUsers.length}`, 'success');
+
+            if (existingUsers.length === 0) {
+                log('⚠️ Nessun utente trovato in localStorage', 'warning');
+                log('💡 Possibili cause:', 'info');
+                log('   - localStorage effettivamente vuoto', 'info');
+                log('   - Utenti in formato non riconosciuto', 'info');
+                log('   - Dati corrotti o criptati', 'info');
+                
+                // Debug: mostra tutte le chiavi presenti
+                log('🔍 DEBUG - Tutte le chiavi presenti:', 'info');
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    const value = localStorage.getItem(key);
+                    const preview = value ? (value.length > 50 ? value.substring(0, 50) + '...' : value) : 'null';
+                    log(`   ${i + 1}. "${key}" = "${preview}"`, 'info');
+                }
+            } else {
+                log('📋 Dettaglio utenti da migrare:', 'info');
+                existingUsers.forEach((user, index) => {
+                    log(`   ${index + 1}. ${user.email} (${user.name})`, 'info');
+                    log(`      ID: ${user.id}`, 'info');
+                    log(`      Password: ${user.password ? '[PRESENTE]' : '[MANCANTE]'}`, 'info');
+                    log(`      Data: ${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}`, 'info');
+                });
+
+                // Abilita pulsante migrazione
+                document.getElementById('migrate-btn').disabled = false;
+                log('✅ Analisi completata. Pulsante migrazione abilitato.', 'success');
+            }
+
+            // Update statistics
+            migrationResults.total = existingUsers.length;
+            updateStats('analysis-stats', {
+                total: existingUsers.length,
+                success: 0,
+                failed: 0,
+                duplicates: 0
+            });
+        }
+
+        // Test connessione Supabase
+        async function testSupabaseConnection() {
+            log('🔗 Test connessione Supabase...', 'info', 'migration-log');
+            
+            const result = await apiCall('/api/ping');
+            
+            if (result.success) {
+                log('✅ Supabase connesso correttamente', 'success', 'migration-log');
+                log(`   Status: ${result.status}`, 'info', 'migration-log');
+                log(`   Response: ${JSON.stringify(result.data)}`, 'info', 'migration-log');
+                return true;
+            } else {
+                log('❌ Problema connessione Supabase', 'error', 'migration-log');
+                log(`   Status: ${result.status}`, 'error', 'migration-log');
+                log(`   Error: ${result.error || result.statusText}`, 'error', 'migration-log');
+                return false;
+            }
+        }
+
+        // Avvia migrazione
+        async function startMigration() {
+            if (existingUsers.length === 0) {
+                log('❌ Nessun utente da migrare. Esegui prima l\'analisi.', 'error', 'migration-log');
+                return;
+            }
+
+            document.getElementById('migration-log').innerHTML = '';
+            log('🚀 ============================================', 'info', 'migration-log');
+            log('🚀 AVVIO MIGRAZIONE UTENTI A SUPABASE', 'info', 'migration-log');
+            log('🚀 ============================================', 'info', 'migration-log');
+
+            // Reset statistiche
+            migrationResults = {
+                success: 0,
+                failed: 0,
+                duplicates: 0,
+                total: existingUsers.length
+            };
+
+            // Test connessione prima di iniziare
+            const connectionOk = await testSupabaseConnection();
+            if (!connectionOk) {
+                log('❌ Migrazione interrotta: problemi di connessione', 'error', 'migration-log');
+                return;
+            }
+
+            // Disabilita pulsante per evitare doppie migrazioni
+            document.getElementById('migrate-btn').disabled = true;
+
+            log(`📊 Inizio migrazione di ${existingUsers.length} utenti...`, 'info', 'migration-log');
+
+            for (let i = 0; i < existingUsers.length; i++) {
+                const user = existingUsers[i];
+                
+                log(`\n👤 Migrazione utente ${i + 1}/${existingUsers.length}: ${user.email}`, 'info', 'migration-log');
+                
+                // Update progress
+                updateProgress(i, existingUsers.length);
+                updateStats('migration-stats', migrationResults);
+
+                try {
+                    // Tenta registrazione su Supabase
+                    const result = await apiCall('/api/register', {
+                        email: user.email,
+                        password: user.password,
+                        name: user.name
+                    }, 'POST');
+
+                    if (result.success) {
+                        log(`   ✅ ${user.email}: Migrato con successo`, 'success', 'migration-log');
+                        migrationResults.success++;
+                    } else if (result.status === 409) {
+                        log(`   🔄 ${user.email}: Già esistente in Supabase (OK)`, 'warning', 'migration-log');
+                        migrationResults.duplicates++;
+                    } else {
+                        log(`   ❌ ${user.email}: Errore - ${result.data.message || result.statusText}`, 'error', 'migration-log');
+                        migrationResults.failed++;
+                    }
+                } catch (error) {
+                    log(`   ❌ ${user.email}: Errore critico - ${error.message}`, 'error', 'migration-log');
+                    migrationResults.failed++;
+                }
+
+                // Pausa breve per non sovraccaricare il server
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            // Migrazione completata
+            updateProgress(existingUsers.length, existingUsers.length);
+            updateStats('migration-stats', migrationResults);
+
+            log('\n🎉 ============================================', 'success', 'migration-log');
+            log('🎉 MIGRAZIONE COMPLETATA', 'success', 'migration-log');
+            log('🎉 ============================================', 'success', 'migration-log');
+            log(`📊 Risultati finali:`, 'info', 'migration-log');
+            log(`   ✅ Successi: ${migrationResults.success}`, 'success', 'migration-log');
+            log(`   🔄 Duplicati: ${migrationResults.duplicates}`, 'warning', 'migration-log');
+            log(`   ❌ Fallimenti: ${migrationResults.failed}`, migrationResults.failed > 0 ? 'error' : 'info', 'migration-log');
+
+            if (migrationResults.failed === 0) {
+                log('🎯 Migrazione completata con successo!', 'success', 'migration-log');
+            } else {
+                log('⚠️ Migrazione completata con alcuni errori. Verifica i log.', 'warning', 'migration-log');
+            }
+        }
+
+        // Verifica migrazione
+        async function verifyMigration() {
+            document.getElementById('verification-log').innerHTML = '';
+            log('🔍 ============================================', 'info', 'verification-log');
+            log('🔍 VERIFICA POST-MIGRAZIONE', 'info', 'verification-log');
+            log('🔍 ============================================', 'info', 'verification-log');
+
+            if (existingUsers.length === 0) {
+                log('⚠️ Nessun utente da verificare. Esegui prima analisi e migrazione.', 'warning', 'verification-log');
+                return;
+            }
+
+            let verificationResults = {
+                verified: 0,
+                failed: 0,
+                total: existingUsers.length
+            };
+
+            log(`🔍 Verifica ${existingUsers.length} utenti migrati...`, 'info', 'verification-log');
+
+            for (let i = 0; i < existingUsers.length; i++) {
+                const user = existingUsers[i];
+                
+                log(`\n🔐 Test login ${i + 1}/${existingUsers.length}: ${user.email}`, 'info', 'verification-log');
+
+                try {
+                    const result = await apiCall('/api/login', {
+                        email: user.email,
+                        password: user.password
+                    }, 'POST');
+
+                    if (result.success) {
+                        log(`   ✅ ${user.email}: Login OK - Migrazione verificata`, 'success', 'verification-log');
+                        verificationResults.verified++;
+                    } else {
+                        log(`   ❌ ${user.email}: Login fallito - ${result.data.message || result.statusText}`, 'error', 'verification-log');
+                        verificationResults.failed++;
+                    }
+                } catch (error) {
+                    log(`   ❌ ${user.email}: Errore verifica - ${error.message}`, 'error', 'verification-log');
+                    verificationResults.failed++;
+                }
+
+                // Pausa breve
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+
+            log('\n📊 RISULTATI VERIFICA:', 'info', 'verification-log');
+            log(`   ✅ Verificati: ${verificationResults.verified}`, 'success', 'verification-log');
+            log(`   ❌ Non verificati: ${verificationResults.failed}`, verificationResults.failed > 0 ? 'error' : 'info', 'verification-log');
+
+            if (verificationResults.failed === 0) {
+                log('🎯 Tutti gli utenti verificati con successo!', 'success', 'verification-log');
+                log('🧹 È ora sicuro pulire localStorage', 'success', 'verification-log');
+                document.getElementById('cleanup-btn').disabled = false;
+            } else {
+                log('⚠️ Alcuni utenti non sono stati verificati. NON pulire localStorage ancora.', 'warning', 'verification-log');
+            }
+        }
+
+        // Pulizia localStorage
+        function cleanupLocalStorage() {
+            log('🧹 ============================================', 'info', 'verification-log');
+            log('🧹 PULIZIA LOCALSTORAGE', 'info', 'verification-log');
+            log('🧹 ============================================', 'info', 'verification-log');
+
+            const keysToClean = [
+                'mc-users', 'mc-user', 'mc-email', 'mc-onboarded',
+                'mentalCommons_ucmes', 'mentalCommons_portatori',
+                'mental_commons_users', 'mentalCommons_users'
+            ];
+
+            let cleanedKeys = 0;
+
+            keysToClean.forEach(key => {
+                if (localStorage.getItem(key)) {
+                    localStorage.removeItem(key);
+                    log(`🗑️ Rimosso: ${key}`, 'success', 'verification-log');
+                    cleanedKeys++;
+                } else {
+                    log(`➖ Non presente: ${key}`, 'info', 'verification-log');
+                }
+            });
+
+            log(`\n✅ Pulizia completata: ${cleanedKeys} chiavi rimosse`, 'success', 'verification-log');
+            log('🎯 localStorage ora pulito, sistema centralizzato su Supabase', 'success', 'verification-log');
+
+            // Disabilita pulsante dopo pulizia
+            document.getElementById('cleanup-btn').disabled = true;
+        }
+
+        // Auto-start analysis on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                analyzeExistingUsers();
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 DEBUG API CALLS - Mental Commons</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Monaco', 'Menlo', monospace;
+            background: #1e1e1e;
+            color: #fff;
+            padding: 20px;
+            line-height: 1.4;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #4fc3f7;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .api-section {
+            background: #2d2d2d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4fc3f7;
+        }
+        
+        .api-section h2 {
+            color: #81c784;
+            margin-bottom: 15px;
+        }
+        
+        .button {
+            background: #4fc3f7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+            font-family: inherit;
+        }
+        
+        .button:hover {
+            background: #29b6f6;
+        }
+        
+        .button.success {
+            background: #4caf50;
+        }
+        
+        .button.error {
+            background: #f44336;
+        }
+        
+        .log-area {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            border: 1px solid #333;
+        }
+        
+        .input-group {
+            margin-bottom: 10px;
+        }
+        
+        .input-group label {
+            display: block;
+            color: #ffb74d;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 8px;
+            background: #424242;
+            color: #fff;
+            border: 1px solid #666;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .status.success { background: #4caf50; }
+        .status.error { background: #f44336; }
+        .status.pending { background: #ff9800; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 1200px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 DEBUG API CALLS - Mental Commons</h1>
+        
+        <div class="grid">
+            <!-- REGISTRAZIONE -->
+            <div class="api-section">
+                <h2>📝 REGISTER API</h2>
+                
+                <div class="input-group">
+                    <label>Email:</label>
+                    <input type="email" id="reg-email" value="debug@mentalcommons.it">
+                </div>
+                
+                <div class="input-group">
+                    <label>Password:</label>
+                    <input type="password" id="reg-password" value="debug123">
+                </div>
+                
+                <div class="input-group">
+                    <label>Nome:</label>
+                    <input type="text" id="reg-name" value="Debug User">
+                </div>
+                
+                <button class="button" onclick="callRegisterAPI()">
+                    🚀 Call Register API
+                </button>
+                <span id="reg-status" class="status pending">Ready</span>
+                
+                <div id="reg-log" class="log-area"></div>
+            </div>
+            
+            <!-- LOGIN -->
+            <div class="api-section">
+                <h2>🔐 LOGIN API</h2>
+                
+                <div class="input-group">
+                    <label>Email:</label>
+                    <input type="email" id="login-email" value="test@mentalcommons.it">
+                </div>
+                
+                <div class="input-group">
+                    <label>Password:</label>
+                    <input type="password" id="login-password" value="test123">
+                </div>
+                
+                <button class="button" onclick="callLoginAPI()">
+                    🚀 Call Login API
+                </button>
+                <span id="login-status" class="status pending">Ready</span>
+                
+                <div id="login-log" class="log-area"></div>
+            </div>
+            
+            <!-- UCME -->
+            <div class="api-section">
+                <h2>📄 UCME API</h2>
+                
+                <div class="input-group">
+                    <label>JWT Token:</label>
+                    <input type="text" id="ucme-token" placeholder="Token from login...">
+                </div>
+                
+                <div class="input-group">
+                    <label>Titolo:</label>
+                    <input type="text" id="ucme-title" value="Debug UCMe">
+                </div>
+                
+                <div class="input-group">
+                    <label>Contenuto:</label>
+                    <textarea id="ucme-content" rows="3">Questo è un test di debug per verificare che le query Supabase funzionino correttamente.</textarea>
+                </div>
+                
+                <button class="button" onclick="callUCMeAPI()">
+                    🚀 Call UCMe API
+                </button>
+                <span id="ucme-status" class="status pending">Ready</span>
+                
+                <div id="ucme-log" class="log-area"></div>
+            </div>
+        </div>
+        
+        <!-- LOG GLOBALE -->
+        <div class="api-section">
+            <h2>📊 GLOBAL DEBUG LOG</h2>
+            <button class="button" onclick="clearGlobalLog()">🗑️ Clear Log</button>
+            <button class="button" onclick="runSequentialTest()">🔄 Run Sequential Test</button>
+            
+            <div id="global-log" class="log-area" style="height: 300px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Uso il nuovo deployment per testare RLS
+        const backendUrl = 'http://localhost:3000';
+        let globalLogContent = '';
+        
+        function log(message, section = 'global') {
+            const timestamp = new Date().toISOString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            
+            globalLogContent += logMessage;
+            
+            // Aggiorna log globale
+            document.getElementById('global-log').textContent = globalLogContent;
+            document.getElementById('global-log').scrollTop = document.getElementById('global-log').scrollHeight;
+            
+            // Aggiorna log specifico se specificato
+            if (section !== 'global') {
+                const sectionLog = document.getElementById(`${section}-log`);
+                if (sectionLog) {
+                    sectionLog.textContent += logMessage;
+                    sectionLog.scrollTop = sectionLog.scrollHeight;
+                }
+            }
+        }
+        
+        function updateStatus(section, status) {
+            const statusEl = document.getElementById(`${section}-status`);
+            statusEl.className = `status ${status}`;
+            statusEl.textContent = status.toUpperCase();
+        }
+        
+        async function callRegisterAPI() {
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const name = document.getElementById('reg-name').value;
+            
+            updateStatus('reg', 'pending');
+            document.getElementById('reg-log').textContent = '';
+            
+            log('🟣 INIZIO REGISTER API CALL', 'reg');
+            log(`📧 Email: ${email}`, 'reg');
+            log(`👤 Nome: ${name}`, 'reg');
+            log(`🔗 URL: ${backendUrl}/api/register`, 'reg');
+            
+            try {
+                const payload = { email, password, name };
+                log(`📤 Payload: ${JSON.stringify(payload, null, 2)}`, 'reg');
+                
+                const response = await fetch(`${backendUrl}/api/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                log(`📥 Response Status: ${response.status} ${response.statusText}`, 'reg');
+                log(`📥 Response Headers: ${JSON.stringify(Object.fromEntries(response.headers), null, 2)}`, 'reg');
+                
+                const result = await response.json();
+                
+                log(`📥 Response Body: ${JSON.stringify(result, null, 2)}`, 'reg');
+                
+                if (result.success) {
+                    updateStatus('reg', 'success');
+                    log(`✅ REGISTRAZIONE COMPLETATA`, 'reg');
+                    log(`🆔 User ID: ${result.user?.id}`, 'reg');
+                    log(`🎫 Token generato: ${result.token ? 'SÌ' : 'NO'}`, 'reg');
+                    
+                    // Auto-fill login
+                    document.getElementById('login-email').value = email;
+                    document.getElementById('login-password').value = password;
+                } else {
+                    updateStatus('reg', 'error');
+                    log(`❌ REGISTRAZIONE FALLITA: ${result.message}`, 'reg');
+                    log(`🔍 Debug info: ${JSON.stringify(result.debug, null, 2)}`, 'reg');
+                }
+            } catch (error) {
+                updateStatus('reg', 'error');
+                log(`💥 ERRORE CONNESSIONE: ${error.message}`, 'reg');
+                log(`📚 Stack: ${error.stack}`, 'reg');
+            }
+        }
+        
+        async function callLoginAPI() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            updateStatus('login', 'pending');
+            document.getElementById('login-log').textContent = '';
+            
+            log('🟣 INIZIO LOGIN API CALL', 'login');
+            log(`📧 Email: ${email}`, 'login');
+            log(`🔗 URL: ${backendUrl}/api/login`, 'login');
+            
+            try {
+                const payload = { email, password };
+                log(`📤 Payload: ${JSON.stringify({ email, password: '[HIDDEN]' }, null, 2)}`, 'login');
+                
+                const response = await fetch(`${backendUrl}/api/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                log(`📥 Response Status: ${response.status} ${response.statusText}`, 'login');
+                log(`📥 Response Headers: ${JSON.stringify(Object.fromEntries(response.headers), null, 2)}`, 'login');
+                
+                const result = await response.json();
+                
+                log(`📥 Response Body: ${JSON.stringify({
+                    ...result,
+                    token: result.token ? `${result.token.substring(0, 20)}...` : null
+                }, null, 2)}`, 'login');
+                
+                if (result.success) {
+                    updateStatus('login', 'success');
+                    log(`✅ LOGIN COMPLETATO`, 'login');
+                    log(`🆔 User ID: ${result.user?.id}`, 'login');
+                    log(`🎫 Token length: ${result.token?.length}`, 'login');
+                    
+                    // Auto-fill token in UCMe section
+                    document.getElementById('ucme-token').value = result.token;
+                } else {
+                    updateStatus('login', 'error');
+                    log(`❌ LOGIN FALLITO: ${result.message}`, 'login');
+                    log(`🔍 Debug info: ${JSON.stringify(result.debug, null, 2)}`, 'login');
+                }
+            } catch (error) {
+                updateStatus('login', 'error');
+                log(`💥 ERRORE CONNESSIONE: ${error.message}`, 'login');
+                log(`📚 Stack: ${error.stack}`, 'login');
+            }
+        }
+        
+        async function callUCMeAPI() {
+            const token = document.getElementById('ucme-token').value;
+            const title = document.getElementById('ucme-title').value;
+            const content = document.getElementById('ucme-content').value;
+            
+            if (!token) {
+                alert('❌ Token richiesto! Effettua prima il login.');
+                return;
+            }
+            
+            updateStatus('ucme', 'pending');
+            document.getElementById('ucme-log').textContent = '';
+            
+            log('🟣 INIZIO UCME API CALL', 'ucme');
+            log(`📝 Titolo: ${title}`, 'ucme');
+            log(`📄 Contenuto length: ${content.length}`, 'ucme');
+            log(`🎫 Token preview: ${token.substring(0, 20)}...`, 'ucme');
+            log(`🔗 URL: ${backendUrl}/api/ucme`, 'ucme');
+            
+            try {
+                const payload = { title, content };
+                log(`📤 Payload: ${JSON.stringify(payload, null, 2)}`, 'ucme');
+                
+                const response = await fetch(`${backendUrl}/api/ucme`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                log(`📥 Response Status: ${response.status} ${response.statusText}`, 'ucme');
+                log(`📥 Response Headers: ${JSON.stringify(Object.fromEntries(response.headers), null, 2)}`, 'ucme');
+                
+                const result = await response.json();
+                
+                log(`📥 Response Body: ${JSON.stringify(result, null, 2)}`, 'ucme');
+                
+                if (result.success) {
+                    updateStatus('ucme', 'success');
+                    log(`✅ UCME SALVATA`, 'ucme');
+                    log(`🆔 UCMe ID: ${result.ucme?.id}`, 'ucme');
+                    log(`📊 Status: ${result.ucme?.status}`, 'ucme');
+                    log(`📅 Created: ${result.ucme?.created_at}`, 'ucme');
+                } else {
+                    updateStatus('ucme', 'error');
+                    log(`❌ UCME FALLITA: ${result.message}`, 'ucme');
+                    log(`🔍 Debug info: ${JSON.stringify(result.debug, null, 2)}`, 'ucme');
+                }
+            } catch (error) {
+                updateStatus('ucme', 'error');
+                log(`💥 ERRORE CONNESSIONE: ${error.message}`, 'ucme');
+                log(`📚 Stack: ${error.stack}`, 'ucme');
+            }
+        }
+        
+        function clearGlobalLog() {
+            globalLogContent = '';
+            document.getElementById('global-log').textContent = '';
+            document.getElementById('reg-log').textContent = '';
+            document.getElementById('login-log').textContent = '';
+            document.getElementById('ucme-log').textContent = '';
+        }
+        
+        async function runSequentialTest() {
+            log('🚀 AVVIO TEST SEQUENZIALE COMPLETO');
+            log('===================================');
+            
+            // Step 1: Register
+            log('\n🟣 STEP 1: Registrazione...');
+            await callRegisterAPI();
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Step 2: Login
+            log('\n🟣 STEP 2: Login...');
+            await callLoginAPI();
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Step 3: UCMe
+            if (document.getElementById('ucme-token').value) {
+                log('\n🟣 STEP 3: Salvataggio UCMe...');
+                await callUCMeAPI();
+            } else {
+                log('\n❌ STEP 3: Saltato (token mancante)');
+            }
+            
+            log('\n===================================');
+            log('📊 TEST SEQUENZIALE COMPLETATO');
+        }
+        
+        // Inizializzazione
+        log('🔍 Debug API Calls caricato');
+        log(`🌐 Backend URL: ${backendUrl}`);
+    </script>
+</body>
+</html> 

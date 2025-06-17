@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Commons - Test RLS Quick Fix</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .pending { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .btn:hover { background: #0056b3; }
+        h1 { text-align: center; color: #2c3e50; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Mental Commons - Test RLS Quick Fix</h1>
+        
+        <p><strong>Obiettivo:</strong> Verificare se il fix RLS ha risolto l'errore "new row violates row-level security policy"</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="btn" onclick="testRLSFix()">🚀 Test RLS Fix</button>
+            <button class="btn" onclick="location.reload()">🔄 Reset</button>
+        </div>
+        
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://mental-commons.vercel.app/api';
+        
+        function addResult(message, type = 'pending') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = message;
+            document.getElementById('test-results').appendChild(div);
+        }
+        
+        async function testRLSFix() {
+            document.getElementById('test-results').innerHTML = '';
+            
+            addResult('🔍 Test RLS Fix in corso...', 'pending');
+            
+            try {
+                const timestamp = Date.now();
+                const testUser = {
+                    name: 'Test RLS Fix User',
+                    email: `test-rls-fix-${timestamp}@mentalcommons.it`,
+                    password: 'test123'
+                };
+                
+                addResult(`📝 Tentativo registrazione utente: ${testUser.email}`, 'pending');
+                
+                const response = await fetch(`${API_BASE}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testUser)
+                });
+                
+                const result = await response.json();
+                
+                console.log('Response completa:', result);
+                
+                if (result.success) {
+                    addResult(`✅ SUCCESS! RLS FIX FUNZIONA!\n\n` +
+                             `✨ Utente registrato con successo:\n` +
+                             `Email: ${result.user.email}\n` +
+                             `ID: ${result.user.id}\n` +
+                             `Token: ${result.token ? 'Generato ✓' : 'Non generato ✗'}\n` +
+                             `Backend: ${result.debug?.backend || 'N/A'}\n` +
+                             `Storage: ${result.debug?.persistentStorage ? 'Persistente ✓' : 'Temporaneo ⚠️'}\n\n` +
+                             `🎉 Il problema RLS è stato risolto!`, 'success');
+                             
+                    // Test aggiuntivo: tentativo di login
+                    addResult('🔐 Test login con lo stesso utente...', 'pending');
+                    
+                    const loginResponse = await fetch(`${API_BASE}/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: testUser.email,
+                            password: testUser.password
+                        })
+                    });
+                    
+                    const loginResult = await loginResponse.json();
+                    
+                    if (loginResult.success) {
+                        addResult(`✅ LOGIN SUCCESSO!\n` +
+                                 `🔑 Token JWT: ${loginResult.token.substring(0, 50)}...\n` +
+                                 `👤 Utente: ${loginResult.user.name}\n` +
+                                 `💾 Dati persistenti: ${loginResult.debug?.persistentStorage ? 'SI' : 'NO'}\n\n` +
+                                 `🏆 TUTTI I TEST SUPERATI - SISTEMA FUNZIONANTE!`, 'success');
+                    } else {
+                        addResult(`⚠️ Login fallito: ${loginResult.message}\n` +
+                                 `Debug: ${JSON.stringify(loginResult.debug, null, 2)}`, 'error');
+                    }
+                    
+                } else {
+                    // Analizza l'errore
+                    const errorMsg = result.message || 'Errore sconosciuto';
+                    const debugInfo = result.debug || {};
+                    
+                    if (errorMsg.includes('violates row-level security') || 
+                        debugInfo.error?.includes('violates row-level security')) {
+                        addResult(`❌ PROBLEMA RLS NON RISOLTO!\n\n` +
+                                 `🚫 Errore: ${errorMsg}\n` +
+                                 `🔍 Debug: ${JSON.stringify(debugInfo, null, 2)}\n\n` +
+                                 `⚡ AZIONE RICHIESTA:\n` +
+                                 `1. Eseguire lo script fix-rls-final.sql nel SQL Editor di Supabase\n` +
+                                 `2. Verificare che le politiche service_role siano applicate\n` +
+                                 `3. Ripetere questo test`, 'error');
+                    } else {
+                        addResult(`⚠️ Errore diverso da RLS:\n\n` +
+                                 `Message: ${errorMsg}\n` +
+                                 `Debug: ${JSON.stringify(debugInfo, null, 2)}\n\n` +
+                                 `Questo potrebbe essere un altro tipo di problema.`, 'error');
+                    }
+                }
+                
+            } catch (error) {
+                addResult(`💥 ERRORE DI RETE:\n\n` +
+                         `${error.message}\n\n` +
+                         `Verifica che:\n` +
+                         `1. Le API siano deployate correttamente\n` +
+                         `2. L'URL ${API_BASE} sia raggiungibile\n` +
+                         `3. La connessione internet funzioni`, 'error');
+                console.error('Errore completo:', error);
+            }
+        }
+    </script>
+</body>
+</html> 

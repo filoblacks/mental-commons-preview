@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🟣 FASE 3 - Test Query Dirette</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .phase-section {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .test-button {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+        }
+        .test-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .log-container {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success { background: rgba(76, 175, 80, 0.3); }
+        .status.error { background: rgba(244, 67, 54, 0.3); }
+        .status.warning { background: rgba(255, 193, 7, 0.3); }
+        .input-group {
+            margin: 15px 0;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🟣 FASE 3 - Test Query Dirette</h1>
+            <p>Verifica sistematica delle query API vs Database</p>
+        </div>
+
+        <!-- Test Registrazione -->
+        <div class="phase-section">
+            <h3>📝 Test Registrazione Utente</h3>
+            <div class="input-group">
+                <label>Email:</label>
+                <input type="email" id="registerEmail" value="test-fase3@mentalcommons.it" placeholder="test@example.com">
+            </div>
+            <div class="input-group">
+                <label>Password:</label>
+                <input type="password" id="registerPassword" value="password123" placeholder="password123">
+            </div>
+            <div class="input-group">
+                <label>Nome:</label>
+                <input type="text" id="registerName" value="Test Fase 3" placeholder="Nome Utente">
+            </div>
+            <button class="test-button" onclick="testRegistration()">🚀 Test Registrazione</button>
+            <div id="registerStatus"></div>
+            <div id="registerLogs" class="log-container"></div>
+        </div>
+
+        <!-- Test Login -->
+        <div class="phase-section">
+            <h3>🔐 Test Login Utente</h3>
+            <div class="input-group">
+                <label>Email:</label>
+                <input type="email" id="loginEmail" value="test-fase3@mentalcommons.it" placeholder="test@example.com">
+            </div>
+            <div class="input-group">
+                <label>Password:</label>
+                <input type="password" id="loginPassword" value="password123" placeholder="password123">
+            </div>
+            <button class="test-button" onclick="testLogin()">🔑 Test Login</button>
+            <div id="loginStatus"></div>
+            <div id="loginLogs" class="log-container"></div>
+        </div>
+
+        <!-- Test Connessione Database -->
+        <div class="phase-section">
+            <h3>🔍 Test Connessione Database</h3>
+            <button class="test-button" onclick="testDatabaseConnection()">🌐 Test Connessione</button>
+            <div id="dbStatus"></div>
+            <div id="dbLogs" class="log-container"></div>
+        </div>
+
+        <!-- Test Tutti gli Utenti -->
+        <div class="phase-section">
+            <h3>👥 Test Recupero Utenti</h3>
+            <button class="test-button" onclick="testGetAllUsers()">📋 Lista Utenti</button>
+            <div id="usersStatus"></div>
+            <div id="usersLogs" class="log-container"></div>
+        </div>
+
+        <!-- Log Generale -->
+        <div class="phase-section">
+            <h3>📊 Log Generale Sistema</h3>
+            <button class="test-button" onclick="clearLogs()">🧹 Pulisci Log</button>
+            <div id="generalLogs" class="log-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let testCounter = 0;
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toISOString();
+            const formattedMessage = `[${timestamp}] ${message}`;
+            
+            // Log generale
+            const generalLogs = document.getElementById('generalLogs');
+            generalLogs.textContent += formattedMessage + '\n';
+            generalLogs.scrollTop = generalLogs.scrollHeight;
+            
+            console.log(formattedMessage);
+        }
+
+        function updateStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.className = `status ${type}`;
+            element.textContent = message;
+        }
+
+        function updateLogs(elementId, content) {
+            const element = document.getElementById(elementId);
+            element.textContent = content;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        async function makeRequest(url, method = 'GET', body = null) {
+            testCounter++;
+            const testId = `TEST-${testCounter}`;
+            
+            log(`🟣 ${testId} - Inizio richiesta ${method} ${url}`);
+            
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                };
+                
+                if (body) {
+                    options.body = JSON.stringify(body);
+                    log(`📤 ${testId} - Body inviato: ${JSON.stringify(body, null, 2)}`);
+                }
+                
+                const response = await fetch(url, options);
+                const responseText = await response.text();
+                
+                log(`📥 ${testId} - Status: ${response.status}`);
+                log(`📥 ${testId} - Headers: ${JSON.stringify(Object.fromEntries(response.headers), null, 2)}`);
+                log(`📥 ${testId} - Response raw: ${responseText}`);
+                
+                let responseData;
+                try {
+                    responseData = JSON.parse(responseText);
+                } catch (e) {
+                    responseData = { raw: responseText, parseError: e.message };
+                }
+                
+                return {
+                    testId,
+                    ok: response.ok,
+                    status: response.status,
+                    data: responseData,
+                    rawResponse: responseText
+                };
+            } catch (error) {
+                log(`❌ ${testId} - Errore request: ${error.message}`);
+                return {
+                    testId,
+                    ok: false,
+                    error: error.message,
+                    data: null
+                };
+            }
+        }
+
+        async function testRegistration() {
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const name = document.getElementById('registerName').value;
+            
+            updateStatus('registerStatus', '🔄 Test registrazione in corso...', 'warning');
+            
+            const result = await makeRequest(`${API_BASE}/register`, 'POST', {
+                email,
+                password,
+                name
+            });
+            
+            const logContent = `🟣 FASE 3 - TEST REGISTRAZIONE
+Test ID: ${result.testId}
+Status: ${result.status}
+Success: ${result.ok}
+Response: ${JSON.stringify(result.data, null, 2)}
+Raw Response: ${result.rawResponse || 'N/A'}
+Error: ${result.error || 'N/A'}`;
+            
+            updateLogs('registerLogs', logContent);
+            
+            if (result.ok) {
+                updateStatus('registerStatus', `✅ Registrazione riuscita! User ID: ${result.data?.user?.id || 'N/A'}`, 'success');
+            } else {
+                updateStatus('registerStatus', `❌ Registrazione fallita: ${result.data?.message || result.error}`, 'error');
+            }
+        }
+
+        async function testLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            updateStatus('loginStatus', '🔄 Test login in corso...', 'warning');
+            
+            const result = await makeRequest(`${API_BASE}/login`, 'POST', {
+                email,
+                password
+            });
+            
+            const logContent = `🟣 FASE 3 - TEST LOGIN
+Test ID: ${result.testId}
+Status: ${result.status}
+Success: ${result.ok}
+Response: ${JSON.stringify(result.data, null, 2)}
+Raw Response: ${result.rawResponse || 'N/A'}
+Error: ${result.error || 'N/A'}`;
+            
+            updateLogs('loginLogs', logContent);
+            
+            if (result.ok) {
+                updateStatus('loginStatus', `✅ Login riuscito! Token: ${result.data?.token ? 'Presente' : 'Mancante'}`, 'success');
+            } else {
+                updateStatus('loginStatus', `❌ Login fallito: ${result.data?.message || result.error}`, 'error');
+            }
+        }
+
+        async function testDatabaseConnection() {
+            updateStatus('dbStatus', '🔄 Test connessione in corso...', 'warning');
+            
+            const result = await makeRequest(`${API_BASE}/ping`, 'GET');
+            
+            const logContent = `🟣 FASE 3 - TEST CONNESSIONE DB
+Test ID: ${result.testId}
+Status: ${result.status}
+Success: ${result.ok}
+Response: ${JSON.stringify(result.data, null, 2)}
+Raw Response: ${result.rawResponse || 'N/A'}
+Error: ${result.error || 'N/A'}`;
+            
+            updateLogs('dbLogs', logContent);
+            
+            if (result.ok) {
+                updateStatus('dbStatus', '✅ Connessione database riuscita!', 'success');
+            } else {
+                updateStatus('dbStatus', `❌ Connessione database fallita: ${result.data?.message || result.error}`, 'error');
+            }
+        }
+
+        async function testGetAllUsers() {
+            updateStatus('usersStatus', '🔄 Recupero utenti in corso...', 'warning');
+            
+            const result = await makeRequest(`${API_BASE}/users`, 'GET');
+            
+            const logContent = `🟣 FASE 3 - TEST RECUPERO UTENTI
+Test ID: ${result.testId}
+Status: ${result.status}
+Success: ${result.ok}
+Response: ${JSON.stringify(result.data, null, 2)}
+Raw Response: ${result.rawResponse || 'N/A'}
+Error: ${result.error || 'N/A'}`;
+            
+            updateLogs('usersLogs', logContent);
+            
+            if (result.ok && result.data?.users) {
+                updateStatus('usersStatus', `✅ Recuperati ${result.data.users.length} utenti`, 'success');
+            } else {
+                updateStatus('usersStatus', `❌ Recupero utenti fallito: ${result.data?.message || result.error}`, 'error');
+            }
+        }
+
+        function clearLogs() {
+            document.getElementById('generalLogs').textContent = '';
+            testCounter = 0;
+            log('🧹 Log puliti - Sistema reset');
+        }
+
+        // Log iniziale
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🟣 FASE 3 - Sistema di test query dirette avviato');
+            log('🔍 Ambiente: ' + window.location.origin);
+            log('📊 Pronto per test sistematici');
+        });
+    </script>
+</body>
+</html> 
