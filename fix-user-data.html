@@ -199,6 +199,12 @@
             } else {
                 log('❌ Nessuna UCMe trovata', 'error');
                 log('💡 L\'utente potrebbe non aver mai inviato UCMe', 'info');
+                log('💡 Oppure localStorage è stato pulito', 'info');
+                
+                // Abilita creazione manuale utente
+                log('\n🔧 CREAZIONE MANUALE UTENTE:', 'highlight');
+                log('Inserisci email e password per creare l\'account', 'info');
+                showManualUserCreation();
             }
 
             log('\n🔧 PROSSIMI PASSI:', 'highlight');
@@ -227,6 +233,60 @@
             
             // Pre-compila nome utente
             document.getElementById('user-name').value = userName;
+        }
+
+        // Mostra interfaccia per creazione manuale utente
+        function showManualUserCreation() {
+            const container = document.getElementById('user-reconstruction');
+            
+            container.innerHTML = `
+                <div class="user-card">
+                    <h3>🔧 Creazione Manuale Utente</h3>
+                    <div><strong>📧 Email:</strong> <input type="email" id="manual-email" placeholder="canepanerifilippo@gmail.com" style="width:100%;margin:5px 0;"></div>
+                    <div><strong>👤 Nome:</strong> <input type="text" id="manual-name" placeholder="Nome utente" style="width:100%;margin:5px 0;"></div>
+                    <div><strong>🔧 Stato:</strong> <span class="warning">Da creare</span></div>
+                    <button onclick="createManualUser()" style="margin-top:10px;">👤 Crea Utente</button>
+                </div>
+            `;
+            
+            // Pre-compila con email nota
+            document.getElementById('manual-email').value = 'canepanerifilippo@gmail.com';
+            document.getElementById('manual-name').value = 'canepanerifilippo';
+        }
+
+        // Crea utente manualmente
+        function createManualUser() {
+            const email = document.getElementById('manual-email').value;
+            const name = document.getElementById('manual-name').value;
+            const password = document.getElementById('user-password').value;
+
+            if (!email || !name || !password) {
+                log('❌ Compila tutti i campi: email, nome e password', 'error', 'reconstruction-log');
+                return;
+            }
+
+            // Crea dati utente fittizi
+            existingData = {
+                onboarded: true,
+                config: null,
+                ucmes: [{
+                    id: 'manual_' + Date.now(),
+                    email: email,
+                    text: 'Account creato manualmente',
+                    timestamp: new Date().toISOString(),
+                    status: 'manual'
+                }]
+            };
+
+            log('✅ Dati utente creati manualmente', 'success', 'reconstruction-log');
+            log(`   📧 Email: ${email}`, 'info', 'reconstruction-log');
+            log(`   👤 Nome: ${name}`, 'info', 'reconstruction-log');
+
+            // Abilita ricostruzione
+            document.getElementById('reconstruct-btn').disabled = false;
+            
+            // Aggiorna interfaccia
+            showUserCard(email);
         }
 
         // Test connessione server
