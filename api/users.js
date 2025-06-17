@@ -1,14 +1,14 @@
 // ================================================================
 // MENTAL COMMONS - API UTENTI
 // ================================================================
-// Endpoint per recuperare tutti gli utenti dal database
+// Endpoint per recuperare tutti gli utenti dal database e aggiornare profili
 
-import { getAllUsers } from './supabase.js';
+import { getAllUsers, updateUserProfile } from './supabase.js';
 
 export default async function handler(req, res) {
   // Configurazione CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
   // Gestisci preflight OPTIONS
@@ -41,11 +41,66 @@ export default async function handler(req, res) {
         }
       });
       
+    } else if (req.method === 'PUT') {
+      console.log('🔄 Aggiornamento profilo utente...');
+      
+      const { userId, name, surname } = req.body;
+      
+      // Validazione
+      if (!userId) {
+        return res.status(400).json({
+          success: false,
+          message: 'ID utente richiesto per aggiornamento profilo'
+        });
+      }
+      
+      if (!name || name.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          message: 'Il nome è richiesto'
+        });
+      }
+      
+      // Validazione surname opzionale
+      if (surname && surname.length > 100) {
+        return res.status(400).json({
+          success: false,
+          message: 'Il cognome deve essere massimo 100 caratteri'
+        });
+      }
+      
+      // Validazione formato surname
+      if (surname && surname.trim() !== '') {
+        const surnameRegex = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ\s\-']+$/;
+        if (!surnameRegex.test(surname.trim())) {
+          return res.status(400).json({
+            success: false,
+            message: 'Il cognome può contenere solo lettere, spazi, apostrofi e trattini'
+          });
+        }
+      }
+      
+      console.log('📝 Aggiornando profilo:', { userId, name, surname: surname || 'NON SPECIFICATO' });
+      
+      // Aggiorna profilo utente
+      const updatedUser = await updateUserProfile(userId, name, surname);
+      
+      console.log('✅ Profilo aggiornato con successo');
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Profilo utente aggiornato con successo',
+        data: {
+          user: updatedUser,
+          timestamp: new Date().toISOString()
+        }
+      });
+      
     } else {
       console.log('❌ Metodo non supportato:', req.method);
       return res.status(405).json({
         success: false,
-        message: 'Metodo non supportato. Usa GET.'
+        message: 'Metodo non supportato. Usa GET per recuperare utenti o PUT per aggiornare profilo.'
       });
     }
     

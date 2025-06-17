@@ -15,6 +15,7 @@ CREATE TABLE users (
   email text UNIQUE NOT NULL,
   password_hash text NOT NULL,
   name text,
+  surname text,
   role text DEFAULT 'user',
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now(),
@@ -163,5 +164,6 @@ COMMENT ON TABLE ucmes IS 'Tabella delle UCMe (Unità Cognitive Mentali) condivi
 COMMENT ON TABLE user_sessions IS 'Tabella per gestire le sessioni di login e logout';
 
 COMMENT ON COLUMN users.password_hash IS 'Password hashata con bcrypt (salt rounds: 10)';
+COMMENT ON COLUMN users.surname IS 'Cognome dell''utente (campo opzionale per compatibilità retroattiva)';
 COMMENT ON COLUMN ucmes.status IS 'Stati possibili: attesa, assegnata, risposta, completata';
 COMMENT ON COLUMN user_sessions.token_hash IS 'Hash del JWT token per sicurezza aggiuntiva'; 

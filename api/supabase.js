@@ -148,7 +148,7 @@ export async function getAllUsers() {
     
     const { data, error } = await getSupabaseClient()
       .from('users')
-      .select('id, email, name, role, is_active, created_at, last_login')
+      .select('id, email, name, surname, role, is_active, created_at, last_login')
       .order('created_at', { ascending: false });
     
     if (error) {
@@ -218,7 +218,7 @@ export async function findUserByEmail(email) {
 }
 
 // Crea nuovo utente
-export async function createUser(email, password, name) {
+export async function createUser(email, password, name, surname = null) {
   try {
     // 🟣 FASE 2 - TRACCIAMENTO COMPLETO API
     console.log('🟣 ============================================');
@@ -226,9 +226,11 @@ export async function createUser(email, password, name) {
     console.log('🟣 ============================================');
     console.log('📥 Input ricevuto:', { 
       email, 
-      name, 
+      name,
+      surname,
       emailType: typeof email, 
       nameType: typeof name,
+      surnameType: typeof surname,
       passwordPresent: !!password,
       passwordLength: password?.length 
     });
@@ -243,6 +245,7 @@ export async function createUser(email, password, name) {
       email,
       password_hash: passwordHash,
       name,
+      surname: surname || null,
       role: 'user',
       is_active: true
     };
@@ -298,6 +301,40 @@ export async function updateLastLogin(userId) {
   } catch (error) {
     console.error('❌ Errore aggiornamento login:', error);
     // Non bloccare il login per questo errore
+  }
+}
+
+// Aggiorna profilo utente (nome e cognome)
+export async function updateUserProfile(userId, name, surname = null) {
+  try {
+    console.log('👤 Aggiornando profilo utente:', { userId, name, surname: surname || 'NON SPECIFICATO' });
+    
+    const updateData = {
+      name: name.trim(),
+      surname: surname ? surname.trim() : null,
+      updated_at: new Date().toISOString()
+    };
+    
+    console.log('📤 Dati aggiornamento profilo:', JSON.stringify(updateData, null, 2));
+    
+    const { data, error } = await getSupabaseClient()
+      .from('users')
+      .update(updateData)
+      .eq('id', userId)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('❌ Errore aggiornamento profilo:', error);
+      throw error;
+    }
+    
+    console.log('✅ Profilo utente aggiornato con successo');
+    console.log('📊 Dati utente aggiornato:', JSON.stringify({ ...data, password_hash: '[HIDDEN]' }, null, 2));
+    return data;
+  } catch (error) {
+    console.error('❌ Errore aggiornamento profilo utente:', error);
+    throw error;
   }
 }
 

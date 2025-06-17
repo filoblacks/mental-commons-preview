@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 TEST ESTENSIONE SURNAME - Mental Commons</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #764ba2;
+            margin: 0;
+            font-size: 2.5em;
+        }
+        
+        .test-section {
+            margin: 25px 0;
+            padding: 20px;
+            border: 2px solid #e0e6ed;
+            border-radius: 15px;
+            background: #f8f9fa;
+        }
+        
+        .test-section h3 {
+            color: #667eea;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin: 15px 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .log-area {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            margin-top: 15px;
+        }
+        
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 TEST ESTENSIONE SURNAME</h1>
+            <p>Verifica della nuova funzionalità cognome nel sistema Mental Commons</p>
+        </div>
+
+        <!-- Test 1: Registrazione con Surname -->
+        <div class="test-section">
+            <h3>📧 Test 1: Registrazione con Cognome</h3>
+            <p>Testa la registrazione di un nuovo utente con nome e cognome</p>
+            
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="registerEmail" placeholder="test.surname@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="registerPassword" placeholder="password123">
+            </div>
+            
+            <div class="form-group">
+                <label>Nome:</label>
+                <input type="text" id="registerName" placeholder="Mario">
+            </div>
+            
+            <div class="form-group">
+                <label>Cognome:</label>
+                <input type="text" id="registerSurname" placeholder="Rossi">
+            </div>
+            
+            <button class="btn" onclick="testRegisterWithSurname()">🧪 Testa Registrazione</button>
+            <button class="btn" onclick="testRegisterWithoutSurname()">🧪 Testa senza Cognome</button>
+        </div>
+
+        <!-- Test 2: Aggiornamento Profilo -->
+        <div class="test-section">
+            <h3>✏️ Test 2: Aggiornamento Profilo</h3>
+            <p>Testa l'aggiornamento del profilo utente con cognome</p>
+            
+            <div class="form-group">
+                <label>User ID:</label>
+                <input type="text" id="updateUserId" placeholder="UUID dell'utente">
+            </div>
+            
+            <div class="form-group">
+                <label>Nuovo Nome:</label>
+                <input type="text" id="updateName" placeholder="Giuseppe">
+            </div>
+            
+            <div class="form-group">
+                <label>Nuovo Cognome:</label>
+                <input type="text" id="updateSurname" placeholder="Verdi">
+            </div>
+            
+            <button class="btn" onclick="testUpdateProfile()">🧪 Testa Aggiornamento</button>
+        </div>
+
+        <!-- Test 3: Recupero Utenti -->
+        <div class="test-section">
+            <h3>👥 Test 3: Recupero Utenti</h3>
+            <p>Verifica che gli utenti vengano recuperati con il campo cognome</p>
+            
+            <button class="btn" onclick="testGetUsers()">🧪 Recupera Tutti gli Utenti</button>
+        </div>
+
+        <!-- Test 4: Validazione Cognome -->
+        <div class="test-section">
+            <h3>✅ Test 4: Validazione Cognome</h3>
+            <p>Testa la validazione del formato cognome</p>
+            
+            <div class="form-group">
+                <label>Cognome da Testare:</label>
+                <input type="text" id="testSurnameInput" placeholder="Test vari formati">
+            </div>
+            
+            <button class="btn" onclick="testSurnameValidation('Rossi')">Test Valido</button>
+            <button class="btn" onclick="testSurnameValidation('De Rossi')">Test Spazio</button>
+            <button class="btn" onclick="testSurnameValidation('O\'Connor')">Test Apostrofo</button>
+            <button class="btn" onclick="testSurnameValidation('García-López')">Test Trattino</button>
+            <button class="btn" onclick="testSurnameValidation('123Rossi')">Test Non Valido</button>
+        </div>
+
+        <!-- Log Area -->
+        <div class="test-section">
+            <h3>📋 Log Test</h3>
+            <div id="logArea" class="log-area">Pronto per i test...\n</div>
+            <button class="btn" onclick="clearLog()">🧹 Pulisci Log</button>
+        </div>
+    </div>
+
+    <script>
+        // Configurazione API
+        const API_BASE = '/api';
+        
+        // Utility per logging
+        function log(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            logArea.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('logArea').innerHTML = 'Log pulito...\n';
+        }
+        
+        // Test 1: Registrazione con cognome
+        async function testRegisterWithSurname() {
+            const email = document.getElementById('registerEmail').value || 'test.surname@example.com';
+            const password = document.getElementById('registerPassword').value || 'password123';
+            const name = document.getElementById('registerName').value || 'Mario';
+            const surname = document.getElementById('registerSurname').value || 'Rossi';
+            
+            log(`🧪 Testando registrazione con cognome: ${name} ${surname}`, 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password, name, surname })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ Registrazione completata! User ID: ${data.user.id}`, 'success');
+                    log(`👤 Nome: ${data.user.name}, Cognome: ${data.user.surname || 'N/A'}`, 'success');
+                    // Salva l'ID per il test di aggiornamento
+                    document.getElementById('updateUserId').value = data.user.id;
+                } else {
+                    log(`❌ Errore registrazione: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`💥 Errore di rete: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test registrazione senza cognome
+        async function testRegisterWithoutSurname() {
+            const email = 'test.nosurname@example.com';
+            const password = 'password123';
+            const name = 'Anna';
+            
+            log(`🧪 Testando registrazione senza cognome: ${name}`, 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password, name })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ Registrazione senza cognome completata! User ID: ${data.user.id}`, 'success');
+                    log(`👤 Nome: ${data.user.name}, Cognome: ${data.user.surname || 'NON SPECIFICATO'}`, 'success');
+                } else {
+                    log(`❌ Errore registrazione: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`💥 Errore di rete: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test 2: Aggiornamento profilo
+        async function testUpdateProfile() {
+            const userId = document.getElementById('updateUserId').value;
+            const name = document.getElementById('updateName').value || 'Giuseppe';
+            const surname = document.getElementById('updateSurname').value || 'Verdi';
+            
+            if (!userId) {
+                log('❌ User ID richiesto per il test di aggiornamento', 'error');
+                return;
+            }
+            
+            log(`🧪 Testando aggiornamento profilo: ${name} ${surname}`, 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/users`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userId, name, surname })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ Profilo aggiornato con successo!`, 'success');
+                    log(`👤 Nuovo nome: ${data.data.user.name}, Cognome: ${data.data.user.surname || 'N/A'}`, 'success');
+                } else {
+                    log(`❌ Errore aggiornamento: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`💥 Errore di rete: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test 3: Recupero utenti
+        async function testGetUsers() {
+            log('🧪 Testando recupero tutti gli utenti...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/users`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ Recuperati ${data.data.count} utenti`, 'success');
+                    data.data.users.forEach((user, index) => {
+                        log(`👤 ${index + 1}. ${user.name} ${user.surname || '[NO COGNOME]'} (${user.email})`, 'info');
+                    });
+                } else {
+                    log(`❌ Errore recupero utenti: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`💥 Errore di rete: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test 4: Validazione cognome
+        function testSurnameValidation(surnameToTest) {
+            const surname = surnameToTest || document.getElementById('testSurnameInput').value;
+            
+            if (!surname) {
+                log('❌ Inserisci un cognome da testare', 'error');
+                return;
+            }
+            
+            log(`🧪 Testando validazione cognome: "${surname}"`, 'info');
+            
+            const surnameRegex = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ\s\-']+$/;
+            
+            if (surnameRegex.test(surname.trim())) {
+                log(`✅ Cognome "${surname}" è valido`, 'success');
+            } else {
+                log(`❌ Cognome "${surname}" non è valido`, 'error');
+            }
+            
+            // Test lunghezza
+            if (surname.length > 100) {
+                log(`❌ Cognome troppo lungo (${surname.length} caratteri, max 100)`, 'error');
+            } else {
+                log(`✅ Lunghezza cognome OK (${surname.length} caratteri)`, 'success');
+            }
+        }
+        
+        // Inizializzazione
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Test suite caricata e pronta!', 'success');
+            log('📝 Esegui i test per verificare l\'estensione surname', 'info');
+        });
+    </script>
+</body>
+</html> 

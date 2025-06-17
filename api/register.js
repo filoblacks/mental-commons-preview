@@ -66,7 +66,7 @@ export default async function handler(req, res) {
   console.log('📝 Tentativo di registrazione ricevuto - BACKEND SUPABASE');
   console.log('📝 Body ricevuto (RAW):', JSON.stringify(req.body, null, 2));
   
-  const { email, password, name } = req.body;
+  const { email, password, name, surname } = req.body;
   
   // Log dettagliato dei dati ricevuti
   console.log('📦 REGISTER PAYLOAD - Dati estratti dal body:');
@@ -79,6 +79,9 @@ export default async function handler(req, res) {
   console.log('  👤 Name:', name);
   console.log('  👤 Name type:', typeof name);
   console.log('  👤 Name length:', name?.length);
+  console.log('  👤 Surname:', surname);
+  console.log('  👤 Surname type:', typeof surname);
+  console.log('  👤 Surname length:', surname?.length);
   
   // Validazione campi obbligatori
   if (!email || !password || !name) {
@@ -90,13 +93,48 @@ export default async function handler(req, res) {
         hasEmail: !!email,
         hasPassword: !!password,
         hasName: !!name,
+        hasSurname: !!surname,
         emailValue: email || 'MISSING',
         nameValue: name || 'MISSING',
+        surnameValue: surname || 'OPTIONAL',
         passwordPresent: !!password,
         apiVersion: '2.0.0',
         backend: 'supabase'
       }
     });
+  }
+  
+  // Validazione surname opzionale
+  if (surname && surname.length > 100) {
+    console.log('❌ Cognome troppo lungo:', surname.length, 'caratteri');
+    return res.status(400).json({
+      success: false,
+      message: 'Il cognome deve essere massimo 100 caratteri',
+      debug: {
+        surnameLength: surname.length,
+        maximumLength: 100,
+        apiVersion: '2.0.0',
+        backend: 'supabase'
+      }
+    });
+  }
+  
+  // Validazione formato surname (solo lettere, spazi, apostrofi, trattini)
+  if (surname && surname.trim() !== '') {
+    const surnameRegex = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ\s\-']+$/;
+    if (!surnameRegex.test(surname.trim())) {
+      console.log('❌ Formato cognome non valido:', surname);
+      return res.status(400).json({
+        success: false,
+        message: 'Il cognome può contenere solo lettere, spazi, apostrofi e trattini',
+        debug: {
+          receivedSurname: surname,
+          surnameValid: false,
+          apiVersion: '2.0.0',
+          backend: 'supabase'
+        }
+      });
+    }
   }
   
   // Validazione formato email
@@ -189,14 +227,16 @@ export default async function handler(req, res) {
     console.log('👤 CREAZIONE UTENTE - Salvataggio in Supabase:');
     console.log('  📧 Email:', email);
     console.log('  👤 Nome:', name);
+    console.log('  👤 Cognome:', surname || 'NON SPECIFICATO');
     console.log('  🔐 Password: [HASHATA CON BCRYPT]');
     
-    const newUser = await createUser(email, password, name);
+    const newUser = await createUser(email, password, name, surname);
     
     console.log('✅ Utente creato con successo nel database');
     console.log('  👤 User ID:', newUser.id);
     console.log('  👤 Email:', newUser.email);
     console.log('  👤 Nome:', newUser.name);
+    console.log('  👤 Cognome:', newUser.surname || 'NON SPECIFICATO');
     console.log('  👤 Ruolo:', newUser.role);
     console.log('  📅 Creato il:', newUser.created_at);
     
@@ -215,6 +255,7 @@ export default async function handler(req, res) {
     console.log('📦 REGISTER RESULT - SUCCESSO:');
     console.log('  📧 Email salvata:', newUser.email);
     console.log('  👤 Nome salvato:', newUser.name);
+    console.log('  👤 Cognome salvato:', newUser.surname || 'NON SPECIFICATO');
     console.log('  🔐 Password hash: SALVATO');
     console.log('  💾 Persistenza: SÌ (Supabase)');
     console.log('  🔄 Cross-device: SÌ');
@@ -227,6 +268,7 @@ export default async function handler(req, res) {
         id: newUser.id,
         email: newUser.email,
         name: newUser.name,
+        surname: newUser.surname,
         role: newUser.role,
         createdAt: newUser.created_at
       },
