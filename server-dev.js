@@ -12,9 +12,9 @@ console.log('🔧 ENV CHECK - URL:', process.env.SUPABASE_URL ? '✅ PRESENTE' :
 console.log('🔧 ENV CHECK - KEY:', process.env.SUPABASE_SERVICE_KEY ? '✅ PRESENTE' : '❌ MANCANTE');
 
 import { createServer } from 'http';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname, join, extname } from 'path';
 
 // Import delle API (DOPO che le env sono caricate)
 import registerHandler from './api/register.js';
@@ -26,6 +26,46 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const PORT = 3000;
+
+// Funzione per servire file statici
+function serveStaticFile(filePath, res) {
+  try {
+    const content = readFileSync(filePath);
+    const ext = extname(filePath);
+    
+    let contentType = 'text/plain';
+    switch (ext) {
+      case '.html':
+        contentType = 'text/html';
+        break;
+      case '.js':
+        contentType = 'application/javascript';
+        break;
+      case '.css':
+        contentType = 'text/css';
+        break;
+      case '.json':
+        contentType = 'application/json';
+        break;
+      case '.png':
+        contentType = 'image/png';
+        break;
+      case '.jpg':
+      case '.jpeg':
+        contentType = 'image/jpeg';
+        break;
+      case '.svg':
+        contentType = 'image/svg+xml';
+        break;
+    }
+    
+    res.writeHead(200, { 'Content-Type': contentType });
+    res.end(content);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
 
 // Simulatore di req/res per le API Vercel
 function createApiContext(req, res, handler) {
@@ -110,6 +150,23 @@ const server = createServer((req, res) => {
       res.end('Debug page not found');
     }
   } else {
+    // Prova a servire file statici dalla directory public
+    const filePath = join(__dirname, 'public', req.url);
+    
+    if (existsSync(filePath) && serveStaticFile(filePath, res)) {
+      // File servito con successo
+      return;
+    }
+    
+    // Prova anche dalla root directory per compatibilità
+    const rootFilePath = join(__dirname, req.url.substring(1));
+    
+    if (existsSync(rootFilePath) && serveStaticFile(rootFilePath, res)) {
+      // File servito con successo
+      return;
+    }
+    
+    // File non trovato
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('Not Found');
   }

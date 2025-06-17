@@ -1,54 +1,55 @@
 {
   "version": 2,
+  "buildCommand": "echo 'Building static files...'",
+  "outputDirectory": ".",
+  "public": true,
   "functions": {
     "api/*.js": {
       "maxDuration": 10
     }
   },
-  "headers": [
+  "routes": [
     {
-      "source": "/(.*)\\.css",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "text/css"
-        }
-      ]
+      "src": "/style.css",
+      "dest": "/style.css",
+      "headers": { "Content-Type": "text/css" }
     },
     {
-      "source": "/(.*)\\.js",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/javascript"
-        }
-      ]
+      "src": "/script.js", 
+      "dest": "/script.js",
+      "headers": { "Content-Type": "application/javascript" }
     },
     {
-      "source": "/(.*)\\.svg",
-      "headers": [
-        {
-          "key": "Content-Type", 
-          "value": "image/svg+xml"
-        }
-      ]
+      "src": "/logo.svg",
+      "dest": "/logo.svg", 
+      "headers": { "Content-Type": "image/svg+xml" }
     },
     {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, PUT, DELETE, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-        }
-      ]
+      "src": "/favicon.svg",
+      "dest": "/favicon.svg",
+      "headers": { "Content-Type": "image/svg+xml" }
+    },
+    {
+      "src": "/favicon-32x32.svg",
+      "dest": "/favicon-32x32.svg",
+      "headers": { "Content-Type": "image/svg+xml" }
+    },
+    {
+      "src": "/favicon-16x16.svg", 
+      "dest": "/favicon-16x16.svg",
+      "headers": { "Content-Type": "image/svg+xml" }
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ]
 } 
