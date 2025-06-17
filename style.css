@@ -3227,14 +3227,13 @@ body {
     max-width: 960px;
     margin: 0 auto;
     display: flex;
-    flex-direction: column;
-    gap: 24px;
-    align-items: center;
+    flex-direction: row;
+    gap: 32px;
+    align-items: stretch;
 }
 
 .demo-box {
-    width: 100%;
-    max-width: 600px;
+    flex: 1;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
@@ -3242,6 +3241,8 @@ body {
     opacity: 0;
     transform: translateY(24px);
     animation: fadeInUp 0.8s ease-out forwards;
+    display: flex;
+    flex-direction: column;
 }
 
 .demo-box:nth-child(1) {
@@ -3256,11 +3257,10 @@ body {
     font-family: 'Inter', sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
-    color: #EEE;
+    color: #AAA;
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 16px;
-    opacity: 0.7;
 }
 
 .demo-text {
@@ -3269,6 +3269,22 @@ body {
     line-height: 1.6;
     color: #EEE;
     font-style: italic;
+    flex: 1;
+}
+
+.quote-start,
+.quote-end {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-style: normal;
+}
+
+.quote-start {
+    margin-right: 4px;
+}
+
+.quote-end {
+    margin-left: 4px;
 }
 
 @keyframes fadeInUp {
@@ -3331,6 +3347,7 @@ body {
     }
     
     .demo-boxes {
+        flex-direction: column;
         gap: 20px;
     }
     
@@ -3387,6 +3404,7 @@ body {
     }
     
     .demo-boxes {
+        flex-direction: column;
         gap: 16px;
     }
     
