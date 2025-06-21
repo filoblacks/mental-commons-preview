@@ -5,11 +5,14 @@
 // Descrizione: Gestione JWT persistente con localStorage e scadenza 30 giorni
 
 // Sistema di logging produzione-aware
-const isProduction = window.isProduction || (() => {
+// Usa la definizione globale sicura da script.js
+if (typeof window.isProduction === 'undefined') {
+  window.isProduction = (() => {
     const hostname = window.location.hostname;
     return hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.includes('vercel.app');
-});
-const PRODUCTION_MODE = isProduction();
+  });
+}
+const PRODUCTION_MODE = window.isProduction();
 const log = (...args) => { if (!PRODUCTION_MODE) debug(...args); };
 const debug = (...args) => { if (!PRODUCTION_MODE) console.debug(...args); };
 const error = (...args) => { error(...args); };

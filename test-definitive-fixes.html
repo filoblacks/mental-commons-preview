@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Definitivo - Fix isProduction + Char Counter</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+        }
+        .test-title {
+            color: #007bff;
+            margin-top: 0;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        .status {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            font-weight: 500;
+        }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status.pending { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        
+        /* Stili UCMe Form */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        .form-group textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        .char-counter {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #6c757d;
+            text-align: right;
+        }
+        .char-count {
+            font-weight: 600;
+        }
+        .char-count-warning {
+            color: #dc3545 !important;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        
+        .log-container {
+            background: #000;
+            color: #0f0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 16px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛠 Test Definitivo - Fix isProduction + Char Counter</h1>
+    <p><strong>Obiettivo:</strong> Verificare che i problemi segnalati siano stati risolti definitivamente.</p>
+
+    <!-- Test 1: isProduction -->
+    <div class="test-container">
+        <h2 class="test-title">1. Test isProduction - No Duplicate Declaration Error</h2>
+        <div id="isproduction-status" class="status pending">Controllo in corso...</div>
+        <div id="isproduction-details"></div>
+    </div>
+
+    <!-- Test 2: Char Counter -->
+    <div class="test-container">
+        <h2 class="test-title">2. Test Char Counter UCMe</h2>
+        <div class="form-group">
+            <label for="ucme-text">Textarea UCMe (test dinamico)</label>
+            <textarea 
+                id="ucme-text" 
+                placeholder="Scrivi qui per testare il contatore caratteri in tempo reale..."
+                minlength="20" 
+                maxlength="600"
+            ></textarea>
+            <div class="char-counter">
+                <span id="char-count">0</span>/600 caratteri (minimo 20)
+            </div>
+        </div>
+        <div id="charcount-status" class="status pending">Controllo in corso...</div>
+        <div id="charcount-details"></div>
+    </div>
+
+    <!-- Test 3: Script Loading -->
+    <div class="test-container">
+        <h2 class="test-title">3. Test Script Loading</h2>
+        <div id="scripts-status" class="status pending">Controllo in corso...</div>
+        <div id="scripts-details"></div>
+    </div>
+
+    <!-- Log Console -->
+    <div class="test-container">
+        <h2 class="test-title">4. Console Log</h2>
+        <div id="console-log" class="log-container">
+            === INIZIALIZZAZIONE TEST ===<br>
+        </div>
+    </div>
+
+    <!-- Carica gli script come nelle pagine reali -->
+    <script src="/auth.js?v=202506172330"></script>
+    <script src="/script.js?v=202506211938"></script>
+    
+    <script>
+        // Sistema di logging per il test
+        const originalConsole = {
+            log: console.log,
+            error: console.error,
+            warn: console.warn,
+            debug: console.debug
+        };
+        
+        function addToLog(message, type = 'info') {
+            const logContainer = document.getElementById('console-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'warn' ? '⚠️' : '✅';
+            logContainer.innerHTML += `[${timestamp}] ${prefix} ${message}<br>`;
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            // Chiama anche il console originale
+            originalConsole[type === 'info' ? 'log' : type](message);
+        }
+        
+        // Override console per catturare i log
+        console.log = (...args) => {
+            originalConsole.log(...args);
+            addToLog(args.join(' '), 'info');
+        };
+        console.error = (...args) => {
+            originalConsole.error(...args);
+            addToLog(args.join(' '), 'error');
+        };
+        console.warn = (...args) => {
+            originalConsole.warn(...args);
+            addToLog(args.join(' '), 'warn');
+        };
+
+        // Funzioni di test
+        function testIsProduction() {
+            addToLog('🔍 Test 1: isProduction');
+            
+            try {
+                // Verifica che window.isProduction esista e sia funzionale
+                if (typeof window.isProduction === 'function') {
+                    const result = window.isProduction();
+                    addToLog(`✅ window.isProduction() = ${result}`);
+                    
+                    document.getElementById('isproduction-status').className = 'status success';
+                    document.getElementById('isproduction-status').textContent = '✅ Fix isProduction funzionante';
+                    document.getElementById('isproduction-details').innerHTML = `
+                        <strong>Risultato:</strong><br>
+                        • window.isProduction definita: ✅<br>
+                        • Valore: ${result}<br>
+                        • Tipo: ${typeof window.isProduction}<br>
+                        • Nessun errore di duplicazione: ✅
+                    `;
+                } else {
+                    throw new Error('window.isProduction non trovata o non è una funzione');
+                }
+            } catch (error) {
+                addToLog(`❌ Errore test isProduction: ${error.message}`, 'error');
+                document.getElementById('isproduction-status').className = 'status error';
+                document.getElementById('isproduction-status').textContent = '❌ Fix isProduction NON funziona';
+                document.getElementById('isproduction-details').innerHTML = `<strong>Errore:</strong> ${error.message}`;
+            }
+        }
+        
+        function testCharCounter() {
+            addToLog('🔍 Test 2: Char Counter');
+            
+            try {
+                const textarea = document.getElementById('ucme-text');
+                const charCount = document.getElementById('char-count');
+                
+                if (!textarea || !charCount) {
+                    throw new Error('Elementi textarea o char-count non trovati');
+                }
+                
+                // Test funzionalità
+                const testText = 'Questo è un test del contatore caratteri in tempo reale!';
+                textarea.value = testText;
+                
+                // Simula un evento input
+                const inputEvent = new Event('input', { bubbles: true });
+                textarea.dispatchEvent(inputEvent);
+                
+                // Verifica che il contatore si sia aggiornato
+                setTimeout(() => {
+                    const currentCount = parseInt(charCount.textContent);
+                    const expectedCount = testText.length;
+                    
+                    if (currentCount === expectedCount) {
+                        addToLog(`✅ Char counter funziona: ${currentCount}/${expectedCount}`);
+                        
+                        document.getElementById('charcount-status').className = 'status success';
+                        document.getElementById('charcount-status').textContent = '✅ Char counter funzionante';
+                        document.getElementById('charcount-details').innerHTML = `
+                            <strong>Test completato:</strong><br>
+                            • Elementi trovati: ✅<br>
+                            • Contatore aggiornato: ${currentCount} caratteri<br>
+                            • Evento input catturato: ✅<br>
+                            • Styling dinamico: ${charCount.style.color ? '✅' : '⚠️'}
+                        `;
+                        
+                        // Test aggiuntivo: testa diversi scenari
+                        testCharCounterScenarios(textarea, charCount);
+                    } else {
+                        throw new Error(`Counter non aggiornato: atteso ${expectedCount}, trovato ${currentCount}`);
+                    }
+                }, 100);
+                
+            } catch (error) {
+                addToLog(`❌ Errore test char counter: ${error.message}`, 'error');
+                document.getElementById('charcount-status').className = 'status error';
+                document.getElementById('charcount-status').textContent = '❌ Char counter NON funziona';
+                document.getElementById('charcount-details').innerHTML = `<strong>Errore:</strong> ${error.message}`;
+            }
+        }
+        
+        function testCharCounterScenarios(textarea, charCount) {
+            addToLog('🔍 Test scenari char counter');
+            
+            const scenarios = [
+                { text: 'Testo breve', expectedColor: '#ff6b6b' }, // <20 caratteri
+                { text: 'Questo è un testo di media lunghezza per testare il contatore caratteri con colore verde', expectedColor: '#4caf50' }, // 20-500
+                { text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.', expectedColor: '#ffa726' } // >500 caratteri
+            ];
+            
+            scenarios.forEach((scenario, index) => {
+                setTimeout(() => {
+                    textarea.value = scenario.text;
+                    const inputEvent = new Event('input', { bubbles: true });
+                    textarea.dispatchEvent(inputEvent);
+                    
+                    setTimeout(() => {
+                        const currentCount = parseInt(charCount.textContent);
+                        const currentColor = charCount.style.color;
+                        
+                        addToLog(`📝 Scenario ${index + 1}: ${currentCount} caratteri, colore: ${currentColor}`);
+                    }, 50);
+                }, index * 200);
+            });
+        }
+        
+        function testScriptLoading() {
+            addToLog('🔍 Test 3: Script Loading');
+            
+            try {
+                const scripts = [...document.getElementsByTagName('script')];
+                const scriptInfo = scripts.map(script => ({
+                    src: script.src || 'inline',
+                    type: script.type || 'text/javascript'
+                }));
+                
+                addToLog(`📜 ${scripts.length} script trovati`);
+                
+                document.getElementById('scripts-status').className = 'status success';
+                document.getElementById('scripts-status').textContent = `✅ ${scripts.length} script caricati`;
+                document.getElementById('scripts-details').innerHTML = `
+                    <strong>Script caricati:</strong><br>
+                    ${scriptInfo.map(s => `• ${s.src}<br>`).join('')}
+                `;
+                
+            } catch (error) {
+                addToLog(`❌ Errore test script loading: ${error.message}`, 'error');
+                document.getElementById('scripts-status').className = 'status error';
+                document.getElementById('scripts-status').textContent = '❌ Errore nel caricamento script';
+            }
+        }
+        
+        // Esegui tutti i test quando la pagina è pronta
+        document.addEventListener('DOMContentLoaded', function() {
+            addToLog('🚀 DOM caricato, inizio test...');
+            
+            // Test immediati
+            testIsProduction();
+            testScriptLoading();
+            
+            // Test char counter con delay per permettere l'inizializzazione
+            setTimeout(testCharCounter, 500);
+        });
+        
+        // Gestione errori globali
+        window.addEventListener('error', function(event) {
+            addToLog(`❌ ERRORE GLOBALE: ${event.error?.message || event.message}`, 'error');
+        });
+        
+        addToLog('✅ Test system inizializzato');
+    </script>
+</body>
+</html> 

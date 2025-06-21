@@ -21,12 +21,14 @@
         (function() {
             'use strict';
             
-            // Sistema di logging produzione-aware - Usa funzione globale se disponibile
-            const isProduction = window.isProduction || (() => {
+            // Sistema di logging produzione-aware - Usa funzione globale sicura
+            if (typeof window.isProduction === 'undefined') {
+              window.isProduction = (() => {
                 const hostname = window.location.hostname;
                 return hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.includes('vercel.app');
-            });
-            const PRODUCTION_MODE = isProduction();
+              });
+            }
+            const PRODUCTION_MODE = window.isProduction();
             const log = (...args) => { if (!PRODUCTION_MODE) console.log(...args); };
             const debug = (...args) => { if (!PRODUCTION_MODE) console.debug(...args); };
             const error = (...args) => { console.error(...args); };

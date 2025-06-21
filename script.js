@@ -1,11 +1,13 @@
 // Mental Commons 3.0 - Sistema Completo con Login e Area Utente
 
 // Sistema di logging che si adatta automaticamente all'ambiente
-// Definizione globale per evitare dichiarazioni duplicate
-window.isProduction = window.isProduction || (() => {
-  const hostname = window.location.hostname;
-  return hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.includes('vercel.app');
-});
+// Definizione globale sicura per evitare dichiarazioni duplicate
+if (typeof window.isProduction === 'undefined') {
+  window.isProduction = (() => {
+    const hostname = window.location.hostname;
+    return hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.includes('vercel.app');
+  });
+}
 
 const PRODUCTION_MODE = window.isProduction();
 
@@ -1439,6 +1441,9 @@ function setupEventListeners() {
     
     // Area utente
     setupUserAreaListeners();
+    
+    // Assicura che il char counter funzioni sempre
+    ensureCharCounterWorks();
 }
 
 function setupNavigationListeners() {
@@ -2059,48 +2064,8 @@ function hideAuthError() {
 }
 
 function setupMainFormListeners() {
-    // Textarea character counter con controllo robusto
-    const textarea = document.getElementById('ucme-text');
-    const charCount = document.getElementById('char-count');
-    
-    if (textarea && charCount) {
-        log('✅ Elementi char counter trovati, configurando listener...');
-        
-        const updateCharCounter = function() {
-            const currentLength = this.value.length;
-            charCount.textContent = currentLength;
-            
-            // Cambio colore del contatore
-            if (currentLength < 20) {
-                charCount.style.color = '#ff6b6b';
-            } else if (currentLength > 500) {
-                charCount.style.color = '#ffa726';
-            } else {
-                charCount.style.color = '#4caf50';
-            }
-            
-            log(`📝 Char counter aggiornato: ${currentLength} caratteri`);
-            validateForm();
-        };
-        
-        // Aggiungi listener multipli per catturare tutti gli eventi
-        textarea.addEventListener('input', updateCharCounter);
-        textarea.addEventListener('keyup', updateCharCounter);
-        textarea.addEventListener('paste', function() {
-            // Delay per permettere al paste di completarsi
-            setTimeout(updateCharCounter.bind(this), 10);
-        });
-        
-        // Inizializza il contatore con il valore corrente
-        updateCharCounter.call(textarea);
-        
-        log('✅ Char counter configurato correttamente');
-    } else {
-        error('❌ Elementi char counter non trovati:', {
-            textarea: !!textarea,
-            charCount: !!charCount
-        });
-    }
+    // Usa il sistema di char counter unificato
+    setupUniversalCharCounter();
     
     // Form validation
     const form = document.getElementById('ucme-form');
@@ -3804,51 +3769,108 @@ window.debugDashboard = debugDashboard;
 // CHAR COUNTER FALLBACK
 // ========================================
 
-function setupCharCounterFallback() {
-    log('🔄 Controllo fallback char counter...');
+// ========================================
+// SISTEMA CHAR COUNTER UNIVERSALE
+// ========================================
+
+/**
+ * 🎯 SETUP CHAR COUNTER UNIVERSALE
+ * Sistema robusto che funziona su tutte le pagine e piattaforme
+ */
+function setupUniversalCharCounter() {
+    log('🔄 Inizializzazione char counter universale...');
     
     const textarea = document.getElementById('ucme-text');
     const charCount = document.getElementById('char-count');
     
-    if (textarea && charCount) {
-        // Verifica se il listener è già attivo
-        if (!textarea.hasAttribute('data-char-counter-ready')) {
-            log('🔧 Configurazione fallback char counter...');
-            
-            const updateCharCounter = function() {
-                const currentLength = this.value.length;
-                charCount.textContent = currentLength;
-                
-                // Cambio colore del contatore
-                if (currentLength < 20) {
-                    charCount.style.color = '#ff6b6b';
-                } else if (currentLength > 500) {
-                    charCount.style.color = '#ffa726';
-                } else {
-                    charCount.style.color = '#4caf50';
-                }
-                
-                log(`📝 Char counter fallback: ${currentLength} caratteri`);
-            };
-            
-            // Aggiungi listener
-            textarea.addEventListener('input', updateCharCounter);
-            textarea.addEventListener('keyup', updateCharCounter);
-            textarea.addEventListener('paste', function() {
-                setTimeout(updateCharCounter.bind(this), 10);
-            });
-            
-            // Marca come configurato
-            textarea.setAttribute('data-char-counter-ready', 'true');
-            
-            // Inizializza il contatore
-            updateCharCounter.call(textarea);
-            
-            log('✅ Char counter fallback configurato');
-        } else {
-            log('✅ Char counter già configurato');
-        }
-    } else {
-        log('⚠️ Elementi char counter non disponibili per fallback');
+    if (!textarea || !charCount) {
+        debug('⚠️ Elementi char counter non trovati su questa pagina:', {
+            textarea: !!textarea,
+            charCount: !!charCount,
+            url: window.location.pathname
+        });
+        return false;
     }
+    
+    // Verifica se già configurato
+    if (textarea.hasAttribute('data-char-counter-initialized')) {
+        debug('✅ Char counter già inizializzato');
+        return true;
+    }
+    
+    log('🔧 Configurazione char counter...');
+    
+    // Funzione di aggiornamento robusto
+    const updateCharCounter = function() {
+        const currentLength = this.value.length;
+        charCount.textContent = currentLength;
+        
+        // Styling dinamico del contatore
+        charCount.className = 'char-count';
+        if (currentLength < 20) {
+            charCount.style.color = '#ff6b6b';
+            charCount.classList.add('char-count-warning');
+        } else if (currentLength > 500) {
+            charCount.style.color = '#ffa726';
+            charCount.classList.add('char-count-warning');
+        } else {
+            charCount.style.color = '#4caf50';
+            charCount.classList.remove('char-count-warning');
+        }
+        
+        debug(`📝 Char counter: ${currentLength}/600 caratteri`);
+        
+        // Chiama validazione form se disponibile
+        if (typeof validateForm === 'function') {
+            validateForm();
+        }
+    };
+    
+    // Listener per tutti i tipi di input
+    const events = ['input', 'keyup', 'change', 'paste', 'cut'];
+    events.forEach(event => {
+        textarea.addEventListener(event, function(e) {
+            if (event === 'paste' || event === 'cut') {
+                // Delay per paste/cut per permettere il completamento
+                setTimeout(() => updateCharCounter.call(this), 10);
+            } else {
+                updateCharCounter.call(this);
+            }
+        });
+    });
+    
+    // Listener per eventi touch su mobile
+    if ('ontouchstart' in window) {
+        textarea.addEventListener('touchend', updateCharCounter);
+    }
+    
+    // Marca come inizializzato
+    textarea.setAttribute('data-char-counter-initialized', 'true');
+    
+    // Inizializza immediatamente
+    updateCharCounter.call(textarea);
+    
+    log('✅ Char counter universale configurato correttamente');
+    return true;
+}
+
+/**
+ * 🔄 FALLBACK CHAR COUNTER PER PAGES LEGACY
+ * Chiamato automaticamente se il setup principale non funziona
+ */
+function ensureCharCounterWorks() {
+    // Prova configurazione dopo caricamento DOM
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupUniversalCharCounter);
+    } else {
+        setupUniversalCharCounter();
+    }
+    
+    // Fallback con timeout per casi edge
+    setTimeout(() => {
+        if (!document.getElementById('ucme-text')?.hasAttribute('data-char-counter-initialized')) {
+            debug('🔄 Tentativo fallback char counter...');
+            setupUniversalCharCounter();
+        }
+    }, 1000);
 }
