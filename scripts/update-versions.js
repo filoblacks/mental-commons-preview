@@ -3,13 +3,17 @@
 import fs from 'fs';
 import path from 'path';
 
+// Sistema di logging semplificato per script build
+const info = console.log;
+const error = console.error;
+
 // Legge la configurazione delle versioni
 function readVersionConfig() {
     try {
         const versionData = fs.readFileSync('version.json', 'utf8');
         return JSON.parse(versionData);
     } catch (error) {
-        console.error('❌ Errore nella lettura di version.json:', error.message);
+        error('❌ Errore nella lettura di version.json:', error.message);
         process.exit(1);
     }
 }
@@ -32,10 +36,10 @@ function updateVersionsInFile(filePath, cssVersion, jsVersion) {
         );
         
         fs.writeFileSync(filePath, content, 'utf8');
-        console.log(`✅ Aggiornato: ${filePath}`);
+        info(`✅ Aggiornato: ${filePath}`);
         
     } catch (error) {
-        console.error(`❌ Errore nell'aggiornamento di ${filePath}:`, error.message);
+        error(`❌ Errore nell'aggiornamento di ${filePath}:`, error.message);
     }
 }
 
@@ -63,7 +67,7 @@ function updateVersionConfig(newVersion) {
     };
     
     fs.writeFileSync('version.json', JSON.stringify(config, null, 2), 'utf8');
-    console.log(`✅ version.json aggiornato alla versione: ${newVersion}`);
+    info(`✅ version.json aggiornato alla versione: ${newVersion}`);
 }
 
 // Main function
@@ -71,7 +75,7 @@ function main() {
     const args = process.argv.slice(2);
     const shouldGenerateNew = args.includes('--new') || args.includes('bump');
     
-    console.log('🔄 Aggiornamento versioni file CSS e JS...\n');
+    info('🔄 Aggiornamento versioni file CSS e JS...\n');
     
     let config = readVersionConfig();
     
@@ -80,14 +84,14 @@ function main() {
         const newVersion = generateNewVersion();
         updateVersionConfig(newVersion);
         config = readVersionConfig(); // Rilegge la configurazione aggiornata
-        console.log(`🆕 Nuova versione generata: ${newVersion}\n`);
+        info(`🆕 Nuova versione generata: ${newVersion}\n`);
     }
     
     const cssVersion = config.assets.css;
     const jsVersion = config.assets.js;
     
-    console.log(`📦 Versione CSS: ${cssVersion}`);
-    console.log(`📦 Versione JS: ${jsVersion}\n`);
+    info(`📦 Versione CSS: ${cssVersion}`);
+    info(`📦 Versione JS: ${jsVersion}\n`);
     
     // Lista dei file HTML da aggiornare (ora nella root)
     const htmlFiles = [
@@ -102,15 +106,15 @@ function main() {
         if (fs.existsSync(filePath)) {
             updateVersionsInFile(filePath, cssVersion, jsVersion);
         } else {
-            console.log(`⚠️  File non trovato: ${filePath}`);
+            info(`⚠️  File non trovato: ${filePath}`);
         }
     });
     
-    console.log('\n✅ Processo completato!\n');
+    info('\n✅ Processo completato!\n');
     
     // Mostra come usare lo script
     if (!shouldGenerateNew) {
-        console.log('💡 Per generare una nuova versione, usa: npm run update-versions --new');
+        info('💡 Per generare una nuova versione, usa: npm run update-versions --new');
     }
 }
 

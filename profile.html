@@ -20,6 +20,18 @@
     <script>
         (function() {
             'use strict';
+            
+            // Sistema di logging produzione-aware
+            const isProduction = () => {
+                const hostname = window.location.hostname;
+                return hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.includes('vercel.app');
+            };
+            const PRODUCTION_MODE = isProduction();
+            const log = (...args) => { if (!PRODUCTION_MODE) console.log(...args); };
+            const debug = (...args) => { if (!PRODUCTION_MODE) console.debug(...args); };
+            const error = (...args) => { console.error(...args); };
+            const warn = (...args) => { if (!PRODUCTION_MODE) console.warn(...args); };
+            
             const startTime = performance.now();
             debug('🚀 [AUTH-IMMEDIATE] Controllo auth immediato avviato (PROFILE)', { timestamp: startTime });
             

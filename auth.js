@@ -4,6 +4,17 @@
 // Versione: 3.0.0
 // Descrizione: Gestione JWT persistente con localStorage e scadenza 30 giorni
 
+// Sistema di logging produzione-aware
+const isProduction = () => {
+    const hostname = window.location.hostname;
+    return hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.includes('vercel.app');
+};
+const PRODUCTION_MODE = isProduction();
+const log = (...args) => { if (!PRODUCTION_MODE) debug(...args); };
+const debug = (...args) => { if (!PRODUCTION_MODE) console.debug(...args); };
+const error = (...args) => { error(...args); };
+const warn = (...args) => { if (!PRODUCTION_MODE) console.warn(...args); };
+
 // ================================================================
 // CONFIGURAZIONE E STATO GLOBALE AUTH LOADING
 // ================================================================
@@ -24,9 +35,9 @@ window.authReady = false;
  * Eseguita appena il browser carica questo script, prima del DOM ready
  */
 (function initImmediateAuth() {
-    console.log('🚀 ============================================');
-    console.log('🚀 INIZIALIZZAZIONE IMMEDIATA ANTI-FLICKER');
-    console.log('🚀 ============================================');
+    debug('🚀 ============================================');
+    debug('🚀 INIZIALIZZAZIONE IMMEDIATA ANTI-FLICKER');
+    debug('🚀 ============================================');
     
     // Aggiungi classe auth-loading al body
     if (document.body) {
@@ -45,9 +56,9 @@ window.authReady = false;
     // Esegui controllo auth immediato
     try {
         const immediateAuthResult = checkAuthImmediate();
-        console.log('🔍 Controllo auth immediato completato:', immediateAuthResult);
+        debug('🔍 Controllo auth immediato completato:', immediateAuthResult);
     } catch (error) {
-        console.error('❌ Errore controllo auth immediato:', error);
+        error('❌ Errore controllo auth immediato:', error);
     }
 })();
 
@@ -61,7 +72,7 @@ function checkAuthImmediate() {
         const userJson = localStorage.getItem(AUTH_CONFIG.USER_KEY);
         
         if (!token || !userJson) {
-            console.log('👤 Nessun token/utente trovato - stato guest');
+            debug('👤 Nessun token/utente trovato - stato guest');
             window.authLoading = false;
             window.authReady = true;
             return { isAuthenticated: false, immediate: true };
@@ -71,14 +82,14 @@ function checkAuthImmediate() {
         
         // Verifica validità token (solo scadenza)
         if (isTokenExpired(token)) {
-            console.log('⏰ Token scaduto - pulizia automatica');
+            debug('⏰ Token scaduto - pulizia automatica');
             clearAuthData();
             window.authLoading = false;
             window.authReady = true;
             return { isAuthenticated: false, expired: true, immediate: true };
         }
         
-        console.log('✅ Token valido trovato - utente autenticato');
+        debug('✅ Token valido trovato - utente autenticato');
         window.authLoading = false;
         window.authReady = true;
         return { 
@@ -88,7 +99,7 @@ function checkAuthImmediate() {
             immediate: true
         };
     } catch (error) {
-        console.error('❌ Errore controllo auth immediato:', error);
+        error('❌ Errore controllo auth immediato:', error);
         clearAuthData();
         window.authLoading = false;
         window.authReady = true;
@@ -101,9 +112,9 @@ function checkAuthImmediate() {
  * Chiamata quando DOM è pronto per aggiornare la UI
  */
 function finalizeAuthUI() {
-    console.log('🎯 ============================================');
-    console.log('🎯 FINALIZZAZIONE UI AUTH');
-    console.log('🎯 ============================================');
+    debug('🎯 ============================================');
+    debug('🎯 FINALIZZAZIONE UI AUTH');
+    debug('🎯 ============================================');
     
     // Mostra spinner durante verifica finale
     showAuthSpinner();
@@ -120,7 +131,7 @@ function finalizeAuthUI() {
     // Nascondi spinner
     hideAuthSpinner();
     
-    console.log('✅ UI Auth finalizzata');
+    debug('✅ UI Auth finalizzata');
     return authResult;
 }
 
@@ -161,7 +172,7 @@ function decodeJWT(token) {
         const payload = JSON.parse(atob(parts[1]));
         return payload;
     } catch (error) {
-        console.error('❌ Errore decodifica JWT:', error);
+        error('❌ Errore decodifica JWT:', error);
         return null;
     }
 }
@@ -213,7 +224,7 @@ function getTokenInfo(token) {
  */
 function saveAuthData(user, token) {
     try {
-        console.log('💾 Salvando dati autenticazione in localStorage...');
+        debug('💾 Salvando dati autenticazione in localStorage...');
         
         localStorage.setItem(AUTH_CONFIG.TOKEN_KEY, token);
         localStorage.setItem(AUTH_CONFIG.USER_KEY, JSON.stringify(user));
@@ -221,17 +232,17 @@ function saveAuthData(user, token) {
         // Log informazioni token
         const tokenInfo = getTokenInfo(token);
         if (tokenInfo) {
-            console.log('🎫 Token info:', {
+            debug('🎫 Token info:', {
                 email: tokenInfo.email,
                 expiresAt: tokenInfo.expiresAt,
                 daysUntilExpiry: tokenInfo.daysUntilExpiry
             });
         }
         
-        console.log('✅ Dati autenticazione salvati con successo');
+        debug('✅ Dati autenticazione salvati con successo');
         return true;
     } catch (error) {
-        console.error('❌ Errore salvataggio dati autenticazione:', error);
+        error('❌ Errore salvataggio dati autenticazione:', error);
         return false;
     }
 }
@@ -245,16 +256,16 @@ function loadAuthData() {
         const userJson = localStorage.getItem(AUTH_CONFIG.USER_KEY);
         
         if (!token || !userJson) {
-            console.log('👤 Nessun dato di autenticazione trovato');
+            debug('👤 Nessun dato di autenticazione trovato');
             return null;
         }
         
         const user = JSON.parse(userJson);
         
-        console.log('📂 Dati autenticazione caricati da localStorage');
+        debug('📂 Dati autenticazione caricati da localStorage');
         return { user, token };
     } catch (error) {
-        console.error('❌ Errore caricamento dati autenticazione:', error);
+        error('❌ Errore caricamento dati autenticazione:', error);
         clearAuthData(); // Pulisci dati corrotti
         return null;
     }
@@ -265,7 +276,7 @@ function loadAuthData() {
  */
 function clearAuthData() {
     try {
-        console.log('🧹 Pulizia completa dati autenticazione...');
+        debug('🧹 Pulizia completa dati autenticazione...');
         
         // Rimuovi da localStorage
         localStorage.removeItem(AUTH_CONFIG.TOKEN_KEY);
@@ -280,10 +291,10 @@ function clearAuthData() {
         localStorage.removeItem('mc-email');
         localStorage.removeItem('mc-users');
         
-        console.log('✅ Pulizia completa completata');
+        debug('✅ Pulizia completa completata');
         return true;
     } catch (error) {
-        console.error('❌ Errore durante pulizia dati:', error);
+        error('❌ Errore durante pulizia dati:', error);
         return false;
     }
 }
@@ -296,14 +307,14 @@ function clearAuthData() {
  * Verifica se l'utente è autenticato con token valido
  */
 function checkAuth() {
-    console.log('🔍 ============================================');
-    console.log('🔍 CONTROLLO AUTENTICAZIONE PERSISTENTE');
-    console.log('🔍 ============================================');
+    debug('🔍 ============================================');
+    debug('🔍 CONTROLLO AUTENTICAZIONE PERSISTENTE');
+    debug('🔍 ============================================');
     
     const authData = loadAuthData();
     
     if (!authData) {
-        console.log('❌ Nessun dato di autenticazione disponibile');
+        debug('❌ Nessun dato di autenticazione disponibile');
         return { isAuthenticated: false, user: null, token: null };
     }
     
@@ -311,13 +322,13 @@ function checkAuth() {
     
     // Verifica validità token
     if (isTokenExpired(token)) {
-        console.log('⏰ Token scaduto, logout automatico');
+        debug('⏰ Token scaduto, logout automatico');
         clearAuthData();
         return { isAuthenticated: false, user: null, token: null, expired: true };
     }
     
     const tokenInfo = getTokenInfo(token);
-    console.log('✅ Utente autenticato:', {
+    debug('✅ Utente autenticato:', {
         email: user.email,
         name: user.name,
         tokenValid: !tokenInfo.isExpired,
@@ -336,9 +347,9 @@ function checkAuth() {
  * Forza logout utente
  */
 function forceLogout(reason = 'Manual logout') {
-    console.log('🚪 ============================================');
-    console.log('🚪 LOGOUT FORZATO:', reason);
-    console.log('🚪 ============================================');
+    debug('🚪 ============================================');
+    debug('🚪 LOGOUT FORZATO:', reason);
+    debug('🚪 ============================================');
     
     clearAuthData();
     
@@ -356,11 +367,11 @@ function forceLogout(reason = 'Manual logout') {
     if (!window.location.pathname.includes('index.html') && 
         window.location.pathname !== '/' && 
         !window.location.pathname.includes('login.html')) {
-        console.log('🔄 Redirect a homepage dopo logout');
+        debug('🔄 Redirect a homepage dopo logout');
         window.location.href = '/';
     }
     
-    console.log('✅ Logout completato');
+    debug('✅ Logout completato');
 }
 
 // ================================================================
@@ -372,7 +383,7 @@ function forceLogout(reason = 'Manual logout') {
  */
 async function validateTokenWithBackend(token) {
     try {
-        console.log('🔐 Validazione token con backend...');
+        debug('🔐 Validazione token con backend...');
         
         const response = await fetch(`${AUTH_CONFIG.API_BASE_URL}/validate-token`, {
             method: 'POST',
@@ -384,15 +395,15 @@ async function validateTokenWithBackend(token) {
         });
         
         if (!response.ok) {
-            console.log('❌ Token non valido secondo il backend');
+            debug('❌ Token non valido secondo il backend');
             return false;
         }
         
         const result = await response.json();
-        console.log('✅ Token validato dal backend');
+        debug('✅ Token validato dal backend');
         return result.valid === true;
     } catch (error) {
-        console.error('❌ Errore validazione token con backend:', error);
+        error('❌ Errore validazione token con backend:', error);
         // In caso di errore di rete, assumiamo il token locale sia valido
         return true;
     }
@@ -419,7 +430,7 @@ function createAuthenticatedFetch() {
                     'Authorization': `Bearer ${authResult.token}`
                 };
                 
-                console.log('🔐 Header Authorization aggiunto alla chiamata API');
+                debug('🔐 Header Authorization aggiunto alla chiamata API');
             }
         }
         
@@ -435,7 +446,7 @@ function createAuthenticatedFetch() {
  * Inizializza il sistema di autenticazione persistente
  */
 function initPersistentAuth() {
-    console.log('🚀 Inizializzazione autenticazione persistente...');
+    debug('🚀 Inizializzazione autenticazione persistente...');
     
     // Configura fetch authenticato
     createAuthenticatedFetch();
@@ -444,11 +455,11 @@ function initPersistentAuth() {
     const authResult = checkAuth();
     
     if (authResult.expired) {
-        console.log('⚠️ Sessione scaduta, utente disconnesso automaticamente');
+        debug('⚠️ Sessione scaduta, utente disconnesso automaticamente');
         // Potresti mostrare un messaggio all'utente qui
     }
     
-    console.log('✅ Sistema autenticazione persistente inizializzato');
+    debug('✅ Sistema autenticazione persistente inizializzato');
     return authResult;
 }
 
@@ -481,4 +492,4 @@ window.PersistentAuth = {
     init: initPersistentAuth
 };
 
-console.log('📚 Sistema autenticazione persistente caricato'); 
+debug('📚 Sistema autenticazione persistente caricato'); 
