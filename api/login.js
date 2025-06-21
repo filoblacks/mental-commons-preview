@@ -1,4 +1,6 @@
 // ================================================================
+// Sistema di logging per ambiente produzione
+const { log, debug, info, warn, error } = require("../logger.js");
 // MENTAL COMMONS - LOGIN API CON SUPABASE
 // ================================================================
 // Versione: 2.0.0
@@ -19,15 +21,15 @@ export default async function handler(req, res) {
   // LOGGING INIZIALE E CONFIGURAZIONE
   // ================================================================
   
-  console.log('🟣 ============================================');
-  console.log('🟣 MENTAL COMMONS - LOGIN API v2.0 SUPABASE');
-  console.log('🟣 ============================================');
-  console.log('🔑 Timestamp:', new Date().toISOString());
-  console.log('🔑 Headers ricevuti:', JSON.stringify(req.headers, null, 2));
-  console.log('🔑 Metodo:', req.method);
-  console.log('🔑 User-Agent:', req.headers['user-agent']);
-  console.log('🔑 Origin:', req.headers.origin);
-  console.log('🔑 Referer:', req.headers.referer);
+  debug('🟣 ============================================');
+  debug('🟣 MENTAL COMMONS - LOGIN API v2.0 SUPABASE');
+  debug('🟣 ============================================');
+  debug('🔑 Timestamp:', new Date().toISOString());
+  debug('🔑 Headers ricevuti:', JSON.stringify(req.headers, null, 2));
+  debug('🔑 Metodo:', req.method);
+  debug('🔑 User-Agent:', req.headers['user-agent']);
+  debug('🔑 Origin:', req.headers.origin);
+  debug('🔑 Referer:', req.headers.referer);
   
   // Log configurazione Supabase
   logConfiguration();
@@ -41,13 +43,13 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   
   if (req.method === 'OPTIONS') {
-    console.log('🔑 Risposta CORS OPTIONS inviata');
+    debug('🔑 Risposta CORS OPTIONS inviata');
     res.status(200).end();
     return;
   }
   
   if (req.method !== 'POST') {
-    console.log('❌ Metodo non valido:', req.method);
+    debug('❌ Metodo non valido:', req.method);
     return res.status(405).json({
       success: false,
       message: 'Metodo non consentito. Utilizzare POST.',
@@ -64,22 +66,22 @@ export default async function handler(req, res) {
   // VALIDAZIONE INPUT
   // ================================================================
   
-  console.log('🔐 Tentativo di login ricevuto - BACKEND SUPABASE');
-  console.log('🔑 Body ricevuto (RAW):', JSON.stringify(req.body, null, 2));
+  debug('🔐 Tentativo di login ricevuto - BACKEND SUPABASE');
+  debug('🔑 Body ricevuto (RAW):', JSON.stringify(req.body, null, 2));
   
   const { email, password } = req.body;
   
   // Log dettagliato dei dati ricevuti
-  console.log('📦 LOGIN PAYLOAD - Dati estratti dal body:');
-  console.log('  📧 Email:', email);
-  console.log('  📧 Email type:', typeof email);
-  console.log('  📧 Email length:', email?.length);
-  console.log('  🔑 Password presente:', !!password);
-  console.log('  🔑 Password type:', typeof password);
-  console.log('  🔑 Password length:', password?.length);
+  debug('📦 LOGIN PAYLOAD - Dati estratti dal body:');
+  debug('  📧 Email:', email);
+  debug('  📧 Email type:', typeof email);
+  debug('  📧 Email length:', email?.length);
+  debug('  🔑 Password presente:', !!password);
+  debug('  🔑 Password type:', typeof password);
+  debug('  🔑 Password length:', password?.length);
   
   if (!email || !password) {
-    console.log('❌ Dati mancanti nel login');
+    debug('❌ Dati mancanti nel login');
     return res.status(400).json({
       success: false,
       message: 'Email e password sono richiesti',
@@ -98,11 +100,11 @@ export default async function handler(req, res) {
   // TEST CONNESSIONE DATABASE
   // ================================================================
   
-  console.log('🔍 Test connessione database prima del login...');
+  debug('🔍 Test connessione database prima del login...');
   const dbConnected = await testDatabaseConnection();
   
   if (!dbConnected) {
-    console.log('❌ Connessione database fallita');
+    debug('❌ Connessione database fallita');
     return res.status(500).json({
       success: false,
       message: 'Errore di connessione al database',
@@ -120,19 +122,19 @@ export default async function handler(req, res) {
   
   try {
     // 1. Ricerca utente nel database
-    console.log('📥 RICERCA UTENTE - Inizio ricerca in Supabase:');
-    console.log('  🔍 Tipo di storage: Supabase PostgreSQL');
-    console.log('  🔍 Fonte dati: Database persistente');
-    console.log('  🔍 Account ricercato:', email);
+    debug('📥 RICERCA UTENTE - Inizio ricerca in Supabase:');
+    debug('  🔍 Tipo di storage: Supabase PostgreSQL');
+    debug('  🔍 Fonte dati: Database persistente');
+    debug('  🔍 Account ricercato:', email);
     
     const user = await findUserByEmail(email);
     
     if (!user) {
-      console.log('❌ Account non trovato nel database');
-      console.log('📦 LOGIN RESULT - FALLIMENTO:');
-      console.log('  📧 Email ricevuta:', email);
-      console.log('  👤 Account esistente: NO');
-      console.log('  🔍 Ricerca completata in database persistente');
+      debug('❌ Account non trovato nel database');
+      debug('📦 LOGIN RESULT - FALLIMENTO:');
+      debug('  📧 Email ricevuta:', email);
+      debug('  👤 Account esistente: NO');
+      debug('  🔍 Ricerca completata in database persistente');
       
       return res.status(401).json({
         success: false,
@@ -147,23 +149,23 @@ export default async function handler(req, res) {
       });
     }
     
-    console.log('✅ Account trovato nel database');
-    console.log('  👤 User ID:', user.id);
-    console.log('  👤 Nome:', user.name);
-    console.log('  👤 Ruolo:', user.role);
-    console.log('  👤 Attivo:', user.is_active);
-    console.log('  👤 Ultimo login:', user.last_login);
+    debug('✅ Account trovato nel database');
+    debug('  👤 User ID:', user.id);
+    debug('  👤 Nome:', user.name);
+    debug('  👤 Ruolo:', user.role);
+    debug('  👤 Attivo:', user.is_active);
+    debug('  👤 Ultimo login:', user.last_login);
     
     // 2. Verifica password
-    console.log('🔐 Verifica password...');
+    debug('🔐 Verifica password...');
     const isPasswordValid = await verifyPassword(password, user.password_hash);
     
     if (!isPasswordValid) {
-      console.log('❌ Password non valida');
-      console.log('📦 LOGIN RESULT - FALLIMENTO:');
-      console.log('  📧 Email match: SÌ');
-      console.log('  🔑 Password match: NO');
-      console.log('  👤 Account esistente: SÌ');
+      debug('❌ Password non valida');
+      debug('📦 LOGIN RESULT - FALLIMENTO:');
+      debug('  📧 Email match: SÌ');
+      debug('  🔑 Password match: NO');
+      debug('  👤 Account esistente: SÌ');
       
       return res.status(401).json({
         success: false,
@@ -178,10 +180,10 @@ export default async function handler(req, res) {
       });
     }
     
-    console.log('✅ Password valida');
+    debug('✅ Password valida');
     
     // 3. Genera JWT token
-    console.log('🎫 Generazione token JWT...');
+    debug('🎫 Generazione token JWT...');
     const token = generateJWT(user.id, user.email);
     
     // 4. Salva sessione (opzionale, non bloccante)
@@ -195,13 +197,13 @@ export default async function handler(req, res) {
     // RISPOSTA DI SUCCESSO
     // ================================================================
     
-    console.log('📦 LOGIN RESULT - SUCCESSO:');
-    console.log('  📧 Email match: ESATTO');
-    console.log('  🔑 Password match: ESATTO');
-    console.log('  👤 Account esistente: SÌ');
-    console.log('  🎫 JWT Token: GENERATO');
-    console.log('  💾 Persistenza: SÌ (Supabase)');
-    console.log('  🔄 Cross-device: SÌ');
+    debug('📦 LOGIN RESULT - SUCCESSO:');
+    debug('  📧 Email match: ESATTO');
+    debug('  🔑 Password match: ESATTO');
+    debug('  👤 Account esistente: SÌ');
+    debug('  🎫 JWT Token: GENERATO');
+    debug('  💾 Persistenza: SÌ (Supabase)');
+    debug('  🔄 Cross-device: SÌ');
     
     const responseData = {
       success: true,
@@ -224,7 +226,7 @@ export default async function handler(req, res) {
       }
     };
     
-    console.log('🔑 Login response preparata:', JSON.stringify(responseData, null, 2));
+    debug('🔑 Login response preparata:', JSON.stringify(responseData, null, 2));
     res.status(200).json(responseData);
     
   } catch (error) {
@@ -232,8 +234,8 @@ export default async function handler(req, res) {
     // GESTIONE ERRORI
     // ================================================================
     
-    console.error('💥 Errore durante il processo di login:', error);
-    console.error('💥 Stack trace:', error.stack);
+    error('💥 Errore durante il processo di login:', error);
+    error('💥 Stack trace:', error.stack);
     
     return res.status(500).json({
       success: false,
@@ -248,6 +250,6 @@ export default async function handler(req, res) {
     });
   }
   
-  console.log('🔚 Fine processo login - timestamp:', new Date().toISOString());
-  console.log('🟣 ============================================');
+  debug('🔚 Fine processo login - timestamp:', new Date().toISOString());
+  debug('🟣 ============================================');
 } 

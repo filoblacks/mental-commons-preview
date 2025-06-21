@@ -1,4 +1,20 @@
 // Mental Commons 3.0 - Sistema Completo con Login e Area Utente
+
+// Sistema di logging che si adatta automaticamente all'ambiente
+const isProduction = () => {
+  const hostname = window.location.hostname;
+  return hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.includes('vercel.app');
+};
+
+const PRODUCTION_MODE = isProduction();
+
+const log = (...args) => { if (!PRODUCTION_MODE) console.log(...args); };
+const debug = (...args) => { if (!PRODUCTION_MODE) console.debug(...args); };
+const info = (...args) => { if (!PRODUCTION_MODE) console.info(...args); };
+const warn = (...args) => { if (!PRODUCTION_MODE) console.warn(...args); };
+const error = (...args) => { console.error(...args); };
+const devError = (...args) => { if (!PRODUCTION_MODE) console.error(...args); };
+
 // Variabili globali
 let ucmeData = [];
 let portatoreData = [];
@@ -15,21 +31,21 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========================================
 
 async function autoMigrateUsersToSupabase() {
-    console.log('🔄 ============================================');
-    console.log('🔄 AUTO-MIGRAZIONE UTENTI LOCALSTORAGE -> SUPABASE');
-    console.log('🔄 ============================================');
+    debug('🔄 ============================================');
+    debug('🔄 AUTO-MIGRAZIONE UTENTI LOCALSTORAGE -> SUPABASE');
+    debug('🔄 ============================================');
     
     // Controlla se la migrazione è già stata completata
     const migrationCompleted = localStorage.getItem('mc-migration-completed');
     if (migrationCompleted === 'true') {
-        console.log('✅ Migrazione già completata in precedenza - skip');
+        debug('✅ Migrazione già completata in precedenza - skip');
         return { migrated: 0, failed: 0, duplicates: 0, skipped: true };
     }
     
     // Flag per disabilitare completamente la migrazione automatica
     const migrationDisabled = localStorage.getItem('mc-migration-disabled');
     if (migrationDisabled === 'true') {
-        console.log('⚠️ Migrazione automatica disabilitata manualmente - skip');
+        debug('⚠️ Migrazione automatica disabilitata manualmente - skip');
         return { migrated: 0, failed: 0, duplicates: 0, disabled: true };
     }
     
@@ -47,16 +63,16 @@ async function autoMigrateUsersToSupabase() {
                 usersToMigrate.push(user);
             }
         } catch (e) {
-            console.log('⚠️ Errore parsing utente corrente:', e.message);
+            log('⚠️ Errore parsing utente corrente:', e.message);
         }
     }
     
     if (usersToMigrate.length === 0) {
-        console.log('✅ Nessun utente localStorage da migrare');
+        log('✅ Nessun utente localStorage da migrare');
         return { migrated: 0, failed: 0, duplicates: 0 };
     }
     
-    console.log(`📊 Trovati ${usersToMigrate.length} utenti da migrare:`, usersToMigrate.map(u => u.email));
+    log(`📊 Trovati ${usersToMigrate.length} utenti da migrare:`, usersToMigrate.map(u => u.email));
     
     let migrationStats = {
         migrated: 0,
@@ -68,7 +84,7 @@ async function autoMigrateUsersToSupabase() {
     // Prova migrazione per ogni utente
     for (let i = 0; i < usersToMigrate.length; i++) {
         const user = usersToMigrate[i];
-        console.log(`\n👤 Migrazione ${i + 1}/${usersToMigrate.length}: ${user.email}`);
+        log(`\n👤 Migrazione ${i + 1}/${usersToMigrate.length}: ${user.email}`);
         
         try {
             const result = await registerWithBackend(
@@ -78,21 +94,21 @@ async function autoMigrateUsersToSupabase() {
             );
             
             if (result.success) {
-                console.log(`   ✅ ${user.email}: Migrato con successo`);
+                log(`   ✅ ${user.email}: Migrato con successo`);
                 migrationStats.migrated++;
             } else if (result.statusCode === 409 || result.error === 'user_already_exists' || 
                       (result.message && (result.message.includes('già esiste') || result.message.includes('already exists')))) {
-                console.log(`   🔄 ${user.email}: Già esistente in Supabase (OK)`);
+                log(`   🔄 ${user.email}: Già esistente in Supabase (OK)`);
                 migrationStats.duplicates++;
             } else {
-                console.log(`   ❌ ${user.email}: Fallimento - ${result.message || 'Errore sconosciuto'}`);
-                console.log(`   🔍 Debug:`, result.debug || 'Nessun debug disponibile');
+                log(`   ❌ ${user.email}: Fallimento - ${result.message || 'Errore sconosciuto'}`);
+                log(`   🔍 Debug:`, result.debug || 'Nessun debug disponibile');
                 migrationStats.failed++;
             }
         } catch (error) {
             // Questo catch ora dovrebbe essere raramente utilizzato
             // perché registerWithBackend gestisce internamente gli errori
-            console.log(`   ❌ ${user.email}: Errore critico non gestito - ${error.message}`);
+            log(`   ❌ ${user.email}: Errore critico non gestito - ${error.message}`);
             migrationStats.failed++;
         }
         
@@ -100,15 +116,15 @@ async function autoMigrateUsersToSupabase() {
         await new Promise(resolve => setTimeout(resolve, 200));
     }
     
-    console.log('\n📊 RISULTATI MIGRAZIONE:');
-    console.log(`   ✅ Migrati: ${migrationStats.migrated}`);
-    console.log(`   🔄 Duplicati: ${migrationStats.duplicates}`);
-    console.log(`   ❌ Falliti: ${migrationStats.failed}`);
+    log('\n📊 RISULTATI MIGRAZIONE:');
+    log(`   ✅ Migrati: ${migrationStats.migrated}`);
+    log(`   🔄 Duplicati: ${migrationStats.duplicates}`);
+    log(`   ❌ Falliti: ${migrationStats.failed}`);
     
     // Se la migrazione è andata a buon fine, offri di pulire localStorage
     if (migrationStats.failed === 0 && (migrationStats.migrated > 0 || migrationStats.duplicates > 0)) {
-        console.log('🧹 Migrazione completata con successo');
-        console.log('💡 localStorage sarà pulito al logout per completare la transizione');
+        log('🧹 Migrazione completata con successo');
+        log('💡 localStorage sarà pulito al logout per completare la transizione');
         
         // Salva flag per indicare che la migrazione è completata
         localStorage.setItem('mc-migration-completed', 'true');
@@ -122,54 +138,54 @@ async function autoMigrateUsersToSupabase() {
 // ========================================
 
 function initializeApp() {
-    console.log('🔄 Inizializzazione Mental Commons 3.0...');
+    log('🔄 Inizializzazione Mental Commons 3.0...');
     
     // ========================================
     // INIZIALIZZAZIONE SISTEMA AUTENTICAZIONE
     // ========================================
-    console.log('🔐 Inizializzazione sistema autenticazione...');
+    log('🔐 Inizializzazione sistema autenticazione...');
     
     if (typeof window.PersistentAuth !== 'undefined') {
         // Inizializza il sistema di autenticazione persistente
         window.PersistentAuth.init();
-        console.log('✅ Sistema PersistentAuth inizializzato');
+        log('✅ Sistema PersistentAuth inizializzato');
     } else {
-        console.warn('⚠️ Sistema PersistentAuth non disponibile - autenticazione limitata');
+        warn('⚠️ Sistema PersistentAuth non disponibile - autenticazione limitata');
     }
     
     // 1. Prima di tutto, esegui migrazione automatica se necessario
     autoMigrateUsersToSupabase().then(migrationStats => {
-        console.log('🔄 Auto-migrazione completata:', migrationStats);
+        log('🔄 Auto-migrazione completata:', migrationStats);
         
         // 2. Poi continua con l'inizializzazione normale
         continueInitialization();
     }).catch(error => {
-        console.error('❌ Errore durante auto-migrazione:', error);
+        error('❌ Errore durante auto-migrazione:', error);
         // Continua comunque l'inizializzazione anche se la migrazione fallisce
         continueInitialization();
     });
 }
 
 function continueInitialization() {
-    console.log('🚀 ============================================');
-    console.log('🚀 INIZIALIZZAZIONE CONTINUA - ANTI-FLICKER');
-    console.log('🚀 ============================================');
+    log('🚀 ============================================');
+    log('🚀 INIZIALIZZAZIONE CONTINUA - ANTI-FLICKER');
+    log('🚀 ============================================');
     
     // Verifica se esiste già lo stato auth immediato
     if (window.immediateAuthState && window.immediateAuthState.verified) {
-        console.log('✅ Stato auth immediato trovato:', window.immediateAuthState);
+        log('✅ Stato auth immediato trovato:', window.immediateAuthState);
         
         // Usa lo stato già verificato
         if (window.immediateAuthState.isAuthenticated) {
             currentUser = window.immediateAuthState.user;
-            console.log('👤 Utente già autenticato:', currentUser.email);
+            log('👤 Utente già autenticato:', currentUser.email);
             
             // Non aggiornare UI - è già stata configurata dal controllo immediato
             // Aggiorna solo le variabili JavaScript interne
             syncUIWithCurrentState();
         } else {
             currentUser = null;
-            console.log('👤 Utente guest confermato');
+            log('👤 Utente guest confermato');
             
             // Non aggiornare UI - è già stata configurata dal controllo immediato
             // Aggiorna solo le variabili JavaScript interne
@@ -177,7 +193,7 @@ function continueInitialization() {
         }
     } else {
         // Fallback al sistema precedente (non dovrebbe mai accadere)
-        console.warn('⚠️ Controllo auth immediato non trovato, fallback');
+        warn('⚠️ Controllo auth immediato non trovato, fallback');
         checkExistingUser();
     }
     
@@ -188,17 +204,17 @@ function continueInitialization() {
     loadExistingData();
     
     // Controlla se siamo nella pagina dashboard e inizializzala
-    console.log("🔍 Rilevamento pagina corrente:", {
+    log("🔍 Rilevamento pagina corrente:", {
         pathname: window.location.pathname,
         href: window.location.href,
         includesDashboard: window.location.pathname.includes('dashboard.html')
     });
     
     if (window.location.pathname.includes('dashboard.html')) {
-        console.log("✅ Pagina dashboard rilevata - inizializzo dashboard");
+        log("✅ Pagina dashboard rilevata - inizializzo dashboard");
         initializeDashboard();
     } else {
-        console.log("🏠 Pagina non-dashboard rilevata - inizializzo home");
+        log("🏠 Pagina non-dashboard rilevata - inizializzo home");
         // Inizializza schermata home
         showScreen('home');
     }
@@ -215,7 +231,7 @@ function continueInitialization() {
     // Setup mobile optimizations
     setupMobileOptimizations();
     
-        console.log('✅ Mental Commons 3.0 inizializzato con migrazione automatica');
+        log('✅ Mental Commons 3.0 inizializzato con migrazione automatica');
 }
 
 // ========================================
@@ -238,7 +254,7 @@ function showScreen(screenName) {
     updateNavigation(screenName);
     
     currentScreen = screenName;
-    console.log('Passaggio a schermata:', screenName);
+    log('Passaggio a schermata:', screenName);
 }
 
 function updateNavigation(activeScreen) {
@@ -257,8 +273,8 @@ function updateNavigation(activeScreen) {
 // ========================================
 
 function initializeDashboard() {
-    console.log("🟢 INIZIO initializeDashboard - timestamp:", new Date().toISOString());
-    console.log('🔄 Inizializzazione dashboard...');
+    log("🟢 INIZIO initializeDashboard - timestamp:", new Date().toISOString());
+    log('🔄 Inizializzazione dashboard...');
     
     // Elementi della dashboard
     const userVerification = document.getElementById('user-verification');
@@ -266,7 +282,7 @@ function initializeDashboard() {
     const noAccess = document.getElementById('no-access');
     
     if (!userVerification || !dashboardContent || !noAccess) {
-        console.error('❌ Elementi dashboard mancanti nel DOM:', {
+        error('❌ Elementi dashboard mancanti nel DOM:', {
             userVerification: !!userVerification,
             dashboardContent: !!dashboardContent,
             noAccess: !!noAccess
@@ -274,29 +290,29 @@ function initializeDashboard() {
         return;
     }
 
-    console.log('✅ Tutti gli elementi DOM trovati');
+    log('✅ Tutti gli elementi DOM trovati');
     
-    console.log("⏰ Impostazione setTimeout per caricamento asincrono...");
+    log("⏰ Impostazione setTimeout per caricamento asincrono...");
     setTimeout(() => {
-        console.log("⏰ AVVIO setTimeout callback - timestamp:", new Date().toISOString());
+        log("⏰ AVVIO setTimeout callback - timestamp:", new Date().toISOString());
         try {
-            console.log('🔍 Controllo stato utente...');
+            log('🔍 Controllo stato utente...');
             
             // Verifica se l'utente è loggato
             if (!currentUser) {
-                console.log('⚠️ Utente non loggato, mostro schermata di accesso');
+                log('⚠️ Utente non loggato, mostro schermata di accesso');
                 userVerification.style.display = 'none';
                 noAccess.style.display = 'block';
                 return;
             }
             
-            console.log('✅ Utente loggato:', currentUser.email);
-            console.log('📊 Dati ucmeData disponibili:', ucmeData.length, 'UCMe totali');
+            log('✅ Utente loggato:', currentUser.email);
+            log('📊 Dati ucmeData disponibili:', ucmeData.length, 'UCMe totali');
             
             // Carica i dati dell'utente
-            console.log('🔄 Caricamento dati dashboard...');
+            log('🔄 Caricamento dati dashboard...');
             const userData = loadDashboardData(currentUser.email);
-            console.log('📋 Dati dashboard ricevuti:', JSON.stringify({
+            log('📋 Dati dashboard ricevuti:', JSON.stringify({
                 isEmpty: userData?.isEmpty,
                 ucmesLength: userData?.ucmes?.length,
                 hasUser: !!userData?.user,
@@ -305,41 +321,41 @@ function initializeDashboard() {
             
             // Verifica validità dei dati
             if (!userData) {
-                console.error('❌ userData è null o undefined');
+                error('❌ userData è null o undefined');
                 updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
                 return;
             }
 
             if (!userData.ucmes && !userData.isEmpty) {
-                console.error('❌ Struttura dati non valida:', userData);
+                error('❌ Struttura dati non valida:', userData);
                 updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
                 return;
             }
             
-            console.log('🎨 Rendering dashboard avviato...');
+            log('🎨 Rendering dashboard avviato...');
             
             // Rendering della dashboard
             if (userData.isEmpty) {
-                console.log('📝 Dati vuoti, mostro dashboard vuota');
+                log('📝 Dati vuoti, mostro dashboard vuota');
                 renderEmptyDashboard();
             } else {
-                console.log('📝 Rendering dashboard con dati:', userData.ucmes.length, 'UCMe trovate');
+                log('📝 Rendering dashboard con dati:', userData.ucmes.length, 'UCMe trovate');
                 renderDashboard(userData);
             }
             
-            console.log('🔄 Aggiornamento UI - nascondo caricamento e mostro contenuto...');
+            log('🔄 Aggiornamento UI - nascondo caricamento e mostro contenuto...');
             
             // ⚠️ CRITICO: SEMPRE nascondere caricamento e mostrare contenuto, anche se ci sono errori nel rendering
-            console.log("🔄 FORZATURA aggiornamento UI - questo DEVE sempre eseguire");
+            log("🔄 FORZATURA aggiornamento UI - questo DEVE sempre eseguire");
             userVerification.style.display = 'none';
             dashboardContent.style.display = 'block';
-            console.log("✅ UI forzatamente aggiornata - caricamento nascosto, dashboard mostrata");
+            log("✅ UI forzatamente aggiornata - caricamento nascosto, dashboard mostrata");
             
-            console.log('✅ Dashboard completamente caricata e visualizzata');
+            log('✅ Dashboard completamente caricata e visualizzata');
             
         } catch (error) {
-            console.error('❌ Errore durante caricamento dashboard:', error);
-            console.error('Stack trace:', error.stack);
+            error('❌ Errore durante caricamento dashboard:', error);
+            error('Stack trace:', error.stack);
             
             // Anche in caso di errore, mostra sempre l'UI base
             userVerification.style.display = 'none';
@@ -359,28 +375,28 @@ function initializeDashboard() {
             updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
         }
         
-        console.log("⏰ FINE setTimeout callback - timestamp:", new Date().toISOString());
+        log("⏰ FINE setTimeout callback - timestamp:", new Date().toISOString());
     }, 500); // Piccolo delay per dare feedback visivo del caricamento
     
-    console.log("🔚 FINE initializeDashboard - setTimeout impostato - timestamp:", new Date().toISOString());
+    log("🔚 FINE initializeDashboard - setTimeout impostato - timestamp:", new Date().toISOString());
 }
 
 function loadDashboardData(email) {
     try {
-        console.log("🟢 Avvio funzione loadDashboardData");
-        console.log('🔍 Caricamento dati dashboard per email:', email);
-        console.log("📦 Dati di input:", JSON.stringify({
+        log("🟢 Avvio funzione loadDashboardData");
+        log('🔍 Caricamento dati dashboard per email:', email);
+        log("📦 Dati di input:", JSON.stringify({
             email: email,
             ucmeDataType: typeof ucmeData,
             ucmeDataIsArray: Array.isArray(ucmeData),
             ucmeDataLength: ucmeData?.length,
             currentUser: currentUser
         }, null, 2));
-        console.log('📊 ucmeData completo:', ucmeData);
+        log('📊 ucmeData completo:', ucmeData);
         
         // Verifica che ucmeData sia un array valido
         if (!Array.isArray(ucmeData)) {
-            console.error('❌ ucmeData non è un array valido:', typeof ucmeData, ucmeData);
+            error('❌ ucmeData non è un array valido:', typeof ucmeData, ucmeData);
             return {
                 isEmpty: true,
                 ucmes: [],
@@ -390,7 +406,7 @@ function loadDashboardData(email) {
         
         // Carica UCMe dell'utente
         const userUcmes = ucmeData.filter(ucme => {
-            console.log('🔍 Verifica UCMe:', {
+            log('🔍 Verifica UCMe:', {
                 ucmeEmail: ucme.email,
                 targetEmail: email,
                 match: ucme.email === email
@@ -398,11 +414,11 @@ function loadDashboardData(email) {
             return ucme.email === email;
         });
         
-        console.log('✅ UCMe trovate per', email, ':', userUcmes.length);
+        log('✅ UCMe trovate per', email, ':', userUcmes.length);
         
         // Log dettagliato delle UCMe trovate
         if (userUcmes.length > 0) {
-            console.log('📋 UCMe dell\'utente:', userUcmes.map(ucme => ({
+            log('📋 UCMe dell\'utente:', userUcmes.map(ucme => ({
                 text: ucme.text?.substring(0, 50) + '...',
                 timestamp: ucme.timestamp,
                 hasResponse: !!ucme.response
@@ -411,7 +427,7 @@ function loadDashboardData(email) {
         
         // Se non ci sono UCMe, restituisce struttura vuota
         if (userUcmes.length === 0) {
-            console.log('📝 Nessuna UCMe trovata, ritorno struttura vuota');
+            log('📝 Nessuna UCMe trovata, ritorno struttura vuota');
             return {
                 isEmpty: true,
                 ucmes: [],
@@ -420,14 +436,14 @@ function loadDashboardData(email) {
         }
         
         // Ordina UCMe per timestamp (più recenti prima)
-        console.log('🔄 Ordinamento UCMe per timestamp...');
+        log('🔄 Ordinamento UCMe per timestamp...');
         const sortedUcmes = userUcmes.sort((a, b) => {
             const dateA = new Date(a.timestamp || 0);
             const dateB = new Date(b.timestamp || 0);
             return dateB - dateA;
         });
         
-        console.log('✅ UCMe ordinate:', sortedUcmes.map(ucme => ({
+        log('✅ UCMe ordinate:', sortedUcmes.map(ucme => ({
             text: ucme.text?.substring(0, 30) + '...',
             timestamp: ucme.timestamp
         })));
@@ -443,7 +459,7 @@ function loadDashboardData(email) {
             }
         };
         
-        console.log('✅ Dati dashboard preparati:', {
+        log('✅ Dati dashboard preparati:', {
             isEmpty: dashboardData.isEmpty,
             ucmesCount: dashboardData.ucmes.length,
             stats: dashboardData.stats
@@ -452,19 +468,19 @@ function loadDashboardData(email) {
         return dashboardData;
         
     } catch (error) {
-        console.error('❌ Errore nel caricamento dati dashboard:', error);
-        console.error('Stack trace:', error.stack);
+        error('❌ Errore nel caricamento dati dashboard:', error);
+        error('Stack trace:', error.stack);
         return null;
     }
 }
 
 function renderDashboard(data) {
     try {
-        console.log("🟢 Avvio funzione renderDashboard");
-        console.log("📦 Dati ricevuti per rendering:", JSON.stringify(data, null, 2));
+        log("🟢 Avvio funzione renderDashboard");
+        log("📦 Dati ricevuti per rendering:", JSON.stringify(data, null, 2));
         
         // 🔍 Verifica stato dati
-        console.log("🔍 Verifica stato dati: ", {
+        log("🔍 Verifica stato dati: ", {
             isEmpty: data?.isEmpty,
             ucmes: data?.ucmes,
             user: data?.user,
@@ -476,40 +492,40 @@ function renderDashboard(data) {
         const ucmeBlocksContainer = document.getElementById("ucme-blocks");
         const dashboardContent = document.getElementById("dashboard-content");
         const userVerification = document.getElementById("user-verification");
-        console.log("🧩 Elementi DOM target trovati:", {
+        log("🧩 Elementi DOM target trovati:", {
             ucmeBlocksContainer: !!ucmeBlocksContainer,
             dashboardContent: !!dashboardContent,
             userVerification: !!userVerification
         });
         
-        console.log('🎨 Rendering dashboard con dati:', data);
+        log('🎨 Rendering dashboard con dati:', data);
         
         // Aggiorna informazioni profilo
-        console.log('👤 Aggiornamento informazioni profilo...');
+        log('👤 Aggiornamento informazioni profilo...');
         updateProfileInfo(data.user);
-        console.log('✅ Informazioni profilo aggiornate');
+        log('✅ Informazioni profilo aggiornate');
         
         // Renderizza le UCMe
-        console.log('📝 Rendering UCMe blocks...');
+        log('📝 Rendering UCMe blocks...');
         renderUcmeBlocks(data.ucmes);
-        console.log('✅ UCMe blocks renderizzate');
+        log('✅ UCMe blocks renderizzate');
         
         // 🔄 Controllo stato visuale - garantisco sempre l'aggiornamento
-        console.log("🔄 Aggiornamento stato visuale - nascondo caricamento e mostro dashboard");
+        log("🔄 Aggiornamento stato visuale - nascondo caricamento e mostro dashboard");
         if (userVerification) {
             userVerification.style.display = "none";
-            console.log("✅ Messaggio di caricamento nascosto");
+            log("✅ Messaggio di caricamento nascosto");
         }
         if (dashboardContent) {
             dashboardContent.style.display = "block";
-            console.log("✅ Contenuto dashboard mostrato");
+            log("✅ Contenuto dashboard mostrato");
         }
         
-        console.log('✅ Dashboard renderizzata con successo');
+        log('✅ Dashboard renderizzata con successo');
         
     } catch (error) {
-        console.error('❌ Errore nel rendering dashboard:', error);
-        console.error('Stack trace:', error.stack);
+        error('❌ Errore nel rendering dashboard:', error);
+        error('Stack trace:', error.stack);
         
         // In caso di errore, mostra comunque un contenuto base
         const ucmeBlocks = document.getElementById('ucme-blocks');
@@ -526,7 +542,7 @@ function renderDashboard(data) {
         try {
             updateProfileInfo(data.user);
         } catch (profileError) {
-            console.error('❌ Errore anche nell\'aggiornamento profilo:', profileError);
+            error('❌ Errore anche nell\'aggiornamento profilo:', profileError);
         }
         
         updateDashboardStatus('Errore nella visualizzazione del tuo spazio.');
@@ -535,27 +551,27 @@ function renderDashboard(data) {
 
 function renderEmptyDashboard() {
     try {
-        console.log("🟢 Avvio funzione renderEmptyDashboard");
+        log("🟢 Avvio funzione renderEmptyDashboard");
         
         // 🧩 Debug DOM - verifica elementi target esistano
         const ucmeBlocks = document.getElementById('ucme-blocks');
         const dashboardContent = document.getElementById("dashboard-content");
         const userVerification = document.getElementById("user-verification");
-        console.log("🧩 Elementi DOM target trovati:", {
+        log("🧩 Elementi DOM target trovati:", {
             ucmeBlocks: !!ucmeBlocks,
             dashboardContent: !!dashboardContent,
             userVerification: !!userVerification
         });
         
-        console.log('📝 Rendering dashboard vuota...');
+        log('📝 Rendering dashboard vuota...');
         
         // Aggiorna informazioni profilo
-        console.log('👤 Aggiornamento informazioni profilo per dashboard vuota...');
+        log('👤 Aggiornamento informazioni profilo per dashboard vuota...');
         updateProfileInfo(currentUser);
-        console.log('✅ Informazioni profilo aggiornate');
+        log('✅ Informazioni profilo aggiornate');
         
         // Mostra messaggio per dashboard vuota
-        console.log('📝 Inserimento messaggio dashboard vuota...');
+        log('📝 Inserimento messaggio dashboard vuota...');
         if (ucmeBlocks) {
             ucmeBlocks.innerHTML = `
                 <div class="empty-dashboard">
@@ -563,33 +579,33 @@ function renderEmptyDashboard() {
                     <p>Quando condividerai la tua prima UCMe, apparirà qui.</p>
                 </div>
             `;
-            console.log('✅ Messaggio dashboard vuota inserito');
+            log('✅ Messaggio dashboard vuota inserito');
         } else {
-            console.error('❌ Elemento ucme-blocks non trovato nel DOM');
+            error('❌ Elemento ucme-blocks non trovato nel DOM');
         }
         
         // 🔄 Controllo stato visuale - garantisco sempre l'aggiornamento
-        console.log("🔄 Aggiornamento stato visuale - nascondo caricamento e mostro dashboard");
+        log("🔄 Aggiornamento stato visuale - nascondo caricamento e mostro dashboard");
         if (userVerification) {
             userVerification.style.display = "none";
-            console.log("✅ Messaggio di caricamento nascosto");
+            log("✅ Messaggio di caricamento nascosto");
         }
         if (dashboardContent) {
             dashboardContent.style.display = "block";
-            console.log("✅ Contenuto dashboard mostrato");
+            log("✅ Contenuto dashboard mostrato");
         }
         
-        console.log('✅ Dashboard vuota renderizzata');
+        log('✅ Dashboard vuota renderizzata');
         
     } catch (error) {
-        console.error('❌ Errore nel rendering dashboard vuota:', error);
-        console.error('Stack trace:', error.stack);
+        error('❌ Errore nel rendering dashboard vuota:', error);
+        error('Stack trace:', error.stack);
         
         // Fallback per le informazioni profilo
         try {
             updateProfileInfo(currentUser);
         } catch (profileError) {
-            console.error('❌ Errore anche nell\'aggiornamento profilo:', profileError);
+            error('❌ Errore anche nell\'aggiornamento profilo:', profileError);
         }
         
         // Fallback per il contenuto
@@ -609,39 +625,39 @@ function renderEmptyDashboard() {
 
 function renderUcmeBlocks(ucmes) {
     try {
-        console.log('📝 Rendering blocchi UCMe:', ucmes.length, 'elementi');
+        log('📝 Rendering blocchi UCMe:', ucmes.length, 'elementi');
         
         const container = document.getElementById('ucme-blocks');
         if (!container) {
-            console.error('❌ Container ucme-blocks non trovato nel DOM');
+            error('❌ Container ucme-blocks non trovato nel DOM');
             return;
         }
         
-        console.log('✅ Container ucme-blocks trovato');
+        log('✅ Container ucme-blocks trovato');
         container.innerHTML = '';
         
         if (!ucmes || ucmes.length === 0) {
-            console.log('⚠️ Nessuna UCMe da renderizzare');
+            log('⚠️ Nessuna UCMe da renderizzare');
             return;
         }
         
         ucmes.forEach((ucme, index) => {
             try {
-                console.log(`📝 Creazione blocco UCMe ${index + 1}/${ucmes.length}:`, ucme.text?.substring(0, 50) + '...');
+                log(`📝 Creazione blocco UCMe ${index + 1}/${ucmes.length}:`, ucme.text?.substring(0, 50) + '...');
                 const ucmeBlock = createDashboardUcmeBlock(ucme, index);
                 container.appendChild(ucmeBlock);
-                console.log(`✅ Blocco UCMe ${index + 1} creato e aggiunto`);
+                log(`✅ Blocco UCMe ${index + 1} creato e aggiunto`);
             } catch (blockError) {
-                console.error(`❌ Errore nella creazione blocco UCMe ${index + 1}:`, blockError);
+                error(`❌ Errore nella creazione blocco UCMe ${index + 1}:`, blockError);
                 // Continua con il prossimo blocco
             }
         });
         
-        console.log('✅ Rendering blocchi UCMe completato');
+        log('✅ Rendering blocchi UCMe completato');
         
     } catch (error) {
-        console.error('❌ Errore durante rendering blocchi UCMe:', error);
-        console.error('Stack trace:', error.stack);
+        error('❌ Errore durante rendering blocchi UCMe:', error);
+        error('Stack trace:', error.stack);
         
         // Fallback: mostra almeno un messaggio di errore
         const container = document.getElementById('ucme-blocks');
@@ -701,14 +717,14 @@ function createDashboardUcmeBlock(ucme, index) {
 
 function updateProfileInfo(user) {
     try {
-        console.log('👤 Aggiornamento profilo per:', user);
+        log('👤 Aggiornamento profilo per:', user);
         
         const profileEmail = document.getElementById('profile-email');
         const profileName = document.getElementById('profile-name');
         const profileCreated = document.getElementById('profile-created');
         const profileLastLogin = document.getElementById('profile-last-login');
         
-        console.log('📊 Elementi profilo trovati:', {
+        log('📊 Elementi profilo trovati:', {
             profileEmail: !!profileEmail,
             profileName: !!profileName,
             profileCreated: !!profileCreated,
@@ -717,21 +733,21 @@ function updateProfileInfo(user) {
         
         if (profileEmail) {
             profileEmail.textContent = user.email || 'Email non disponibile';
-            console.log('✅ Email profilo aggiornata');
+            log('✅ Email profilo aggiornata');
         }
         
         if (profileName) {
             profileName.textContent = user.name || 'Non specificato';
-            console.log('✅ Nome profilo aggiornato');
+            log('✅ Nome profilo aggiornato');
         }
         
         if (profileCreated) {
             try {
                 const createdDate = new Date(user.createdAt || Date.now()).toLocaleDateString('it-IT');
                 profileCreated.textContent = createdDate;
-                console.log('✅ Data creazione profilo aggiornata');
+                log('✅ Data creazione profilo aggiornata');
             } catch (dateError) {
-                console.error('❌ Errore nella formattazione data creazione:', dateError);
+                error('❌ Errore nella formattazione data creazione:', dateError);
                 profileCreated.textContent = 'Data non disponibile';
             }
         }
@@ -740,18 +756,18 @@ function updateProfileInfo(user) {
             try {
                 const lastLoginDate = new Date(user.lastLogin || Date.now()).toLocaleDateString('it-IT');
                 profileLastLogin.textContent = lastLoginDate;
-                console.log('✅ Data ultimo accesso aggiornata');
+                log('✅ Data ultimo accesso aggiornata');
             } catch (dateError) {
-                console.error('❌ Errore nella formattazione data ultimo accesso:', dateError);
+                error('❌ Errore nella formattazione data ultimo accesso:', dateError);
                 profileLastLogin.textContent = 'Data non disponibile';
             }
         }
         
-        console.log('✅ Profilo completamente aggiornato');
+        log('✅ Profilo completamente aggiornato');
         
     } catch (error) {
-        console.error('❌ Errore durante aggiornamento profilo:', error);
-        console.error('Stack trace:', error.stack);
+        error('❌ Errore durante aggiornamento profilo:', error);
+        error('Stack trace:', error.stack);
         
         // Fallback: tenta di aggiornare almeno l'email se possibile
         try {
@@ -760,7 +776,7 @@ function updateProfileInfo(user) {
                 profileEmail.textContent = user.email;
             }
         } catch (fallbackError) {
-            console.error('❌ Errore anche nel fallback email:', fallbackError);
+            error('❌ Errore anche nel fallback email:', fallbackError);
         }
     }
 }
@@ -778,9 +794,9 @@ function updateDashboardStatus(message) {
 
 function checkExistingUser() {
     // 🔍 DEBUG: Controllo stato autenticazione PERSISTENTE
-    console.log('🔍 ============================================');
-    console.log('🔍 CONTROLLO AUTENTICAZIONE PERSISTENTE');
-    console.log('🔍 ============================================');
+    log('🔍 ============================================');
+    log('🔍 CONTROLLO AUTENTICAZIONE PERSISTENTE');
+    log('🔍 ============================================');
     
     // Usa il nuovo sistema di autenticazione persistente
     if (typeof window.PersistentAuth !== 'undefined') {
@@ -788,30 +804,30 @@ function checkExistingUser() {
         
         if (authResult.isAuthenticated) {
             currentUser = authResult.user;
-            console.log('✅ Utente autenticato trovato (PERSISTENTE):', currentUser.email);
-            console.log('🔍 Dati utente:');
-            console.log('  📧 Email:', currentUser.email);
-            console.log('  👤 Nome:', currentUser.name);
-            console.log('  🆔 ID:', currentUser.id);
-            console.log('  🎫 Token scade:', authResult.tokenInfo.expiresAt);
-            console.log('  📅 Giorni rimanenti:', authResult.tokenInfo.daysUntilExpiry);
+            log('✅ Utente autenticato trovato (PERSISTENTE):', currentUser.email);
+            log('🔍 Dati utente:');
+            log('  📧 Email:', currentUser.email);
+            log('  👤 Nome:', currentUser.name);
+            log('  🆔 ID:', currentUser.id);
+            log('  🎫 Token scade:', authResult.tokenInfo.expiresAt);
+            log('  📅 Giorni rimanenti:', authResult.tokenInfo.daysUntilExpiry);
             
             updateUIForLoggedUser();
             updateNavigation(currentScreen);
             
-            console.log('✅ UI aggiornata per utente autenticato');
+            log('✅ UI aggiornata per utente autenticato');
         } else {
             if (authResult.expired) {
-                console.log('⏰ Sessione scaduta automaticamente');
+                log('⏰ Sessione scaduta automaticamente');
                 showMobileFriendlyAlert('La tua sessione è scaduta. Effettua nuovamente il login.');
             }
-            console.log('👤 Nessun utente autenticato trovato');
-            console.log('🔄 Configurazione UI per utente guest...');
+            log('👤 Nessun utente autenticato trovato');
+            log('🔄 Configurazione UI per utente guest...');
             updateUIForGuestUser();
         }
     } else {
         // Fallback al sistema precedente se il nuovo non è caricato
-        console.log('⚠️ Sistema persistente non caricato, fallback a sessionStorage');
+        log('⚠️ Sistema persistente non caricato, fallback a sessionStorage');
         
         const savedUser = sessionStorage.getItem('mental_commons_user');
         const savedToken = sessionStorage.getItem('mental_commons_token');
@@ -822,7 +838,7 @@ function checkExistingUser() {
                 updateUIForLoggedUser();
                 updateNavigation(currentScreen);
             } catch (error) {
-                console.error('❌ Errore nel parsing dei dati utente:', error);
+                error('❌ Errore nel parsing dei dati utente:', error);
                 sessionStorage.removeItem('mental_commons_user');
                 sessionStorage.removeItem('mental_commons_token');
                 updateUIForGuestUser();
@@ -840,12 +856,12 @@ function checkExistingUser() {
 // - registerUser() -> Ora gestito da /api/register
 
 function logoutUser() {
-    console.log('🚪 ============================================');
-    console.log('🚪 LOGOUT UTENTE');
-    console.log('🚪 ============================================');
+    log('🚪 ============================================');
+    log('🚪 LOGOUT UTENTE');
+    log('🚪 ============================================');
     
     if (currentUser) {
-        console.log('👤 Logout di:', currentUser.email);
+        log('👤 Logout di:', currentUser.email);
     }
     
     // Mostra spinner durante logout
@@ -855,7 +871,7 @@ function logoutUser() {
     
     // Usa il nuovo sistema di autenticazione persistente se disponibile
     if (typeof window.PersistentAuth !== 'undefined') {
-        console.log('🔄 Usando sistema persistente per logout...');
+        log('🔄 Usando sistema persistente per logout...');
         window.PersistentAuth.forceLogout('Manual logout');
         
         // Aggiorna variabili locali
@@ -867,7 +883,7 @@ function logoutUser() {
         window.PersistentAuth.hideAuthSpinner();
     } else {
         // Fallback al sistema precedente
-        console.log('⚠️ Sistema persistente non disponibile, usando logout classico');
+        log('⚠️ Sistema persistente non disponibile, usando logout classico');
         
         // Pulisci TUTTI i dati di sessione
         currentUser = null;
@@ -884,14 +900,14 @@ function logoutUser() {
         localStorage.removeItem('mentalCommons_ucmes');
         localStorage.removeItem('mentalCommons_portatori');
         
-        console.log('🧹 Tutti i dati di sessione puliti');
-        console.log('🔄 Aggiornamento UI per guest...');
+        log('🧹 Tutti i dati di sessione puliti');
+        log('🔄 Aggiornamento UI per guest...');
         
         updateUIForGuestUser();
         showScreen('home');
     }
     
-    console.log('✅ Logout completato');
+    log('✅ Logout completato');
 }
 
 // ========================================
@@ -903,7 +919,7 @@ function logoutUser() {
  * dal controllo auth immediato. Non modifica la UI, solo le variabili.
  */
 function syncUIWithCurrentState() {
-    console.log('🔄 Sincronizzazione stato interno con UI già configurata...');
+    log('🔄 Sincronizzazione stato interno con UI già configurata...');
     
     if (currentUser) {
         // Stato autenticato - sincronizza variabili interne
@@ -918,7 +934,7 @@ function syncUIWithCurrentState() {
             emailInput.style.opacity = '0.7';
         }
         
-        console.log('✅ Variabili interne sincronizzate per utente:', currentUser.email);
+        log('✅ Variabili interne sincronizzate per utente:', currentUser.email);
     } else {
         // Stato guest - reset variabili interne
         const emailInput = document.getElementById('email');
@@ -929,7 +945,7 @@ function syncUIWithCurrentState() {
             emailInput.style.opacity = '';
         }
         
-        console.log('✅ Variabili interne sincronizzate per guest');
+        log('✅ Variabili interne sincronizzate per guest');
     }
 }
 
@@ -995,7 +1011,7 @@ function updateUIForLoggedUser() {
         emailInput.style.opacity = '0.7';
     }
     
-    console.log('UI aggiornata per utente loggato:', currentUser.email);
+    log('UI aggiornata per utente loggato:', currentUser.email);
 }
 
 function updateUIForGuestUser() {
@@ -1033,7 +1049,7 @@ function updateUIForGuestUser() {
         mainCta.style.display = 'block';
         mainCta.style.visibility = 'visible';
         mainCta.style.opacity = '1';
-        console.log('CTA main reso visibile per utente guest');
+        log('CTA main reso visibile per utente guest');
     }
     
     // Reset email field
@@ -1045,7 +1061,7 @@ function updateUIForGuestUser() {
         emailInput.style.opacity = '';
     }
     
-    console.log('UI aggiornata per utente guest');
+    log('UI aggiornata per utente guest');
 }
 
 function generateAccessCode() {
@@ -1061,12 +1077,12 @@ function forceShowCTA() {
         mainCta.style.display = 'block';
         mainCta.style.visibility = 'visible';
         mainCta.style.opacity = '1';
-        console.log('CTA forzato a essere visibile');
+        log('CTA forzato a essere visibile');
     }
     
     if (userWelcome) {
         userWelcome.style.display = 'none';
-        console.log('User welcome nascosto');
+        log('User welcome nascosto');
     }
 }
 
@@ -1074,7 +1090,7 @@ function forceShowCTA() {
 function debugLogout() {
     logoutUser();
     forceShowCTA();
-    console.log('Debug: Logout forzato e CTA mostrato');
+    log('Debug: Logout forzato e CTA mostrato');
 }
 
 // Aggiungi le funzioni al window per il debugging
@@ -1181,7 +1197,7 @@ function showOnboardingModal() {
     
     // Controlla se l'elemento esiste prima di tentare di accedervi
     if (!modal) {
-        console.log('⚠️ Onboarding modal not found on this page, skipping...');
+        log('⚠️ Onboarding modal not found on this page, skipping...');
         return;
     }
     
@@ -1200,7 +1216,7 @@ function completeOnboarding() {
     const modal = document.getElementById('onboarding-modal');
     
     if (!modal) {
-        console.log('⚠️ Onboarding modal not found, marking as completed');
+        log('⚠️ Onboarding modal not found, marking as completed');
         return;
     }
     
@@ -1211,7 +1227,7 @@ function completeOnboarding() {
         document.body.style.overflow = '';
     }, 300);
     
-    console.log('Onboarding completato');
+    log('Onboarding completato');
 }
 
 // ========================================
@@ -1290,23 +1306,23 @@ function createHistoryItem(ucme, index) {
 // ========================================
 
 function loadExistingData() {
-    console.log('🟣 FASE 4 DEBUG - VERIFICA STORAGE');
-    console.log('📊 Caricamento dati esistenti...');
+    log('🟣 FASE 4 DEBUG - VERIFICA STORAGE');
+    log('📊 Caricamento dati esistenti...');
     
     // 🔍 VERIFICA DOVE VENGONO SALVATI I DATI
-    console.log('🔍 VERIFICA STORAGE - Fonti di dati:');
-    console.log('  📁 localStorage: disponibile');
-    console.log('  📁 File JSON: statici dal build');
-    console.log('  🗄️ Database: NON CONNESSO');
-    console.log('  ☁️ API Vercel: NON persistente (solo log)');
+    log('🔍 VERIFICA STORAGE - Fonti di dati:');
+    log('  📁 localStorage: disponibile');
+    log('  📁 File JSON: statici dal build');
+    log('  🗄️ Database: NON CONNESSO');
+    log('  ☁️ API Vercel: NON persistente (solo log)');
     
     // Carica UCMe dal localStorage
     const savedUcmes = localStorage.getItem('mentalCommons_ucmes');
     if (savedUcmes) {
         try {
             ucmeData = JSON.parse(savedUcmes);
-            console.log(`✅ Caricate ${ucmeData.length} UCMe dal localStorage`);
-            console.log('📦 Storage attuale - localStorage UCMe:', {
+            log(`✅ Caricate ${ucmeData.length} UCMe dal localStorage`);
+            log('📦 Storage attuale - localStorage UCMe:', {
                 count: ucmeData.length,
                 persistent: 'Solo fino a clear browser data',
                 crossDevice: 'NO - solo questo browser',
@@ -1317,12 +1333,12 @@ function loadExistingData() {
                 }))
             });
         } catch (error) {
-            console.error('Errore nel caricamento UCMe:', error);
+            error('Errore nel caricamento UCMe:', error);
             ucmeData = [];
         }
     } else {
-        console.log('📭 Nessuna UCMe trovata in localStorage');
-        console.log('⚠️ CONFERMA: localStorage vuoto - le UCMe salvate via API non sono qui');
+        log('📭 Nessuna UCMe trovata in localStorage');
+        log('⚠️ CONFERMA: localStorage vuoto - le UCMe salvate via API non sono qui');
     }
     
     // Carica candidature Portatore dal localStorage
@@ -1330,23 +1346,23 @@ function loadExistingData() {
     if (savedPortatori) {
         try {
             portatoreData = JSON.parse(savedPortatori);
-            console.log(`✅ Caricate ${portatoreData.length} candidature Portatore dal localStorage`);
+            log(`✅ Caricate ${portatoreData.length} candidature Portatore dal localStorage`);
         } catch (error) {
-            console.error('Errore nel caricamento candidature Portatore:', error);
+            error('Errore nel caricamento candidature Portatore:', error);
             portatoreData = [];
         }
     } else {
-        console.log('📭 Nessun portatore trovato in localStorage');
+        log('📭 Nessun portatore trovato in localStorage');
     }
     
     // 🔍 VERIFICA PERSISTENZA REALE
-    console.log('🔍 VERIFICA PERSISTENZA STORAGE:');
-    console.log('  📱 Mobile vs Desktop: localStorage separato per device');
-    console.log('  🔄 Reset browser: Tutti i dati localStorage persi');
-    console.log('  ☁️ Vercel serverless: Nessun filesystem persistente');
-    console.log('  📊 UCMe inviate via API: Solo in log console (non recuperabili)');
+    log('🔍 VERIFICA PERSISTENZA STORAGE:');
+    log('  📱 Mobile vs Desktop: localStorage separato per device');
+    log('  🔄 Reset browser: Tutti i dati localStorage persi');
+    log('  ☁️ Vercel serverless: Nessun filesystem persistente');
+    log('  📊 UCMe inviate via API: Solo in log console (non recuperabili)');
     
-    console.log('📋 Stato dati completo:', {
+    log('📋 Stato dati completo:', {
         ucmes: ucmeData.length,
         portatori: portatoreData.length,
         storageType: 'localStorage_only',
@@ -1356,12 +1372,12 @@ function loadExistingData() {
     
     // 🚨 EVIDENZIA PROBLEMA PERSISTENZA
     if (ucmeData.length === 0) {
-        console.log('🚨 STORAGE ISSUE: Nessuna UCMe in localStorage');
-        console.log('🚨 POSSIBILI CAUSE:');
-        console.log('  1. UCMe inviate solo via API (solo log, non storage)');
-        console.log('  2. Browser data cleared');
-        console.log('  3. Device diverso da quello usato per inviare');
-        console.log('  4. Nessuna UCMe mai inviata');
+        log('🚨 STORAGE ISSUE: Nessuna UCMe in localStorage');
+        log('🚨 POSSIBILI CAUSE:');
+        log('  1. UCMe inviate solo via API (solo log, non storage)');
+        log('  2. Browser data cleared');
+        log('  3. Device diverso da quello usato per inviare');
+        log('  4. Nessuna UCMe mai inviata');
     }
 }
 
@@ -1372,9 +1388,9 @@ function saveUcmeDataLocal(newUcme) {
     // Salva nel localStorage
     try {
         localStorage.setItem('mentalCommons_ucmes', JSON.stringify(ucmeData));
-        console.log('UCMe salvata nel localStorage');
+        log('UCMe salvata nel localStorage');
     } catch (error) {
-        console.error('Errore nel salvataggio UCMe:', error);
+        error('Errore nel salvataggio UCMe:', error);
         throw new Error('Errore nel salvataggio locale');
     }
 }
@@ -1394,9 +1410,9 @@ function savePortatoreData(email) {
         
         try {
             localStorage.setItem('mentalCommons_portatori', JSON.stringify(portatoreData));
-            console.log('Candidatura Portatore salvata');
+            log('Candidatura Portatore salvata');
         } catch (error) {
-            console.error('Errore nel salvataggio candidatura Portatore:', error);
+            error('Errore nel salvataggio candidatura Portatore:', error);
         }
     }
 }
@@ -1432,7 +1448,7 @@ function setupNavigationListeners() {
 }
 
 function setupAuthFormListeners() {
-    console.log('🔧 setupAuthFormListeners called');
+    log('🔧 setupAuthFormListeners called');
     
     // Event listener per i tab login/registrazione
     const tabLogin = document.getElementById('tab-login');
@@ -1440,7 +1456,7 @@ function setupAuthFormListeners() {
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     
-    console.log('🔍 Elements found:', {
+    log('🔍 Elements found:', {
         tabLogin: !!tabLogin,
         tabRegister: !!tabRegister, 
         loginForm: !!loginForm,
@@ -1448,7 +1464,7 @@ function setupAuthFormListeners() {
     });
     
     if (tabLogin && tabRegister && loginForm && registerForm) {
-        console.log('✅ All elements found, adding event listeners');
+        log('✅ All elements found, adding event listeners');
         // Click sul tab "Accedi"
         tabLogin.addEventListener('click', function() {
             // Aggiorna gli stili dei tab
@@ -1459,12 +1475,12 @@ function setupAuthFormListeners() {
             loginForm.style.display = 'block';
             registerForm.style.display = 'none';
             
-            console.log('Switched to login form');
+            log('Switched to login form');
         });
         
         // Click sul tab "Registrati"
         tabRegister.addEventListener('click', function() {
-            console.log('🎯 Tab Registrati clicked!');
+            log('🎯 Tab Registrati clicked!');
             
             // Aggiorna gli stili dei tab
             tabRegister.classList.add('active');
@@ -1474,7 +1490,7 @@ function setupAuthFormListeners() {
             registerForm.style.display = 'block';
             loginForm.style.display = 'none';
             
-            console.log('✅ Switched to register form');
+            log('✅ Switched to register form');
         });
         
         // 🔧 MOBILE FIX: Aggiungi gestione input per prevenire problemi mobile
@@ -1484,9 +1500,9 @@ function setupAuthFormListeners() {
         loginForm.addEventListener('submit', handleLoginSubmit);
         registerForm.addEventListener('submit', handleRegisterSubmit);
         
-        console.log('🎉 All event listeners added successfully');
+        log('🎉 All event listeners added successfully');
     } else {
-        console.error('❌ Missing elements:', {
+        error('❌ Missing elements:', {
             tabLogin: !tabLogin ? 'MISSING' : 'OK',
             tabRegister: !tabRegister ? 'MISSING' : 'OK',
             loginForm: !loginForm ? 'MISSING' : 'OK', 
@@ -1497,7 +1513,7 @@ function setupAuthFormListeners() {
 
 // 🔧 NUOVA FUNZIONE: Fix per input mobile
 function setupMobileInputFixes() {
-    console.log('🔧 Setting up mobile input fixes...');
+    log('🔧 Setting up mobile input fixes...');
     
     // Tutti i campi email e password nel login/registrazione
     const inputs = [
@@ -1522,14 +1538,14 @@ function setupMobileInputFixes() {
                     // Per email: rimuovi spazi e converti in lowercase
                     const cleanValue = originalValue.replace(/\s+/g, '').toLowerCase();
                     if (cleanValue !== originalValue) {
-                        console.log(`📧 Email auto-corretta: "${originalValue}" → "${cleanValue}"`);
+                        log(`📧 Email auto-corretta: "${originalValue}" → "${cleanValue}"`);
                         e.target.value = cleanValue;
                     }
                 } else {
                     // Per password: rimuovi solo spazi leading/trailing
                     const cleanValue = originalValue.trim();
                     if (cleanValue !== originalValue && originalValue.length > cleanValue.length) {
-                        console.log(`🔑 Password auto-pulita: spazi rimossi`);
+                        log(`🔑 Password auto-pulita: spazi rimossi`);
                         e.target.value = cleanValue;
                     }
                 }
@@ -1537,14 +1553,14 @@ function setupMobileInputFixes() {
             
             // Focus/blur eventi per mobile
             input.addEventListener('focus', function() {
-                console.log(`📱 Focus su campo: ${inputId}`);
+                log(`📱 Focus su campo: ${inputId}`);
             });
             
             input.addEventListener('blur', function() {
-                console.log(`📱 Blur da campo: ${inputId}, valore finale: "${this.value}"`);
+                log(`📱 Blur da campo: ${inputId}, valore finale: "${this.value}"`);
             });
             
-            console.log(`✅ Mobile fixes applicati a: ${inputId}`);
+            log(`✅ Mobile fixes applicati a: ${inputId}`);
         }
     });
 }
@@ -1554,25 +1570,25 @@ function setupMobileInputFixes() {
 // ========================================
 
 function debugLoginIssues() {
-    console.log('🔍 === DEBUG LOGIN MOBILE ===');
+    log('🔍 === DEBUG LOGIN MOBILE ===');
     
     // Controlla localStorage
-    console.log('💾 LocalStorage status:');
+    log('💾 LocalStorage status:');
     try {
         const testKey = 'mc-test-' + Date.now();
         localStorage.setItem(testKey, 'test');
         const testValue = localStorage.getItem(testKey);
         localStorage.removeItem(testKey);
-        console.log('✅ LocalStorage funziona correttamente');
+        log('✅ LocalStorage funziona correttamente');
     } catch (e) {
-        console.log('❌ Errore localStorage:', e);
+        log('❌ Errore localStorage:', e);
     }
     
     // Mostra tutti gli utenti registrati
     const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
-    console.log('👥 Utenti registrati:', users.length);
+    log('👥 Utenti registrati:', users.length);
     users.forEach((user, index) => {
-        console.log(`👤 Utente ${index + 1}:`, {
+        log(`👤 Utente ${index + 1}:`, {
             email: user.email,
             hasPassword: !!user.password,
             passwordLength: user.password?.length,
@@ -1582,7 +1598,7 @@ function debugLoginIssues() {
     });
     
     // Info dispositivo
-    console.log('📱 Device info:', {
+    log('📱 Device info:', {
         userAgent: navigator.userAgent,
         isMobile: isMobileDevice(),
         platform: navigator.platform,
@@ -1640,7 +1656,7 @@ function showDebugPanel() {
     if (existing) existing.remove();
     
     document.body.appendChild(panel);
-    console.log('🔍 Pannello debug mostrato');
+    log('🔍 Pannello debug mostrato');
 }
 
 // Funzione per creare utente test rapidamente
@@ -1668,10 +1684,10 @@ async function syncUsersToBackendDebug() {
     try {
         const result = await syncUsersToBackend();
         alert(`Sync risultato: ${result.message}`);
-        console.log('📤 Sync completata:', result);
+        log('📤 Sync completata:', result);
     } catch (error) {
         alert(`Errore sync: ${error.message}`);
-        console.error('❌ Errore sync:', error);
+        error('❌ Errore sync:', error);
     }
 }
 
@@ -1681,20 +1697,20 @@ async function testBackendLogin() {
     
     if (email && password) {
         try {
-            console.log('🔍 Debug test backend iniziato...');
-            console.log('📡 Endpoint:', `${window.location.origin}/api/login`);
-            console.log('📤 Payload:', { action: 'login', email, password: '[HIDDEN]' });
-            console.log('🔧 Backend: SUPABASE (Google Apps Script RIMOSSO)');
+            log('🔍 Debug test backend iniziato...');
+            log('📡 Endpoint:', `${window.location.origin}/api/login`);
+            log('📤 Payload:', { action: 'login', email, password: '[HIDDEN]' });
+            log('🔧 Backend: SUPABASE (Google Apps Script RIMOSSO)');
             
             const result = await loginWithBackend(email, password);
             alert(`✅ Test login: ${result.success ? 'SUCCESS' : 'FAILED'}\n${result.message}`);
-            console.log('🧪 Test backend login SUCCESS:', result);
+            log('🧪 Test backend login SUCCESS:', result);
         } catch (error) {
             // Debug dettagliato errore
-            console.error('❌ Errore completo:', error);
-            console.error('❌ Stack trace:', error.stack);
-            console.error('❌ Message:', error.message);
-            console.error('❌ Name:', error.name);
+            error('❌ Errore completo:', error);
+            error('❌ Stack trace:', error.stack);
+            error('❌ Message:', error.message);
+            error('❌ Name:', error.name);
             
             let errorMsg = error.message;
             let helpMsg = '';
@@ -1721,50 +1737,50 @@ window.debugMC = {
     debug: debugLoginIssues,
     // ❌ FUNZIONI DEPRECATE - localStorage non più usato per utenti
     users: () => {
-        console.log('⚠️ DEPRECATO: Gli utenti sono ora gestiti solo in Supabase');
-        console.log('🔍 Per debug, controlla sessionStorage:', {
+        log('⚠️ DEPRECATO: Gli utenti sono ora gestiti solo in Supabase');
+        log('🔍 Per debug, controlla sessionStorage:', {
             user: sessionStorage.getItem('mental_commons_user'),
             token: sessionStorage.getItem('mental_commons_token')
         });
         return [];
     },
     clearUsers: () => {
-        console.log('⚠️ DEPRECATO: Pulizia localStorage non necessaria');
-        console.log('🔄 Eseguo logout completo invece...');
+        log('⚠️ DEPRECATO: Pulizia localStorage non necessaria');
+        log('🔄 Eseguo logout completo invece...');
         logoutUser();
     },
     testLogin: async (email, password) => {
-        console.log('🧪 Test login Supabase:', { email, password: '[HIDDEN]' });
+        log('🧪 Test login Supabase:', { email, password: '[HIDDEN]' });
         try {
             const result = await loginWithBackend(email, password);
-            console.log('🧪 Risultato:', result.success ? 'SUCCESSO' : 'FALLITO');
-            console.log('🧪 Dettagli:', result);
+            log('🧪 Risultato:', result.success ? 'SUCCESSO' : 'FALLITO');
+            log('🧪 Dettagli:', result);
             return result;
         } catch (error) {
-            console.log('🧪 Errore:', error.message);
+            log('🧪 Errore:', error.message);
             return { success: false, error: error.message };
         }
     },
     testRegister: async (email, password, name) => {
-        console.log('🧪 Test registrazione Supabase:', { email, password: '[HIDDEN]', name });
+        log('🧪 Test registrazione Supabase:', { email, password: '[HIDDEN]', name });
         try {
             const result = await registerWithBackend(email, password, name);
-            console.log('🧪 Risultato:', result.success ? 'SUCCESSO' : 'FALLITO');
-            console.log('🧪 Dettagli:', result);
+            log('🧪 Risultato:', result.success ? 'SUCCESSO' : 'FALLITO');
+            log('🧪 Dettagli:', result);
             return result;
         } catch (error) {
-            console.log('🧪 Errore:', error.message);
+            log('🧪 Errore:', error.message);
             return { success: false, error: error.message };
         }
     },
     currentUser: () => {
-        console.log('👤 Utente corrente:');
-        console.log('  sessionStorage:', sessionStorage.getItem('mental_commons_user'));
-        console.log('  currentUser var:', currentUser);
+        log('👤 Utente corrente:');
+        log('  sessionStorage:', sessionStorage.getItem('mental_commons_user'));
+        log('  currentUser var:', currentUser);
         return currentUser;
     },
     logout: () => {
-        console.log('🚪 Logout di debug...');
+        log('🚪 Logout di debug...');
         logoutUser();
     }
 };
@@ -1780,10 +1796,10 @@ async function handleLoginSubmit(event) {
     const password = document.getElementById('login-password')?.value?.trim();
     
     // 🔍 DEBUG: Log dettagliato per troubleshooting cross-device
-    console.log('🔐 ============================================');
-    console.log('🔐 MENTAL COMMONS - LOGIN ATTEMPT');
-    console.log('🔐 ============================================');
-    console.log('📤 Login data:', { 
+    log('🔐 ============================================');
+    log('🔐 MENTAL COMMONS - LOGIN ATTEMPT');
+    log('🔐 ============================================');
+    log('📤 Login data:', { 
         email, 
         password: password ? '[PRESENTE]' : '[MANCANTE]',
         emailLength: email?.length,
@@ -1798,68 +1814,68 @@ async function handleLoginSubmit(event) {
     hideAuthError();
     
     if (!email || !password) {
-        console.log('❌ Campi mancanti:', { email: !!email, password: !!password });
+        log('❌ Campi mancanti:', { email: !!email, password: !!password });
         showAuthError('Inserisci email e password per accedere.');
         return;
     }
     
     if (!isValidEmail(email)) {
-        console.log('❌ Email non valida:', email);
+        log('❌ Email non valida:', email);
         showAuthError('Inserisci un indirizzo email valido.');
         return;
     }
     
     // 🚀 SOLO SUPABASE - NESSUN FALLBACK LOCALE
     try {
-        console.log('🌐 Tentativo login con SUPABASE (UNICA FONTE)...');
-        console.log('🔍 Endpoint:', `${window.location.origin}/api/login`);
+        log('🌐 Tentativo login con SUPABASE (UNICA FONTE)...');
+        log('🔍 Endpoint:', `${window.location.origin}/api/login`);
         
         const result = await loginWithBackend(email, password);
         
-        console.log('📥 Risposta Supabase ricevuta:');
-        console.log('  ✅ Success:', result.success);
-        console.log('  👤 User data:', result.user ? 'PRESENTE' : 'MANCANTE');
-        console.log('  🎫 Token:', result.token ? 'PRESENTE' : 'MANCANTE');
-        console.log('  💬 Message:', result.message);
+        log('📥 Risposta Supabase ricevuta:');
+        log('  ✅ Success:', result.success);
+        log('  👤 User data:', result.user ? 'PRESENTE' : 'MANCANTE');
+        log('  🎫 Token:', result.token ? 'PRESENTE' : 'MANCANTE');
+        log('  💬 Message:', result.message);
         
         if (result.success && result.user && result.token) {
-            console.log('✅ Login Supabase riuscito');
+            log('✅ Login Supabase riuscito');
             
             currentUser = result.user;
             
             // Usa il nuovo sistema di autenticazione persistente
             if (typeof window.PersistentAuth !== 'undefined') {
-                console.log('💾 Salvando dati con sistema persistente...');
+                log('💾 Salvando dati con sistema persistente...');
                 window.PersistentAuth.saveAuthData(currentUser, result.token);
             } else {
                 // Fallback: salva in localStorage direttamente
-                console.log('⚠️ Sistema persistente non disponibile, salvando in localStorage');
+                log('⚠️ Sistema persistente non disponibile, salvando in localStorage');
                 localStorage.setItem('mental_commons_token', result.token);
                 localStorage.setItem('mental_commons_user', JSON.stringify(currentUser));
             }
             
-            console.log('💾 Dati salvati in localStorage (PERSISTENTE)');
-            console.log('🔄 Reindirizzamento a dashboard...');
+            log('💾 Dati salvati in localStorage (PERSISTENTE)');
+            log('🔄 Reindirizzamento a dashboard...');
             
             window.location.href = 'dashboard.html';
             return;
         } else {
-            console.log('❌ Login fallito - risposta Supabase non valida');
+            log('❌ Login fallito - risposta Supabase non valida');
             showAuthError(result.message || 'Errore durante il login. Verifica email e password.');
             return;
         }
         
     } catch (error) {
-        console.error('❌ Errore CRITICO durante login Supabase:', error);
-        console.error('Stack trace:', error.stack);
+        error('❌ Errore CRITICO durante login Supabase:', error);
+        error('Stack trace:', error.stack);
         
         // 🚨 NESSUN FALLBACK - SOLO SUPABASE
-        console.log('🚨 NESSUN FALLBACK - LOGIN FALLITO');
-        console.log('🔍 Possibili cause:');
-        console.log('  1. Account non esistente nel database Supabase');
-        console.log('  2. Password errata');
-        console.log('  3. Problemi di connessione al database');
-        console.log('  4. Configurazione Supabase non corretta');
+        log('🚨 NESSUN FALLBACK - LOGIN FALLITO');
+        log('🔍 Possibili cause:');
+        log('  1. Account non esistente nel database Supabase');
+        log('  2. Password errata');
+        log('  3. Problemi di connessione al database');
+        log('  4. Configurazione Supabase non corretta');
         
         if (error.message.includes('404')) {
             showAuthError('Account non trovato. Registrati per accedere.');
@@ -1883,10 +1899,10 @@ async function handleRegisterSubmit(event) {
     const confirmPassword = document.getElementById('register-confirm')?.value?.trim();
     
     // 🔍 DEBUG: Log dettagliato per troubleshooting cross-device
-    console.log('📝 ============================================');
-    console.log('📝 MENTAL COMMONS - REGISTER ATTEMPT');
-    console.log('📝 ============================================');
-    console.log('📤 Register data:', { 
+    log('📝 ============================================');
+    log('📝 MENTAL COMMONS - REGISTER ATTEMPT');
+    log('📝 ============================================');
+    log('📤 Register data:', { 
         name,
         surname: surname || 'NON SPECIFICATO',
         email, 
@@ -1906,21 +1922,21 @@ async function handleRegisterSubmit(event) {
     hideAuthError();
     
     if (!name || !email || !password || !confirmPassword) {
-        console.log('❌ Campi registrazione mancanti');
+        log('❌ Campi registrazione mancanti');
         showAuthError('Compila tutti i campi obbligatori per registrarti.');
         return;
     }
     
     // Validazione nome
     if (name.length < 2) {
-        console.log('❌ Nome troppo corto:', name.length);
+        log('❌ Nome troppo corto:', name.length);
         showAuthError('Il nome deve essere di almeno 2 caratteri.');
         return;
     }
     
     // Validazione surname opzionale
     if (surname && surname.length > 100) {
-        console.log('❌ Cognome troppo lungo:', surname.length);
+        log('❌ Cognome troppo lungo:', surname.length);
         showAuthError('Il cognome deve essere massimo 100 caratteri.');
         return;
     }
@@ -1929,61 +1945,61 @@ async function handleRegisterSubmit(event) {
     if (surname && surname.trim() !== '') {
         const surnameRegex = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ\s\-']+$/;
         if (!surnameRegex.test(surname.trim())) {
-            console.log('❌ Formato cognome non valido:', surname);
+            log('❌ Formato cognome non valido:', surname);
             showAuthError('Il cognome può contenere solo lettere, spazi, apostrofi e trattini.');
             return;
         }
     }
     
     if (!isValidEmail(email)) {
-        console.log('❌ Email registrazione non valida:', email);
+        log('❌ Email registrazione non valida:', email);
         showAuthError('Inserisci un indirizzo email valido.');
         return;
     }
     
     if (password.length < 6) {
-        console.log('❌ Password troppo corta:', password.length);
+        log('❌ Password troppo corta:', password.length);
         showAuthError('La password deve essere di almeno 6 caratteri.');
         return;
     }
     
     if (password !== confirmPassword) {
-        console.log('❌ Password non corrispondenti');
+        log('❌ Password non corrispondenti');
         showAuthError('Le password non corrispondono.');
         return;
     }
     
     // 🚀 SOLO SUPABASE - NESSUN FALLBACK LOCALE
     try {
-        console.log('🌐 Tentativo registrazione con SUPABASE (UNICA FONTE)...');
-        console.log('🔍 Endpoint:', `${window.location.origin}/api/register`);
+        log('🌐 Tentativo registrazione con SUPABASE (UNICA FONTE)...');
+        log('🔍 Endpoint:', `${window.location.origin}/api/register`);
         
         const result = await registerWithBackend(email, password, name, surname);
         
-        console.log('📥 Risposta Supabase registrazione ricevuta:');
-        console.log('  ✅ Success:', result.success);
-        console.log('  👤 User data:', result.user ? 'PRESENTE' : 'MANCANTE');
-        console.log('  🎫 Token:', result.token ? 'PRESENTE' : 'MANCANTE');
-        console.log('  💬 Message:', result.message);
+        log('📥 Risposta Supabase registrazione ricevuta:');
+        log('  ✅ Success:', result.success);
+        log('  👤 User data:', result.user ? 'PRESENTE' : 'MANCANTE');
+        log('  🎫 Token:', result.token ? 'PRESENTE' : 'MANCANTE');
+        log('  💬 Message:', result.message);
         
         if (result.success && result.user && result.token) {
-            console.log('✅ Registrazione Supabase riuscita');
+            log('✅ Registrazione Supabase riuscita');
             
             currentUser = result.user;
             
             // Usa il nuovo sistema di autenticazione persistente
             if (typeof window.PersistentAuth !== 'undefined') {
-                console.log('💾 Salvando dati con sistema persistente...');
+                log('💾 Salvando dati con sistema persistente...');
                 window.PersistentAuth.saveAuthData(currentUser, result.token);
             } else {
                 // Fallback: salva in localStorage direttamente
-                console.log('⚠️ Sistema persistente non disponibile, salvando in localStorage');
+                log('⚠️ Sistema persistente non disponibile, salvando in localStorage');
                 localStorage.setItem('mental_commons_token', result.token);
                 localStorage.setItem('mental_commons_user', JSON.stringify(currentUser));
             }
             
-            console.log('💾 Dati salvati in localStorage (PERSISTENTE)');
-            console.log('🔄 Reindirizzamento a dashboard...');
+            log('💾 Dati salvati in localStorage (PERSISTENTE)');
+            log('🔄 Reindirizzamento a dashboard...');
             
             showAuthError('Account creato con successo! Reindirizzamento...');
             setTimeout(() => {
@@ -1991,22 +2007,22 @@ async function handleRegisterSubmit(event) {
             }, 1000);
             return;
         } else {
-            console.log('❌ Registrazione fallita - risposta Supabase non valida');
+            log('❌ Registrazione fallita - risposta Supabase non valida');
             showAuthError(result.message || 'Errore durante la registrazione. Riprova.');
             return;
         }
         
     } catch (error) {
-        console.error('❌ Errore CRITICO durante registrazione Supabase:', error);
-        console.error('Stack trace:', error.stack);
+        error('❌ Errore CRITICO durante registrazione Supabase:', error);
+        error('Stack trace:', error.stack);
         
         // 🚨 NESSUN FALLBACK - SOLO SUPABASE
-        console.log('🚨 NESSUN FALLBACK - REGISTRAZIONE FALLITA');
-        console.log('🔍 Possibili cause:');
-        console.log('  1. Email già esistente nel database Supabase');
-        console.log('  2. Problemi di validazione dati');
-        console.log('  3. Problemi di connessione al database');
-        console.log('  4. Configurazione Supabase non corretta');
+        log('🚨 NESSUN FALLBACK - REGISTRAZIONE FALLITA');
+        log('🔍 Possibili cause:');
+        log('  1. Email già esistente nel database Supabase');
+        log('  2. Problemi di validazione dati');
+        log('  3. Problemi di connessione al database');
+        log('  4. Configurazione Supabase non corretta');
         
         if (error.message.includes('409')) {
             showAuthError('Un account con questa email esiste già. Prova ad accedere.');
@@ -2191,33 +2207,141 @@ function isValidEmail(email) {
 
 async function handleFormSubmission(event) {
     event.preventDefault();
+    console.log('📝 ============================================');
+    console.log('📝 GESTIONE INVIO FORM UCME');
+    console.log('📝 ============================================');
     
-    if (!validateForm()) {
-        showMobileFriendlyAlert('Per favore completa correttamente tutti i campi.');
-        return;
-    }
-    
-    // Raccolta dati dal form
-    const formData = collectFormData();
-    
-    // Mostra stato di caricamento
     showLoadingState();
+    hideAuthError();
     
     try {
-        // Invio dati al backend Vercel
-        await submitUCMeToVercel(formData);
+        // ========================================
+        // FASE 1: VALIDAZIONE FORM LATO CLIENT
+        // ========================================
         
-        // Salvataggio backup locale
-        saveUcmeDataLocal(formData);
+        console.log('🔍 FASE 1: Validazione form lato client...');
         
-        // Gestione candidatura Portatore
-        if (formData.portatore) {
-            savePortatoreData(formData.email);
+        // Verifica che tutti i campi richiesti siano presenti nel DOM
+        const requiredFields = {
+            'ucme-text': document.getElementById('ucme-text'),
+            'email': document.getElementById('email'),
+            'tone': document.getElementById('tone'),
+            'acceptance': document.getElementById('acceptance')
+        };
+        
+        for (const [fieldId, element] of Object.entries(requiredFields)) {
+            if (!element) {
+                throw new Error(`Campo richiesto non trovato: ${fieldId}`);
+            }
         }
         
-        // Se utente loggato, aggiorna la dashboard
+        // Validazione specifica del contenuto UCMe
+        const ucmeTextElement = requiredFields['ucme-text'];
+        const ucmeText = ucmeTextElement.value.trim();
+        
+        console.log('📝 Validazione contenuto UCMe:', {
+            hasValue: !!ucmeText,
+            length: ucmeText.length,
+            minRequired: 20,
+            maxAllowed: 600
+        });
+        
+        if (!ucmeText) {
+            throw new Error('Il contenuto della UCMe è richiesto');
+        }
+        
+        if (ucmeText.length < 20) {
+            throw new Error('Il contenuto deve essere di almeno 20 caratteri');
+        }
+        
+        if (ucmeText.length > 600) {
+            throw new Error('Il contenuto non può superare i 600 caratteri');
+        }
+        
+        // Validazione accettazione termini
+        const acceptanceElement = requiredFields['acceptance'];
+        if (!acceptanceElement.checked) {
+            throw new Error('Devi accettare i termini per procedere');
+        }
+        
+        console.log('✅ Validazione lato client completata con successo');
+        
+        // ========================================
+        // FASE 2: RACCOLTA DATI FORM
+        // ========================================
+        
+        console.log('📋 FASE 2: Raccolta dati form...');
+        
+        let formData;
+        try {
+            formData = collectFormData();
+            console.log('✅ Dati form raccolti con successo');
+        } catch (error) {
+            console.error('❌ Errore durante raccolta dati form:', error.message);
+            throw new Error(`Errore nella preparazione dati: ${error.message}`);
+        }
+        
+        // Validazione aggiuntiva sui dati raccolti
+        if (!formData.content) {
+            throw new Error('Contenuto UCMe mancante nei dati preparati');
+        }
+        
+        console.log('📊 Riepilogo dati preparati:', {
+            hasContent: !!formData.content,
+            contentLength: formData.content?.length || 0,
+            hasEmail: !!formData.email,
+            tone: formData.tone,
+            acceptance: formData.acceptance,
+            portatore: formData.portatore
+        });
+        
+        // ========================================
+        // FASE 3: INVIO AL BACKEND
+        // ========================================
+        
+        console.log('🚀 FASE 3: Invio al backend...');
+        
+        const result = await submitUCMeToVercel(formData);
+        
+        // ========================================
+        // FASE 4: GESTIONE SUCCESSO
+        // ========================================
+        
+        console.log('🎉 FASE 4: Gestione successo...');
+        
+        if (!result || !result.success) {
+            throw new Error(result?.message || 'Risposta backend non valida');
+        }
+        
+        // Salvataggio locale per backup
+        try {
+            saveUcmeDataLocal(formData);
+            console.log('✅ Backup locale salvato');
+        } catch (backupError) {
+            console.warn('⚠️ Errore salvataggio backup locale:', backupError.message);
+            // Non bloccare il flusso per errori di backup
+        }
+        
+        // Gestione portatore se richiesto
+        if (formData.portatore && formData.email) {
+            try {
+                savePortatoreData(formData.email);
+                console.log('✅ Dati portatore salvati');
+            } catch (portatoreError) {
+                console.warn('⚠️ Errore salvataggio dati portatore:', portatoreError.message);
+                // Non bloccare il flusso per errori portatore
+            }
+        }
+        
+        // Aggiornamento dashboard se utente loggato
         if (currentUser && currentUser.email === formData.email) {
-            loadUserDashboard();
+            try {
+                loadUserDashboard();
+                console.log('✅ Dashboard utente aggiornata');
+            } catch (dashboardError) {
+                console.warn('⚠️ Errore aggiornamento dashboard:', dashboardError.message);
+                // Non bloccare il flusso per errori dashboard
+            }
         }
         
         // Mostra messaggio di successo
@@ -2226,12 +2350,34 @@ async function handleFormSubmission(event) {
         // Reset del form
         resetForm();
         
-        console.log('UCMe inviata con successo:', formData);
+        console.log('🎉 UCMe inviata con successo completo!');
+        console.log('📊 Risultato finale:', {
+            ucmeId: result.ucme?.id,
+            success: true,
+            timestamp: new Date().toISOString(),
+            userEmail: formData.email
+        });
         
     } catch (error) {
-        console.error('Errore nell\'invio della UCMe:', error);
+        console.error('💥 ============================================');
+        console.error('💥 ERRORE DURANTE INVIO FORM UCME');
+        console.error('💥 ============================================');
+        console.error('💥 Messaggio:', error.message);
+        console.error('💥 Stack:', error.stack);
+        console.error('💥 Timestamp:', new Date().toISOString());
+        console.error('💥 ============================================');
+        
         showErrorMessage(error.message);
         hideLoadingState();
+        
+        // Log aggiuntivo per debugging
+        console.log('🔍 Stato form al momento dell\'errore:', {
+            ucmeText: document.getElementById('ucme-text')?.value?.length || 0,
+            email: document.getElementById('email')?.value || 'N/A',
+            tone: document.getElementById('tone')?.value || 'N/A',
+            acceptance: document.getElementById('acceptance')?.checked || false,
+            isUserLogged: !!currentUser
+        });
     }
 }
 
@@ -2239,31 +2385,109 @@ function collectFormData() {
     const textarea = document.getElementById('ucme-text');
     const email = document.getElementById('email');
     const tone = document.getElementById('tone');
+    const acceptance = document.getElementById('acceptance');
     const portatore = document.getElementById('portatore');
+    
+    // Validazione essenziale dei campi obbligatori
+    if (!textarea) {
+        throw new Error('Campo textarea UCMe non trovato');
+    }
+    
+    if (!email) {
+        throw new Error('Campo email non trovato');
+    }
+    
+    if (!tone) {
+        throw new Error('Campo tono non trovato');
+    }
+    
+    if (!acceptance) {
+        throw new Error('Campo accettazione non trovato');
+    }
+    
+    // Estrai e valida il contenuto
+    const ucmeText = textarea.value.trim();
+    
+    // Validazione contenuto UCMe
+    if (!ucmeText) {
+        throw new Error('Il contenuto della UCMe è richiesto');
+    }
+    
+    if (ucmeText.length < 20) {
+        throw new Error('Il contenuto deve essere di almeno 20 caratteri');
+    }
+    
+    if (ucmeText.length > 600) {
+        throw new Error('Il contenuto non può superare i 600 caratteri');
+    }
     
     // Se l'utente è loggato, usa la sua email
     const userEmail = currentUser ? currentUser.email : email.value.trim();
     
-    return {
+    // Validazione email
+    if (!userEmail) {
+        throw new Error('Email è richiesta');
+    }
+    
+    if (!isValidEmail(userEmail)) {
+        throw new Error('Email non valida');
+    }
+    
+    // Validazione accettazione
+    if (!acceptance.checked) {
+        throw new Error('Devi accettare i termini per inviare la UCMe');
+    }
+    
+    // Costruisci il payload nel formato atteso dal backend
+    const backendPayload = {
+        // Campi richiesti dal backend API
+        content: ucmeText,  // Backend si aspetta 'content', non 'text'
+        title: null,        // Campo opzionale, per ora null
+        
+        // Metadati aggiuntivi per completezza
+        tone: tone.value,
+        userEmail: userEmail,
+        portatore: portatore ? portatore.checked : false,
+        acceptance: acceptance.checked
+    };
+    
+    // Payload completo per uso interno (mantenuto per compatibilità)
+    const fullPayload = {
+        // Dati backend
+        ...backendPayload,
+        
+        // Metadati interni
         id: generateUniqueId(),
         email: userEmail,
-        text: textarea.value.trim(),
-        tone: tone.value,
-        portatore: portatore ? portatore.checked : false,
+        text: ucmeText, // Manteniamo anche 'text' per compatibilità interna
         timestamp: new Date().toISOString(),
         status: 'pending',
         response: null,
         metadata: {
-            characterCount: textarea.value.length,
+            characterCount: ucmeText.length,
             userAgent: navigator.userAgent,
             language: navigator.language,
             isMobile: window.innerWidth <= 768,
             screenSize: `${window.innerWidth}x${window.innerHeight}`,
             platform: navigator.platform,
             version: '3.0',
-            userId: currentUser ? currentUser.id : null
+            userId: currentUser ? currentUser.id : null,
+            formValidated: true,
+            validationTimestamp: new Date().toISOString()
         }
     };
+    
+    console.log('📋 Form data collection completata:', {
+        hasContent: !!backendPayload.content,
+        contentLength: backendPayload.content?.length || 0,
+        email: userEmail,
+        tone: backendPayload.tone,
+        portatore: backendPayload.portatore,
+        acceptance: backendPayload.acceptance,
+        isValid: true
+    });
+    
+    return fullPayload;
 }
 
 function generateUniqueId() {
@@ -2279,21 +2503,21 @@ function generateUniqueId() {
 // ========================================
 
 async function getValidAuthToken() {
-    console.log('🎫 ============================================');
-    console.log('🎫 RECUPERO TOKEN DI AUTENTICAZIONE VALIDO');
-    console.log('🎫 ============================================');
+    log('🎫 ============================================');
+    log('🎫 RECUPERO TOKEN DI AUTENTICAZIONE VALIDO');
+    log('🎫 ============================================');
     
     try {
         // Controlla se il sistema auth è disponibile
         if (typeof window.PersistentAuth === 'undefined') {
-            console.error('❌ Sistema PersistentAuth non disponibile');
+            error('❌ Sistema PersistentAuth non disponibile');
             return null;
         }
         
         // Usa il sistema centralizzato di autenticazione
         const authResult = window.PersistentAuth.checkAuth();
         
-        console.log('📊 Stato autenticazione:', {
+        log('📊 Stato autenticazione:', {
             isAuthenticated: authResult.isAuthenticated,
             hasUser: !!authResult.user,
             hasToken: !!authResult.token,
@@ -2301,9 +2525,9 @@ async function getValidAuthToken() {
         });
         
         if (!authResult.isAuthenticated) {
-            console.log('❌ Utente non autenticato');
+            log('❌ Utente non autenticato');
             if (authResult.expired) {
-                console.log('⏰ Token scaduto - richiesta nuovo login');
+                log('⏰ Token scaduto - richiesta nuovo login');
                 showMobileFriendlyAlert('Sessione scaduta. Ti preghiamo di accedere di nuovo.');
                 // Forza redirect a login se necessario
                 setTimeout(() => {
@@ -2318,7 +2542,7 @@ async function getValidAuthToken() {
         const token = authResult.token;
         const tokenInfo = authResult.tokenInfo || window.PersistentAuth.getTokenInfo(token);
         
-        console.log('✅ Token valido recuperato:', {
+        log('✅ Token valido recuperato:', {
             userId: tokenInfo?.userId,
             email: tokenInfo?.email,
             issuedAt: tokenInfo?.issuedAt,
@@ -2331,12 +2555,12 @@ async function getValidAuthToken() {
         const maskedToken = token ? 
             token.substring(0, 10) + '...' + token.substring(token.length - 10) : 
             'null';
-        console.log('🔒 Token (mascherato):', maskedToken);
+        log('🔒 Token (mascherato):', maskedToken);
         
         return token;
         
     } catch (error) {
-        console.error('💥 Errore durante recupero token:', error);
+        error('💥 Errore durante recupero token:', error);
         return null;
     }
 }
@@ -2355,7 +2579,7 @@ async function submitUCMeToVercel(formData) {
     const UCME_ENDPOINT = `${BASE_URL}/api/ucme`;
     
     console.log('🌐 Endpoint UCMe:', UCME_ENDPOINT);
-    console.log('📋 Dati form da inviare:', JSON.stringify(formData, null, 2));
+    console.log('📋 Dati form ricevuti (completi):', JSON.stringify(formData, null, 2));
     
     try {
         // ========================================
@@ -2372,42 +2596,93 @@ async function submitUCMeToVercel(formData) {
         console.log('✅ Token di autenticazione recuperato con successo');
         
         // ========================================
-        // FASE 2: PREPARAZIONE RICHIESTA
+        // FASE 2: VALIDAZIONE E PREPARAZIONE PAYLOAD
         // ========================================
         
-        console.log('\n📤 FASE 2: Preparazione richiesta HTTP...');
+        console.log('\n📝 FASE 2: Validazione e preparazione payload...');
+        
+        // Estrai solo i campi richiesti dal backend
+        const backendPayload = {
+            content: formData.content, // Campo richiesto dal backend
+            title: formData.title || null // Campo opzionale
+        };
+        
+        // Validazione payload prima dell'invio
+        if (!backendPayload.content) {
+            throw new Error('Contenuto della UCMe mancante');
+        }
+        
+        if (typeof backendPayload.content !== 'string') {
+            throw new Error('Contenuto della UCMe deve essere una stringa');
+        }
+        
+        if (backendPayload.content.trim().length < 20) {
+            throw new Error('Contenuto della UCMe troppo breve (minimo 20 caratteri)');
+        }
+        
+        if (backendPayload.content.trim().length > 600) {
+            throw new Error('Contenuto della UCMe troppo lungo (massimo 600 caratteri)');
+        }
+        
+        // Log del payload che sarà inviato
+        console.log('📦 Payload UCMe da inviare al backend:', JSON.stringify(backendPayload, null, 2));
+        console.log('📊 Validazione payload:', {
+            hasContent: !!backendPayload.content,
+            contentType: typeof backendPayload.content,
+            contentLength: backendPayload.content?.length || 0,
+            hasTitle: !!backendPayload.title,
+            titleType: typeof backendPayload.title,
+            isValid: true
+        });
+        
+        // ========================================
+        // FASE 3: PREPARAZIONE RICHIESTA HTTP
+        // ========================================
+        
+        console.log('\n📤 FASE 3: Preparazione richiesta HTTP...');
         
         const headers = {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         };
         
+        const requestBody = JSON.stringify(backendPayload);
+        
         const requestConfig = {
             method: 'POST',
             mode: 'cors',
             cache: 'no-cache',
             headers: headers,
-            body: JSON.stringify(formData)
+            body: requestBody
         };
         
-        console.log('📋 Configurazione richiesta:', {
+        // LOG DETTAGLIATO RICHIESTO DALL'UTENTE
+        console.log('📋 Headers UCMe inviati:', {
+            'Content-Type': headers['Content-Type'],
+            'Authorization': `Bearer ${token.substring(0, 10)}...${token.substring(token.length - 5)}`
+        });
+        
+        console.log('📦 Payload UCMe inviato:', requestBody);
+        
+        console.log('📋 Configurazione richiesta completa:', {
             method: requestConfig.method,
             url: UCME_ENDPOINT,
             headers: {
                 'Content-Type': headers['Content-Type'],
-                'Authorization': `Bearer ${token.substring(0, 10)}...${token.substring(token.length - 5)}`
+                'Authorization-Length': headers['Authorization']?.length || 0
             },
-            bodyLength: requestConfig.body?.length || 0
+            bodyLength: requestBody.length,
+            bodyValid: !!requestBody
         });
         
         // ========================================
-        // FASE 3: INVIO RICHIESTA
+        // FASE 4: INVIO RICHIESTA
         // ========================================
         
-        console.log('\n🚀 FASE 3: Invio richiesta al server...');
+        console.log('\n🚀 FASE 4: Invio richiesta al server...');
         const response = await fetch(UCME_ENDPOINT, requestConfig);
         
-        console.log('📨 Risposta ricevuta:', {
+        console.log('📨 Response status + headers:', {
             status: response.status,
             statusText: response.statusText,
             ok: response.ok,
@@ -2415,10 +2690,36 @@ async function submitUCMeToVercel(formData) {
         });
         
         // ========================================
-        // FASE 4: GESTIONE RISPOSTA
+        // FASE 5: GESTIONE RISPOSTA
         // ========================================
         
-        console.log('\n📊 FASE 4: Elaborazione risposta...');
+        console.log('\n📊 FASE 5: Elaborazione risposta...');
+        
+        // Gestione speciale per errore 400 Bad Request
+        if (response.status === 400) {
+            console.error('🚫 ERRORE 400 - BAD REQUEST');
+            console.error('   Payload inviato:', requestBody);
+            console.error('   Headers inviati:', headers);
+            
+            // Prova a leggere il corpo della risposta per dettagli
+            let errorDetails = {};
+            try {
+                errorDetails = await response.json();
+                console.error('   Dettagli errore server:', errorDetails);
+                
+                // LOG DETTAGLIATO RICHIESTO DALL'UTENTE
+                console.log('Response status + body:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    body: errorDetails
+                });
+                
+            } catch (e) {
+                console.error('   Impossibile leggere dettagli errore:', e.message);
+            }
+            
+            throw new Error(errorDetails.message || 'Dati della richiesta non validi. Verifica il contenuto della UCMe.');
+        }
         
         // Gestione speciale per errore 401
         if (response.status === 401) {
@@ -2445,28 +2746,51 @@ async function submitUCMeToVercel(formData) {
         
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('❌ Errore HTTP:', {
+            console.error('❌ Errore HTTP generico:', {
                 status: response.status,
                 statusText: response.statusText,
                 errorData: errorData
             });
+            
+            // LOG DETTAGLIATO RICHIESTO DALL'UTENTE
+            console.log('Response status + body:', {
+                status: response.status,
+                statusText: response.statusText,
+                body: errorData
+            });
+            
             throw new Error(errorData.message || `Errore HTTP: ${response.status}`);
         }
         
         const result = await response.json();
         
+        // LOG DETTAGLIATO RICHIESTO DALL'UTENTE
+        console.log('Response status + body:', {
+            status: response.status,
+            statusText: response.statusText,
+            body: result
+        });
+        
         console.log('✅ Risposta Vercel Backend:', {
             success: result.success,
             message: result.message,
+            ucmeId: result.ucme?.id,
             debug: result.debug
         });
         
         if (!result.success) {
-            console.error('❌ Operazione fallita:', result.message);
+            console.error('❌ Operazione fallita secondo il server:', result.message);
             throw new Error(result.message || 'Errore sconosciuto dal server');
         }
         
         console.log('🎉 UCMe inviata con successo!');
+        console.log('📊 Riepilogo invio:', {
+            ucmeId: result.ucme?.id,
+            contentLength: backendPayload.content.length,
+            userEmail: formData.email,
+            timestamp: result.ucme?.createdAt || new Date().toISOString()
+        });
+        
         return result;
         
     } catch (error) {
@@ -2476,12 +2800,16 @@ async function submitUCMeToVercel(formData) {
         console.error('💥 Messaggio:', error.message);
         console.error('💥 Stack:', error.stack);
         console.error('💥 Endpoint:', UCME_ENDPOINT);
+        console.error('💥 Form Data:', JSON.stringify(formData, null, 2));
         console.error('💥 ============================================');
         
         // Re-throw con messaggio user-friendly
         if (error.message.includes('Token di autenticazione') || 
             error.message.includes('Sessione scaduta')) {
             throw error; // Mantieni il messaggio originale per errori di auth
+        } else if (error.message.includes('contenuto') || 
+                  error.message.includes('caratteri')) {
+            throw error; // Mantieni messaggi di validazione
         } else {
             throw new Error('Errore di connessione. Riprova più tardi.');
         }
@@ -2619,12 +2947,12 @@ function setupMobileDebugTrigger() {
             tapCount = 0;
             
             // Mostra debug panel su triplo tap
-            console.log('🔍 Triplo tap rilevato - mostrando debug panel');
+            log('🔍 Triplo tap rilevato - mostrando debug panel');
             showDebugPanel();
         }
     });
     
-    console.log('📱 Debug trigger (triplo tap) configurato per mobile');
+    log('📱 Debug trigger (triplo tap) configurato per mobile');
 }
 
 // 🔧 Funzione per determinare se permettere auto-registrazione
@@ -2639,7 +2967,7 @@ function shouldAllowAutoRegistration() {
         window.location.port !== '' || // Qualsiasi porta diversa da 80/443
         window.location.protocol === 'file:'; // File locale
     
-    console.log('🔍 Ambiente rilevato:', {
+    log('🔍 Ambiente rilevato:', {
         hostname: window.location.hostname,
         port: window.location.port,
         protocol: window.location.protocol,
@@ -2655,7 +2983,7 @@ function shouldAllowAutoRegistration() {
 
 async function loginWithBackend(email, password) {
     // 🟣 FASE 3 DEBUG - VERIFICA COERENZA BACKEND
-    console.log('🟣 FASE 3 DEBUG - LOGIN BACKEND CHIAMATA');
+    log('🟣 FASE 3 DEBUG - LOGIN BACKEND CHIAMATA');
     
     // Determina l'URL base del backend Vercel
     const BASE_URL = window.location.origin;
@@ -2666,10 +2994,10 @@ async function loginWithBackend(email, password) {
         password: password
     };
     
-    console.log('🌐 Chiamata login backend Vercel (non più Google Apps Script)');
-    console.log('📡 URL:', LOGIN_ENDPOINT);
-    console.log('📤 Payload completo:', payload);
-    console.log('🔍 Verifica: NON ci sono più riferimenti a script.google.com');
+    log('🌐 Chiamata login backend Vercel (non più Google Apps Script)');
+    log('📡 URL:', LOGIN_ENDPOINT);
+    log('📤 Payload completo:', payload);
+    log('🔍 Verifica: NON ci sono più riferimenti a script.google.com');
     
     try {
         // Fetch al nuovo endpoint Vercel
@@ -2683,27 +3011,27 @@ async function loginWithBackend(email, password) {
             body: JSON.stringify(payload)
         });
         
-        console.log('📡 Response status:', response.status);
-        console.log('📡 Response ok:', response.ok);
-        console.log('📡 Response headers:', [...response.headers.entries()]);
+        log('📡 Response status:', response.status);
+        log('📡 Response ok:', response.ok);
+        log('📡 Response headers:', [...response.headers.entries()]);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status} - ${response.statusText}`);
         }
         
         const result = await response.json();
-        console.log('📥 Risposta login backend SUCCESS:', result);
-        console.log('🟣 FASE 3 - Chiamata API completata con successo (Vercel endpoint)');
+        log('📥 Risposta login backend SUCCESS:', result);
+        log('🟣 FASE 3 - Chiamata API completata con successo (Vercel endpoint)');
         
         return result;
         
     } catch (error) {
-        console.error('❌ Errore fetch principale:', error);
-        console.log('🟣 FASE 3 - Errore nella chiamata API Vercel:', error.message);
+        error('❌ Errore fetch principale:', error);
+        log('🟣 FASE 3 - Errore nella chiamata API Vercel:', error.message);
         
         // Log eventuali chiamate esterne sospette
         if (error.message.includes('script.google.com')) {
-            console.log('⚠️ ATTENZIONE: Chiamata a Google Apps Script rilevata - QUESTO NON DOVREBBE SUCCEDERE');
+            log('⚠️ ATTENZIONE: Chiamata a Google Apps Script rilevata - QUESTO NON DOVREBBE SUCCEDERE');
         }
         
         throw error;
@@ -2713,8 +3041,8 @@ async function loginWithBackend(email, password) {
 // Metodo fallback rimosso - ora usiamo solo Vercel API
 // La funzione è mantenuta per compatibilità ma non dovrebbe più essere chiamata
 async function loginWithBackendFallback(email, password) {
-    console.log('⚠️ ATTENZIONE: loginWithBackendFallback chiamata - QUESTO NON DOVREBBE SUCCEDERE');
-    console.log('🟣 FASE 3 - Google Apps Script è stato rimosso, ora usiamo solo Vercel API');
+    log('⚠️ ATTENZIONE: loginWithBackendFallback chiamata - QUESTO NON DOVREBBE SUCCEDERE');
+    log('🟣 FASE 3 - Google Apps Script è stato rimosso, ora usiamo solo Vercel API');
     
     return {
         success: false,
@@ -2726,7 +3054,7 @@ async function loginWithBackendFallback(email, password) {
 
 async function registerWithBackend(email, password, name, surname = null) {
     // 🟣 FASE 3 DEBUG - VERIFICA COERENZA BACKEND
-    console.log('🟣 FASE 3 DEBUG - REGISTER BACKEND CHIAMATA');
+    log('🟣 FASE 3 DEBUG - REGISTER BACKEND CHIAMATA');
     
     // Determina l'URL base del backend Vercel
     const BASE_URL = window.location.origin;
@@ -2739,10 +3067,10 @@ async function registerWithBackend(email, password, name, surname = null) {
         surname: surname
     };
     
-    console.log('🌐 Chiamata registrazione backend Vercel (non più Google Apps Script)');
-    console.log('📡 URL:', REGISTER_ENDPOINT);
-    console.log('📤 Payload completo:', payload);
-    console.log('🔍 Verifica: NON ci sono più riferimenti a script.google.com');
+    log('🌐 Chiamata registrazione backend Vercel (non più Google Apps Script)');
+    log('📡 URL:', REGISTER_ENDPOINT);
+    log('📤 Payload completo:', payload);
+    log('🔍 Verifica: NON ci sono più riferimenti a script.google.com');
     
     try {
         const response = await fetch(REGISTER_ENDPOINT, {
@@ -2755,15 +3083,15 @@ async function registerWithBackend(email, password, name, surname = null) {
             body: JSON.stringify(payload)
         });
         
-        console.log('📡 Register Response status:', response.status);
-        console.log('📡 Register Response ok:', response.ok);
+        log('📡 Register Response status:', response.status);
+        log('📡 Register Response ok:', response.ok);
         
         const result = await response.json();
-        console.log('📥 Risposta registrazione backend:', result);
+        log('📥 Risposta registrazione backend:', result);
         
         if (response.status === 409) {
             // Gestione specifica per utente già esistente
-            console.log('⚠️ Utente già esistente (409) - Gestione migrazione');
+            log('⚠️ Utente già esistente (409) - Gestione migrazione');
             return {
                 success: false,
                 message: result.message || 'Un account con questa email già esiste',
@@ -2774,7 +3102,7 @@ async function registerWithBackend(email, password, name, surname = null) {
         }
         
         if (!response.ok) {
-            console.error('❌ Errore registrazione:', response.status, result.message);
+            error('❌ Errore registrazione:', response.status, result.message);
             return {
                 success: false,
                 message: result.message || `Errore HTTP ${response.status}`,
@@ -2784,8 +3112,8 @@ async function registerWithBackend(email, password, name, surname = null) {
             };
         }
         
-        console.log('✅ Registrazione completata con successo');
-        console.log('🟣 FASE 3 - Registrazione API completata (Vercel endpoint)');
+        log('✅ Registrazione completata con successo');
+        log('🟣 FASE 3 - Registrazione API completata (Vercel endpoint)');
         
         return {
             success: true,
@@ -2793,7 +3121,7 @@ async function registerWithBackend(email, password, name, surname = null) {
         };
         
     } catch (error) {
-        console.error('💥 Errore di rete o parsing durante registrazione:', error);
+        error('💥 Errore di rete o parsing durante registrazione:', error);
         return {
             success: false,
             message: 'Errore di connessione durante la registrazione',
@@ -2808,23 +3136,23 @@ async function registerWithBackend(email, password, name, surname = null) {
 
 async function syncUsersToBackend() {
     // 🟣 FASE 3 DEBUG - VERIFICA COERENZA BACKEND
-    console.log('🟣 FASE 3 DEBUG - SYNC USERS DEPRECATO');
-    console.log('⚠️ ATTENZIONE: Sincronizzazione con Google Apps Script rimossa');
-    console.log('🔍 Verifica: Ora tutti i dati sono gestiti tramite Vercel API');
+    log('🟣 FASE 3 DEBUG - SYNC USERS DEPRECATO');
+    log('⚠️ ATTENZIONE: Sincronizzazione con Google Apps Script rimossa');
+    log('🔍 Verifica: Ora tutti i dati sono gestiti tramite Vercel API');
     
     const localUsers = JSON.parse(localStorage.getItem('mc-users') || '[]');
     
     if (localUsers.length === 0) {
-        console.log('📭 Nessun utente locale da sincronizzare');
+        log('📭 Nessun utente locale da sincronizzare');
         return { success: true, message: 'Nessun utente da sincronizzare' };
     }
     
-    console.log('🔄 Sincronizzazione rimossa - utenti gestiti localmente:', localUsers.length, 'utenti');
-    console.log('💡 INFO: La sincronizzazione con backend esterno è stata rimossa');
-    console.log('💡 INFO: Gli utenti ora vengono registrati tramite /api/register');
+    log('🔄 Sincronizzazione rimossa - utenti gestiti localmente:', localUsers.length, 'utenti');
+    log('💡 INFO: La sincronizzazione con backend esterno è stata rimossa');
+    log('💡 INFO: Gli utenti ora vengono registrati tramite /api/register');
     
     // Log eventuali chiamate esterne sospette
-    console.log('🔍 Loggare eventuali chiamate esterne sospette: NESSUNA (Google Apps Script rimosso)');
+    log('🔍 Loggare eventuali chiamate esterne sospette: NESSUNA (Google Apps Script rimosso)');
     
     return { 
         success: true, 
@@ -2995,7 +3323,7 @@ function clearAllData() {
         localStorage.removeItem('mc-users');
         localStorage.removeItem('mc-user');
         localStorage.removeItem('mc-onboarded');
-        console.log('Tutti i dati cancellati');
+        log('Tutti i dati cancellati');
         location.reload();
     }
 }
@@ -3089,10 +3417,10 @@ function createTestData() {
     // Aggiorna le variabili globali
     ucmeData = testUcmes;
     
-    console.log('Dati di test creati nel localStorage');
-    console.log('Utenti disponibili:');
+    log('Dati di test creati nel localStorage');
+    log('Utenti disponibili:');
     testUsers.forEach(user => {
-        console.log(`- ${user.email} (codice: ${user.accessCode})`);
+        log(`- ${user.email} (codice: ${user.accessCode})`);
     });
 }
 
@@ -3128,7 +3456,7 @@ async function loadRitualStats() {
             const ucmeJson = await ucmeResponse.json();
             ucmes = ucmeJson.ucmes || [];
         } catch (error) {
-            console.log('File data.json non disponibile:', error.message);
+            log('File data.json non disponibile:', error.message);
             showStatsUnavailableMessage();
             return;
         }
@@ -3141,10 +3469,10 @@ async function loadRitualStats() {
                 const risposteJson = await risposteResponse.json();
                 risposte = risposteJson.risposte || [];
             } else {
-                console.log('File risposte.json non trovato, usando array vuoto');
+                log('File risposte.json non trovato, usando array vuoto');
             }
         } catch (error) {
-            console.log('Errore nel caricamento risposte.json:', error.message);
+            log('Errore nel caricamento risposte.json:', error.message);
         }
         
         // Calcola statistiche
@@ -3157,14 +3485,14 @@ async function loadRitualStats() {
         // Aggiorna i contatori con animazione fade-in
         updateStatsWithAnimation(ucmeCount, risposteCount, portatoriAttivi);
         
-        console.log('Statistiche caricate:', {
+        log('Statistiche caricate:', {
             ucmes: ucmeCount,
             risposte: risposteCount,
             portatori: portatoriAttivi
         });
         
     } catch (error) {
-        console.error('Errore generale nel caricamento delle statistiche:', error);
+        error('Errore generale nel caricamento delle statistiche:', error);
         showStatsUnavailableMessage();
     }
 }
@@ -3176,7 +3504,7 @@ function updateStatsWithAnimation(ucmeCount, risposteCount, portatoriCount) {
     const portatoriElement = document.getElementById('portatori-count');
     
     if (!ucmeElement || !risposteElement || !portatoriElement) {
-        console.warn('Elementi contatori non trovati');
+        warn('Elementi contatori non trovati');
         return;
     }
     
@@ -3223,7 +3551,7 @@ function showStatsUnavailableMessage() {
     if (risposteElement) risposteElement.textContent = '?';
     if (portatoriElement) portatoriElement.textContent = '?';
     
-    console.log('📊 Statistiche non disponibili - usando placeholder');
+    log('📊 Statistiche non disponibili - usando placeholder');
 }
 
 // ========================================
@@ -3247,8 +3575,8 @@ function resetUser(email) {
             updateUIForGuestUser();
         }
         
-        console.log(`✅ Utente ${email} rimosso dal sistema`);
-        console.log(`📊 Utenti rimanenti: ${filteredUsers.length}`);
+        log(`✅ Utente ${email} rimosso dal sistema`);
+        log(`📊 Utenti rimanenti: ${filteredUsers.length}`);
         
         // Ricarica dashboard se siamo in quella pagina
         if (window.location.pathname.includes('dashboard.html')) {
@@ -3258,7 +3586,7 @@ function resetUser(email) {
         return { success: true, message: `Utente ${email} rimosso` };
         
     } catch (error) {
-        console.error('Errore nel reset utente:', error);
+        error('Errore nel reset utente:', error);
         return { success: false, error: error.message };
     }
 }
@@ -3269,31 +3597,31 @@ function showUsers() {
         const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
         const currentUser = JSON.parse(localStorage.getItem('mc-user') || 'null');
         
-        console.log('👥 UTENTI NEL SISTEMA:');
-        console.log('=====================');
+        log('👥 UTENTI NEL SISTEMA:');
+        log('=====================');
         
         if (users.length === 0) {
-            console.log('Nessun utente registrato');
+            log('Nessun utente registrato');
             return { users: [], currentUser: null };
         }
         
         users.forEach((user, i) => {
             const isCurrent = currentUser && currentUser.email === user.email;
-            console.log(`${i+1}. ${user.email} (${user.name}) ${isCurrent ? '← ATTUALE' : ''}`);
-            console.log(`   Codice: ${user.accessCode || 'N/A'}`);
-            console.log(`   Creato: ${new Date(user.createdAt).toLocaleDateString('it-IT')}`);
+            log(`${i+1}. ${user.email} (${user.name}) ${isCurrent ? '← ATTUALE' : ''}`);
+            log(`   Codice: ${user.accessCode || 'N/A'}`);
+            log(`   Creato: ${new Date(user.createdAt).toLocaleDateString('it-IT')}`);
         });
         
         if (currentUser) {
-            console.log(`\n🔓 Utente attualmente loggato: ${currentUser.email}`);
+            log(`\n🔓 Utente attualmente loggato: ${currentUser.email}`);
         } else {
-            console.log('\n👤 Nessun utente loggato');
+            log('\n👤 Nessun utente loggato');
         }
         
         return { users, currentUser };
         
     } catch (error) {
-        console.error('Errore nel recuperare utenti:', error);
+        error('Errore nel recuperare utenti:', error);
         return { error: error.message };
     }
 }
@@ -3305,24 +3633,24 @@ function findUser(email) {
         const user = users.find(u => u.email === email);
         
         if (user) {
-            console.log('👤 UTENTE TROVATO:');
-            console.log('==================');
-            console.log(`Email: ${user.email}`);
-            console.log(`Nome: ${user.name}`);
-            console.log(`ID: ${user.id}`);
-            console.log(`Codice accesso: ${user.accessCode || 'N/A'}`);
-            console.log(`Creato: ${new Date(user.createdAt).toLocaleDateString('it-IT')}`);
-            console.log(`Ultimo login: ${new Date(user.lastLogin).toLocaleDateString('it-IT')}`);
-            console.log(`Portatore: ${user.isPortatore ? 'Sì' : 'No'}`);
+            log('👤 UTENTE TROVATO:');
+            log('==================');
+            log(`Email: ${user.email}`);
+            log(`Nome: ${user.name}`);
+            log(`ID: ${user.id}`);
+            log(`Codice accesso: ${user.accessCode || 'N/A'}`);
+            log(`Creato: ${new Date(user.createdAt).toLocaleDateString('it-IT')}`);
+            log(`Ultimo login: ${new Date(user.lastLogin).toLocaleDateString('it-IT')}`);
+            log(`Portatore: ${user.isPortatore ? 'Sì' : 'No'}`);
             
             return user;
         } else {
-            console.log(`❌ Utente con email "${email}" non trovato`);
+            log(`❌ Utente con email "${email}" non trovato`);
             return null;
         }
         
     } catch (error) {
-        console.error('Errore nella ricerca utente:', error);
+        error('Errore nella ricerca utente:', error);
         return { error: error.message };
     }
 }
@@ -3341,8 +3669,8 @@ function resetAllData() {
             updateUIForGuestUser();
         }
         
-        console.log('🗑️ Tutti i dati rimossi dal localStorage');
-        console.log('✅ Sistema resettato - puoi ora registrare nuovi utenti');
+        log('🗑️ Tutti i dati rimossi dal localStorage');
+        log('✅ Sistema resettato - puoi ora registrare nuovi utenti');
         
         // Ricarica la pagina se necessario
         if (window.location.pathname.includes('dashboard.html') || window.location.pathname.includes('login.html')) {
@@ -3352,7 +3680,7 @@ function resetAllData() {
         return { success: true };
         
     } catch (error) {
-        console.error('Errore nel reset dati:', error);
+        error('Errore nel reset dati:', error);
         return { success: false, error: error.message };
     }
 }
@@ -3369,22 +3697,22 @@ window.resetAllData = resetAllData;
 
 // Funzione di emergenza per forzare la visualizzazione della dashboard
 function forceDashboardDisplay() {
-    console.log('🚨 FORZATURA EMERGENCY - Aggiornamento immediato stato visuale dashboard');
+    log('🚨 FORZATURA EMERGENCY - Aggiornamento immediato stato visuale dashboard');
     
     const userVerification = document.getElementById('user-verification');
     const dashboardContent = document.getElementById('dashboard-content');
     
     if (userVerification) {
         userVerification.style.display = 'none';
-        console.log('🚨 FORCED: Messaggio caricamento nascosto');
+        log('🚨 FORCED: Messaggio caricamento nascosto');
     }
     
     if (dashboardContent) {
         dashboardContent.style.display = 'block';
-        console.log('🚨 FORCED: Dashboard content mostrato');
+        log('🚨 FORCED: Dashboard content mostrato');
     }
     
-    console.log('🚨 EMERGENCY FORCE COMPLETED');
+    log('🚨 EMERGENCY FORCE COMPLETED');
     return { userVerification: !!userVerification, dashboardContent: !!dashboardContent };
 }
 
@@ -3393,16 +3721,16 @@ window.forceDashboardDisplay = forceDashboardDisplay;
 
 // Funzione di debug che può essere chiamata dalla console per diagnosticare problemi dashboard
 function debugDashboard() {
-    console.log('🔍 === DEBUG DASHBOARD ===');
+    log('🔍 === DEBUG DASHBOARD ===');
     
     // Verifica elementi DOM
-    console.log('📊 Verifica elementi DOM:');
+    log('📊 Verifica elementi DOM:');
     const userVerification = document.getElementById('user-verification');
     const dashboardContent = document.getElementById('dashboard-content');
     const noAccess = document.getElementById('no-access');
     const ucmeBlocks = document.getElementById('ucme-blocks');
     
-    console.log({
+    log({
         userVerification: !!userVerification,
         userVerificationDisplay: userVerification?.style.display,
         dashboardContent: !!dashboardContent,
@@ -3413,16 +3741,16 @@ function debugDashboard() {
     });
     
     // Verifica stato utente
-    console.log('👤 Stato utente corrente:');
-    console.log({
+    log('👤 Stato utente corrente:');
+    log({
         currentUser: currentUser,
         hasCurrentUser: !!currentUser,
         currentUserEmail: currentUser?.email
     });
     
     // Verifica dati
-    console.log('📊 Stato dati:');
-    console.log({
+    log('📊 Stato dati:');
+    log({
         ucmeDataType: typeof ucmeData,
         ucmeDataLength: Array.isArray(ucmeData) ? ucmeData.length : 'N/A',
         ucmeDataSample: Array.isArray(ucmeData) ? ucmeData.slice(0, 2) : ucmeData
@@ -3430,16 +3758,16 @@ function debugDashboard() {
     
     // Se utente è loggato, prova a caricare i suoi dati
     if (currentUser) {
-        console.log('🔄 Test caricamento dati utente...');
+        log('🔄 Test caricamento dati utente...');
         try {
             const userData = loadDashboardData(currentUser.email);
-            console.log('✅ Dati utente caricati:', userData);
+            log('✅ Dati utente caricati:', userData);
         } catch (error) {
-            console.error('❌ Errore nel caricamento dati utente:', error);
+            error('❌ Errore nel caricamento dati utente:', error);
         }
     }
     
-    console.log('🔍 === FINE DEBUG DASHBOARD ===');
+    log('🔍 === FINE DEBUG DASHBOARD ===');
 }
 
 // Rendi la funzione disponibile globalmente per debug

@@ -1,4 +1,6 @@
 // ================================================================
+// Sistema di logging per ambiente produzione
+const { log, debug, info, warn, error } = require("../logger.js");
 // MENTAL COMMONS - API UTENTI
 // ================================================================
 // Endpoint per recuperare tutti gli utenti dal database e aggiornare profili
@@ -16,20 +18,20 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  console.log('='.repeat(60));
-  console.log('🔍 RICHIESTA RECUPERO UTENTI');
-  console.log('Method:', req.method);
-  console.log('Time:', new Date().toISOString());
-  console.log('='.repeat(60));
+  debug('='.repeat(60));
+  debug('🔍 RICHIESTA RECUPERO UTENTI');
+  debug('Method:', req.method);
+  debug('Time:', new Date().toISOString());
+  debug('='.repeat(60));
 
   try {
     if (req.method === 'GET') {
-      console.log('📋 Recuperando tutti gli utenti...');
+      debug('📋 Recuperando tutti gli utenti...');
       
       // Recupera tutti gli utenti
       const users = await getAllUsers();
       
-      console.log('✅ Utenti recuperati con successo:', users.length);
+      debug('✅ Utenti recuperati con successo:', users.length);
       
       return res.status(200).json({
         success: true,
@@ -42,7 +44,7 @@ export default async function handler(req, res) {
       });
       
     } else if (req.method === 'PUT') {
-      console.log('🔄 Aggiornamento profilo utente...');
+      debug('🔄 Aggiornamento profilo utente...');
       
       const { userId, name, surname } = req.body;
       
@@ -80,12 +82,12 @@ export default async function handler(req, res) {
         }
       }
       
-      console.log('📝 Aggiornando profilo:', { userId, name, surname: surname || 'NON SPECIFICATO' });
+      debug('📝 Aggiornando profilo:', { userId, name, surname: surname || 'NON SPECIFICATO' });
       
       // Aggiorna profilo utente
       const updatedUser = await updateUserProfile(userId, name, surname);
       
-      console.log('✅ Profilo aggiornato con successo');
+      debug('✅ Profilo aggiornato con successo');
       
       return res.status(200).json({
         success: true,
@@ -97,7 +99,7 @@ export default async function handler(req, res) {
       });
       
     } else {
-      console.log('❌ Metodo non supportato:', req.method);
+      debug('❌ Metodo non supportato:', req.method);
       return res.status(405).json({
         success: false,
         message: 'Metodo non supportato. Usa GET per recuperare utenti o PUT per aggiornare profilo.'
@@ -105,7 +107,7 @@ export default async function handler(req, res) {
     }
     
   } catch (error) {
-    console.error('❌ ERRORE RECUPERO UTENTI:', error);
+    error('❌ ERRORE RECUPERO UTENTI:', error);
     return res.status(500).json({
       success: false,
       message: 'Errore interno del server',

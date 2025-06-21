@@ -292,26 +292,99 @@
                     }
                 }
                 
-                // Crea i dati del form
+                // Valida contenuto prima di procedere
+                if (!ucmeText || ucmeText.trim().length < 20) {
+                    resultArea.textContent += '❌ Contenuto troppo breve (minimo 20 caratteri)\n';
+                    return;
+                }
+                
+                if (ucmeText.trim().length > 600) {
+                    resultArea.textContent += '❌ Contenuto troppo lungo (massimo 600 caratteri)\n';
+                    return;
+                }
+                
+                // Simula i dati del form nel formato corretto
                 const formData = {
-                    ucmeText: ucmeText,
+                    // Campi richiesti dal backend (formato corretto)
+                    content: ucmeText.trim(),  // Backend si aspetta 'content'
+                    title: null,               // Campo opzionale
+                    
+                    // Metadati aggiuntivi (per compatibilità interna)
                     email: document.getElementById('test-email').value,
                     tone: tone,
                     acceptance: true,
                     portatore: false,
                     timestamp: new Date().toISOString(),
-                    id: 'test-' + Date.now()
+                    id: 'test-' + Date.now(),
+                    
+                    // Metadata completi
+                    metadata: {
+                        characterCount: ucmeText.trim().length,
+                        userAgent: navigator.userAgent,
+                        language: navigator.language,
+                        isMobile: window.innerWidth <= 768,
+                        screenSize: `${window.innerWidth}x${window.innerHeight}`,
+                        platform: navigator.platform,
+                        version: '3.0',
+                        formValidated: true,
+                        validationTimestamp: new Date().toISOString(),
+                        testMode: true
+                    }
                 };
                 
-                resultArea.textContent += `📋 Dati form:\n${JSON.stringify(formData, null, 2)}\n\n`;
+                resultArea.textContent += `📋 Form data preparato:\n${JSON.stringify(formData, null, 2)}\n\n`;
+                
+                // Verifica che i campi essenziali siano presenti
+                resultArea.textContent += `✅ Validazione payload:\n`;
+                resultArea.textContent += `  - content: ${formData.content ? '✅ Presente' : '❌ Mancante'} (${formData.content?.length || 0} caratteri)\n`;
+                resultArea.textContent += `  - title: ${formData.title !== undefined ? '✅ Definito' : '❌ Mancante'}\n`;
+                resultArea.textContent += `  - email: ${formData.email ? '✅ Presente' : '❌ Mancante'}\n`;
+                resultArea.textContent += `  - acceptance: ${formData.acceptance ? '✅ Accettato' : '❌ Non accettato'}\n\n`;
                 
                 // Test della funzione submitUCMeToVercel
                 if (typeof submitUCMeToVercel === 'function') {
                     resultArea.textContent += '🚀 Invio UCMe in corso...\n';
+                    
+                    // Log per intercettare cosa viene effettivamente inviato
+                    const originalFetch = window.fetch;
+                    let interceptedRequest = null;
+                    
+                    window.fetch = async function(url, options) {
+                        if (url.includes('/api/ucme')) {
+                            interceptedRequest = {
+                                url: url,
+                                method: options.method,
+                                headers: options.headers,
+                                body: options.body,
+                                bodyParsed: options.body ? JSON.parse(options.body) : null
+                            };
+                            resultArea.textContent += `\n🔍 Richiesta intercettata:\n`;
+                            resultArea.textContent += `  URL: ${interceptedRequest.url}\n`;
+                            resultArea.textContent += `  Method: ${interceptedRequest.method}\n`;
+                            resultArea.textContent += `  Content-Type: ${interceptedRequest.headers['Content-Type']}\n`;
+                            resultArea.textContent += `  Authorization: ${interceptedRequest.headers['Authorization'] ? 'Presente' : 'Mancante'}\n`;
+                            resultArea.textContent += `  Body: ${interceptedRequest.body}\n`;
+                            resultArea.textContent += `  Body parsed:\n${JSON.stringify(interceptedRequest.bodyParsed, null, 4)}\n\n`;
+                        }
+                        return originalFetch.call(this, url, options);
+                    };
+                    
                     const result = await submitUCMeToVercel(formData);
+                    
+                    // Ripristina fetch originale
+                    window.fetch = originalFetch;
                     
                     resultArea.textContent += `✅ UCMe inviata con successo!\n`;
                     resultArea.textContent += `📊 Risultato:\n${JSON.stringify(result, null, 2)}\n`;
+                    
+                    if (interceptedRequest) {
+                        resultArea.textContent += `\n📊 Analisi richiesta inviata:\n`;
+                        resultArea.textContent += `  - Formato payload: ${interceptedRequest.bodyParsed ? 'JSON valido' : 'Errore parsing'}\n`;
+                        resultArea.textContent += `  - Campo 'content': ${interceptedRequest.bodyParsed?.content ? '✅ Presente' : '❌ Mancante'}\n`;
+                        resultArea.textContent += `  - Campo 'title': ${interceptedRequest.bodyParsed?.title !== undefined ? '✅ Definito' : '❌ Mancante'}\n`;
+                        resultArea.textContent += `  - Lunghezza content: ${interceptedRequest.bodyParsed?.content?.length || 0} caratteri\n`;
+                    }
+                    
                 } else {
                     resultArea.textContent += '❌ Funzione submitUCMeToVercel non disponibile\n';
                 }
@@ -320,6 +393,12 @@
                 resultArea.textContent += `💥 Errore durante invio UCMe:\n`;
                 resultArea.textContent += `   Messaggio: ${error.message}\n`;
                 resultArea.textContent += `   Stack: ${error.stack}\n`;
+                
+                // Log diagnostico aggiuntivo
+                resultArea.textContent += `\n🔍 Diagnostica errore:\n`;
+                resultArea.textContent += `   - Lunghezza testo: ${ucmeText.length}\n`;
+                resultArea.textContent += `   - Testo valido: ${ucmeText.length >= 20 && ucmeText.length <= 600}\n`;
+                resultArea.textContent += `   - Tipo errore: ${error.name}\n`;
             }
         }
         

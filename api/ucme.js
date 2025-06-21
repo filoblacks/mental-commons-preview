@@ -1,4 +1,6 @@
 // ================================================================
+// Sistema di logging per ambiente produzione
+const { log, debug, info, warn, error } = require("../logger.js");
 // MENTAL COMMONS - UCME API CON SUPABASE
 // ================================================================
 // Versione: 2.0.0
@@ -17,15 +19,15 @@ export default async function handler(req, res) {
   // LOGGING INIZIALE E CONFIGURAZIONE
   // ================================================================
   
-  console.log('🟣 ============================================');
-  console.log('🟣 MENTAL COMMONS - UCME API v2.0 SUPABASE');
-  console.log('🟣 ============================================');
-  console.log('📝 Timestamp:', new Date().toISOString());
-  console.log('📝 Headers ricevuti:', JSON.stringify(req.headers, null, 2));
-  console.log('📝 Metodo:', req.method);
-  console.log('📝 User-Agent:', req.headers['user-agent']);
-  console.log('📝 Origin:', req.headers.origin);
-  console.log('📝 Referer:', req.headers.referer);
+  debug('🟣 ============================================');
+  debug('🟣 MENTAL COMMONS - UCME API v2.0 SUPABASE');
+  debug('🟣 ============================================');
+  debug('📝 Timestamp:', new Date().toISOString());
+  debug('📝 Headers ricevuti:', JSON.stringify(req.headers, null, 2));
+  debug('📝 Metodo:', req.method);
+  debug('📝 User-Agent:', req.headers['user-agent']);
+  debug('📝 Origin:', req.headers.origin);
+  debug('📝 Referer:', req.headers.referer);
   
   // Log configurazione Supabase
   logConfiguration();
@@ -39,7 +41,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   
   if (req.method === 'OPTIONS') {
-    console.log('📝 Risposta CORS OPTIONS inviata');
+    debug('📝 Risposta CORS OPTIONS inviata');
     res.status(200).end();
     return;
   }
@@ -55,7 +57,7 @@ export default async function handler(req, res) {
     // POST: Salva nuova UCMe
     return await handlePostUCMe(req, res);
   } else {
-    console.log('❌ Metodo non valido:', req.method);
+    debug('❌ Metodo non valido:', req.method);
     return res.status(405).json({
       success: false,
       message: 'Metodo non consentito. Utilizzare GET o POST.',
@@ -74,13 +76,13 @@ export default async function handler(req, res) {
 // ================================================================
 
 async function handleGetUCMes(req, res) {
-  console.log('📖 GET UCMe - Recupero UCMe dell\'utente');
+  debug('📖 GET UCMe - Recupero UCMe dell\'utente');
   
   try {
     // Estrai token JWT dall'header Authorization
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ Token JWT mancante nell\'header Authorization');
+      debug('❌ Token JWT mancante nell\'header Authorization');
       return res.status(401).json({
         success: false,
         message: 'Token di autenticazione richiesto',
@@ -93,12 +95,12 @@ async function handleGetUCMes(req, res) {
     }
     
     const token = authHeader.substring(7);
-    console.log('🎫 Token JWT ricevuto, verifico...');
+    debug('🎫 Token JWT ricevuto, verifico...');
     
     // Verifica token JWT
     const decoded = verifyJWT(token);
     if (!decoded) {
-      console.log('❌ Token JWT non valido');
+      debug('❌ Token JWT non valido');
       return res.status(401).json({
         success: false,
         message: 'Token di autenticazione non valido',
@@ -109,12 +111,12 @@ async function handleGetUCMes(req, res) {
       });
     }
     
-    console.log('✅ Token JWT valido per utente:', decoded.userId);
+    debug('✅ Token JWT valido per utente:', decoded.userId);
     
     // Test connessione database
     const dbConnected = await testDatabaseConnection();
     if (!dbConnected) {
-      console.log('❌ Connessione database fallita');
+      debug('❌ Connessione database fallita');
       return res.status(500).json({
         success: false,
         message: 'Errore di connessione al database',
@@ -123,10 +125,10 @@ async function handleGetUCMes(req, res) {
     }
     
     // Recupera UCMe dell'utente
-    console.log('📖 Recupero UCMe per utente:', decoded.userId);
+    debug('📖 Recupero UCMe per utente:', decoded.userId);
     const userUCMes = await getUserUCMes(decoded.userId);
     
-    console.log('✅ UCMe recuperate:', userUCMes.length);
+    debug('✅ UCMe recuperate:', userUCMes.length);
     
     return res.status(200).json({
       success: true,
@@ -145,7 +147,7 @@ async function handleGetUCMes(req, res) {
     });
     
   } catch (error) {
-    console.error('💥 Errore durante il recupero UCMe:', error);
+    error('💥 Errore durante il recupero UCMe:', error);
     return res.status(500).json({
       success: false,
       message: 'Errore interno del server',
@@ -162,8 +164,8 @@ async function handleGetUCMes(req, res) {
 // ================================================================
 
 async function handlePostUCMe(req, res) {
-  console.log('📝 POST UCMe - Salvataggio nuova UCMe');
-  console.log('📝 UCMe save request (RAW):', JSON.stringify(req.body, null, 2));
+  debug('📝 POST UCMe - Salvataggio nuova UCMe');
+  debug('📝 UCMe save request (RAW):', JSON.stringify(req.body, null, 2));
   
   try {
     // ================================================================
@@ -173,7 +175,7 @@ async function handlePostUCMe(req, res) {
     // Estrai token JWT dall'header Authorization
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ Token JWT mancante nell\'header Authorization');
+      debug('❌ Token JWT mancante nell\'header Authorization');
       return res.status(401).json({
         success: false,
         message: 'Token di autenticazione richiesto per salvare UCMe',
@@ -186,12 +188,12 @@ async function handlePostUCMe(req, res) {
     }
     
     const token = authHeader.substring(7);
-    console.log('🎫 Token JWT ricevuto, verifico...');
+    debug('🎫 Token JWT ricevuto, verifico...');
     
     // Verifica token JWT
     const decoded = verifyJWT(token);
     if (!decoded) {
-      console.log('❌ Token JWT non valido');
+      debug('❌ Token JWT non valido');
       return res.status(401).json({
         success: false,
         message: 'Token di autenticazione non valido',
@@ -202,7 +204,7 @@ async function handlePostUCMe(req, res) {
       });
     }
     
-    console.log('✅ Token JWT valido per utente:', decoded.userId);
+    debug('✅ Token JWT valido per utente:', decoded.userId);
     
     // ================================================================
     // VALIDAZIONE INPUT
@@ -211,18 +213,18 @@ async function handlePostUCMe(req, res) {
     const { content, title } = req.body;
     
     // Log dettagliato dei dati ricevuti
-    console.log('📦 UCME SAVE PAYLOAD - Dati estratti dal body:');
-    console.log('  📝 Content:', content?.substring(0, 100) + '...');
-    console.log('  📝 Content type:', typeof content);
-    console.log('  📝 Content length:', content?.length);
-    console.log('  📋 Title:', title);
-    console.log('  📋 Title type:', typeof title);
-    console.log('  👤 User ID (da JWT):', decoded.userId);
-    console.log('  📧 User Email (da JWT):', decoded.email);
+    debug('📦 UCME SAVE PAYLOAD - Dati estratti dal body:');
+    debug('  📝 Content:', content?.substring(0, 100) + '...');
+    debug('  📝 Content type:', typeof content);
+    debug('  📝 Content length:', content?.length);
+    debug('  📋 Title:', title);
+    debug('  📋 Title type:', typeof title);
+    debug('  👤 User ID (da JWT):', decoded.userId);
+    debug('  📧 User Email (da JWT):', decoded.email);
     
     // Validazione dati obbligatori
     if (!content) {
-      console.log('❌ Contenuto UCMe mancante');
+      debug('❌ Contenuto UCMe mancante');
       return res.status(400).json({
         success: false,
         message: 'Il contenuto della UCMe è richiesto',
@@ -236,7 +238,7 @@ async function handlePostUCMe(req, res) {
     
     // Validazione lunghezza contenuto
     if (content.length < 20 || content.length > 600) {
-      console.log('❌ Lunghezza contenuto UCMe non valida:', content.length);
+      debug('❌ Lunghezza contenuto UCMe non valida:', content.length);
       return res.status(400).json({
         success: false,
         message: 'Il contenuto deve essere tra 20 e 600 caratteri',
@@ -254,11 +256,11 @@ async function handlePostUCMe(req, res) {
     // TEST CONNESSIONE DATABASE
     // ================================================================
     
-    console.log('🔍 Test connessione database prima del salvataggio UCMe...');
+    debug('🔍 Test connessione database prima del salvataggio UCMe...');
     const dbConnected = await testDatabaseConnection();
     
     if (!dbConnected) {
-      console.log('❌ Connessione database fallita');
+      debug('❌ Connessione database fallita');
       return res.status(500).json({
         success: false,
         message: 'Errore di connessione al database',
@@ -274,34 +276,34 @@ async function handlePostUCMe(req, res) {
     // SALVATAGGIO UCME
     // ================================================================
     
-    console.log('📥 SALVATAGGIO UCME - Inizio salvataggio in Supabase:');
-    console.log('  🔍 Tipo di storage: Supabase PostgreSQL');
-    console.log('  🔍 Fonte dati: Database persistente');
-    console.log('  🔍 User ID:', decoded.userId);
-    console.log('  📝 Contenuto length:', content.length);
-    console.log('  📋 Titolo:', title || 'Nessun titolo');
+    debug('📥 SALVATAGGIO UCME - Inizio salvataggio in Supabase:');
+    debug('  🔍 Tipo di storage: Supabase PostgreSQL');
+    debug('  🔍 Fonte dati: Database persistente');
+    debug('  🔍 User ID:', decoded.userId);
+    debug('  📝 Contenuto length:', content.length);
+    debug('  📋 Titolo:', title || 'Nessun titolo');
     
     // Salva UCMe nel database
     const savedUCMe = await saveUCMe(decoded.userId, content.trim(), title?.trim() || null);
     
-    console.log('✅ UCMe salvata con successo nel database');
-    console.log('  📝 UCMe ID:', savedUCMe.id);
-    console.log('  👤 User ID:', savedUCMe.user_id);
-    console.log('  📅 Creata il:', savedUCMe.created_at);
-    console.log('  📊 Status:', savedUCMe.status);
+    debug('✅ UCMe salvata con successo nel database');
+    debug('  📝 UCMe ID:', savedUCMe.id);
+    debug('  👤 User ID:', savedUCMe.user_id);
+    debug('  📅 Creata il:', savedUCMe.created_at);
+    debug('  📊 Status:', savedUCMe.status);
     
     // ================================================================
     // RISPOSTA DI SUCCESSO
     // ================================================================
     
-    console.log('📦 UCME SAVE RESULT - SUCCESSO:');
-    console.log('  📝 UCMe ID:', savedUCMe.id);
-    console.log('  📧 Email utente:', decoded.email);
-    console.log('  📊 Caratteri contenuto:', content.length);
-    console.log('  📋 Titolo:', title || 'Nessuno');
-    console.log('  💾 Persistenza: SÌ (Supabase)');
-    console.log('  🔄 Cross-device: SÌ');
-    console.log('  🗄️ Database: CONNESSO E FUNZIONANTE');
+    debug('📦 UCME SAVE RESULT - SUCCESSO:');
+    debug('  📝 UCMe ID:', savedUCMe.id);
+    debug('  📧 Email utente:', decoded.email);
+    debug('  📊 Caratteri contenuto:', content.length);
+    debug('  📋 Titolo:', title || 'Nessuno');
+    debug('  💾 Persistenza: SÌ (Supabase)');
+    debug('  🔄 Cross-device: SÌ');
+    debug('  🗄️ Database: CONNESSO E FUNZIONANTE');
     
     const responseData = {
       success: true,
@@ -330,7 +332,7 @@ async function handlePostUCMe(req, res) {
       }
     };
     
-    console.log('📝 UCMe response preparata:', JSON.stringify(responseData, null, 2));
+    debug('📝 UCMe response preparata:', JSON.stringify(responseData, null, 2));
     res.status(201).json(responseData);
     
   } catch (error) {
@@ -338,13 +340,13 @@ async function handlePostUCMe(req, res) {
     // GESTIONE ERRORI
     // ================================================================
     
-    console.error('💥 Errore durante il salvataggio UCMe:', error);
-    console.error('💥 Stack trace:', error.stack);
+    error('💥 Errore durante il salvataggio UCMe:', error);
+    error('💥 Stack trace:', error.stack);
     
-    console.log('📦 UCME SAVE RESULT - ERRORE:');
-    console.log('  ❌ Errore tipo:', error.name);
-    console.log('  ❌ Errore messaggio:', error.message);
-    console.log('  ❌ Timestamp errore:', new Date().toISOString());
+    debug('📦 UCME SAVE RESULT - ERRORE:');
+    debug('  ❌ Errore tipo:', error.name);
+    debug('  ❌ Errore messaggio:', error.message);
+    debug('  ❌ Timestamp errore:', new Date().toISOString());
     
     return res.status(500).json({
       success: false,
@@ -359,8 +361,8 @@ async function handlePostUCMe(req, res) {
     });
   }
   
-  console.log('🔚 Fine processo UCMe save - timestamp:', new Date().toISOString());
-  console.log('🟣 ============================================');
+  debug('🔚 Fine processo UCMe save - timestamp:', new Date().toISOString());
+  debug('🟣 ============================================');
 }
 
 // Nota: In Vercel serverless il filesystem è read-only

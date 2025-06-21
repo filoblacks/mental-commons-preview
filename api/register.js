@@ -1,4 +1,6 @@
 // ================================================================
+// Sistema di logging per ambiente produzione
+const { log, debug, info, warn, error } = require("../logger.js");
 // MENTAL COMMONS - REGISTER API CON SUPABASE
 // ================================================================
 // Versione: 2.0.0
@@ -18,15 +20,15 @@ export default async function handler(req, res) {
   // LOGGING INIZIALE E CONFIGURAZIONE
   // ================================================================
   
-  console.log('🟣 ============================================');
-  console.log('🟣 MENTAL COMMONS - REGISTER API v2.0 SUPABASE');
-  console.log('🟣 ============================================');
-  console.log('📝 Timestamp:', new Date().toISOString());
-  console.log('📝 Headers ricevuti:', JSON.stringify(req.headers, null, 2));
-  console.log('📝 Metodo:', req.method);
-  console.log('📝 User-Agent:', req.headers['user-agent']);
-  console.log('📝 Origin:', req.headers.origin);
-  console.log('📝 Referer:', req.headers.referer);
+  debug('🟣 ============================================');
+  debug('🟣 MENTAL COMMONS - REGISTER API v2.0 SUPABASE');
+  debug('🟣 ============================================');
+  debug('📝 Timestamp:', new Date().toISOString());
+  debug('📝 Headers ricevuti:', JSON.stringify(req.headers, null, 2));
+  debug('📝 Metodo:', req.method);
+  debug('📝 User-Agent:', req.headers['user-agent']);
+  debug('📝 Origin:', req.headers.origin);
+  debug('📝 Referer:', req.headers.referer);
   
   // Log configurazione Supabase
   logConfiguration();
@@ -40,13 +42,13 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   
   if (req.method === 'OPTIONS') {
-    console.log('📝 Risposta CORS OPTIONS inviata');
+    debug('📝 Risposta CORS OPTIONS inviata');
     res.status(200).end();
     return;
   }
   
   if (req.method !== 'POST') {
-    console.log('❌ Metodo non valido:', req.method);
+    debug('❌ Metodo non valido:', req.method);
     return res.status(405).json({
       success: false,
       message: 'Metodo non consentito. Utilizzare POST.',
@@ -63,29 +65,29 @@ export default async function handler(req, res) {
   // VALIDAZIONE INPUT
   // ================================================================
   
-  console.log('📝 Tentativo di registrazione ricevuto - BACKEND SUPABASE');
-  console.log('📝 Body ricevuto (RAW):', JSON.stringify(req.body, null, 2));
+  debug('📝 Tentativo di registrazione ricevuto - BACKEND SUPABASE');
+  debug('📝 Body ricevuto (RAW):', JSON.stringify(req.body, null, 2));
   
   const { email, password, name, surname } = req.body;
   
   // Log dettagliato dei dati ricevuti
-  console.log('📦 REGISTER PAYLOAD - Dati estratti dal body:');
-  console.log('  📧 Email:', email);
-  console.log('  📧 Email type:', typeof email);
-  console.log('  📧 Email length:', email?.length);
-  console.log('  🔑 Password presente:', !!password);
-  console.log('  🔑 Password type:', typeof password);
-  console.log('  🔑 Password length:', password?.length);
-  console.log('  👤 Name:', name);
-  console.log('  👤 Name type:', typeof name);
-  console.log('  👤 Name length:', name?.length);
-  console.log('  👤 Surname:', surname);
-  console.log('  👤 Surname type:', typeof surname);
-  console.log('  👤 Surname length:', surname?.length);
+  debug('📦 REGISTER PAYLOAD - Dati estratti dal body:');
+  debug('  📧 Email:', email);
+  debug('  📧 Email type:', typeof email);
+  debug('  📧 Email length:', email?.length);
+  debug('  🔑 Password presente:', !!password);
+  debug('  🔑 Password type:', typeof password);
+  debug('  🔑 Password length:', password?.length);
+  debug('  👤 Name:', name);
+  debug('  👤 Name type:', typeof name);
+  debug('  👤 Name length:', name?.length);
+  debug('  👤 Surname:', surname);
+  debug('  👤 Surname type:', typeof surname);
+  debug('  👤 Surname length:', surname?.length);
   
   // Validazione campi obbligatori
   if (!email || !password || !name) {
-    console.log('❌ Dati mancanti nella registrazione');
+    debug('❌ Dati mancanti nella registrazione');
     return res.status(400).json({
       success: false,
       message: 'Email, password e nome sono richiesti',
@@ -106,7 +108,7 @@ export default async function handler(req, res) {
   
   // Validazione surname opzionale
   if (surname && surname.length > 100) {
-    console.log('❌ Cognome troppo lungo:', surname.length, 'caratteri');
+    debug('❌ Cognome troppo lungo:', surname.length, 'caratteri');
     return res.status(400).json({
       success: false,
       message: 'Il cognome deve essere massimo 100 caratteri',
@@ -123,7 +125,7 @@ export default async function handler(req, res) {
   if (surname && surname.trim() !== '') {
     const surnameRegex = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ\s\-']+$/;
     if (!surnameRegex.test(surname.trim())) {
-      console.log('❌ Formato cognome non valido:', surname);
+      debug('❌ Formato cognome non valido:', surname);
       return res.status(400).json({
         success: false,
         message: 'Il cognome può contenere solo lettere, spazi, apostrofi e trattini',
@@ -140,7 +142,7 @@ export default async function handler(req, res) {
   // Validazione formato email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    console.log('❌ Formato email non valido:', email);
+    debug('❌ Formato email non valido:', email);
     return res.status(400).json({
       success: false,
       message: 'Formato email non valido',
@@ -155,7 +157,7 @@ export default async function handler(req, res) {
   
   // Validazione lunghezza password
   if (password.length < 6) {
-    console.log('❌ Password troppo corta:', password.length, 'caratteri');
+    debug('❌ Password troppo corta:', password.length, 'caratteri');
     return res.status(400).json({
       success: false,
       message: 'La password deve essere di almeno 6 caratteri',
@@ -172,11 +174,11 @@ export default async function handler(req, res) {
   // TEST CONNESSIONE DATABASE
   // ================================================================
   
-  console.log('🔍 Test connessione database prima della registrazione...');
+  debug('🔍 Test connessione database prima della registrazione...');
   const dbConnected = await testDatabaseConnection();
   
   if (!dbConnected) {
-    console.log('❌ Connessione database fallita');
+    debug('❌ Connessione database fallita');
     return res.status(500).json({
       success: false,
       message: 'Errore di connessione al database',
@@ -194,30 +196,30 @@ export default async function handler(req, res) {
   
   try {
     // 1. Verifica se l'utente esiste già
-    console.log('📥 VERIFICA UTENTE ESISTENTE - Controllo in Supabase:');
-    console.log('  🔍 Tipo di storage: Supabase PostgreSQL');
-    console.log('  🔍 Fonte dati: Database persistente');
-    console.log('  🔍 Email da verificare:', email);
+    debug('📥 VERIFICA UTENTE ESISTENTE - Controllo in Supabase:');
+    debug('  🔍 Tipo di storage: Supabase PostgreSQL');
+    debug('  🔍 Fonte dati: Database persistente');
+    debug('  🔍 Email da verificare:', email);
     
     let existingUser = null;
     
     try {
       existingUser = await findUserByEmail(email);
-      console.log('✅ Controllo utente esistente completato:', existingUser ? 'TROVATO' : 'NON TROVATO');
+      debug('✅ Controllo utente esistente completato:', existingUser ? 'TROVATO' : 'NON TROVATO');
     } catch (searchError) {
-      console.error('❌ Errore durante la ricerca utente esistente:', searchError);
+      error('❌ Errore durante la ricerca utente esistente:', searchError);
       
       // Se c'è un errore nella ricerca, procediamo comunque con la creazione
       // L'eventuale duplicato verrà catturato dal database
-      console.log('⚠ Procedo comunque con la creazione utente (gestione errore ricerca)');
+      debug('⚠ Procedo comunque con la creazione utente (gestione errore ricerca)');
     }
     
     if (existingUser) {
-      console.log('❌ Utente già esistente nel database');
-      console.log('📦 REGISTER RESULT - FALLIMENTO:');
-      console.log('  📧 Email:', email);
-      console.log('  👤 Account già esistente: SÌ');
-      console.log('  🆔 User ID esistente:', existingUser.id);
+      debug('❌ Utente già esistente nel database');
+      debug('📦 REGISTER RESULT - FALLIMENTO:');
+      debug('  📧 Email:', email);
+      debug('  👤 Account già esistente: SÌ');
+      debug('  🆔 User ID esistente:', existingUser.id);
       
       return res.status(409).json({
         success: false,
@@ -234,27 +236,27 @@ export default async function handler(req, res) {
       });
     }
     
-    console.log('✅ Email disponibile, procedo con la creazione');
+    debug('✅ Email disponibile, procedo con la creazione');
     
     // 2. Crea nuovo utente
-    console.log('👤 CREAZIONE UTENTE - Salvataggio in Supabase:');
-    console.log('  📧 Email:', email);
-    console.log('  👤 Nome:', name);
-    console.log('  👤 Cognome:', surname || 'NON SPECIFICATO');
-    console.log('  🔐 Password: [HASHATA CON BCRYPT]');
+    debug('👤 CREAZIONE UTENTE - Salvataggio in Supabase:');
+    debug('  📧 Email:', email);
+    debug('  👤 Nome:', name);
+    debug('  👤 Cognome:', surname || 'NON SPECIFICATO');
+    debug('  🔐 Password: [HASHATA CON BCRYPT]');
     
     const newUser = await createUser(email, password, name, surname);
     
-    console.log('✅ Utente creato con successo nel database');
-    console.log('  👤 User ID:', newUser.id);
-    console.log('  👤 Email:', newUser.email);
-    console.log('  👤 Nome:', newUser.name);
-    console.log('  👤 Cognome:', newUser.surname || 'NON SPECIFICATO');
-    console.log('  👤 Ruolo:', newUser.role);
-    console.log('  📅 Creato il:', newUser.created_at);
+    debug('✅ Utente creato con successo nel database');
+    debug('  👤 User ID:', newUser.id);
+    debug('  👤 Email:', newUser.email);
+    debug('  👤 Nome:', newUser.name);
+    debug('  👤 Cognome:', newUser.surname || 'NON SPECIFICATO');
+    debug('  👤 Ruolo:', newUser.role);
+    debug('  📅 Creato il:', newUser.created_at);
     
     // 3. Genera JWT token per login automatico
-    console.log('🎫 Generazione token JWT per login automatico...');
+    debug('🎫 Generazione token JWT per login automatico...');
     const token = generateJWT(newUser.id, newUser.email);
     
     // 4. Salva sessione (opzionale, non bloccante)
@@ -265,14 +267,14 @@ export default async function handler(req, res) {
     // RISPOSTA DI SUCCESSO
     // ================================================================
     
-    console.log('📦 REGISTER RESULT - SUCCESSO:');
-    console.log('  📧 Email salvata:', newUser.email);
-    console.log('  👤 Nome salvato:', newUser.name);
-    console.log('  👤 Cognome salvato:', newUser.surname || 'NON SPECIFICATO');
-    console.log('  🔐 Password hash: SALVATO');
-    console.log('  💾 Persistenza: SÌ (Supabase)');
-    console.log('  🔄 Cross-device: SÌ');
-    console.log('  🎫 Login automatico: SÌ');
+    debug('📦 REGISTER RESULT - SUCCESSO:');
+    debug('  📧 Email salvata:', newUser.email);
+    debug('  👤 Nome salvato:', newUser.name);
+    debug('  👤 Cognome salvato:', newUser.surname || 'NON SPECIFICATO');
+    debug('  🔐 Password hash: SALVATO');
+    debug('  💾 Persistenza: SÌ (Supabase)');
+    debug('  🔄 Cross-device: SÌ');
+    debug('  🎫 Login automatico: SÌ');
     
     const responseData = {
       success: true,
@@ -298,7 +300,7 @@ export default async function handler(req, res) {
       }
     };
     
-    console.log('📝 Registration response preparata:', JSON.stringify(responseData, null, 2));
+    debug('📝 Registration response preparata:', JSON.stringify(responseData, null, 2));
     res.status(201).json(responseData);
     
   } catch (error) {
@@ -306,10 +308,10 @@ export default async function handler(req, res) {
     // GESTIONE ERRORI
     // ================================================================
     
-    console.error('💥 Errore durante il processo di registrazione:', error);
-    console.error('💥 Stack trace:', error.stack);
-    console.error('💥 Error code:', error.code);
-    console.error('💥 Error statusCode:', error.statusCode);
+    error('💥 Errore durante il processo di registrazione:', error);
+    error('💥 Stack trace:', error.stack);
+    error('💥 Error code:', error.code);
+    error('💥 Error statusCode:', error.statusCode);
     
     // Gestione errori specifici
     let errorMessage = 'Errore interno del server durante la registrazione';
@@ -317,7 +319,7 @@ export default async function handler(req, res) {
     
     // Errore di duplicazione email
     if (error.code === 'DUPLICATE_EMAIL' || error.statusCode === 409) {
-      console.log('❌ Rilevato errore di duplicazione email');
+      debug('❌ Rilevato errore di duplicazione email');
       return res.status(409).json({
         success: false,
         message: 'Un account con questa email esiste già. Prova a fare login.',
@@ -334,7 +336,7 @@ export default async function handler(req, res) {
     
     // Altri errori di duplicazione (fallback)
     if (error.message && (error.message.includes('duplicate key') || error.message.includes('already exists'))) {
-      console.log('❌ Rilevato errore di duplicazione (fallback)');
+      debug('❌ Rilevato errore di duplicazione (fallback)');
       return res.status(409).json({
         success: false,
         message: 'Un account con questa email esiste già. Prova a fare login.',
@@ -373,6 +375,6 @@ export default async function handler(req, res) {
     });
   }
   
-  console.log('🔚 Fine processo registrazione - timestamp:', new Date().toISOString());
-  console.log('🟣 ============================================');
+  debug('🔚 Fine processo registrazione - timestamp:', new Date().toISOString());
+  debug('🟣 ============================================');
 } 

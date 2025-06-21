@@ -8,6 +8,9 @@ import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
+// Sistema di logging per ambiente produzione
+const { log, debug, info, warn, error } = require('../logger.js');
+
 // ================================================================
 // CONFIGURAZIONE SUPABASE
 // ================================================================
@@ -28,21 +31,21 @@ function getSupabaseClient() {
     // ================================================================
     // 🟣 FASE 1 - VERIFICA CONNESSIONE BACKEND ↔ DATABASE
     // ================================================================
-    console.log('🟣 ============================================');
-    console.log('🟣 FASE 1 - VERIFICA CONNESSIONE SUPABASE');
-    console.log('🟣 ============================================');
-    console.log("🔑 Supabase URL:", supabaseUrl);
-    console.log("🔑 Supabase KEY (masked):", supabaseServiceKey ? supabaseServiceKey.slice(0, 10) + '...' + supabaseServiceKey.slice(-5) : 'MANCANTE');
-    console.log("🔑 URL Type:", typeof supabaseUrl);
-    console.log("🔑 KEY Type:", typeof supabaseServiceKey);
-    console.log("🔑 URL Length:", supabaseUrl?.length || 0);
-    console.log("🔑 KEY Length:", supabaseServiceKey?.length || 0);
-    console.log("🔍 URL Match Pattern:", supabaseUrl?.includes('supabase.co') ? '✅ VALIDO' : '❌ FORMATO ERRATO');
+    debug('🟣 ============================================');
+    debug('🟣 FASE 1 - VERIFICA CONNESSIONE SUPABASE');
+    debug('🟣 ============================================');
+    debug("🔑 Supabase URL:", supabaseUrl);
+    debug("🔑 Supabase KEY (masked):", supabaseServiceKey ? supabaseServiceKey.slice(0, 10) + '...' + supabaseServiceKey.slice(-5) : 'MANCANTE');
+    debug("🔑 URL Type:", typeof supabaseUrl);
+    debug("🔑 KEY Type:", typeof supabaseServiceKey);
+    debug("🔑 URL Length:", supabaseUrl?.length || 0);
+    debug("🔑 KEY Length:", supabaseServiceKey?.length || 0);
+    debug("🔍 URL Match Pattern:", supabaseUrl?.includes('supabase.co') ? '✅ VALIDO' : '❌ FORMATO ERRATO');
 
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('❌ ERRORE: Variabili ambiente Supabase mancanti');
-      console.error('   SUPABASE_URL:', supabaseUrl ? '✅ Presente' : '❌ Mancante');
-      console.error('   SUPABASE_SERVICE_KEY:', supabaseServiceKey ? '✅ Presente' : '❌ Mancante');
+      error('❌ ERRORE: Variabili ambiente Supabase mancanti');
+      error('   SUPABASE_URL:', supabaseUrl ? '✅ Presente' : '❌ Mancante');
+      error('   SUPABASE_SERVICE_KEY:', supabaseServiceKey ? '✅ Presente' : '❌ Mancante');
       throw new Error('Variabili ambiente Supabase mancanti');
     }
 
@@ -61,11 +64,11 @@ function getSupabaseClient() {
     });
 
     // 🟣 FASE 1 - VERIFICA CLIENT SUPABASE CONFIGURAZIONE
-    console.log("🔍 Client Supabase configurato:");
-    console.log("  - Auth auto refresh:", false);
-    console.log("  - Persist session:", false);
-    console.log("  - Global headers set:", true);
-    console.log("  - Service key in use:", !!supabaseServiceKey);
+    debug("🔍 Client Supabase configurato:");
+    debug("  - Auth auto refresh:", false);
+    debug("  - Persist session:", false);
+    debug("  - Global headers set:", true);
+    debug("  - Service key in use:", !!supabaseServiceKey);
   }
   
   return supabase;
@@ -81,12 +84,12 @@ const JWT_SECRET = process.env.JWT_SECRET || 'mental-commons-secret-key-change-i
 // Hash password con bcrypt
 export async function hashPassword(password) {
   try {
-    console.log('🔐 Hashing password...');
+    debug('🔐 Hashing password...');
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
-    console.log('✅ Password hashata con successo');
+    debug('✅ Password hashata con successo');
     return hash;
   } catch (error) {
-    console.error('❌ Errore hashing password:', error);
+    error('❌ Errore hashing password:', error);
     throw error;
   }
 }
@@ -94,12 +97,12 @@ export async function hashPassword(password) {
 // Verifica password
 export async function verifyPassword(password, hash) {
   try {
-    console.log('🔐 Verificando password...');
+    debug('🔐 Verificando password...');
     const isValid = await bcrypt.compare(password, hash);
-    console.log('🔐 Password valida:', isValid);
+    debug('🔐 Password valida:', isValid);
     return isValid;
   } catch (error) {
-    console.error('❌ Errore verifica password:', error);
+    error('❌ Errore verifica password:', error);
     throw error;
   }
 }
@@ -107,7 +110,7 @@ export async function verifyPassword(password, hash) {
 // Genera JWT token
 export function generateJWT(userId, email) {
   try {
-    console.log('🎫 Generando JWT per utente:', userId);
+    debug('🎫 Generando JWT per utente:', userId);
     const payload = {
       userId,
       email,
@@ -116,10 +119,10 @@ export function generateJWT(userId, email) {
     };
     
     const token = jwt.sign(payload, JWT_SECRET);
-    console.log('✅ JWT generato con successo (scadenza: 30 giorni)');
+    debug('✅ JWT generato con successo (scadenza: 30 giorni)');
     return token;
   } catch (error) {
-    console.error('❌ Errore generazione JWT:', error);
+    error('❌ Errore generazione JWT:', error);
     throw error;
   }
 }
@@ -127,12 +130,12 @@ export function generateJWT(userId, email) {
 // Verifica JWT token
 export function verifyJWT(token) {
   try {
-    console.log('🎫 Verificando JWT...');
+    debug('🎫 Verificando JWT...');
     const decoded = jwt.verify(token, JWT_SECRET);
-    console.log('✅ JWT valido per utente:', decoded.userId);
+    debug('✅ JWT valido per utente:', decoded.userId);
     return decoded;
   } catch (error) {
-    console.error('❌ JWT non valido:', error.message);
+    error('❌ JWT non valido:', error.message);
     return null;
   }
 }
@@ -144,7 +147,7 @@ export function verifyJWT(token) {
 // Recupera tutti gli utenti
 export async function getAllUsers() {
   try {
-    console.log('👥 Recuperando tutti gli utenti dal database...');
+    debug('👥 Recuperando tutti gli utenti dal database...');
     
     const { data, error } = await getSupabaseClient()
       .from('users')
@@ -152,14 +155,14 @@ export async function getAllUsers() {
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.error('❌ Errore recupero utenti:', error);
+      error('❌ Errore recupero utenti:', error);
       throw error;
     }
     
-    console.log('✅ Recuperati', data?.length || 0, 'utenti');
+    debug('✅ Recuperati', data?.length || 0, 'utenti');
     return data || [];
   } catch (error) {
-    console.error('❌ Errore recupero tutti gli utenti:', error);
+    error('❌ Errore recupero tutti gli utenti:', error);
     throw error;
   }
 }
@@ -168,10 +171,10 @@ export async function getAllUsers() {
 export async function findUserByEmail(email) {
   try {
     // 🟣 FASE 2 - TRACCIAMENTO COMPLETO API
-    console.log('🟣 ============================================');
-    console.log('🟣 FASE 2 - TRACCIAMENTO findUserByEmail');
-    console.log('🟣 ============================================');
-    console.log('📥 Input ricevuto:', { email, emailType: typeof email, emailLength: email?.length });
+    debug('🟣 ============================================');
+    debug('🟣 FASE 2 - TRACCIAMENTO findUserByEmail');
+    debug('🟣 ============================================');
+    debug('📥 Input ricevuto:', { email, emailType: typeof email, emailLength: email?.length });
     
     // Query da eseguire
     const queryInfo = {
@@ -180,9 +183,9 @@ export async function findUserByEmail(email) {
       filter: { email: email },
       operation: 'SELECT'
     };
-    console.log('📤 Query generata:', JSON.stringify(queryInfo, null, 2));
+    debug('📤 Query generata:', JSON.stringify(queryInfo, null, 2));
     
-    console.log('👤 Ricerca utente per email:', email);
+    debug('👤 Ricerca utente per email:', email);
     
     // Prima prova con .single() per ottenere un solo risultato
     const { data, error } = await getSupabaseClient()
@@ -192,36 +195,36 @@ export async function findUserByEmail(email) {
       .maybeSingle(); // Usa maybeSingle() invece di single() per evitare errori quando non trova nulla
     
     // Log del risultato completo
-    console.log('📥 Query result RAW:', { data, error });
-    console.log('📊 Risultato analisi:'); 
-    console.log('  - Data presente:', !!data);
-    console.log('  - Error presente:', !!error);
-    console.log('  - Error code:', error?.code);
-    console.log('  - Error message:', error?.message);
-    console.log('  - Error details:', error?.details);
+    debug('📥 Query result RAW:', { data, error });
+    debug('📊 Risultato analisi:'); 
+    debug('  - Data presente:', !!data);
+    debug('  - Error presente:', !!error);
+    debug('  - Error code:', error?.code);
+    debug('  - Error message:', error?.message);
+    debug('  - Error details:', error?.details);
     
     if (error) {
-      console.log('⚠ Query error completo:', JSON.stringify(error, null, 2));
+      debug('⚠ Query error completo:', JSON.stringify(error, null, 2));
       // Con maybeSingle(), non dovremmo avere errori PGRST116
-      console.error('❌ Errore inaspettato nella ricerca utente:', error);
+      error('❌ Errore inaspettato nella ricerca utente:', error);
       throw error;
     }
     
     if (data) {
-      console.log('✅ Utente trovato:', data.id);
-      console.log('📊 Dati utente trovati:', JSON.stringify({ ...data, password_hash: '[HIDDEN]' }, null, 2));
+      debug('✅ Utente trovato:', data.id);
+      debug('📊 Dati utente trovati:', JSON.stringify({ ...data, password_hash: '[HIDDEN]' }, null, 2));
       return data;
     } else {
-      console.log('👤 Utente non trovato per email:', email);
+      debug('👤 Utente non trovato per email:', email);
       return null;
     }
   } catch (error) {
-    console.error('❌ Errore ricerca utente completo:', JSON.stringify(error, null, 2));
+    error('❌ Errore ricerca utente completo:', JSON.stringify(error, null, 2));
     
     // Se l'errore è di connessione o configurazione, rilancialo
     // Se è un errore di "not found", restituisci null
     if (error.code === 'PGRST116' || error.message?.includes('No rows')) {
-      console.log('👤 Utente non trovato (errore catch)');
+      debug('👤 Utente non trovato (errore catch)');
       return null;
     }
     
@@ -233,10 +236,10 @@ export async function findUserByEmail(email) {
 export async function createUser(email, password, name, surname = null) {
   try {
     // 🟣 FASE 2 - TRACCIAMENTO COMPLETO API
-    console.log('🟣 ============================================');
-    console.log('🟣 FASE 2 - TRACCIAMENTO createUser');
-    console.log('🟣 ============================================');
-    console.log('📥 Input ricevuto:', { 
+    debug('🟣 ============================================');
+    debug('🟣 FASE 2 - TRACCIAMENTO createUser');
+    debug('🟣 ============================================');
+    debug('📥 Input ricevuto:', { 
       email, 
       name,
       surname,
@@ -247,7 +250,7 @@ export async function createUser(email, password, name, surname = null) {
       passwordLength: password?.length 
     });
     
-    console.log('👤 Creando nuovo utente:', email);
+    debug('👤 Creando nuovo utente:', email);
     
     // Hash password
     const passwordHash = await hashPassword(password);
@@ -262,10 +265,10 @@ export async function createUser(email, password, name, surname = null) {
       is_active: true
     };
     
-    console.log('📤 Query INSERT da eseguire:');
-    console.log('  - Table: users');
-    console.log('  - Operation: INSERT');
-    console.log('  - Data:', JSON.stringify({ ...insertData, password_hash: '[HIDDEN]' }, null, 2));
+    debug('📤 Query INSERT da eseguire:');
+    debug('  - Table: users');
+    debug('  - Operation: INSERT');
+    debug('  - Data:', JSON.stringify({ ...insertData, password_hash: '[HIDDEN]' }, null, 2));
     
     // Inserisci utente
     const { data, error } = await getSupabaseClient()
@@ -275,21 +278,21 @@ export async function createUser(email, password, name, surname = null) {
       .single();
     
     // Log del risultato completo
-    console.log('📥 Query INSERT result RAW:', { data: data ? '[USER_DATA]' : null, error });
-    console.log('📊 Risultato analisi:'); 
-    console.log('  - Data presente:', !!data);
-    console.log('  - Error presente:', !!error);
-    console.log('  - Error code:', error?.code);
-    console.log('  - Error message:', error?.message);
-    console.log('  - Error details:', error?.details);
-    console.log('  - Error hint:', error?.hint);
+    debug('📥 Query INSERT result RAW:', { data: data ? '[USER_DATA]' : null, error });
+    debug('📊 Risultato analisi:'); 
+    debug('  - Data presente:', !!data);
+    debug('  - Error presente:', !!error);
+    debug('  - Error code:', error?.code);
+    debug('  - Error message:', error?.message);
+    debug('  - Error details:', error?.details);
+    debug('  - Error hint:', error?.hint);
     
     if (error) {
-      console.error('❌ Errore creazione utente completo:', JSON.stringify(error, null, 2));
+      error('❌ Errore creazione utente completo:', JSON.stringify(error, null, 2));
       
       // Gestione specifica per errori di duplicazione
       if (error.code === '23505' || error.message?.includes('duplicate key') || error.message?.includes('already exists')) {
-        console.error('❌ ERRORE DUPLICAZIONE: Utente con questa email già esiste');
+        error('❌ ERRORE DUPLICAZIONE: Utente con questa email già esiste');
         const duplicateError = new Error('Un account con questa email esiste già');
         duplicateError.code = 'DUPLICATE_EMAIL';
         duplicateError.statusCode = 409;
@@ -299,11 +302,11 @@ export async function createUser(email, password, name, surname = null) {
       throw error;
     }
     
-    console.log('✅ Utente creato con successo:', data.id);
-    console.log('📊 Dati utente creato:', JSON.stringify({ ...data, password_hash: '[HIDDEN]' }, null, 2));
+    debug('✅ Utente creato con successo:', data.id);
+    debug('📊 Dati utente creato:', JSON.stringify({ ...data, password_hash: '[HIDDEN]' }, null, 2));
     return data;
   } catch (error) {
-    console.error('❌ Errore creazione utente completo:', JSON.stringify(error, null, 2));
+    error('❌ Errore creazione utente completo:', JSON.stringify(error, null, 2));
     
     // Rilanciare l'errore così com'è per mantenere le informazioni
     throw error;
@@ -313,7 +316,7 @@ export async function createUser(email, password, name, surname = null) {
 // Aggiorna ultimo login
 export async function updateLastLogin(userId) {
   try {
-    console.log('👤 Aggiornando ultimo login per:', userId);
+    debug('👤 Aggiornando ultimo login per:', userId);
     
     const { error } = await getSupabaseClient()
       .from('users')
@@ -321,9 +324,9 @@ export async function updateLastLogin(userId) {
       .eq('id', userId);
     
     if (error) throw error;
-    console.log('✅ Ultimo login aggiornato');
+    debug('✅ Ultimo login aggiornato');
   } catch (error) {
-    console.error('❌ Errore aggiornamento login:', error);
+    error('❌ Errore aggiornamento login:', error);
     // Non bloccare il login per questo errore
   }
 }
@@ -331,7 +334,7 @@ export async function updateLastLogin(userId) {
 // Aggiorna profilo utente (nome e cognome)
 export async function updateUserProfile(userId, name, surname = null) {
   try {
-    console.log('👤 Aggiornando profilo utente:', { userId, name, surname: surname || 'NON SPECIFICATO' });
+    debug('👤 Aggiornando profilo utente:', { userId, name, surname: surname || 'NON SPECIFICATO' });
     
     const updateData = {
       name: name.trim(),
@@ -339,7 +342,7 @@ export async function updateUserProfile(userId, name, surname = null) {
       updated_at: new Date().toISOString()
     };
     
-    console.log('📤 Dati aggiornamento profilo:', JSON.stringify(updateData, null, 2));
+    debug('📤 Dati aggiornamento profilo:', JSON.stringify(updateData, null, 2));
     
     const { data, error } = await getSupabaseClient()
       .from('users')
@@ -349,15 +352,15 @@ export async function updateUserProfile(userId, name, surname = null) {
       .single();
     
     if (error) {
-      console.error('❌ Errore aggiornamento profilo:', error);
+      error('❌ Errore aggiornamento profilo:', error);
       throw error;
     }
     
-    console.log('✅ Profilo utente aggiornato con successo');
-    console.log('📊 Dati utente aggiornato:', JSON.stringify({ ...data, password_hash: '[HIDDEN]' }, null, 2));
+    debug('✅ Profilo utente aggiornato con successo');
+    debug('📊 Dati utente aggiornato:', JSON.stringify({ ...data, password_hash: '[HIDDEN]' }, null, 2));
     return data;
   } catch (error) {
-    console.error('❌ Errore aggiornamento profilo utente:', error);
+    error('❌ Errore aggiornamento profilo utente:', error);
     throw error;
   }
 }
@@ -369,9 +372,9 @@ export async function updateUserProfile(userId, name, surname = null) {
 // Salva nuova UCMe
 export async function saveUCMe(userId, content, title = null) {
   try {
-    console.log('📝 Salvando nuova UCMe per utente:', userId);
-    console.log('📝 Contenuto length:', content?.length);
-    console.log('📝 Titolo:', title);
+    debug('📝 Salvando nuova UCMe per utente:', userId);
+    debug('📝 Contenuto length:', content?.length);
+    debug('📝 Titolo:', title);
     
     // 🟣 FASE 2 - LOGGING PAYLOAD DETTAGLIATO UCMe
     const insertPayload = {
@@ -381,9 +384,9 @@ export async function saveUCMe(userId, content, title = null) {
       status: 'attesa'
     };
     
-    console.log('📤 Supabase UCMe insert payload:', insertPayload);
-    console.log('📤 Query target table: ucmes');
-    console.log('📤 Query type: INSERT');
+    debug('📤 Supabase UCMe insert payload:', insertPayload);
+    debug('📤 Query target table: ucmes');
+    debug('📤 Query type: INSERT');
     
     const { data, error } = await getSupabaseClient()
       .from('ucmes')
@@ -391,22 +394,22 @@ export async function saveUCMe(userId, content, title = null) {
       .select()
       .single();
     
-    console.log('📥 Supabase UCMe insert result:', data);
-    console.log('⚠ Supabase UCMe insert error:', error);
+    debug('📥 Supabase UCMe insert result:', data);
+    debug('⚠ Supabase UCMe insert error:', error);
     
     if (error) {
-      console.error('❌ DETTAGLIO ERRORE SUPABASE UCMe:');
-      console.error('   Codice:', error.code);
-      console.error('   Messaggio:', error.message);
-      console.error('   Dettagli:', error.details);
-      console.error('   Hint:', error.hint);
+      error('❌ DETTAGLIO ERRORE SUPABASE UCMe:');
+      error('   Codice:', error.code);
+      error('   Messaggio:', error.message);
+      error('   Dettagli:', error.details);
+      error('   Hint:', error.hint);
       throw error;
     }
     
-    console.log('✅ UCMe salvata con successo:', data.id);
+    debug('✅ UCMe salvata con successo:', data.id);
     return data;
   } catch (error) {
-    console.error('❌ Errore salvataggio UCMe:', error);
+    error('❌ Errore salvataggio UCMe:', error);
     throw error;
   }
 }
@@ -414,7 +417,7 @@ export async function saveUCMe(userId, content, title = null) {
 // Recupera UCMe di un utente
 export async function getUserUCMes(userId) {
   try {
-    console.log('📝 Recuperando UCMe per utente:', userId);
+    debug('📝 Recuperando UCMe per utente:', userId);
     
     const { data, error } = await getSupabaseClient()
       .from('ucmes')
@@ -423,14 +426,14 @@ export async function getUserUCMes(userId) {
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.error('❌ Errore recupero UCMe:', error);
+      error('❌ Errore recupero UCMe:', error);
       throw error;
     }
     
-    console.log('✅ UCMe recuperate:', data?.length || 0);
+    debug('✅ UCMe recuperate:', data?.length || 0);
     return data || [];
   } catch (error) {
-    console.error('❌ Errore recupero UCMe:', error);
+    error('❌ Errore recupero UCMe:', error);
     throw error;
   }
 }
@@ -442,7 +445,7 @@ export async function getUserUCMes(userId) {
 // Salva sessione token
 export async function saveUserSession(userId, token, deviceInfo = null) {
   try {
-    console.log('🎫 Salvando sessione per utente:', userId);
+    debug('🎫 Salvando sessione per utente:', userId);
     
     // Hash del token per sicurezza
     const tokenHash = await bcrypt.hash(token, 5);
@@ -460,10 +463,10 @@ export async function saveUserSession(userId, token, deviceInfo = null) {
     
     if (error) throw error;
     
-    console.log('✅ Sessione salvata:', data.id);
+    debug('✅ Sessione salvata:', data.id);
     return data;
   } catch (error) {
-    console.error('❌ Errore salvataggio sessione:', error);
+    error('❌ Errore salvataggio sessione:', error);
     // Non bloccare il login per questo errore
   }
 }
@@ -475,7 +478,7 @@ export async function saveUserSession(userId, token, deviceInfo = null) {
 // Test connessione database
 export async function testDatabaseConnection() {
   try {
-    console.log('🔍 Test connessione database...');
+    debug('🔍 Test connessione database...');
     
     const { data, error } = await getSupabaseClient()
       .from('users')
@@ -483,14 +486,14 @@ export async function testDatabaseConnection() {
       .limit(1);
     
     if (error) {
-      console.error('❌ Connessione database fallita:', error);
+      error('❌ Connessione database fallita:', error);
       return false;
     }
     
-    console.log('✅ Connessione database OK');
+    debug('✅ Connessione database OK');
     return true;
   } catch (error) {
-    console.error('❌ Errore test connessione:', error);
+    error('❌ Errore test connessione:', error);
     return false;
   }
 }
@@ -500,10 +503,10 @@ export function logConfiguration() {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
   
-  console.log('🔧 CONFIGURAZIONE SUPABASE:');
-  console.log('   URL:', supabaseUrl ? '✅ Configurato' : '❌ Mancante');
-  console.log('   Service Key:', supabaseServiceKey ? '✅ Configurato' : '❌ Mancante');
-  console.log('   JWT Secret:', JWT_SECRET !== 'mental-commons-secret-key-change-in-production' ? '✅ Personalizzato' : '⚠️ Default');
+  debug('🔧 CONFIGURAZIONE SUPABASE:');
+  debug('   URL:', supabaseUrl ? '✅ Configurato' : '❌ Mancante');
+  debug('   Service Key:', supabaseServiceKey ? '✅ Configurato' : '❌ Mancante');
+  debug('   JWT Secret:', JWT_SECRET !== 'mental-commons-secret-key-change-in-production' ? '✅ Personalizzato' : '⚠️ Default');
 }
 
 // ================================================================
@@ -512,29 +515,29 @@ export function logConfiguration() {
 
 export async function testRLSPolicies() {
   try {
-    console.log('🟣 ============================================');
-    console.log('🟣 FASE 4 - TEST RLS E PERMESSI');
-    console.log('🟣 ============================================');
+    debug('🟣 ============================================');
+    debug('🟣 FASE 4 - TEST RLS E PERMESSI');
+    debug('🟣 ============================================');
     
     // Test 1: Verifica connessione con service key
-    console.log('🔍 Test 1: Verifica connessione service key...');
+    debug('🔍 Test 1: Verifica connessione service key...');
     const { data: testSelect, error: testError } = await getSupabaseClient()
       .from('users')
       .select('*', { count: 'exact' })
       .limit(1);
     
-    console.log('📊 Service key test result:');
-    console.log('  - Query eseguita:', 'SELECT count(*) FROM users LIMIT 1');
-    console.log('  - Dati ricevuti:', !!testSelect);
-    console.log('  - Errore presente:', !!testError);
-    console.log('  - Errore dettaglio:', testError ? JSON.stringify(testError, null, 2) : 'Nessuno');
+    debug('📊 Service key test result:');
+    debug('  - Query eseguita:', 'SELECT count(*) FROM users LIMIT 1');
+    debug('  - Dati ricevuti:', !!testSelect);
+    debug('  - Errore presente:', !!testError);
+    debug('  - Errore dettaglio:', testError ? JSON.stringify(testError, null, 2) : 'Nessuno');
     
     // Test 2: Verifica RLS status sulle tabelle principali
     const tables = ['users', 'ucmes', 'user_sessions'];
     const rlsTests = {};
     
     for (const table of tables) {
-      console.log(`🔍 Test RLS per tabella: ${table}`);
+      debug(`🔍 Test RLS per tabella: ${table}`);
       const testResult = await checkRLSBlocking(table, 'SELECT');
       rlsTests[table] = testResult;
     }
@@ -547,7 +550,7 @@ export async function testRLSPolicies() {
       }
     };
   } catch (error) {
-    console.error('❌ Errore test RLS completo:', JSON.stringify(error, null, 2));
+    error('❌ Errore test RLS completo:', JSON.stringify(error, null, 2));
     return {
       serviceKeyWorking: false,
       rlsTests: {},
@@ -559,7 +562,7 @@ export async function testRLSPolicies() {
 // Funzione helper per verificare se una query è bloccata da RLS
 export async function checkRLSBlocking(tableName, operation = 'SELECT') {
   try {
-    console.log(`🔍 Verifica RLS blocking per ${tableName} (${operation})...`);
+    debug(`🔍 Verifica RLS blocking per ${tableName} (${operation})...`);
     
     let query;
     switch (operation.toUpperCase()) {
@@ -583,12 +586,12 @@ export async function checkRLSBlocking(tableName, operation = 'SELECT') {
       error.code === 'PGRST301'
     );
     
-    console.log(`📊 RLS Check ${tableName}:${operation}:`);
-    console.log('  - Query eseguita:', !!data || !!error);
-    console.log('  - Bloccata da RLS:', isBlocked);
-    console.log('  - Errore RLS:', isBlocked ? error.message : 'No');
-    console.log('  - Dati ricevuti:', !!data);
-    console.log('  - Errore completo:', error ? JSON.stringify(error, null, 2) : 'Nessuno');
+    debug(`📊 RLS Check ${tableName}:${operation}:`);
+    debug('  - Query eseguita:', !!data || !!error);
+    debug('  - Bloccata da RLS:', isBlocked);
+    debug('  - Errore RLS:', isBlocked ? error.message : 'No');
+    debug('  - Dati ricevuti:', !!data);
+    debug('  - Errore completo:', error ? JSON.stringify(error, null, 2) : 'Nessuno');
     
     return {
       table: tableName,
@@ -598,7 +601,7 @@ export async function checkRLSBlocking(tableName, operation = 'SELECT') {
       hasData: !!data
     };
   } catch (error) {
-    console.error(`❌ Errore check RLS per ${tableName}:`, error);
+    error(`❌ Errore check RLS per ${tableName}:`, error);
     return {
       table: tableName,
       operation,

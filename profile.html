@@ -21,7 +21,7 @@
         (function() {
             'use strict';
             const startTime = performance.now();
-            console.log('🚀 [AUTH-IMMEDIATE] Controllo auth immediato avviato (PROFILE)', { timestamp: startTime });
+            debug('🚀 [AUTH-IMMEDIATE] Controllo auth immediato avviato (PROFILE)', { timestamp: startTime });
             
             // 1. Controllo sincrono del token
             try {
@@ -41,21 +41,21 @@
                         if (!isExpired) {
                             authUser = JSON.parse(userJson);
                             isAuthenticated = true;
-                            console.log('✅ [AUTH-IMMEDIATE] Token valido trovato (PROFILE)', { email: authUser.email });
+                            debug('✅ [AUTH-IMMEDIATE] Token valido trovato (PROFILE)', { email: authUser.email });
                         } else {
-                            console.log('⏰ [AUTH-IMMEDIATE] Token scaduto, pulizia e redirect');
+                            debug('⏰ [AUTH-IMMEDIATE] Token scaduto, pulizia e redirect');
                             localStorage.removeItem('mental_commons_token');
                             localStorage.removeItem('mental_commons_user');
                             // Redirect a login per pagina protetta
-                            console.log('🔄 [AUTH-IMMEDIATE] Redirect a login...');
+                            debug('🔄 [AUTH-IMMEDIATE] Redirect a login...');
                             window.location.href = '/login.html';
                             return;
                         }
                     } catch (e) {
-                        console.warn('⚠️ [AUTH-IMMEDIATE] Errore parsing token:', e.message);
+                        warn('⚠️ [AUTH-IMMEDIATE] Errore parsing token:', e.message);
                         localStorage.removeItem('mental_commons_token');
                         localStorage.removeItem('mental_commons_user');
-                        console.log('🔄 [AUTH-IMMEDIATE] Redirect a login per errore token...');
+                        debug('🔄 [AUTH-IMMEDIATE] Redirect a login per errore token...');
                         window.location.href = '/login.html';
                         return;
                     }
@@ -63,7 +63,7 @@
                 
                 // 2. Profile richiede autenticazione
                 if (!isAuthenticated) {
-                    console.log('❌ [AUTH-IMMEDIATE] Accesso non autorizzato a profile, redirect');
+                    debug('❌ [AUTH-IMMEDIATE] Accesso non autorizzato a profile, redirect');
                     window.location.href = '/login.html';
                     return;
                 }
@@ -82,10 +82,10 @@
                 };
                 
                 const endTime = performance.now();
-                console.log('✅ [AUTH-IMMEDIATE] Profile autorizzato in', (endTime - startTime).toFixed(2), 'ms');
+                debug('✅ [AUTH-IMMEDIATE] Profile autorizzato in', (endTime - startTime).toFixed(2), 'ms');
                 
             } catch (error) {
-                console.error('❌ [AUTH-IMMEDIATE] Errore critico profile:', error);
+                error('❌ [AUTH-IMMEDIATE] Errore critico profile:', error);
                 
                 // Fallback: redirect a login
                 window.location.href = '/login.html';

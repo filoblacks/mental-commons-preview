@@ -1,4 +1,6 @@
 // ================================================================
+// Sistema di logging per ambiente produzione
+const { log, debug, info, warn, error } = require("../logger.js");
 // MENTAL COMMONS - PING API CON TEST COMPLETI
 // ================================================================
 // Versione: 3.0.0
@@ -16,12 +18,12 @@ export default async function handler(req, res) {
   // LOGGING INIZIALE E CONFIGURAZIONE
   // ================================================================
   
-  console.log('🟣 ============================================');
-  console.log('🟣 MENTAL COMMONS - PING API v3.0 CON TEST');
-  console.log('🟣 ============================================');
-  console.log('📡 Timestamp:', new Date().toISOString());
-  console.log('📡 Method:', req.method);
-  console.log('📡 User-Agent:', req.headers['user-agent']);
+  debug('🟣 ============================================');
+  debug('🟣 MENTAL COMMONS - PING API v3.0 CON TEST');
+  debug('🟣 ============================================');
+  debug('📡 Timestamp:', new Date().toISOString());
+  debug('📡 Method:', req.method);
+  debug('📡 User-Agent:', req.headers['user-agent']);
   
   // ================================================================
   // GESTIONE CORS
@@ -32,7 +34,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   
   if (req.method === 'OPTIONS') {
-    console.log('📡 Risposta CORS OPTIONS inviata');
+    debug('📡 Risposta CORS OPTIONS inviata');
     res.status(200).end();
     return;
   }
@@ -53,7 +55,7 @@ export default async function handler(req, res) {
   
   try {
     // 🟣 FASE 1 - Verifica configurazione
-    console.log('📡 Esecuzione FASE 1 - Configurazione...');
+    debug('📡 Esecuzione FASE 1 - Configurazione...');
     logConfiguration(); // Questo logga automaticamente
     testResults.fase1_configurazione = {
       supabaseUrl: !!process.env.SUPABASE_URL,
@@ -63,7 +65,7 @@ export default async function handler(req, res) {
     };
     
     // 🟣 FASE 2 - Test connessione database
-    console.log('📡 Esecuzione FASE 2 - Connessione database...');
+    debug('📡 Esecuzione FASE 2 - Connessione database...');
     const dbConnection = await testDatabaseConnection();
     testResults.fase2_connessione = {
       connected: dbConnection,
@@ -71,7 +73,7 @@ export default async function handler(req, res) {
     };
     
     // 🟣 FASE 4 - Test RLS e permessi
-    console.log('📡 Esecuzione FASE 4 - RLS e permessi...');
+    debug('📡 Esecuzione FASE 4 - RLS e permessi...');
     const rlsResults = await testRLSPolicies();
     testResults.fase4_rls = rlsResults;
     
@@ -89,13 +91,13 @@ export default async function handler(req, res) {
       readyForProduction: allTestsPassed
     };
     
-    console.log('📡 ============================================');
-    console.log('📡 RISULTATI TEST COMPLETI:');
-    console.log('   - Configurazione OK:', testResults.fase1_configurazione.supabaseUrl && testResults.fase1_configurazione.supabaseServiceKey);
-    console.log('   - Connessione DB OK:', testResults.fase2_connessione.connected);
-    console.log('   - Service Key OK:', testResults.fase4_rls.serviceKeyWorking);
-    console.log('   - Tutti i test OK:', allTestsPassed);
-    console.log('📡 ============================================');
+    debug('📡 ============================================');
+    debug('📡 RISULTATI TEST COMPLETI:');
+    debug('   - Configurazione OK:', testResults.fase1_configurazione.supabaseUrl && testResults.fase1_configurazione.supabaseServiceKey);
+    debug('   - Connessione DB OK:', testResults.fase2_connessione.connected);
+    debug('   - Service Key OK:', testResults.fase4_rls.serviceKeyWorking);
+    debug('   - Tutti i test OK:', allTestsPassed);
+    debug('📡 ============================================');
     
     // Risposta HTTP
     res.status(200).json({
@@ -107,7 +109,7 @@ export default async function handler(req, res) {
     });
     
   } catch (error) {
-    console.error('❌ Errore durante test ping:', error);
+    error('❌ Errore durante test ping:', error);
     
     testResults.summary = {
       allTestsPassed: false,

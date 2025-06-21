@@ -322,35 +322,234 @@ console.log('Response body:', responseData);
 - Cleanup automatico token scaduti
 - Gestione sicura delle credenziali
 
+---
+
+# Fix Payload UCMe - Errore 400 Bad Request
+
+## 📋 Problema Identificato
+Dopo aver risolto l'errore 401, l'invio delle UCMe falliva con errore 400 (Bad Request) perché il **payload inviato non corrispondeva al formato atteso dal backend**.
+
+## 🔍 Diagnosi Dettagliata
+
+### Problemi Trovati:
+1. **Campo sbagliato**: Il client inviava `text` ma il backend si aspettava `content`
+2. **Formato payload non corretto**: Troppi metadati non necessari nel body della richiesta
+3. **Validazione insufficiente**: Mancava validazione lato client prima dell'invio
+4. **Logging payload inadeguato**: Non era chiaro cosa veniva effettivamente inviato
+
+### Schema Backend Atteso:
+```javascript
+// Il backend API /api/ucme si aspetta:
+{
+  "content": "string (20-600 caratteri)",  // Campo obbligatorio
+  "title": "string o null"                 // Campo opzionale
+}
+```
+
+### Schema Client Originale (ERRATO):
+```javascript
+// Il client inviava erroneamente:
+{
+  "text": "contenuto",        // ❌ Campo sbagliato
+  "email": "...",            // ❌ Non necessario nel body
+  "metadata": { ... },       // ❌ Troppi dati non richiesti
+  // ... altri campi non necessari
+}
+```
+
+## 🛠 Soluzione Implementata
+
+### 1. Correzione Formato Payload
+**Funzione `collectFormData()` Aggiornata:**
+```javascript
+function collectFormData() {
+    // ... validazione ...
+    
+    // Costruisci il payload nel formato atteso dal backend
+    const backendPayload = {
+        content: ucmeText,  // ✅ Backend si aspetta 'content', non 'text'
+        title: null,        // ✅ Campo opzionale, per ora null
+        
+        // Metadati aggiuntivi per completezza (ma non inviati al backend)
+        tone: tone.value,
+        userEmail: userEmail,
+        portatore: portatore ? portatore.checked : false,
+        acceptance: acceptance.checked
+    };
+    
+    return fullPayload; // Include sia backend che metadati interni
+}
+```
+
+### 2. Funzione Invio Migliorata
+**Funzione `submitUCMeToVercel()` Aggiornata:**
+```javascript
+async function submitUCMeToVercel(formData) {
+    // FASE 2: VALIDAZIONE E PREPARAZIONE PAYLOAD
+    
+    // Estrai solo i campi richiesti dal backend
+    const backendPayload = {
+        content: formData.content, // Campo richiesto dal backend
+        title: formData.title || null // Campo opzionale
+    };
+    
+    // Validazione payload prima dell'invio
+    if (!backendPayload.content) {
+        throw new Error('Contenuto della UCMe mancante');
+    }
+    
+    // Log del payload che sarà inviato (RICHIESTO DALL'UTENTE)
+    console.log('📦 Payload UCMe inviato:', JSON.stringify(backendPayload));
+    
+    const requestBody = JSON.stringify(backendPayload);
+    // ... resto della funzione
+}
+```
+
+### 3. Validazione Pre-Invio Robusta
+**Aggiunta in `handleFormSubmission()`:**
+```javascript
+// FASE 1: VALIDAZIONE FORM LATO CLIENT
+console.log('🔍 FASE 1: Validazione form lato client...');
+
+// Validazione specifica del contenuto UCMe
+const ucmeText = ucmeTextElement.value.trim();
+
+if (!ucmeText) {
+    throw new Error('Il contenuto della UCMe è richiesto');
+}
+
+if (ucmeText.length < 20) {
+    throw new Error('Il contenuto deve essere di almeno 20 caratteri');
+}
+
+if (ucmeText.length > 600) {
+    throw new Error('Il contenuto non può superare i 600 caratteri');
+}
+```
+
+### 4. Logging Dettagliato Implementato
+**Come richiesto dall'utente:**
+```javascript
+// LOG DETTAGLIATO RICHIESTO DALL'UTENTE
+console.log('📋 Headers UCMe inviati:', headers);
+console.log('📦 Payload UCMe inviato:', requestBody);
+
+// Gestione speciale per errore 400 Bad Request
+if (response.status === 400) {
+    console.error('🚫 ERRORE 400 - BAD REQUEST');
+    console.error('   Payload inviato:', requestBody);
+    console.error('   Headers inviati:', headers);
+    
+    // LOG DETTAGLIATO RICHIESTO DALL'UTENTE
+    console.log('Response status + body:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorDetails
+    });
+}
+```
+
+### 5. Test Migliorato
+**Aggiornato `test-register-fix.html`:**
+- ✅ Intercettazione richieste per analisi payload
+- ✅ Validazione formato prima dell'invio
+- ✅ Confronto payload inviato vs atteso
+- ✅ Diagnostica errori avanzata
+
+## 📊 Logging Diagnostico Completo
+
+### Log Implementati (richiesti dall'utente):
+```javascript
+console.log("Payload UCMe inviato:", JSON.stringify(body));
+console.log("Headers UCMe inviati:", headers);
+console.log("Response status + body:", {status, body});
+```
+
+### Fasi di Logging:
+1. **📝 FASE 2: Validazione e Preparazione Payload**
+   - Controllo formato dati raccolti
+   - Validazione campi obbligatori
+   - Costruzione payload backend-compatible
+
+2. **📤 FASE 3: Preparazione Richiesta HTTP**
+   - Log headers completi
+   - Log payload finale che sarà inviato
+   - Validazione formato JSON
+
+3. **📨 Response Monitoring**
+   - Status code ricevuto
+   - Headers response
+   - Body response completo
+
+## 🎯 Risultati Ottenuti
+
+### ✅ Problema 400 Risolto:
+- Payload ora nel formato corretto atteso dal backend
+- Campo `content` invece di `text`
+- Rimozione metadati non necessari dal body
+
+### ✅ Validazione Robusta:
+- Controllo lunghezza contenuto (20-600 caratteri)
+- Validazione tipo dati
+- Blocco invio se dati non validi
+
+### ✅ Debugging Avanzato:
+- Log completo payload inviato
+- Intercettazione richieste nel test
+- Analisi formato dati in tempo reale
+
+### ✅ UX Migliorata:
+- Messaggi di errore specifici per problemi payload
+- Validazione lato client prima dell'invio
+- Feedback chiaro su cosa non va nei dati
+
 ## 🧪 Come Testare
 
 1. **Apri**: `test-register-fix.html`
-2. **Testa Autenticazione**: Verifica stato auth e fai login
-3. **Testa Invio UCMe**: Prova invio con e senza autenticazione
-4. **Analizza Log**: Esporta log per analisi dettagliata
+2. **Fai Login**: Con credenziali di test
+3. **Inserisci UCMe**: Testo di almeno 20 caratteri
+4. **Testa Invio**: Controlla log per payload intercettato
+5. **Verifica Formato**: Assicurati che venga inviato `content` e non `text`
 
 ## 🔄 Compatibilità
 
-Il fix è **retrocompatibile** e non richiede modifiche ai dati esistenti:
-- ✅ Mantiene funzionalità esistenti
-- ✅ Fallback graceful per browser non supportati
-- ✅ Nessuna migrazione dati richiesta
+### Prima del Fix:
+```javascript
+// ❌ FORMATO ERRATO
+{
+  "text": "contenuto ucme",
+  "email": "user@email.com",
+  "tone": "neutro",
+  "metadata": { ... }
+}
+```
+
+### Dopo il Fix:
+```javascript
+// ✅ FORMATO CORRETTO
+{
+  "content": "contenuto ucme",
+  "title": null
+}
+```
 
 ## 📈 Monitoraggio
 
-Per monitorare il corretto funzionamento:
-- Controlla i log della console per messaggi di errore 401
-- Verifica che gli utenti riescano a inviare UCMe senza problemi
-- Monitora il tasso di successo delle operazioni UCMe
+Per verificare il corretto funzionamento:
+- Controlla che non ci siano più errori 400 nei log
+- Verifica che il backend riceva il campo `content`
+- Monitora il tasso di successo degli invii UCMe
 
 ---
 
 ## 🎉 Conclusione
 
 Il sistema ora garantisce:
-- **🔒 Autenticazione robusta** per tutte le operazioni UCMe
+- **🔒 Autenticazione robusta** per tutte le operazioni UCMe (Fix 401)
+- **📦 Payload corretto** che rispetta il formato backend (Fix 400)
 - **📊 Logging dettagliato** per debugging e monitoraggio  
 - **👤 UX migliorata** con messaggi chiari e gestione automatica errori
 - **🧪 Testing completo** per validazione continuativa
 
-Il problema dell'errore 401 è **definitivamente risolto** con una soluzione scalabile e mantenibile. 
+**Gli errori 401 e 400 sono definitivamente risolti** con una soluzione scalabile e mantenibile. 

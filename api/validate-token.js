@@ -1,4 +1,6 @@
 // ================================================================
+// Sistema di logging per ambiente produzione
+const { log, debug, info, warn, error } = require("../logger.js");
 // MENTAL COMMONS - TOKEN VALIDATION API
 // ================================================================
 // Versione: 1.0.0
@@ -7,9 +9,9 @@
 import { verifyJWT } from './supabase.js';
 
 export default async function handler(req, res) {
-  console.log('🔐 ============================================');
-  console.log('🔐 MENTAL COMMONS - TOKEN VALIDATION API');
-  console.log('🔐 ============================================');
+  debug('🔐 ============================================');
+  debug('🔐 MENTAL COMMONS - TOKEN VALIDATION API');
+  debug('🔐 ============================================');
   
   // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,13 +19,13 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
   if (req.method === 'OPTIONS') {
-    console.log('🔐 Risposta CORS OPTIONS inviata');
+    debug('🔐 Risposta CORS OPTIONS inviata');
     res.status(200).end();
     return;
   }
   
   if (req.method !== 'POST') {
-    console.log('❌ Metodo non valido:', req.method);
+    debug('❌ Metodo non valido:', req.method);
     return res.status(405).json({
       success: false,
       message: 'Metodo non consentito. Utilizzare POST.'
@@ -38,7 +40,7 @@ export default async function handler(req, res) {
     }
     
     if (!token) {
-      console.log('❌ Token mancante');
+      debug('❌ Token mancante');
       return res.status(400).json({
         success: false,
         valid: false,
@@ -46,13 +48,13 @@ export default async function handler(req, res) {
       });
     }
     
-    console.log('🎫 Validando token...');
+    debug('🎫 Validando token...');
     
     // Verifica token con la funzione di supabase.js
     const decoded = verifyJWT(token);
     
     if (!decoded) {
-      console.log('❌ Token non valido o scaduto');
+      debug('❌ Token non valido o scaduto');
       return res.status(401).json({
         success: false,
         valid: false,
@@ -60,7 +62,7 @@ export default async function handler(req, res) {
       });
     }
     
-    console.log('✅ Token valido per utente:', decoded.email);
+    debug('✅ Token valido per utente:', decoded.email);
     
     // Controlla se il token è vicino alla scadenza (meno di 7 giorni)
     const currentTime = Math.floor(Date.now() / 1000);
@@ -82,7 +84,7 @@ export default async function handler(req, res) {
     });
     
   } catch (error) {
-    console.error('❌ Errore validazione token:', error);
+    error('❌ Errore validazione token:', error);
     
     return res.status(500).json({
       success: false,

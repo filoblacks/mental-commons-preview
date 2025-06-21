@@ -20,8 +20,20 @@
     <script>
         (function() {
             'use strict';
+            
+            // Sistema di logging produzione-aware
+            const isProduction = () => {
+                const hostname = window.location.hostname;
+                return hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.includes('vercel.app');
+            };
+            const PRODUCTION_MODE = isProduction();
+            const log = (...args) => { if (!PRODUCTION_MODE) console.log(...args); };
+            const debug = (...args) => { if (!PRODUCTION_MODE) console.debug(...args); };
+            const error = (...args) => { console.error(...args); };
+            const warn = (...args) => { if (!PRODUCTION_MODE) console.warn(...args); };
+            
             const startTime = performance.now();
-            console.log('🚀 [AUTH-IMMEDIATE] Controllo auth immediato avviato (LOGIN)', { timestamp: startTime });
+            debug('🚀 [AUTH-IMMEDIATE] Controllo auth immediato avviato (LOGIN)', { timestamp: startTime });
             
             // 1. Controllo sincrono del token
             try {
@@ -41,16 +53,16 @@
                         if (!isExpired) {
                             authUser = JSON.parse(userJson);
                             isAuthenticated = true;
-                            console.log('✅ [AUTH-IMMEDIATE] Utente già loggato, redirect a dashboard');
+                            debug('✅ [AUTH-IMMEDIATE] Utente già loggato, redirect a dashboard');
                             window.location.href = '/dashboard.html';
                             return;
                         } else {
-                            console.log('⏰ [AUTH-IMMEDIATE] Token scaduto, pulizia');
+                            debug('⏰ [AUTH-IMMEDIATE] Token scaduto, pulizia');
                             localStorage.removeItem('mental_commons_token');
                             localStorage.removeItem('mental_commons_user');
                         }
                     } catch (e) {
-                        console.warn('⚠️ [AUTH-IMMEDIATE] Errore parsing token:', e.message);
+                        warn('⚠️ [AUTH-IMMEDIATE] Errore parsing token:', e.message);
                         localStorage.removeItem('mental_commons_token');
                         localStorage.removeItem('mental_commons_user');
                     }
@@ -70,10 +82,10 @@
                 };
                 
                 const endTime = performance.now();
-                console.log('✅ [AUTH-IMMEDIATE] Pagina login configurata in', (endTime - startTime).toFixed(2), 'ms');
+                debug('✅ [AUTH-IMMEDIATE] Pagina login configurata in', (endTime - startTime).toFixed(2), 'ms');
                 
             } catch (error) {
-                console.error('❌ [AUTH-IMMEDIATE] Errore critico login:', error);
+                error('❌ [AUTH-IMMEDIATE] Errore critico login:', error);
                 
                 // Fallback sicuro
                 document.documentElement.classList.add('auth-ready', 'user-guest');
