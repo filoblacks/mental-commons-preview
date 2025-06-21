@@ -8,10 +8,7 @@
   },
   "functions": {
     "api/*.js": {
-      "maxDuration": 10,
-      "environment": {
-        "NODE_ENV": "production"
-      }
+      "maxDuration": 10
     }
   },
   "routes": [
