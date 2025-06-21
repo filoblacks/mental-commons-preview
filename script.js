@@ -1,12 +1,13 @@
 // Mental Commons 3.0 - Sistema Completo con Login e Area Utente
 
 // Sistema di logging che si adatta automaticamente all'ambiente
-const isProduction = () => {
+// Definizione globale per evitare dichiarazioni duplicate
+window.isProduction = window.isProduction || (() => {
   const hostname = window.location.hostname;
   return hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.includes('vercel.app');
-};
+});
 
-const PRODUCTION_MODE = isProduction();
+const PRODUCTION_MODE = window.isProduction();
 
 const log = (...args) => { if (!PRODUCTION_MODE) console.log(...args); };
 const debug = (...args) => { if (!PRODUCTION_MODE) console.debug(...args); };
@@ -227,6 +228,11 @@ function continueInitialization() {
     
     // Setup form validation
     setupFormValidation();
+    
+    // Setup char counter con fallback
+    setTimeout(() => {
+        setupCharCounterFallback();
+    }, 500);
     
     // Setup mobile optimizations
     setupMobileOptimizations();
@@ -2053,12 +2059,14 @@ function hideAuthError() {
 }
 
 function setupMainFormListeners() {
-    // Textarea character counter
+    // Textarea character counter con controllo robusto
     const textarea = document.getElementById('ucme-text');
     const charCount = document.getElementById('char-count');
     
     if (textarea && charCount) {
-        textarea.addEventListener('input', function() {
+        log('✅ Elementi char counter trovati, configurando listener...');
+        
+        const updateCharCounter = function() {
             const currentLength = this.value.length;
             charCount.textContent = currentLength;
             
@@ -2071,7 +2079,26 @@ function setupMainFormListeners() {
                 charCount.style.color = '#4caf50';
             }
             
+            log(`📝 Char counter aggiornato: ${currentLength} caratteri`);
             validateForm();
+        };
+        
+        // Aggiungi listener multipli per catturare tutti gli eventi
+        textarea.addEventListener('input', updateCharCounter);
+        textarea.addEventListener('keyup', updateCharCounter);
+        textarea.addEventListener('paste', function() {
+            // Delay per permettere al paste di completarsi
+            setTimeout(updateCharCounter.bind(this), 10);
+        });
+        
+        // Inizializza il contatore con il valore corrente
+        updateCharCounter.call(textarea);
+        
+        log('✅ Char counter configurato correttamente');
+    } else {
+        error('❌ Elementi char counter non trovati:', {
+            textarea: !!textarea,
+            charCount: !!charCount
         });
     }
     
@@ -3772,3 +3799,56 @@ function debugDashboard() {
 
 // Rendi la funzione disponibile globalmente per debug
 window.debugDashboard = debugDashboard;
+
+// ========================================
+// CHAR COUNTER FALLBACK
+// ========================================
+
+function setupCharCounterFallback() {
+    log('🔄 Controllo fallback char counter...');
+    
+    const textarea = document.getElementById('ucme-text');
+    const charCount = document.getElementById('char-count');
+    
+    if (textarea && charCount) {
+        // Verifica se il listener è già attivo
+        if (!textarea.hasAttribute('data-char-counter-ready')) {
+            log('🔧 Configurazione fallback char counter...');
+            
+            const updateCharCounter = function() {
+                const currentLength = this.value.length;
+                charCount.textContent = currentLength;
+                
+                // Cambio colore del contatore
+                if (currentLength < 20) {
+                    charCount.style.color = '#ff6b6b';
+                } else if (currentLength > 500) {
+                    charCount.style.color = '#ffa726';
+                } else {
+                    charCount.style.color = '#4caf50';
+                }
+                
+                log(`📝 Char counter fallback: ${currentLength} caratteri`);
+            };
+            
+            // Aggiungi listener
+            textarea.addEventListener('input', updateCharCounter);
+            textarea.addEventListener('keyup', updateCharCounter);
+            textarea.addEventListener('paste', function() {
+                setTimeout(updateCharCounter.bind(this), 10);
+            });
+            
+            // Marca come configurato
+            textarea.setAttribute('data-char-counter-ready', 'true');
+            
+            // Inizializza il contatore
+            updateCharCounter.call(textarea);
+            
+            log('✅ Char counter fallback configurato');
+        } else {
+            log('✅ Char counter già configurato');
+        }
+    } else {
+        log('⚠️ Elementi char counter non disponibili per fallback');
+    }
+}
