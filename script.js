@@ -19,6 +19,20 @@ async function autoMigrateUsersToSupabase() {
     console.log('🔄 AUTO-MIGRAZIONE UTENTI LOCALSTORAGE -> SUPABASE');
     console.log('🔄 ============================================');
     
+    // Controlla se la migrazione è già stata completata
+    const migrationCompleted = localStorage.getItem('mc-migration-completed');
+    if (migrationCompleted === 'true') {
+        console.log('✅ Migrazione già completata in precedenza - skip');
+        return { migrated: 0, failed: 0, duplicates: 0, skipped: true };
+    }
+    
+    // Flag per disabilitare completamente la migrazione automatica
+    const migrationDisabled = localStorage.getItem('mc-migration-disabled');
+    if (migrationDisabled === 'true') {
+        console.log('⚠️ Migrazione automatica disabilitata manualmente - skip');
+        return { migrated: 0, failed: 0, duplicates: 0, disabled: true };
+    }
+    
     // Cerca utenti esistenti in localStorage
     const localUsers = JSON.parse(localStorage.getItem('mc-users') || '[]');
     const currentUser = localStorage.getItem('mc-user');
@@ -66,15 +80,19 @@ async function autoMigrateUsersToSupabase() {
             if (result.success) {
                 console.log(`   ✅ ${user.email}: Migrato con successo`);
                 migrationStats.migrated++;
-            } else if (result.message && result.message.includes('già esiste')) {
+            } else if (result.statusCode === 409 || result.error === 'user_already_exists' || 
+                      (result.message && (result.message.includes('già esiste') || result.message.includes('already exists')))) {
                 console.log(`   🔄 ${user.email}: Già esistente in Supabase (OK)`);
                 migrationStats.duplicates++;
             } else {
-                console.log(`   ❌ ${user.email}: Fallimento - ${result.message}`);
+                console.log(`   ❌ ${user.email}: Fallimento - ${result.message || 'Errore sconosciuto'}`);
+                console.log(`   🔍 Debug:`, result.debug || 'Nessun debug disponibile');
                 migrationStats.failed++;
             }
         } catch (error) {
-            console.log(`   ❌ ${user.email}: Errore critico - ${error.message}`);
+            // Questo catch ora dovrebbe essere raramente utilizzato
+            // perché registerWithBackend gestisce internamente gli errori
+            console.log(`   ❌ ${user.email}: Errore critico non gestito - ${error.message}`);
             migrationStats.failed++;
         }
         
@@ -106,6 +124,19 @@ async function autoMigrateUsersToSupabase() {
 function initializeApp() {
     console.log('🔄 Inizializzazione Mental Commons 3.0...');
     
+    // ========================================
+    // INIZIALIZZAZIONE SISTEMA AUTENTICAZIONE
+    // ========================================
+    console.log('🔐 Inizializzazione sistema autenticazione...');
+    
+    if (typeof window.PersistentAuth !== 'undefined') {
+        // Inizializza il sistema di autenticazione persistente
+        window.PersistentAuth.init();
+        console.log('✅ Sistema PersistentAuth inizializzato');
+    } else {
+        console.warn('⚠️ Sistema PersistentAuth non disponibile - autenticazione limitata');
+    }
+    
     // 1. Prima di tutto, esegui migrazione automatica se necessario
     autoMigrateUsersToSupabase().then(migrationStats => {
         console.log('🔄 Auto-migrazione completata:', migrationStats);
@@ -120,22 +151,33 @@ function initializeApp() {
 }
 
 function continueInitialization() {
-    // Finalizza UI auth (rimuove loading, completa la verifica)
-    if (typeof window.PersistentAuth !== 'undefined') {
-        console.log('🚀 Finalizzando autenticazione anti-flicker...');
-        const authResult = window.PersistentAuth.finalizeAuthUI();
+    console.log('🚀 ============================================');
+    console.log('🚀 INIZIALIZZAZIONE CONTINUA - ANTI-FLICKER');
+    console.log('🚀 ============================================');
+    
+    // Verifica se esiste già lo stato auth immediato
+    if (window.immediateAuthState && window.immediateAuthState.verified) {
+        console.log('✅ Stato auth immediato trovato:', window.immediateAuthState);
         
-        // Aggiorna currentUser basato sul risultato
-        if (authResult.isAuthenticated) {
-            currentUser = authResult.user;
-            updateUIForLoggedUser();
+        // Usa lo stato già verificato
+        if (window.immediateAuthState.isAuthenticated) {
+            currentUser = window.immediateAuthState.user;
+            console.log('👤 Utente già autenticato:', currentUser.email);
+            
+            // Non aggiornare UI - è già stata configurata dal controllo immediato
+            // Aggiorna solo le variabili JavaScript interne
+            syncUIWithCurrentState();
         } else {
             currentUser = null;
-            updateUIForGuestUser();
+            console.log('👤 Utente guest confermato');
+            
+            // Non aggiornare UI - è già stata configurata dal controllo immediato
+            // Aggiorna solo le variabili JavaScript interne
+            syncUIWithCurrentState();
         }
     } else {
-        // Fallback al sistema precedente
-        console.log('⚠️ Sistema persistente non disponibile, usando controllo classico');
+        // Fallback al sistema precedente (non dovrebbe mai accadere)
+        console.warn('⚠️ Controllo auth immediato non trovato, fallback');
         checkExistingUser();
     }
     
@@ -853,6 +895,45 @@ function logoutUser() {
 }
 
 // ========================================
+// SINCRONIZZAZIONE STATO AUTH IMMEDIATO
+// ========================================
+
+/**
+ * Sincronizza le variabili JavaScript interne con lo stato UI già configurato
+ * dal controllo auth immediato. Non modifica la UI, solo le variabili.
+ */
+function syncUIWithCurrentState() {
+    console.log('🔄 Sincronizzazione stato interno con UI già configurata...');
+    
+    if (currentUser) {
+        // Stato autenticato - sincronizza variabili interne
+        localStorage.setItem('mc-email', currentUser.email);
+        
+        // Pre-popola email nel form se presente
+        const emailInput = document.getElementById('email');
+        if (emailInput) {
+            emailInput.value = currentUser.email;
+            emailInput.readOnly = true;
+            emailInput.style.backgroundColor = '#1a1a1a';
+            emailInput.style.opacity = '0.7';
+        }
+        
+        console.log('✅ Variabili interne sincronizzate per utente:', currentUser.email);
+    } else {
+        // Stato guest - reset variabili interne
+        const emailInput = document.getElementById('email');
+        if (emailInput) {
+            emailInput.value = '';
+            emailInput.readOnly = false;
+            emailInput.style.backgroundColor = '';
+            emailInput.style.opacity = '';
+        }
+        
+        console.log('✅ Variabili interne sincronizzate per guest');
+    }
+}
+
+// ========================================
 // GESTIONE UI BASED SU LOGIN STATE
 // ========================================
 
@@ -863,6 +944,7 @@ function updateUIForLoggedUser() {
     const navLogin = document.getElementById('nav-login');
     const navDashboard = document.getElementById('nav-dashboard');
     const navLogout = document.getElementById('nav-logout');
+    const navProfile = document.getElementById('nav-profile');
     
     if (navLogin) navLogin.style.display = 'none';
     if (navDashboard) navDashboard.style.display = 'block';
@@ -870,11 +952,13 @@ function updateUIForLoggedUser() {
         navLogout.style.display = 'block';
         navLogout.onclick = logoutUser;
     }
+    if (navProfile) navProfile.style.display = 'block';
     
     // Aggiorna navigazione mobile
     const mobileNavLogin = document.getElementById('mobile-nav-login');
     const mobileNavDashboard = document.getElementById('mobile-nav-dashboard');
     const mobileNavLogout = document.getElementById('mobile-nav-logout');
+    const mobileNavProfile = document.getElementById('mobile-nav-profile');
     
     if (mobileNavLogin) mobileNavLogin.style.display = 'none';
     if (mobileNavDashboard) mobileNavDashboard.style.display = 'inline-block';
@@ -882,6 +966,7 @@ function updateUIForLoggedUser() {
         mobileNavLogout.style.display = 'inline-block';
         mobileNavLogout.onclick = logoutUser;
     }
+    if (mobileNavProfile) mobileNavProfile.style.display = 'inline-block';
     
     // Salva email per dashboard
     localStorage.setItem('mc-email', currentUser.email);
@@ -918,19 +1003,23 @@ function updateUIForGuestUser() {
     const navLogin = document.getElementById('nav-login');
     const navDashboard = document.getElementById('nav-dashboard');
     const navLogout = document.getElementById('nav-logout');
+    const navProfile = document.getElementById('nav-profile');
     
     if (navLogin) navLogin.style.display = 'block';
     if (navDashboard) navDashboard.style.display = 'none';
     if (navLogout) navLogout.style.display = 'none';
+    if (navProfile) navProfile.style.display = 'none';
     
     // Aggiorna navigazione mobile
     const mobileNavLogin = document.getElementById('mobile-nav-login');
     const mobileNavDashboard = document.getElementById('mobile-nav-dashboard');
     const mobileNavLogout = document.getElementById('mobile-nav-logout');
+    const mobileNavProfile = document.getElementById('mobile-nav-profile');
     
     if (mobileNavLogin) mobileNavLogin.style.display = 'inline-block';
     if (mobileNavDashboard) mobileNavDashboard.style.display = 'none';
     if (mobileNavLogout) mobileNavLogout.style.display = 'none';
+    if (mobileNavProfile) mobileNavProfile.style.display = 'none';
     
     // Mostra sezione guest nella homepage - forza la visualizzazione del CTA
     const userWelcome = document.getElementById('user-welcome');
@@ -2185,39 +2274,217 @@ function generateUniqueId() {
 // INTEGRAZIONE VERCEL BACKEND
 // ========================================
 
+// ========================================
+// FUNZIONE CENTRALIZZATA PER RECUPERO TOKEN VALIDO
+// ========================================
+
+async function getValidAuthToken() {
+    console.log('🎫 ============================================');
+    console.log('🎫 RECUPERO TOKEN DI AUTENTICAZIONE VALIDO');
+    console.log('🎫 ============================================');
+    
+    try {
+        // Controlla se il sistema auth è disponibile
+        if (typeof window.PersistentAuth === 'undefined') {
+            console.error('❌ Sistema PersistentAuth non disponibile');
+            return null;
+        }
+        
+        // Usa il sistema centralizzato di autenticazione
+        const authResult = window.PersistentAuth.checkAuth();
+        
+        console.log('📊 Stato autenticazione:', {
+            isAuthenticated: authResult.isAuthenticated,
+            hasUser: !!authResult.user,
+            hasToken: !!authResult.token,
+            expired: authResult.expired
+        });
+        
+        if (!authResult.isAuthenticated) {
+            console.log('❌ Utente non autenticato');
+            if (authResult.expired) {
+                console.log('⏰ Token scaduto - richiesta nuovo login');
+                showMobileFriendlyAlert('Sessione scaduta. Ti preghiamo di accedere di nuovo.');
+                // Forza redirect a login se necessario
+                setTimeout(() => {
+                    if (window.location.pathname !== '/login.html') {
+                        window.location.href = '/login.html';
+                    }
+                }, 2000);
+            }
+            return null;
+        }
+        
+        const token = authResult.token;
+        const tokenInfo = authResult.tokenInfo || window.PersistentAuth.getTokenInfo(token);
+        
+        console.log('✅ Token valido recuperato:', {
+            userId: tokenInfo?.userId,
+            email: tokenInfo?.email,
+            issuedAt: tokenInfo?.issuedAt,
+            expiresAt: tokenInfo?.expiresAt,
+            daysUntilExpiry: tokenInfo?.daysUntilExpiry,
+            tokenLength: token?.length
+        });
+        
+        // Log token mascherato per debug
+        const maskedToken = token ? 
+            token.substring(0, 10) + '...' + token.substring(token.length - 10) : 
+            'null';
+        console.log('🔒 Token (mascherato):', maskedToken);
+        
+        return token;
+        
+    } catch (error) {
+        console.error('💥 Errore durante recupero token:', error);
+        return null;
+    }
+}
+
+// ========================================
+// INVIO UCME CON AUTENTICAZIONE ROBUSTA
+// ========================================
+
 async function submitUCMeToVercel(formData) {
+    console.log('📝 ============================================');
+    console.log('📝 INVIO UCME CON AUTENTICAZIONE');
+    console.log('📝 ============================================');
+    
     // Determina l'URL base del backend
     const BASE_URL = window.location.origin;
     const UCME_ENDPOINT = `${BASE_URL}/api/ucme`;
     
+    console.log('🌐 Endpoint UCMe:', UCME_ENDPOINT);
+    console.log('📋 Dati form da inviare:', JSON.stringify(formData, null, 2));
+    
     try {
-        const response = await fetch(UCME_ENDPOINT, {
+        // ========================================
+        // FASE 1: RECUPERO TOKEN VALIDO
+        // ========================================
+        
+        console.log('\n🎫 FASE 1: Recupero token di autenticazione...');
+        const token = await getValidAuthToken();
+        
+        if (!token) {
+            throw new Error('Token di autenticazione non disponibile. Effettua il login per continuare.');
+        }
+        
+        console.log('✅ Token di autenticazione recuperato con successo');
+        
+        // ========================================
+        // FASE 2: PREPARAZIONE RICHIESTA
+        // ========================================
+        
+        console.log('\n📤 FASE 2: Preparazione richiesta HTTP...');
+        
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+        
+        const requestConfig = {
             method: 'POST',
             mode: 'cors',
             cache: 'no-cache',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: headers,
             body: JSON.stringify(formData)
+        };
+        
+        console.log('📋 Configurazione richiesta:', {
+            method: requestConfig.method,
+            url: UCME_ENDPOINT,
+            headers: {
+                'Content-Type': headers['Content-Type'],
+                'Authorization': `Bearer ${token.substring(0, 10)}...${token.substring(token.length - 5)}`
+            },
+            bodyLength: requestConfig.body?.length || 0
         });
+        
+        // ========================================
+        // FASE 3: INVIO RICHIESTA
+        // ========================================
+        
+        console.log('\n🚀 FASE 3: Invio richiesta al server...');
+        const response = await fetch(UCME_ENDPOINT, requestConfig);
+        
+        console.log('📨 Risposta ricevuta:', {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok,
+            headers: Object.fromEntries(response.headers.entries())
+        });
+        
+        // ========================================
+        // FASE 4: GESTIONE RISPOSTA
+        // ========================================
+        
+        console.log('\n📊 FASE 4: Elaborazione risposta...');
+        
+        // Gestione speciale per errore 401
+        if (response.status === 401) {
+            console.error('🚫 ERRORE 401 - UNAUTHORIZED');
+            console.error('   Token inviato:', token ? 'Presente' : 'Mancante');
+            console.error('   Header Authorization:', headers.Authorization ? 'Presente' : 'Mancante');
+            
+            // Prova a leggere il corpo della risposta per più dettagli
+            let errorDetails = {};
+            try {
+                errorDetails = await response.json();
+                console.error('   Dettagli errore server:', errorDetails);
+            } catch (e) {
+                console.error('   Impossibile leggere dettagli errore:', e.message);
+            }
+            
+            // Forza logout e redirect
+            if (typeof window.PersistentAuth !== 'undefined') {
+                window.PersistentAuth.forceLogout('Token non valido durante invio UCMe');
+            }
+            
+            throw new Error('Sessione scaduta. Ti preghiamo di accedere di nuovo.');
+        }
         
         if (!response.ok) {
             const errorData = await response.json();
+            console.error('❌ Errore HTTP:', {
+                status: response.status,
+                statusText: response.statusText,
+                errorData: errorData
+            });
             throw new Error(errorData.message || `Errore HTTP: ${response.status}`);
         }
         
         const result = await response.json();
         
+        console.log('✅ Risposta Vercel Backend:', {
+            success: result.success,
+            message: result.message,
+            debug: result.debug
+        });
+        
         if (!result.success) {
+            console.error('❌ Operazione fallita:', result.message);
             throw new Error(result.message || 'Errore sconosciuto dal server');
         }
         
-        console.log('✅ Risposta Vercel Backend:', result);
+        console.log('🎉 UCMe inviata con successo!');
         return result;
         
     } catch (error) {
-        console.error('❌ Errore nella comunicazione con Vercel Backend:', error);
-        throw new Error('Errore di connessione. Riprova più tardi.');
+        console.error('💥 ============================================');
+        console.error('💥 ERRORE DURANTE INVIO UCME');
+        console.error('💥 ============================================');
+        console.error('💥 Messaggio:', error.message);
+        console.error('💥 Stack:', error.stack);
+        console.error('💥 Endpoint:', UCME_ENDPOINT);
+        console.error('💥 ============================================');
+        
+        // Re-throw con messaggio user-friendly
+        if (error.message.includes('Token di autenticazione') || 
+            error.message.includes('Sessione scaduta')) {
+            throw error; // Mantieni il messaggio originale per errori di auth
+        } else {
+            throw new Error('Errore di connessione. Riprova più tardi.');
+        }
     }
 }
 
@@ -2477,28 +2744,66 @@ async function registerWithBackend(email, password, name, surname = null) {
     console.log('📤 Payload completo:', payload);
     console.log('🔍 Verifica: NON ci sono più riferimenti a script.google.com');
     
-    const response = await fetch(REGISTER_ENDPOINT, {
-        method: 'POST',
-        mode: 'cors',
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-    });
-    
-    console.log('📡 Register Response status:', response.status);
-    console.log('📡 Register Response ok:', response.ok);
-    
-    if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+    try {
+        const response = await fetch(REGISTER_ENDPOINT, {
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        console.log('📡 Register Response status:', response.status);
+        console.log('📡 Register Response ok:', response.ok);
+        
+        const result = await response.json();
+        console.log('📥 Risposta registrazione backend:', result);
+        
+        if (response.status === 409) {
+            // Gestione specifica per utente già esistente
+            console.log('⚠️ Utente già esistente (409) - Gestione migrazione');
+            return {
+                success: false,
+                message: result.message || 'Un account con questa email già esiste',
+                error: 'user_already_exists',
+                statusCode: 409,
+                debug: result.debug
+            };
+        }
+        
+        if (!response.ok) {
+            console.error('❌ Errore registrazione:', response.status, result.message);
+            return {
+                success: false,
+                message: result.message || `Errore HTTP ${response.status}`,
+                error: result.debug?.error || 'registration_failed',
+                statusCode: response.status,
+                debug: result.debug
+            };
+        }
+        
+        console.log('✅ Registrazione completata con successo');
+        console.log('🟣 FASE 3 - Registrazione API completata (Vercel endpoint)');
+        
+        return {
+            success: true,
+            ...result
+        };
+        
+    } catch (error) {
+        console.error('💥 Errore di rete o parsing durante registrazione:', error);
+        return {
+            success: false,
+            message: 'Errore di connessione durante la registrazione',
+            error: 'network_error',
+            debug: {
+                originalError: error.message,
+                stack: error.stack
+            }
+        };
     }
-    
-    const result = await response.json();
-    console.log('📥 Risposta registrazione backend:', result);
-    console.log('🟣 FASE 3 - Registrazione API completata (Vercel endpoint)');
-    
-    return result;
 }
 
 async function syncUsersToBackend() {

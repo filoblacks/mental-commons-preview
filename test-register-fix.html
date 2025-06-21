@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test UCMe Submission con Token Fix</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button.danger {
+            background: #dc3545;
+        }
+        button.danger:hover {
+            background: #c82333;
+        }
+        .log-area {
+            background: #f1f1f1;
+            padding: 15px;
+            border-radius: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input[type="email"], textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Test UCMe Submission - Token Fix</h1>
+        <p>Test per verificare che l'invio delle UCMe funzioni correttamente con il sistema di autenticazione migliorato.</p>
+
+        <!-- Sezione Stato Autenticazione -->
+        <div class="test-section">
+            <h3>🔐 Stato Autenticazione</h3>
+            <button onclick="checkAuthStatus()">Verifica Stato Auth</button>
+            <button onclick="clearAuthData()">Pulisci Dati Auth</button>
+            <div id="auth-status" class="log-area"></div>
+        </div>
+
+        <!-- Sezione Login Test -->
+        <div class="test-section">
+            <h3>👤 Login Test</h3>
+            <div class="form-group">
+                <label for="test-email">Email:</label>
+                <input type="email" id="test-email" value="test@mentalcommons.dev" placeholder="Email per test">
+            </div>
+            <div class="form-group">
+                <label for="test-password">Password:</label>
+                <input type="password" id="test-password" value="testpassword123" placeholder="Password per test">
+            </div>
+            <button onclick="testLogin()">Test Login</button>
+            <div id="login-result" class="log-area"></div>
+        </div>
+
+        <!-- Sezione Test UCMe -->
+        <div class="test-section">
+            <h3>📝 Test Invio UCMe</h3>
+            <div class="form-group">
+                <label for="test-ucme-text">Testo UCMe:</label>
+                <textarea id="test-ucme-text" placeholder="Scrivi un pensiero di test...">Questo è un pensiero di test per verificare che il sistema di autenticazione funzioni correttamente durante l'invio delle UCMe.</textarea>
+            </div>
+            <div class="form-group">
+                <label for="test-tone">Tono:</label>
+                <select id="test-tone">
+                    <option value="calmo">Calmo</option>
+                    <option value="poetico">Poetico</option>
+                    <option value="neutro" selected>Neutro</option>
+                    <option value="diretto">Diretto</option>
+                </select>
+            </div>
+            <button onclick="testUCMeSubmission()">Test Invio UCMe</button>
+            <div id="ucme-result" class="log-area"></div>
+        </div>
+
+        <!-- Sezione Logging Generale -->
+        <div class="test-section">
+            <h3>📊 Log Generale</h3>
+            <button onclick="clearLogs()">Pulisci Log</button>
+            <button onclick="exportLogs()">Esporta Log</button>
+            <div id="general-log" class="log-area"></div>
+        </div>
+    </div>
+
+    <!-- Include dei file necessari -->
+    <script src="/auth.js?v=202506172330"></script>
+    <script src="/script.js?v=202506172330"></script>
+    
+    <script>
+        // Override del console.log per catturare tutti i log
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        let allLogs = [];
+        
+        function addLog(type, ...args) {
+            const timestamp = new Date().toISOString();
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            
+            allLogs.push({ timestamp, type, message });
+            updateGeneralLog();
+            
+            // Chiama il console originale
+            if (type === 'log') originalLog(...args);
+            else if (type === 'error') originalError(...args);
+            else if (type === 'warn') originalWarn(...args);
+        }
+        
+        console.log = (...args) => addLog('log', ...args);
+        console.error = (...args) => addLog('error', ...args);
+        console.warn = (...args) => addLog('warn', ...args);
+        
+        function updateGeneralLog() {
+            const logArea = document.getElementById('general-log');
+            if (logArea) {
+                logArea.textContent = allLogs
+                    .slice(-50) // Mostra solo gli ultimi 50 log
+                    .map(log => `[${log.timestamp}] ${log.type.toUpperCase()}: ${log.message}`)
+                    .join('\n');
+                logArea.scrollTop = logArea.scrollHeight;
+            }
+        }
+        
+        // Funzioni di test
+        async function checkAuthStatus() {
+            const statusArea = document.getElementById('auth-status');
+            statusArea.textContent = 'Controllo stato autenticazione...\n';
+            
+            try {
+                // Test sistema PersistentAuth
+                if (typeof window.PersistentAuth !== 'undefined') {
+                    statusArea.textContent += '✅ Sistema PersistentAuth disponibile\n';
+                    
+                    const authResult = window.PersistentAuth.checkAuth();
+                    statusArea.textContent += `📊 Risultato check:\n${JSON.stringify(authResult, null, 2)}\n`;
+                    
+                    // Test token
+                    if (authResult.token) {
+                        const tokenInfo = window.PersistentAuth.getTokenInfo(authResult.token);
+                        statusArea.textContent += `🎫 Info token:\n${JSON.stringify(tokenInfo, null, 2)}\n`;
+                    }
+                } else {
+                    statusArea.textContent += '❌ Sistema PersistentAuth NON disponibile\n';
+                }
+                
+                // Test localStorage diretto
+                const token = localStorage.getItem('mental_commons_token');
+                const user = localStorage.getItem('mental_commons_user');
+                
+                statusArea.textContent += `💾 localStorage:\n`;
+                statusArea.textContent += `  - Token: ${token ? 'Presente (' + token.length + ' caratteri)' : 'Assente'}\n`;
+                statusArea.textContent += `  - User: ${user ? 'Presente' : 'Assente'}\n`;
+                
+                if (token) {
+                    try {
+                        const payload = JSON.parse(atob(token.split('.')[1]));
+                        const expiry = new Date(payload.exp * 1000);
+                        const now = new Date();
+                        statusArea.textContent += `  - Scadenza: ${expiry.toISOString()}\n`;
+                        statusArea.textContent += `  - Valido: ${now < expiry ? '✅' : '❌'}\n`;
+                    } catch (e) {
+                        statusArea.textContent += `  - Errore parsing: ${e.message}\n`;
+                    }
+                }
+                
+            } catch (error) {
+                statusArea.textContent += `❌ Errore: ${error.message}\n`;
+            }
+        }
+        
+        async function testLogin() {
+            const resultArea = document.getElementById('login-result');
+            const email = document.getElementById('test-email').value;
+            const password = document.getElementById('test-password').value;
+            
+            resultArea.textContent = 'Tentativo di login...\n';
+            
+            try {
+                // Usa la funzione di login dal sistema esistente
+                if (typeof loginWithBackend === 'function') {
+                    const result = await loginWithBackend(email, password);
+                    resultArea.textContent += `📊 Risultato login:\n${JSON.stringify(result, null, 2)}\n`;
+                    
+                    if (result.success) {
+                        resultArea.textContent += '✅ Login completato con successo!\n';
+                        await checkAuthStatus(); // Aggiorna stato auth
+                    } else {
+                        resultArea.textContent += `❌ Login fallito: ${result.message}\n`;
+                    }
+                } else {
+                    resultArea.textContent += '❌ Funzione loginWithBackend non disponibile\n';
+                }
+            } catch (error) {
+                resultArea.textContent += `💥 Errore durante login: ${error.message}\n`;
+                resultArea.textContent += `Stack: ${error.stack}\n`;
+            }
+        }
+        
+        async function testUCMeSubmission() {
+            const resultArea = document.getElementById('ucme-result');
+            const ucmeText = document.getElementById('test-ucme-text').value;
+            const tone = document.getElementById('test-tone').value;
+            
+            resultArea.textContent = 'Test invio UCMe...\n';
+            
+            try {
+                // Prima controlla se siamo autenticati
+                if (typeof window.PersistentAuth !== 'undefined') {
+                    const authResult = window.PersistentAuth.checkAuth();
+                    resultArea.textContent += `🔐 Stato auth: ${authResult.isAuthenticated ? 'Autenticato' : 'Non autenticato'}\n`;
+                    
+                    if (!authResult.isAuthenticated) {
+                        resultArea.textContent += '❌ Necessario login prima di inviare UCMe\n';
+                        return;
+                    }
+                }
+                
+                // Crea i dati del form
+                const formData = {
+                    ucmeText: ucmeText,
+                    email: document.getElementById('test-email').value,
+                    tone: tone,
+                    acceptance: true,
+                    portatore: false,
+                    timestamp: new Date().toISOString(),
+                    id: 'test-' + Date.now()
+                };
+                
+                resultArea.textContent += `📋 Dati form:\n${JSON.stringify(formData, null, 2)}\n\n`;
+                
+                // Test della funzione submitUCMeToVercel
+                if (typeof submitUCMeToVercel === 'function') {
+                    resultArea.textContent += '🚀 Invio UCMe in corso...\n';
+                    const result = await submitUCMeToVercel(formData);
+                    
+                    resultArea.textContent += `✅ UCMe inviata con successo!\n`;
+                    resultArea.textContent += `📊 Risultato:\n${JSON.stringify(result, null, 2)}\n`;
+                } else {
+                    resultArea.textContent += '❌ Funzione submitUCMeToVercel non disponibile\n';
+                }
+                
+            } catch (error) {
+                resultArea.textContent += `💥 Errore durante invio UCMe:\n`;
+                resultArea.textContent += `   Messaggio: ${error.message}\n`;
+                resultArea.textContent += `   Stack: ${error.stack}\n`;
+            }
+        }
+        
+        function clearAuthData() {
+            if (typeof window.PersistentAuth !== 'undefined') {
+                window.PersistentAuth.clearAuthData();
+            }
+            localStorage.removeItem('mental_commons_token');
+            localStorage.removeItem('mental_commons_user');
+            
+            document.getElementById('auth-status').textContent = 'Dati di autenticazione puliti.\n';
+        }
+        
+        function clearLogs() {
+            allLogs = [];
+            document.getElementById('general-log').textContent = '';
+        }
+        
+        function exportLogs() {
+            const logsData = JSON.stringify(allLogs, null, 2);
+            const blob = new Blob([logsData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `mental-commons-test-logs-${new Date().toISOString().slice(0, 19)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Inizializzazione
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 Test page inizializzata');
+            checkAuthStatus();
+        });
+    </script>
+</body>
+</html> 

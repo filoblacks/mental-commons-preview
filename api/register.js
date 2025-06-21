@@ -199,7 +199,18 @@ export default async function handler(req, res) {
     console.log('  🔍 Fonte dati: Database persistente');
     console.log('  🔍 Email da verificare:', email);
     
-    const existingUser = await findUserByEmail(email);
+    let existingUser = null;
+    
+    try {
+      existingUser = await findUserByEmail(email);
+      console.log('✅ Controllo utente esistente completato:', existingUser ? 'TROVATO' : 'NON TROVATO');
+    } catch (searchError) {
+      console.error('❌ Errore durante la ricerca utente esistente:', searchError);
+      
+      // Se c'è un errore nella ricerca, procediamo comunque con la creazione
+      // L'eventuale duplicato verrà catturato dal database
+      console.log('⚠ Procedo comunque con la creazione utente (gestione errore ricerca)');
+    }
     
     if (existingUser) {
       console.log('❌ Utente già esistente nel database');
@@ -216,7 +227,9 @@ export default async function handler(req, res) {
           receivedEmail: email,
           existingUserId: existingUser.id,
           backend: 'supabase',
-          suggestion: 'try_login'
+          suggestion: 'try_login',
+          timestamp: new Date().toISOString(),
+          apiVersion: '2.0.0'
         }
       });
     }
@@ -295,21 +308,63 @@ export default async function handler(req, res) {
     
     console.error('💥 Errore durante il processo di registrazione:', error);
     console.error('💥 Stack trace:', error.stack);
+    console.error('💥 Error code:', error.code);
+    console.error('💥 Error statusCode:', error.statusCode);
     
     // Gestione errori specifici
     let errorMessage = 'Errore interno del server durante la registrazione';
     let statusCode = 500;
     
-    if (error.message && error.message.includes('duplicate key')) {
-      errorMessage = 'Un account con questa email esiste già';
-      statusCode = 409;
+    // Errore di duplicazione email
+    if (error.code === 'DUPLICATE_EMAIL' || error.statusCode === 409) {
+      console.log('❌ Rilevato errore di duplicazione email');
+      return res.status(409).json({
+        success: false,
+        message: 'Un account con questa email esiste già. Prova a fare login.',
+        debug: {
+          error: 'user_already_exists',
+          code: 'DUPLICATE_EMAIL',
+          backend: 'supabase',
+          suggestion: 'try_login',
+          timestamp: new Date().toISOString(),
+          apiVersion: '2.0.0'
+        }
+      });
+    }
+    
+    // Altri errori di duplicazione (fallback)
+    if (error.message && (error.message.includes('duplicate key') || error.message.includes('already exists'))) {
+      console.log('❌ Rilevato errore di duplicazione (fallback)');
+      return res.status(409).json({
+        success: false,
+        message: 'Un account con questa email esiste già. Prova a fare login.',
+        debug: {
+          error: 'user_already_exists_fallback',
+          backend: 'supabase',
+          suggestion: 'try_login',
+          timestamp: new Date().toISOString(),
+          apiVersion: '2.0.0'
+        }
+      });
+    }
+    
+    // Errori di connessione database
+    if (error.message && (error.message.includes('connection') || error.message.includes('network'))) {
+      errorMessage = 'Errore di connessione al database. Riprova tra qualche momento.';
+      statusCode = 503;
+    }
+    
+    // Errori di validazione
+    if (error.message && error.message.includes('validation')) {
+      errorMessage = 'Dati non validi forniti';
+      statusCode = 400;
     }
     
     return res.status(statusCode).json({
       success: false,
       message: errorMessage,
       debug: {
-        error: error.message,
+        error: error.message || 'unknown_error',
         code: error.code || 'unknown',
         backend: 'supabase',
         timestamp: new Date().toISOString(),

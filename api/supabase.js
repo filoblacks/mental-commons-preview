@@ -184,11 +184,12 @@ export async function findUserByEmail(email) {
     
     console.log('👤 Ricerca utente per email:', email);
     
+    // Prima prova con .single() per ottenere un solo risultato
     const { data, error } = await getSupabaseClient()
       .from('users')
       .select('*')
       .eq('email', email)
-      .single();
+      .maybeSingle(); // Usa maybeSingle() invece di single() per evitare errori quando non trova nulla
     
     // Log del risultato completo
     console.log('📥 Query result RAW:', { data, error });
@@ -201,18 +202,29 @@ export async function findUserByEmail(email) {
     
     if (error) {
       console.log('⚠ Query error completo:', JSON.stringify(error, null, 2));
-      if (error.code === 'PGRST116') {
-        console.log('👤 Utente non trovato (PGRST116 - No rows)');
-        return null;
-      }
+      // Con maybeSingle(), non dovremmo avere errori PGRST116
+      console.error('❌ Errore inaspettato nella ricerca utente:', error);
       throw error;
     }
     
-    console.log('✅ Utente trovato:', data.id);
-    console.log('📊 Dati utente trovati:', JSON.stringify(data, null, 2));
-    return data;
+    if (data) {
+      console.log('✅ Utente trovato:', data.id);
+      console.log('📊 Dati utente trovati:', JSON.stringify({ ...data, password_hash: '[HIDDEN]' }, null, 2));
+      return data;
+    } else {
+      console.log('👤 Utente non trovato per email:', email);
+      return null;
+    }
   } catch (error) {
     console.error('❌ Errore ricerca utente completo:', JSON.stringify(error, null, 2));
+    
+    // Se l'errore è di connessione o configurazione, rilancialo
+    // Se è un errore di "not found", restituisci null
+    if (error.code === 'PGRST116' || error.message?.includes('No rows')) {
+      console.log('👤 Utente non trovato (errore catch)');
+      return null;
+    }
+    
     throw error;
   }
 }
@@ -274,6 +286,16 @@ export async function createUser(email, password, name, surname = null) {
     
     if (error) {
       console.error('❌ Errore creazione utente completo:', JSON.stringify(error, null, 2));
+      
+      // Gestione specifica per errori di duplicazione
+      if (error.code === '23505' || error.message?.includes('duplicate key') || error.message?.includes('already exists')) {
+        console.error('❌ ERRORE DUPLICAZIONE: Utente con questa email già esiste');
+        const duplicateError = new Error('Un account con questa email esiste già');
+        duplicateError.code = 'DUPLICATE_EMAIL';
+        duplicateError.statusCode = 409;
+        throw duplicateError;
+      }
+      
       throw error;
     }
     
@@ -282,6 +304,8 @@ export async function createUser(email, password, name, surname = null) {
     return data;
   } catch (error) {
     console.error('❌ Errore creazione utente completo:', JSON.stringify(error, null, 2));
+    
+    // Rilanciare l'errore così com'è per mantenere le informazioni
     throw error;
   }
 }
