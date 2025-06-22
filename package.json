@@ -10,7 +10,7 @@
     "deploy": "npm run bump-version && npm run build && vercel --prod",
     "bump-version": "node scripts/update-versions.js bump",
     "update-versions": "node scripts/update-versions.js",
-    "test": "echo \"Tests not implemented yet\" && exit 0",
+    "test": "node --test",
     "lint": "echo \"Linting not configured yet\" && exit 0"
   },
   "keywords": [
