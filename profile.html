@@ -212,10 +212,10 @@
                 <!-- Form Modifica Profilo -->
                 <div class="profile-edit-section">
                     <h2>Modifica Profilo</h2>
-                    <button id="edit-profile-btn" class="profile-action-btn">Modifica le tue informazioni</button>
+                    <button id="edit-profile-btn" class="profile-action-btn" onclick="window.forceToggleProfileForm()">Modifica le tue informazioni</button>
                     
                     <div id="edit-profile-form" class="edit-profile-form" style="display: none;">
-                        <form id="profile-form">
+                        <form id="profile-form" onsubmit="window.forceSaveProfile(event)">
                             <div class="form-group">
                                 <label for="edit-name">Nome</label>
                                 <input type="text" id="edit-name" placeholder="Il tuo nome (opzionale)">
@@ -234,7 +234,7 @@
                             </div>
                             <div class="form-actions">
                                 <button type="submit" class="profile-save-btn">Salva Modifiche</button>
-                                <button type="button" id="cancel-edit-btn" class="profile-cancel-btn">Annulla</button>
+                                <button type="button" id="cancel-edit-btn" class="profile-cancel-btn" onclick="window.forceToggleProfileForm()">Annulla</button>
                             </div>
                         </form>
                     </div>
@@ -292,6 +292,6 @@
     </footer>
 
     <script src="/auth.js?v=202506172252"></script>
-    <script src="/script.js?v=202506172309"></script>
+    <script src="/script.js?v=202506212359"></script>
 </body>
 </html> 

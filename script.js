@@ -497,6 +497,11 @@ function initializeProfile() {
             
             // ⚠️ CRITICO: Configura event listeners DOPO aver mostrato il contenuto
             log('🔧 Configurazione event listeners profilo...');
+            log('🔍 Stato currentUser prima di setupProfileEventListeners:', {
+                currentUser: !!currentUser,
+                userEmail: currentUser?.email,
+                userFromLocalStorage: !!localStorage.getItem('mental_commons_user')
+            });
             setupProfileEventListeners();
             
             log('✅ Profilo completamente caricato e visualizzato');
@@ -4435,15 +4440,13 @@ function setupProfileEventListeners() {
         log('✅ Event listener logout header configurato');
     }
     
-    // Bottone modifica profilo
+    // Bottone modifica profilo - DISABILITATO: Ora usa onclick inline
     const editProfileBtn = document.getElementById('edit-profile-btn');
     if (editProfileBtn) {
-        editProfileBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            log('✏️ Modifica profilo richiesta');
-            toggleEditProfileForm();
-        });
-        log('✅ Event listener modifica profilo configurato');
+        log('🔍 Pulsante edit-profile-btn trovato - usando onclick inline');
+        // RIMOSSO: addEventListener per evitare conflitti con onclick inline
+    } else {
+        error('❌ Pulsante edit-profile-btn NON trovato!');
     }
     
     // Bottone esporta dati
@@ -4497,18 +4500,219 @@ function setupProfileEventListeners() {
 // FUNZIONI GESTIONE FORM MODIFICA PROFILO - NUOVE FUNZIONI
 // ========================================
 
-function toggleEditProfileForm() {
+// FUNZIONE GLOBALE DI EMERGENZA - DEVE FUNZIONARE SEMPRE
+window.forceToggleProfileForm = function() {
+    console.log('🚨 FUNZIONE DI EMERGENZA CHIAMATA!');
+    
     const editForm = document.getElementById('edit-profile-form');
     const editBtn = document.getElementById('edit-profile-btn');
     
-    if (!editForm || !editBtn) {
-        error('❌ Elementi form modifica profilo non trovati');
+    console.log('🔍 Elementi trovati:', { 
+        editForm: !!editForm, 
+        editBtn: !!editBtn
+    });
+    
+    if (!editForm) {
+        alert('❌ ERRORE: Form di modifica non trovato!');
         return;
     }
     
-    if (editForm.style.display === 'none' || !editForm.style.display) {
+    if (!editBtn) {
+        alert('❌ ERRORE: Pulsante di modifica non trovato!');
+        return;
+    }
+    
+    // Recupera l'utente corrente
+    let user = window.currentUser;
+    if (!user) {
+        try {
+            const savedUser = localStorage.getItem('mental_commons_user');
+            if (savedUser) {
+                user = JSON.parse(savedUser);
+                window.currentUser = user;
+                console.log('✅ Utente recuperato dal localStorage:', user.email);
+            } else {
+                alert('❌ ERRORE: Nessun utente loggato trovato!');
+                return;
+            }
+        } catch (e) {
+            alert('❌ ERRORE: Impossibile recuperare dati utente!');
+            return;
+        }
+    }
+    
+    // Controlla lo stato del form
+    const isHidden = editForm.style.display === 'none' || window.getComputedStyle(editForm).display === 'none';
+    console.log('📋 Stato form:', { 
+        display: editForm.style.display,
+        computed: window.getComputedStyle(editForm).display,
+        isHidden: isHidden 
+    });
+    
+    if (isHidden) {
+        // MOSTRA il form
+        console.log('👆 MOSTRANDO form...');
+        
+        // Popola i campi
+        const editName = document.getElementById('edit-name');
+        const editEmail = document.getElementById('edit-email');
+        
+        if (editName) editName.value = user.name || '';
+        if (editEmail) editEmail.value = user.email || '';
+        
+        // Mostra
+        editForm.style.display = 'block';
+        editBtn.textContent = 'Annulla modifica';
+        
+        console.log('✅ Form mostrato!');
+        
+    } else {
+        // NASCONDI il form
+        console.log('👆 NASCONDENDO form...');
+        
+        editForm.style.display = 'none';
+        editBtn.textContent = 'Modifica le tue informazioni';
+        
+        console.log('✅ Form nascosto!');
+    }
+};
+
+// FUNZIONE GLOBALE PER SALVARE IL PROFILO
+window.forceSaveProfile = function(event) {
+    event.preventDefault();
+    console.log('🚨 SALVATAGGIO PROFILO FORZATO!');
+    
+    // Recupera utente
+    let user = window.currentUser;
+    if (!user) {
+        try {
+            const savedUser = localStorage.getItem('mental_commons_user');
+            if (savedUser) {
+                user = JSON.parse(savedUser);
+                window.currentUser = user;
+            } else {
+                alert('❌ ERRORE: Nessun utente loggato!');
+                return;
+            }
+        } catch (e) {
+            alert('❌ ERRORE: Impossibile recuperare dati utente!');
+            return;
+        }
+    }
+    
+    // Recupera valori form
+    const editName = document.getElementById('edit-name');
+    const editEmail = document.getElementById('edit-email');
+    const editPassword = document.getElementById('edit-password');
+    const editConfirmPassword = document.getElementById('edit-confirm-password');
+    
+    if (!editName || !editEmail) {
+        alert('❌ ERRORE: Campi form non trovati!');
+        return;
+    }
+    
+    const newName = editName.value.trim();
+    const newEmail = editEmail.value.trim();
+    const newPassword = editPassword ? editPassword.value.trim() : '';
+    const confirmPassword = editConfirmPassword ? editConfirmPassword.value.trim() : '';
+    
+    // Validazione
+    if (!newName) {
+        alert('❌ Il nome è obbligatorio');
+        return;
+    }
+    
+    if (!newEmail || !newEmail.includes('@')) {
+        alert('❌ Email non valida');
+        return;
+    }
+    
+    if (newPassword && newPassword !== confirmPassword) {
+        alert('❌ Le password non coincidono');
+        return;
+    }
+    
+    if (newPassword && newPassword.length < 6) {
+        alert('❌ La password deve essere di almeno 6 caratteri');
+        return;
+    }
+    
+    // Salva modifiche
+    try {
+        const oldEmail = user.email;
+        user.name = newName;
+        user.email = newEmail;
+        
+        if (newPassword) {
+            user.password = newPassword;
+        }
+        
+        // Salva nel localStorage
+        localStorage.setItem('mental_commons_user', JSON.stringify(user));
+        
+        // Aggiorna anche nella lista utenti
+        const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
+        const userIndex = users.findIndex(u => u.email === oldEmail || u.id === user.id);
+        if (userIndex !== -1) {
+            users[userIndex] = user;
+            localStorage.setItem('mc-users', JSON.stringify(users));
+        }
+        
+        // Aggiorna UI
+        const profileEmail = document.getElementById('profile-email');
+        const profileName = document.getElementById('profile-name');
+        const profileHeaderEmail = document.getElementById('profile-header-email');
+        
+        if (profileEmail) profileEmail.textContent = user.email;
+        if (profileName) profileName.textContent = user.name;
+        if (profileHeaderEmail) profileHeaderEmail.textContent = user.email;
+        
+        // Nascondi form
+        window.forceToggleProfileForm();
+        
+        alert('✅ Profilo aggiornato con successo!');
+        console.log('✅ Profilo salvato:', user.email);
+        
+    } catch (error) {
+        console.error('❌ Errore nel salvataggio:', error);
+        alert('❌ Errore nel salvataggio. Riprova.');
+    }
+};
+
+function toggleEditProfileForm() {
+    log('🔄 toggleEditProfileForm chiamata');
+    
+    const editForm = document.getElementById('edit-profile-form');
+    const editBtn = document.getElementById('edit-profile-btn');
+    
+    log('🔍 Elementi trovati:', { 
+        editForm: !!editForm, 
+        editBtn: !!editBtn,
+        currentUser: !!currentUser,
+        currentUserEmail: currentUser?.email 
+    });
+    
+    if (!editForm || !editBtn) {
+        error('❌ Elementi form modifica profilo non trovati');
+        showMobileFriendlyAlert('Errore: Elementi form non trovati');
+        return;
+    }
+    
+    // Usa getComputedStyle per verificare se l'elemento è realmente visibile
+    const computedStyle = window.getComputedStyle(editForm);
+    const isHidden = computedStyle.display === 'none' || editForm.style.display === 'none';
+    
+    log('📋 Stato form:', { 
+        inlineDisplay: editForm.style.display, 
+        computedDisplay: computedStyle.display, 
+        isHidden: isHidden 
+    });
+    
+    if (isHidden) {
+        log('👆 Mostrando form di modifica...');
         showEditProfileForm();
     } else {
+        log('👆 Nascondendo form di modifica...');
         hideEditProfileForm();
     }
 }
@@ -4517,7 +4721,31 @@ function showEditProfileForm() {
     const editForm = document.getElementById('edit-profile-form');
     const editBtn = document.getElementById('edit-profile-btn');
     
-    if (!editForm || !editBtn || !currentUser) return;
+    if (!editForm || !editBtn) {
+        error('❌ Elementi form non trovati:', { editForm: !!editForm, editBtn: !!editBtn });
+        showMobileFriendlyAlert('Errore: Form di modifica non trovato');
+        return;
+    }
+    
+    if (!currentUser) {
+        error('❌ currentUser è null o undefined');
+        // Prova a recuperare l'utente dal localStorage
+        try {
+            const savedUser = localStorage.getItem('mental_commons_user');
+            if (savedUser) {
+                window.currentUser = JSON.parse(savedUser);
+                log('✅ Utente recuperato dal localStorage');
+            } else {
+                error('❌ Nessun utente salvato in localStorage');
+                showMobileFriendlyAlert('Errore: Utente non autenticato. Ricarica la pagina.');
+                return;
+            }
+        } catch (e) {
+            error('❌ Errore recupero utente:', e);
+            showMobileFriendlyAlert('Errore: Impossibile caricare i dati utente. Ricarica la pagina.');
+            return;
+        }
+    }
     
     // Popola il form con i dati attuali
     const editName = document.getElementById('edit-name');
@@ -4530,7 +4758,7 @@ function showEditProfileForm() {
     editForm.style.display = 'block';
     editBtn.textContent = 'Annulla modifica';
     
-    log('✅ Form modifica profilo mostrato');
+    log('✅ Form modifica profilo mostrato per utente:', currentUser.email);
 }
 
 function hideEditProfileForm() {
