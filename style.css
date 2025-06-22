@@ -3966,3 +3966,186 @@ html.user-guest::after {
     z-index: 9999;
     display: none; /* Rimuovi per debug */
 }
+
+/* ================================================================
+   ICONA PROFILO - DIMENSIONI FISSE E CENTRATA (DEFINITIVO)
+   ================================================================ */
+
+.profile-icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+}
+
+.profile-icon img,
+.profile-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+}
+
+.profile-icon:focus,
+.profile-icon:active,
+.profile-icon:hover {
+    transform: none !important;
+    scale: 1 !important;
+}
+
+/* Icona profilo navigation - regole specifiche */
+.nav-profile-btn {
+    color: #fff !important;
+    border: 1px solid #fff !important;
+    background: transparent !important;
+    padding: 8px !important;
+    border-radius: 6px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+    text-decoration: none !important;
+    transition: background-color 0.2s ease, color 0.2s ease !important;
+}
+
+.nav-profile-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+    stroke: #fff !important;
+    opacity: 1 !important;
+    transition: stroke 0.2s ease !important;
+    transform: none !important;
+    flex-shrink: 0 !important;
+    fill: none !important;
+}
+
+.nav-profile-btn:hover {
+    background: #fff !important;
+    color: #000 !important;
+    transform: none !important;
+    scale: 1 !important;
+    width: 40px !important;
+    height: 40px !important;
+}
+
+.nav-profile-btn:hover svg {
+    stroke: #000 !important;
+    transform: none !important;
+    width: 20px !important;
+    height: 20px !important;
+    scale: 1 !important;
+}
+
+.nav-profile-btn:active,
+.nav-profile-btn:focus {
+    transform: none !important;
+    scale: 1 !important;
+    width: 40px !important;
+    height: 40px !important;
+    outline: none !important;
+}
+
+.nav-profile-btn:active svg,
+.nav-profile-btn:focus svg {
+    transform: none !important;
+    scale: 1 !important;
+    width: 20px !important;
+    height: 20px !important;
+}
+
+/* Mobile profile button - regole coerenti */
+.mobile-profile-btn {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+    border: 1px solid #fff !important;
+    border-radius: 6px !important;
+    background: transparent !important;
+    color: #fff !important;
+    transition: background-color 0.2s ease, color 0.2s ease !important;
+}
+
+.mobile-profile-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+    stroke: #fff !important;
+    opacity: 1 !important;
+    transform: none !important;
+    flex-shrink: 0 !important;
+    fill: none !important;
+}
+
+.mobile-profile-btn:hover {
+    background: #fff !important;
+    color: #000 !important;
+    transform: none !important;
+    scale: 1 !important;
+}
+
+.mobile-profile-btn:hover svg {
+    stroke: #000 !important;
+    transform: none !important;
+    scale: 1 !important;
+}
+
+/* Prevenzione di tutti i possibili conflitti dimensionali */
+.nav-profile-btn *,
+.mobile-profile-btn *,
+.profile-icon * {
+    transform: none !important;
+    scale: 1 !important;
+}
+
+/* Specifiche media queries per consistenza */
+@media (max-width: 768px) {
+    .nav-profile-btn,
+    .mobile-profile-btn {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .nav-profile-btn svg,
+    .mobile-profile-btn svg {
+        width: 20px !important;
+        height: 20px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-profile-btn,
+    .mobile-profile-btn {
+        width: 40px !important;
+        height: 40px !important;
+        padding: 8px !important;
+    }
+    
+    .nav-profile-btn svg,
+    .mobile-profile-btn svg {
+        width: 20px !important;
+        height: 20px !important;
+    }
+}
+
+/* Override per qualsiasi possibile interferenza JavaScript */
+.nav-profile-btn[style*="transform"],
+.mobile-profile-btn[style*="transform"],
+.profile-icon[style*="transform"] {
+    transform: none !important;
+}
+
+.nav-profile-btn[style*="scale"],
+.mobile-profile-btn[style*="scale"],
+.profile-icon[style*="scale"] {
+    scale: 1 !important;
+}
