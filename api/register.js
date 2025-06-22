@@ -1,6 +1,6 @@
 // ================================================================
 // Sistema di logging per ambiente produzione
-const { log, debug, info, warn, error } = require("../logger.js");
+import { log, debug, info, warn, error } from '../logger.js';
 // MENTAL COMMONS - REGISTER API CON SUPABASE
 // ================================================================
 // Versione: 2.0.0

@@ -9,7 +9,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 // Sistema di logging per ambiente produzione
-const { log, debug, info, warn, error } = require('../logger.js');
+import { log, debug, info, warn, error } from '../logger.js';
 
 // ================================================================
 // CONFIGURAZIONE SUPABASE
