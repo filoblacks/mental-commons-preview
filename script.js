@@ -1,22 +1,22 @@
 // Mental Commons 3.0 - Sistema Completo con Login e Area Utente
 
+// ============================================
+// 🛠 MARKER VERSIONE - VERIFICA DEPLOY
+// ============================================
+console.log("🛠 Mental Commons script.js versione FIX 20250618-01 attivo");
+
 // Sistema di logging che si adatta automaticamente all'ambiente
 // Definizione globale sicura per evitare dichiarazioni duplicate
 if (typeof window.isProduction === 'undefined') {
-  window.isProduction = (() => {
-    const hostname = window.location.hostname;
-    return hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.includes('vercel.app');
-  });
+  window.isProduction = (process.env.NODE_ENV === 'production');
 }
 
-const PRODUCTION_MODE = window.isProduction();
-
-const log = (...args) => { if (!PRODUCTION_MODE) console.log(...args); };
-const debug = (...args) => { if (!PRODUCTION_MODE) console.debug(...args); };
-const info = (...args) => { if (!PRODUCTION_MODE) console.info(...args); };
-const warn = (...args) => { if (!PRODUCTION_MODE) console.warn(...args); };
+const log = (...args) => { if (!window.isProduction) console.log(...args); };
+const debug = (...args) => { if (!window.isProduction) console.debug(...args); };
+const info = (...args) => { if (!window.isProduction) console.info(...args); };
+const warn = (...args) => { if (!window.isProduction) console.warn(...args); };
 const error = (...args) => { console.error(...args); };
-const devError = (...args) => { if (!PRODUCTION_MODE) console.error(...args); };
+const devError = (...args) => { if (!window.isProduction) console.error(...args); };
 
 // Variabili globali
 let ucmeData = [];
@@ -3770,8 +3770,23 @@ window.debugDashboard = debugDashboard;
 // ========================================
 
 // ========================================
-// SISTEMA CHAR COUNTER UNIVERSALE
+// SISTEMA CHAR COUNTER UNIVERSALE - FIX DEFINITIVO
 // ========================================
+
+// Inizializzazione DOMContentLoaded per il contatore caratteri
+document.addEventListener('DOMContentLoaded', () => {
+  const textarea = document.getElementById('ucme-text');
+  const counter = document.getElementById('char-count');
+  if (textarea && counter) {
+    counter.textContent = textarea.value.length;
+    textarea.addEventListener('input', () => {
+      counter.textContent = textarea.value.length;
+    });
+    console.log("✅ Contatore UCMe attivato");
+  } else {
+    console.error("❌ Contatore UCMe non inizializzato: elementi mancanti");
+  }
+});
 
 /**
  * 🎯 SETUP CHAR COUNTER UNIVERSALE
