@@ -1,12 +1,13 @@
 // ================================================================
 // MENTAL COMMONS - SUPABASE UTILITY LIBRARY
 // ================================================================
-// Versione: 1.0.0
+// Versione: 1.1.0
 // Descrizione: Libreria per operazioni database Supabase
+// Fix: Convertito a CommonJS puro per compatibilità Vercel
 
-import { createClient } from '@supabase/supabase-js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+const { createClient } = require('@supabase/supabase-js');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 // Sistema di logging per ambiente produzione
 const { log, debug, info, warn, error } = require('../logger.js');
@@ -82,7 +83,7 @@ const SALT_ROUNDS = 10;
 const JWT_SECRET = process.env.JWT_SECRET || 'mental-commons-secret-key-change-in-production';
 
 // Hash password con bcrypt
-export async function hashPassword(password) {
+async function hashPassword(password) {
   try {
     debug('🔐 Hashing password...');
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
@@ -95,7 +96,7 @@ export async function hashPassword(password) {
 }
 
 // Verifica password
-export async function verifyPassword(password, hash) {
+async function verifyPassword(password, hash) {
   try {
     debug('🔐 Verificando password...');
     const isValid = await bcrypt.compare(password, hash);
@@ -108,7 +109,7 @@ export async function verifyPassword(password, hash) {
 }
 
 // Genera JWT token
-export function generateJWT(userId, email) {
+function generateJWT(userId, email) {
   try {
     debug('🎫 Generando JWT per utente:', userId);
     const payload = {
@@ -128,7 +129,7 @@ export function generateJWT(userId, email) {
 }
 
 // Verifica JWT token
-export function verifyJWT(token) {
+function verifyJWT(token) {
   try {
     debug('🎫 Verificando JWT...');
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -145,7 +146,7 @@ export function verifyJWT(token) {
 // ================================================================
 
 // Recupera tutti gli utenti
-export async function getAllUsers() {
+async function getAllUsers() {
   try {
     debug('👥 Recuperando tutti gli utenti dal database...');
     
@@ -168,7 +169,7 @@ export async function getAllUsers() {
 }
 
 // Trova utente per email
-export async function findUserByEmail(email) {
+async function findUserByEmail(email) {
   try {
     // 🟣 FASE 2 - TRACCIAMENTO COMPLETO API
     debug('🟣 ============================================');
@@ -233,7 +234,7 @@ export async function findUserByEmail(email) {
 }
 
 // Crea nuovo utente
-export async function createUser(email, password, name, surname = null) {
+async function createUser(email, password, name, surname = null) {
   try {
     // 🟣 FASE 2 - TRACCIAMENTO COMPLETO API
     debug('🟣 ============================================');
@@ -314,7 +315,7 @@ export async function createUser(email, password, name, surname = null) {
 }
 
 // Aggiorna ultimo login
-export async function updateLastLogin(userId) {
+async function updateLastLogin(userId) {
   try {
     debug('👤 Aggiornando ultimo login per:', userId);
     
@@ -332,7 +333,7 @@ export async function updateLastLogin(userId) {
 }
 
 // Aggiorna profilo utente (nome e cognome)
-export async function updateUserProfile(userId, name, surname = null) {
+async function updateUserProfile(userId, name, surname = null) {
   try {
     debug('👤 Aggiornando profilo utente:', { userId, name, surname: surname || 'NON SPECIFICATO' });
     
@@ -370,7 +371,7 @@ export async function updateUserProfile(userId, name, surname = null) {
 // ================================================================
 
 // Salva nuova UCMe
-export async function saveUCMe(userId, content, title = null) {
+async function saveUCMe(userId, content, title = null) {
   try {
     debug('📝 Salvando nuova UCMe per utente:', userId);
     debug('📝 Contenuto length:', content?.length);
@@ -415,7 +416,7 @@ export async function saveUCMe(userId, content, title = null) {
 }
 
 // Recupera UCMe di un utente
-export async function getUserUCMes(userId) {
+async function getUserUCMes(userId) {
   try {
     debug('📝 Recuperando UCMe per utente:', userId);
     
@@ -443,7 +444,7 @@ export async function getUserUCMes(userId) {
 // ================================================================
 
 // Salva sessione token
-export async function saveUserSession(userId, token, deviceInfo = null) {
+async function saveUserSession(userId, token, deviceInfo = null) {
   try {
     debug('🎫 Salvando sessione per utente:', userId);
     
@@ -476,7 +477,7 @@ export async function saveUserSession(userId, token, deviceInfo = null) {
 // ================================================================
 
 // Test connessione database
-export async function testDatabaseConnection() {
+async function testDatabaseConnection() {
   try {
     debug('🔍 Test connessione database...');
     
@@ -499,7 +500,7 @@ export async function testDatabaseConnection() {
 }
 
 // Log configurazione
-export function logConfiguration() {
+function logConfiguration() {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
   
@@ -513,7 +514,7 @@ export function logConfiguration() {
 // 🟣 FASE 4 - TEST RLS E PERMESSI
 // ================================================================
 
-export async function testRLSPolicies() {
+async function testRLSPolicies() {
   try {
     debug('🟣 ============================================');
     debug('🟣 FASE 4 - TEST RLS E PERMESSI');
@@ -560,7 +561,7 @@ export async function testRLSPolicies() {
 }
 
 // Funzione helper per verificare se una query è bloccata da RLS
-export async function checkRLSBlocking(tableName, operation = 'SELECT') {
+async function checkRLSBlocking(tableName, operation = 'SELECT') {
   try {
     debug(`🔍 Verifica RLS blocking per ${tableName} (${operation})...`);
     
@@ -610,4 +611,39 @@ export async function checkRLSBlocking(tableName, operation = 'SELECT') {
       hasData: false
     };
   }
-} 
+}
+
+// ================================================================
+// ESPORTAZIONI COMMONJS
+// ================================================================
+
+module.exports = {
+  // Utilità client e configurazione
+  getSupabaseClient,
+  logConfiguration,
+  
+  // Utilità password e JWT
+  hashPassword,
+  verifyPassword,
+  generateJWT,
+  verifyJWT,
+  
+  // Operazioni utenti
+  getAllUsers,
+  findUserByEmail,
+  createUser,
+  updateLastLogin,
+  updateUserProfile,
+  
+  // Operazioni UCMe
+  saveUCMe,
+  getUserUCMes,
+  
+  // Operazioni sessioni
+  saveUserSession,
+  
+  // Utilità debug e test
+  testDatabaseConnection,
+  testRLSPolicies,
+  checkRLSBlocking
+}; 
