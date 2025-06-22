@@ -8,15 +8,24 @@ console.log("🛠 Mental Commons script.js versione FIX 20250618-01 attivo");
 // Sistema di logging che si adatta automaticamente all'ambiente
 // Definizione globale sicura per evitare dichiarazioni duplicate
 if (typeof window.isProduction === 'undefined') {
-  window.isProduction = (process.env.NODE_ENV === 'production');
+  window.isProduction = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'production') || false;
 }
 
-const log = (...args) => { if (!window.isProduction) console.log(...args); };
-const debug = (...args) => { if (!window.isProduction) console.debug(...args); };
-const info = (...args) => { if (!window.isProduction) console.info(...args); };
-const warn = (...args) => { if (!window.isProduction) console.warn(...args); };
-const error = (...args) => { console.error(...args); };
-const devError = (...args) => { if (!window.isProduction) console.error(...args); };
+// Definisci le funzioni di logging globalmente per evitare conflitti
+window.log = (...args) => { if (!window.isProduction) console.log(...args); };
+window.debug = (...args) => { if (!window.isProduction) console.debug(...args); };
+window.info = (...args) => { if (!window.isProduction) console.info(...args); };
+window.warn = (...args) => { if (!window.isProduction) console.warn(...args); };
+window.error = (...args) => { console.error(...args); };
+window.devError = (...args) => { if (!window.isProduction) console.error(...args); };
+
+// Alias locali per compatibilità
+const log = window.log;
+const debug = window.debug;
+const info = window.info;
+const warn = window.warn;
+const error = window.error;
+const devError = window.devError;
 
 // Variabili globali
 let ucmeData = [];

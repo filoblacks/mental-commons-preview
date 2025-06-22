@@ -23,7 +23,7 @@
             
             // Sistema di logging produzione-aware - Usa funzione globale sicura
             if (typeof window.isProduction === 'undefined') {
-              window.isProduction = (process.env.NODE_ENV === 'production');
+              window.isProduction = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'production') || false;
             }
             const PRODUCTION_MODE = window.isProduction;
             const log = (...args) => { if (!PRODUCTION_MODE) console.log(...args); };
