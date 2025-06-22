@@ -193,13 +193,13 @@ async function handlePostUCMeFallback(req, res) {
       }
     });
     
-  } catch (error) {
-    error('❌ Errore fallback UCMe:', error);
+  } catch (err) {
+    error('❌ Errore fallback UCMe:', err);
     return res.status(500).json({
       success: false,
       message: 'Errore durante salvataggio di emergenza',
       debug: {
-        error: error.message,
+        error: err.message,
         apiVersion: '2.2.0',
         mode: 'fallback'
       }
@@ -245,12 +245,12 @@ async function handleGetUCMesFallback(req, res) {
       });
     }
     
-  } catch (error) {
+  } catch (err) {
     return res.status(500).json({
       success: false,
       message: 'Errore lettura fallback',
       debug: {
-        error: error.message,
+        error: err.message,
         apiVersion: '2.2.0',
         mode: 'fallback'
       }
@@ -333,13 +333,13 @@ async function handleGetUCMes(req, res) {
       }
     });
     
-  } catch (error) {
-    error('💥 Errore durante il recupero UCMe:', error);
+  } catch (err) {
+    error('💥 Errore durante il recupero UCMe:', err);
     return res.status(500).json({
       success: false,
       message: 'Errore interno del server',
       debug: {
-        error: error.message,
+        error: err.message,
         apiVersion: '2.2.0'
       }
     });
@@ -522,25 +522,25 @@ async function handlePostUCMe(req, res) {
     debug('📝 UCMe response preparata:', JSON.stringify(responseData, null, 2));
     return res.status(201).json(responseData);
     
-  } catch (error) {
+  } catch (err) {
     // ================================================================
     // GESTIONE ERRORI
     // ================================================================
     
-    error('💥 Errore durante il salvataggio UCMe:', error);
-    error('💥 Stack trace:', error.stack);
+    error('💥 Errore durante il salvataggio UCMe:', err);
+    error('💥 Stack trace:', err.stack);
     
     debug('📦 UCME SAVE RESULT - ERRORE:');
-    debug('  ❌ Errore tipo:', error.name);
-    debug('  ❌ Errore messaggio:', error.message);
+    debug('  ❌ Errore tipo:', err.name);
+    debug('  ❌ Errore messaggio:', err.message);
     debug('  ❌ Timestamp errore:', new Date().toISOString());
     
     return res.status(500).json({
       success: false,
       message: 'Errore interno del server durante il salvataggio della UCMe',
       debug: {
-        error: error.message,
-        code: error.code || 'unknown',
+        error: err.message,
+        code: err.code || 'unknown',
         backend: 'supabase',
         timestamp: new Date().toISOString(),
         apiVersion: '2.2.0'
