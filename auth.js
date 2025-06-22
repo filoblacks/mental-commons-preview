@@ -4,17 +4,10 @@
 // Versione: 3.0.0
 // Descrizione: Gestione JWT persistente con localStorage e scadenza 30 giorni
 
-// Sistema di logging produzione-aware
-// Usa SEMPRE le funzioni globali definite da script.js - NESSUNA RIDEFINIZIONE
+// Sistema di logging semplificato - USA SOLO CONSOLE NATIVO
+// NESSUNA definizione di log/debug/error/warn per evitare conflitti
 
-// ⚠️ IMPORTANTE: Non ridefinire mai window.log, window.debug, etc.
-// Le funzioni di logging sono definite SOLO in script.js per evitare conflitti
-
-// Usa funzioni sicure che non creano conflitti - definite inline senza const/let/var
-function log(...args) { if (window.log) window.log(...args); else console.log(...args); }
-function debug(...args) { if (window.debug) window.debug(...args); else console.debug(...args); }
-function error(...args) { if (window.error) window.error(...args); else console.error(...args); }
-function warn(...args) { if (window.warn) window.warn(...args); else console.warn(...args); }
+// Usa direttamente console per evitare qualsiasi conflitto con script.js
 
 // ================================================================
 // CONFIGURAZIONE E STATO GLOBALE AUTH LOADING
@@ -36,9 +29,9 @@ window.authReady = false;
  * Eseguita appena il browser carica questo script, prima del DOM ready
  */
 (function initImmediateAuth() {
-    debug('🚀 ============================================');
-    debug('🚀 INIZIALIZZAZIONE IMMEDIATA ANTI-FLICKER');
-    debug('🚀 ============================================');
+            console.debug('🚀 ============================================');
+        console.debug('🚀 INIZIALIZZAZIONE IMMEDIATA ANTI-FLICKER');
+        console.debug('🚀 ============================================');
     
     // Aggiungi classe auth-loading al body
     if (document.body) {
@@ -57,9 +50,9 @@ window.authReady = false;
     // Esegui controllo auth immediato
     try {
         const immediateAuthResult = checkAuthImmediate();
-        debug('🔍 Controllo auth immediato completato:', immediateAuthResult);
+        console.debug('🔍 Controllo auth immediato completato:', immediateAuthResult);
     } catch (error) {
-        error('❌ Errore controllo auth immediato:', error);
+        console.error('❌ Errore controllo auth immediato:', error);
     }
 })();
 
@@ -73,7 +66,7 @@ function checkAuthImmediate() {
         const userJson = localStorage.getItem(AUTH_CONFIG.USER_KEY);
         
         if (!token || !userJson) {
-            debug('👤 Nessun token/utente trovato - stato guest');
+            console.debug('👤 Nessun token/utente trovato - stato guest');
             window.authLoading = false;
             window.authReady = true;
             return { isAuthenticated: false, immediate: true };
@@ -83,14 +76,14 @@ function checkAuthImmediate() {
         
         // Verifica validità token (solo scadenza)
         if (isTokenExpired(token)) {
-            debug('⏰ Token scaduto - pulizia automatica');
+            console.debug('⏰ Token scaduto - pulizia automatica');
             clearAuthData();
             window.authLoading = false;
             window.authReady = true;
             return { isAuthenticated: false, expired: true, immediate: true };
         }
         
-        debug('✅ Token valido trovato - utente autenticato');
+        console.debug('✅ Token valido trovato - utente autenticato');
         window.authLoading = false;
         window.authReady = true;
         return { 
@@ -100,7 +93,7 @@ function checkAuthImmediate() {
             immediate: true
         };
     } catch (error) {
-        error('❌ Errore controllo auth immediato:', error);
+        console.error('❌ Errore controllo auth immediato:', error);
         clearAuthData();
         window.authLoading = false;
         window.authReady = true;
@@ -113,9 +106,9 @@ function checkAuthImmediate() {
  * Chiamata quando DOM è pronto per aggiornare la UI
  */
 function finalizeAuthUI() {
-    debug('🎯 ============================================');
-    debug('🎯 FINALIZZAZIONE UI AUTH');
-    debug('🎯 ============================================');
+        console.debug('🎯 ============================================');
+        console.debug('🎯 FINALIZZAZIONE UI AUTH');
+        console.debug('🎯 ============================================');
     
     // Mostra spinner durante verifica finale
     showAuthSpinner();
@@ -132,7 +125,7 @@ function finalizeAuthUI() {
     // Nascondi spinner
     hideAuthSpinner();
     
-    debug('✅ UI Auth finalizzata');
+        console.debug('✅ UI Auth finalizzata');
     return authResult;
 }
 
@@ -173,7 +166,7 @@ function decodeJWT(token) {
         const payload = JSON.parse(atob(parts[1]));
         return payload;
     } catch (error) {
-        error('❌ Errore decodifica JWT:', error);
+        console.error('❌ Errore decodifica JWT:', error);
         return null;
     }
 }
@@ -225,7 +218,7 @@ function getTokenInfo(token) {
  */
 function saveAuthData(user, token) {
     try {
-        debug('💾 Salvando dati autenticazione in localStorage...');
+        console.debug('💾 Salvando dati autenticazione in localStorage...');
         
         localStorage.setItem(AUTH_CONFIG.TOKEN_KEY, token);
         localStorage.setItem(AUTH_CONFIG.USER_KEY, JSON.stringify(user));
@@ -233,17 +226,17 @@ function saveAuthData(user, token) {
         // Log informazioni token
         const tokenInfo = getTokenInfo(token);
         if (tokenInfo) {
-            debug('🎫 Token info:', {
+        console.debug('🎫 Token info:', {
                 email: tokenInfo.email,
                 expiresAt: tokenInfo.expiresAt,
                 daysUntilExpiry: tokenInfo.daysUntilExpiry
             });
         }
         
-        debug('✅ Dati autenticazione salvati con successo');
+        console.debug('✅ Dati autenticazione salvati con successo');
         return true;
     } catch (error) {
-        error('❌ Errore salvataggio dati autenticazione:', error);
+        console.error('❌ Errore salvataggio dati autenticazione:', error);
         return false;
     }
 }
@@ -257,16 +250,16 @@ function loadAuthData() {
         const userJson = localStorage.getItem(AUTH_CONFIG.USER_KEY);
         
         if (!token || !userJson) {
-            debug('👤 Nessun dato di autenticazione trovato');
+        console.debug('👤 Nessun dato di autenticazione trovato');
             return null;
         }
         
         const user = JSON.parse(userJson);
         
-        debug('📂 Dati autenticazione caricati da localStorage');
+        console.debug('📂 Dati autenticazione caricati da localStorage');
         return { user, token };
     } catch (error) {
-        error('❌ Errore caricamento dati autenticazione:', error);
+        console.error('❌ Errore caricamento dati autenticazione:', error);
         clearAuthData(); // Pulisci dati corrotti
         return null;
     }
@@ -277,7 +270,7 @@ function loadAuthData() {
  */
 function clearAuthData() {
     try {
-        debug('🧹 Pulizia completa dati autenticazione...');
+        console.debug('🧹 Pulizia completa dati autenticazione...');
         
         // Rimuovi da localStorage
         localStorage.removeItem(AUTH_CONFIG.TOKEN_KEY);
@@ -292,10 +285,10 @@ function clearAuthData() {
         localStorage.removeItem('mc-email');
         localStorage.removeItem('mc-users');
         
-        debug('✅ Pulizia completa completata');
+        console.debug('✅ Pulizia completa completata');
         return true;
     } catch (error) {
-        error('❌ Errore durante pulizia dati:', error);
+        console.error('❌ Errore durante pulizia dati:', error);
         return false;
     }
 }
@@ -308,14 +301,14 @@ function clearAuthData() {
  * Verifica se l'utente è autenticato con token valido
  */
 function checkAuth() {
-    debug('🔍 ============================================');
-    debug('🔍 CONTROLLO AUTENTICAZIONE PERSISTENTE');
-    debug('🔍 ============================================');
+        console.debug('🔍 ============================================');
+        console.debug('🔍 CONTROLLO AUTENTICAZIONE PERSISTENTE');
+        console.debug('🔍 ============================================');
     
     const authData = loadAuthData();
     
     if (!authData) {
-        debug('❌ Nessun dato di autenticazione disponibile');
+        console.debug('❌ Nessun dato di autenticazione disponibile');
         return { isAuthenticated: false, user: null, token: null };
     }
     
@@ -323,13 +316,13 @@ function checkAuth() {
     
     // Verifica validità token
     if (isTokenExpired(token)) {
-        debug('⏰ Token scaduto, logout automatico');
+        console.debug('⏰ Token scaduto, logout automatico');
         clearAuthData();
         return { isAuthenticated: false, user: null, token: null, expired: true };
     }
     
     const tokenInfo = getTokenInfo(token);
-    debug('✅ Utente autenticato:', {
+        console.debug('✅ Utente autenticato:', {
         email: user.email,
         name: user.name,
         tokenValid: !tokenInfo.isExpired,
@@ -348,9 +341,9 @@ function checkAuth() {
  * Forza logout utente
  */
 function forceLogout(reason = 'Manual logout') {
-    debug('🚪 ============================================');
-    debug('🚪 LOGOUT FORZATO:', reason);
-    debug('🚪 ============================================');
+        console.debug('🚪 ============================================');
+        console.debug('🚪 LOGOUT FORZATO:', reason);
+        console.debug('🚪 ============================================');
     
     clearAuthData();
     
@@ -368,11 +361,11 @@ function forceLogout(reason = 'Manual logout') {
     if (!window.location.pathname.includes('index.html') && 
         window.location.pathname !== '/' && 
         !window.location.pathname.includes('login.html')) {
-        debug('🔄 Redirect a homepage dopo logout');
+        console.debug('🔄 Redirect a homepage dopo logout');
         window.location.href = '/';
     }
     
-    debug('✅ Logout completato');
+        console.debug('✅ Logout completato');
 }
 
 // ================================================================
@@ -384,7 +377,7 @@ function forceLogout(reason = 'Manual logout') {
  */
 async function validateTokenWithBackend(token) {
     try {
-        debug('🔐 Validazione token con backend...');
+        console.debug('🔐 Validazione token con backend...');
         
         const response = await fetch(`${AUTH_CONFIG.API_BASE_URL}/validate-token`, {
             method: 'POST',
@@ -396,15 +389,15 @@ async function validateTokenWithBackend(token) {
         });
         
         if (!response.ok) {
-            debug('❌ Token non valido secondo il backend');
+        console.debug('❌ Token non valido secondo il backend');
             return false;
         }
         
         const result = await response.json();
-        debug('✅ Token validato dal backend');
+        console.debug('✅ Token validato dal backend');
         return result.valid === true;
     } catch (error) {
-        error('❌ Errore validazione token con backend:', error);
+        console.error('❌ Errore validazione token con backend:', error);
         // In caso di errore di rete, assumiamo il token locale sia valido
         return true;
     }
@@ -431,7 +424,7 @@ function createAuthenticatedFetch() {
                     'Authorization': `Bearer ${authResult.token}`
                 };
                 
-                debug('🔐 Header Authorization aggiunto alla chiamata API');
+        console.debug('🔐 Header Authorization aggiunto alla chiamata API');
             }
         }
         
@@ -447,7 +440,7 @@ function createAuthenticatedFetch() {
  * Inizializza il sistema di autenticazione persistente
  */
 function initPersistentAuth() {
-    debug('🚀 Inizializzazione autenticazione persistente...');
+        console.debug('🚀 Inizializzazione autenticazione persistente...');
     
     // Configura fetch authenticato
     createAuthenticatedFetch();
@@ -456,11 +449,11 @@ function initPersistentAuth() {
     const authResult = checkAuth();
     
     if (authResult.expired) {
-        debug('⚠️ Sessione scaduta, utente disconnesso automaticamente');
+        console.debug('⚠️ Sessione scaduta, utente disconnesso automaticamente');
         // Potresti mostrare un messaggio all'utente qui
     }
     
-    debug('✅ Sistema autenticazione persistente inizializzato');
+        console.debug('✅ Sistema autenticazione persistente inizializzato');
     return authResult;
 }
 
@@ -493,4 +486,4 @@ window.PersistentAuth = {
     init: initPersistentAuth
 };
 
-debug('📚 Sistema autenticazione persistente caricato'); 
+        console.debug('📚 Sistema autenticazione persistente caricato'); 
