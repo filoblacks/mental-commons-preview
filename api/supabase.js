@@ -89,9 +89,9 @@ async function hashPassword(password) {
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     debug('✅ Password hashata con successo');
     return hash;
-  } catch (error) {
-    error('❌ Errore hashing password:', error);
-    throw error;
+  } catch (err) {
+    error('❌ Errore hashing password:', err);
+    throw err;
   }
 }
 
@@ -102,9 +102,9 @@ async function verifyPassword(password, hash) {
     const isValid = await bcrypt.compare(password, hash);
     debug('🔐 Password valida:', isValid);
     return isValid;
-  } catch (error) {
-    error('❌ Errore verifica password:', error);
-    throw error;
+  } catch (err) {
+    error('❌ Errore verifica password:', err);
+    throw err;
   }
 }
 
@@ -122,9 +122,9 @@ function generateJWT(userId, email) {
     const token = jwt.sign(payload, JWT_SECRET);
     debug('✅ JWT generato con successo (scadenza: 30 giorni)');
     return token;
-  } catch (error) {
-    error('❌ Errore generazione JWT:', error);
-    throw error;
+  } catch (err) {
+    error('❌ Errore generazione JWT:', err);
+    throw err;
   }
 }
 
@@ -135,8 +135,8 @@ function verifyJWT(token) {
     const decoded = jwt.verify(token, JWT_SECRET);
     debug('✅ JWT valido per utente:', decoded.userId);
     return decoded;
-  } catch (error) {
-    error('❌ JWT non valido:', error.message);
+  } catch (err) {
+    error('❌ JWT non valido:', err.message);
     return null;
   }
 }
@@ -156,15 +156,15 @@ async function getAllUsers() {
       .order('created_at', { ascending: false });
     
     if (error) {
-      error('❌ Errore recupero utenti:', error);
-      throw error;
+      error('❌ Errore recupero utenti:', err);
+      throw err;
     }
     
     debug('✅ Recuperati', data?.length || 0, 'utenti');
     return data || [];
-  } catch (error) {
-    error('❌ Errore recupero tutti gli utenti:', error);
-    throw error;
+  } catch (err) {
+    error('❌ Errore recupero tutti gli utenti:', err);
+    throw err;
   }
 }
 
@@ -207,8 +207,8 @@ async function findUserByEmail(email) {
     if (error) {
       debug('⚠ Query error completo:', JSON.stringify(error, null, 2));
       // Con maybeSingle(), non dovremmo avere errori PGRST116
-      error('❌ Errore inaspettato nella ricerca utente:', error);
-      throw error;
+      error('❌ Errore inaspettato nella ricerca utente:', err);
+      throw err;
     }
     
     if (data) {
@@ -219,17 +219,17 @@ async function findUserByEmail(email) {
       debug('👤 Utente non trovato per email:', email);
       return null;
     }
-  } catch (error) {
+  } catch (err) {
     error('❌ Errore ricerca utente completo:', JSON.stringify(error, null, 2));
     
     // Se l'errore è di connessione o configurazione, rilancialo
     // Se è un errore di "not found", restituisci null
-    if (error.code === 'PGRST116' || error.message?.includes('No rows')) {
+    if (err.code === 'PGRST116' || err.message?.includes('No rows')) {
       debug('👤 Utente non trovato (errore catch)');
       return null;
     }
     
-    throw error;
+    throw err;
   }
 }
 
@@ -292,7 +292,7 @@ async function createUser(email, password, name, surname = null) {
       error('❌ Errore creazione utente completo:', JSON.stringify(error, null, 2));
       
       // Gestione specifica per errori di duplicazione
-      if (error.code === '23505' || error.message?.includes('duplicate key') || error.message?.includes('already exists')) {
+      if (err.code === '23505' || err.message?.includes('duplicate key') || err.message?.includes('already exists')) {
         error('❌ ERRORE DUPLICAZIONE: Utente con questa email già esiste');
         const duplicateError = new Error('Un account con questa email esiste già');
         duplicateError.code = 'DUPLICATE_EMAIL';
@@ -300,17 +300,17 @@ async function createUser(email, password, name, surname = null) {
         throw duplicateError;
       }
       
-      throw error;
+      throw err;
     }
     
     debug('✅ Utente creato con successo:', data.id);
     debug('📊 Dati utente creato:', JSON.stringify({ ...data, password_hash: '[HIDDEN]' }, null, 2));
     return data;
-  } catch (error) {
+  } catch (err) {
     error('❌ Errore creazione utente completo:', JSON.stringify(error, null, 2));
     
     // Rilanciare l'errore così com'è per mantenere le informazioni
-    throw error;
+    throw err;
   }
 }
 
@@ -324,10 +324,10 @@ async function updateLastLogin(userId) {
       .update({ last_login: new Date().toISOString() })
       .eq('id', userId);
     
-    if (error) throw error;
+    if (error) throw err;
     debug('✅ Ultimo login aggiornato');
-  } catch (error) {
-    error('❌ Errore aggiornamento login:', error);
+  } catch (err) {
+    error('❌ Errore aggiornamento login:', err);
     // Non bloccare il login per questo errore
   }
 }
@@ -353,16 +353,16 @@ async function updateUserProfile(userId, name, surname = null) {
       .single();
     
     if (error) {
-      error('❌ Errore aggiornamento profilo:', error);
-      throw error;
+      error('❌ Errore aggiornamento profilo:', err);
+      throw err;
     }
     
     debug('✅ Profilo utente aggiornato con successo');
     debug('📊 Dati utente aggiornato:', JSON.stringify({ ...data, password_hash: '[HIDDEN]' }, null, 2));
     return data;
-  } catch (error) {
-    error('❌ Errore aggiornamento profilo utente:', error);
-    throw error;
+  } catch (err) {
+    error('❌ Errore aggiornamento profilo utente:', err);
+    throw err;
   }
 }
 
@@ -396,22 +396,22 @@ async function saveUCMe(userId, content, title = null) {
       .single();
     
     debug('📥 Supabase UCMe insert result:', data);
-    debug('⚠ Supabase UCMe insert error:', error);
+    debug('⚠ Supabase UCMe insert error:', err);
     
     if (error) {
       error('❌ DETTAGLIO ERRORE SUPABASE UCMe:');
-      error('   Codice:', error.code);
-      error('   Messaggio:', error.message);
+      error('   Codice:', err.code);
+      error('   Messaggio:', err.message);
       error('   Dettagli:', error.details);
       error('   Hint:', error.hint);
-      throw error;
+      throw err;
     }
     
     debug('✅ UCMe salvata con successo:', data.id);
     return data;
-  } catch (error) {
-    error('❌ Errore salvataggio UCMe:', error);
-    throw error;
+  } catch (err) {
+    error('❌ Errore salvataggio UCMe:', err);
+    throw err;
   }
 }
 
@@ -427,15 +427,15 @@ async function getUserUCMes(userId) {
       .order('created_at', { ascending: false });
     
     if (error) {
-      error('❌ Errore recupero UCMe:', error);
-      throw error;
+      error('❌ Errore recupero UCMe:', err);
+      throw err;
     }
     
     debug('✅ UCMe recuperate:', data?.length || 0);
     return data || [];
-  } catch (error) {
-    error('❌ Errore recupero UCMe:', error);
-    throw error;
+  } catch (err) {
+    error('❌ Errore recupero UCMe:', err);
+    throw err;
   }
 }
 
@@ -462,12 +462,12 @@ async function saveUserSession(userId, token, deviceInfo = null) {
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) throw err;
     
     debug('✅ Sessione salvata:', data.id);
     return data;
-  } catch (error) {
-    error('❌ Errore salvataggio sessione:', error);
+  } catch (err) {
+    error('❌ Errore salvataggio sessione:', err);
     // Non bloccare il login per questo errore
   }
 }
@@ -487,14 +487,14 @@ async function testDatabaseConnection() {
       .limit(1);
     
     if (error) {
-      error('❌ Connessione database fallita:', error);
+      error('❌ Connessione database fallita:', err);
       return false;
     }
     
     debug('✅ Connessione database OK');
     return true;
-  } catch (error) {
-    error('❌ Errore test connessione:', error);
+  } catch (err) {
+    error('❌ Errore test connessione:', err);
     return false;
   }
 }
@@ -550,7 +550,7 @@ async function testRLSPolicies() {
         serviceKey: testError
       }
     };
-  } catch (error) {
+  } catch (err) {
     error('❌ Errore test RLS completo:', JSON.stringify(error, null, 2));
     return {
       serviceKeyWorking: false,
@@ -580,17 +580,17 @@ async function checkRLSBlocking(tableName, operation = 'SELECT') {
     const { data, error } = await query;
     
     const isBlocked = error && (
-      error.message?.includes('row-level security') ||
-      error.message?.includes('permission denied') ||
-      error.message?.includes('policy') ||
-      error.code === '42501' ||
-      error.code === 'PGRST301'
+      err.message?.includes('row-level security') ||
+      err.message?.includes('permission denied') ||
+      err.message?.includes('policy') ||
+      err.code === '42501' ||
+      err.code === 'PGRST301'
     );
     
     debug(`📊 RLS Check ${tableName}:${operation}:`);
     debug('  - Query eseguita:', !!data || !!error);
     debug('  - Bloccata da RLS:', isBlocked);
-    debug('  - Errore RLS:', isBlocked ? error.message : 'No');
+    debug('  - Errore RLS:', isBlocked ? err.message : 'No');
     debug('  - Dati ricevuti:', !!data);
     debug('  - Errore completo:', error ? JSON.stringify(error, null, 2) : 'Nessuno');
     
@@ -601,8 +601,8 @@ async function checkRLSBlocking(tableName, operation = 'SELECT') {
       error: error,
       hasData: !!data
     };
-  } catch (error) {
-    error(`❌ Errore check RLS per ${tableName}:`, error);
+  } catch (err) {
+    error(`❌ Errore check RLS per ${tableName}:`, err);
     return {
       table: tableName,
       operation,
