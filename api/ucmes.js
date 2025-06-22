@@ -1,18 +1,15 @@
 // ================================================================
 // Sistema di logging per ambiente produzione
-const { log, debug, info, warn, error } = require("../logger.js");
+import { log, debug, info, warn, error } from "../logger.js";
 // MENTAL COMMONS - API UCMES (CARICAMENTO)
 // ================================================================
 // Endpoint per recuperare UCMe salvate nel database Supabase
 
-import { 
-  verifyJWT, 
-  getUserUCMes, 
+import {
+  verifyJWT,
+  getUserUCMes,
   testDatabaseConnection
 } from './supabase.js';
-
-// Sistema di logging per ambiente produzione
-const { log, debug, info, warn, error } = require('../logger.js');
 
 export default async function handler(req, res) {
   debug('🟣 ============================================');
