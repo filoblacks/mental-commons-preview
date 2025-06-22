@@ -1,6 +1,6 @@
 // ================================================================
 // Sistema di logging per ambiente produzione
-const { log, debug, info, warn, error } = require("../logger.js");
+import { log, debug, info, warn, error } from "../logger.js";
 // MENTAL COMMONS - TOKEN VALIDATION API
 // ================================================================
 // Versione: 1.0.0
