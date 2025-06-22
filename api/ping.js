@@ -1,6 +1,6 @@
 // ================================================================
 // Sistema di logging per ambiente produzione
-const { log, debug, info, warn, error } = require("../logger.js");
+import { log, debug, info, warn, error } from '../logger.js';
 // MENTAL COMMONS - PING API CON TEST COMPLETI
 // ================================================================
 // Versione: 3.0.0
