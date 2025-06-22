@@ -10,11 +10,25 @@ if (typeof window.isProduction === 'undefined') {
   window.isProduction = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'production') || false;
 }
 const PRODUCTION_MODE = window.isProduction;
-// Usa le funzioni di logging globali da script.js se disponibili, altrimenti definisci localmente
-const log = typeof window.log !== 'undefined' ? window.log : (...args) => { if (!PRODUCTION_MODE) console.log(...args); };
-const debug = typeof window.debug !== 'undefined' ? window.debug : (...args) => { if (!PRODUCTION_MODE) console.debug(...args); };
-const error = typeof window.error !== 'undefined' ? window.error : (...args) => { console.error(...args); };
-const warn = typeof window.warn !== 'undefined' ? window.warn : (...args) => { if (!PRODUCTION_MODE) console.warn(...args); };
+// Usa sempre le funzioni globali, definendole qui se non esistono già
+if (typeof window.log === 'undefined') {
+  window.log = (...args) => { if (!PRODUCTION_MODE) console.log(...args); };
+}
+if (typeof window.debug === 'undefined') {
+  window.debug = (...args) => { if (!PRODUCTION_MODE) console.debug(...args); };
+}
+if (typeof window.error === 'undefined') {
+  window.error = (...args) => { console.error(...args); };
+}
+if (typeof window.warn === 'undefined') {
+  window.warn = (...args) => { if (!PRODUCTION_MODE) console.warn(...args); };
+}
+
+// Usa le funzioni globali direttamente (no const/let/var)
+const log = window.log;
+const debug = window.debug;
+const error = window.error;
+const warn = window.warn;
 
 // ================================================================
 // CONFIGURAZIONE E STATO GLOBALE AUTH LOADING
