@@ -1,7 +1,6 @@
 {
   "name": "mental-commons",
   "version": "3.0.0",
-  "type": "module",
   "description": "Mental Commons - Piattaforma peer-to-peer per la riflessione condivisa",
   "scripts": {
     "dev": "vercel dev",
