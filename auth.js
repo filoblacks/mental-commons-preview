@@ -5,30 +5,16 @@
 // Descrizione: Gestione JWT persistente con localStorage e scadenza 30 giorni
 
 // Sistema di logging produzione-aware
-// Usa la definizione globale sicura da script.js
-if (typeof window.isProduction === 'undefined') {
-  window.isProduction = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'production') || false;
-}
-const PRODUCTION_MODE = window.isProduction;
-// Usa sempre le funzioni globali, definendole qui se non esistono già
-if (typeof window.log === 'undefined') {
-  window.log = (...args) => { if (!PRODUCTION_MODE) console.log(...args); };
-}
-if (typeof window.debug === 'undefined') {
-  window.debug = (...args) => { if (!PRODUCTION_MODE) console.debug(...args); };
-}
-if (typeof window.error === 'undefined') {
-  window.error = (...args) => { console.error(...args); };
-}
-if (typeof window.warn === 'undefined') {
-  window.warn = (...args) => { if (!PRODUCTION_MODE) console.warn(...args); };
-}
+// Usa SEMPRE le funzioni globali definite da script.js - NESSUNA RIDEFINIZIONE
 
-// Usa le funzioni globali direttamente (no const/let/var)
-const log = window.log;
-const debug = window.debug;
-const error = window.error;
-const warn = window.warn;
+// ⚠️ IMPORTANTE: Non ridefinire mai window.log, window.debug, etc.
+// Le funzioni di logging sono definite SOLO in script.js per evitare conflitti
+
+// Usa funzioni sicure che non creano conflitti - definite inline senza const/let/var
+function log(...args) { if (window.log) window.log(...args); else console.log(...args); }
+function debug(...args) { if (window.debug) window.debug(...args); else console.debug(...args); }
+function error(...args) { if (window.error) window.error(...args); else console.error(...args); }
+function warn(...args) { if (window.warn) window.warn(...args); else console.warn(...args); }
 
 // ================================================================
 // CONFIGURAZIONE E STATO GLOBALE AUTH LOADING
