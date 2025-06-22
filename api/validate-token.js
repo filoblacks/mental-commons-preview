@@ -1,12 +1,28 @@
 // ================================================================
 // Sistema di logging per ambiente produzione
-const { log, debug, info, warn, error } = require("../logger.js");
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const { log, debug, info, warn, error } = require('../logger.js');
 // MENTAL COMMONS - TOKEN VALIDATION API
 // ================================================================
 // Versione: 1.0.0
 // Descrizione: Endpoint per validare JWT token
 
-import { verifyJWT } from './supabase.js';
+import { createHmac } from 'node:crypto';
+
+function verifyJWT(token) {
+  try {
+    const secret = process.env.JWT_SECRET || 'mental-commons-secret-key-change-in-production';
+    const [headerB64, payloadB64, signature] = token.split('.');
+    if (!headerB64 || !payloadB64 || !signature) return null;
+    const data = `${headerB64}.${payloadB64}`;
+    const expected = createHmac('sha256', secret).update(data).digest('base64url');
+    if (signature !== expected) return null;
+    return JSON.parse(Buffer.from(payloadB64, 'base64url').toString());
+  } catch {
+    return null;
+  }
+}
 
 export default async function handler(req, res) {
   debug('🔐 ============================================');
