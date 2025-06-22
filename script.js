@@ -252,7 +252,7 @@ function continueInitialization() {
     
     // Setup char counter con fallback
     setTimeout(() => {
-        setupCharCounterFallback();
+        ensureCharCounterWorks();
     }, 500);
     
     // Setup mobile optimizations
