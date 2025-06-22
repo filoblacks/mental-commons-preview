@@ -495,6 +495,10 @@ function initializeProfile() {
             profileContent.style.display = 'block';
             log("✅ UI profilo forzatamente aggiornata - caricamento nascosto, profilo mostrato");
             
+            // ⚠️ CRITICO: Configura event listeners DOPO aver mostrato il contenuto
+            log('🔧 Configurazione event listeners profilo...');
+            setupProfileEventListeners();
+            
             log('✅ Profilo completamente caricato e visualizzato');
             
         } catch (error) {
@@ -1073,7 +1077,14 @@ function logoutUser() {
         // Aggiorna variabili locali
         currentUser = null;
         updateUIForGuestUser();
-        showScreen('home');
+        
+        // Redirect alla homepage se siamo su una pagina protetta
+        if (window.location.pathname.includes('profile.html') || window.location.pathname.includes('dashboard.html')) {
+            log('🔄 Redirect alla homepage dopo logout');
+            window.location.href = '/index.html';
+        } else {
+            showScreen('home');
+        }
         
         // Nascondi spinner
         window.PersistentAuth.hideAuthSpinner();
@@ -1100,7 +1111,14 @@ function logoutUser() {
         log('🔄 Aggiornamento UI per guest...');
         
         updateUIForGuestUser();
-        showScreen('home');
+        
+        // Redirect alla homepage se siamo su una pagina protetta
+        if (window.location.pathname.includes('profile.html') || window.location.pathname.includes('dashboard.html')) {
+            log('🔄 Redirect alla homepage dopo logout');
+            window.location.href = '/index.html';
+        } else {
+            showScreen('home');
+        }
     }
     
     log('✅ Logout completato');
@@ -1618,20 +1636,15 @@ function savePortatoreData(email) {
 // ========================================
 
 function setupEventListeners() {
-    // Navigazione header
     setupNavigationListeners();
-    
-    // Form di autenticazione
     setupAuthFormListeners();
-    
-    // Form UCMe principale
     setupMainFormListeners();
-    
-    // Area utente
     setupUserAreaListeners();
+    setupMobileInputFixes();
+    setupUniversalCharCounter(); // Deve essere ultimo per sovrascrivere eventuali altri listener
     
-    // Assicura che il char counter funzioni sempre
-    ensureCharCounterWorks();
+    // NUOVO: Aggiungi listeners per i bottoni del profilo
+    setupProfileEventListeners();
 }
 
 function setupNavigationListeners() {
@@ -2305,43 +2318,101 @@ function editProfile() {
 }
 
 function exportUserData() {
-    if (!currentUser) return;
+    if (!currentUser) {
+        showMobileFriendlyAlert('Errore: utente non autenticato');
+        return;
+    }
     
-    const userUcmes = ucmeData.filter(ucme => ucme.email === currentUser.email);
-    const exportData = {
-        user: currentUser,
-        ucmes: userUcmes,
-        exportDate: new Date().toISOString()
-    };
+    log('📤 Avvio esportazione dati per:', currentUser.email);
     
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(dataBlob);
-    link.download = `mental-commons-${currentUser.email}-${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    
-    showMobileFriendlyAlert('Dati esportati!');
+    try {
+        const userUcmes = Array.isArray(ucmeData) ? ucmeData.filter(ucme => ucme.email === currentUser.email) : [];
+        const exportData = {
+            user: {
+                email: currentUser.email,
+                name: currentUser.name,
+                createdAt: currentUser.createdAt,
+                lastLogin: currentUser.lastLogin
+            },
+            ucmes: userUcmes,
+            exportDate: new Date().toISOString(),
+            version: "3.0"
+        };
+        
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `mental-commons-${currentUser.email.replace('@', '-')}-${new Date().toISOString().split('T')[0]}.json`;
+        
+        // Aggiungi il link al DOM temporaneamente per il download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Rilascia l'URL object
+        URL.revokeObjectURL(link.href);
+        
+        showMobileFriendlyAlert('✅ Dati esportati con successo!');
+        log('✅ Esportazione completata');
+        
+    } catch (error) {
+        error('❌ Errore durante esportazione:', error);
+        showMobileFriendlyAlert('❌ Errore durante l\'esportazione');
+    }
 }
 
 function deleteAccount() {
-    if (!currentUser) return;
+    if (!currentUser) {
+        showMobileFriendlyAlert('Errore: utente non autenticato');
+        return;
+    }
     
-    if (confirm('Sei sicuro di voler eliminare il tuo account? Questa azione non può essere annullata.')) {
-        // Rimuovi utente dalla lista
-        const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
-        const filteredUsers = users.filter(u => u.id !== currentUser.id);
-        localStorage.setItem('mc-users', JSON.stringify(filteredUsers));
+    const confirmMessage = `⚠️ ATTENZIONE!\n\nSei sicuro di voler eliminare il tuo account (${currentUser.email})?\n\nQuesta azione:\n• Eliminerà tutti i tuoi dati\n• Rimuoverà tutte le tue UCMe\n• Non può essere annullata\n\nDigita "ELIMINA" per confermare:`;
+    
+    const confirmation = prompt(confirmMessage);
+    
+    if (confirmation === 'ELIMINA') {
+        log('🗑️ Avvio eliminazione account per:', currentUser.email);
         
-        // Rimuovi UCMe dell'utente (opzionale - potresti volerle mantenere anonime)
-        ucmeData = ucmeData.filter(ucme => ucme.email !== currentUser.email);
-        localStorage.setItem('mentalCommons_ucmes', JSON.stringify(ucmeData));
-        
-        // Logout
-        logoutUser();
-        
-        showMobileFriendlyAlert('Account eliminato.');
+        try {
+            const userEmail = currentUser.email;
+            
+            // Rimuovi utente dalla lista
+            const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
+            const filteredUsers = users.filter(u => u.email !== userEmail && u.id !== currentUser.id);
+            localStorage.setItem('mc-users', JSON.stringify(filteredUsers));
+            
+            // Rimuovi UCMe dell'utente
+            if (Array.isArray(ucmeData)) {
+                ucmeData = ucmeData.filter(ucme => ucme.email !== userEmail);
+                localStorage.setItem('mentalCommons_ucmes', JSON.stringify(ucmeData));
+            }
+            
+            // Pulisci tutti i dati utente
+            localStorage.removeItem('mental_commons_user');
+            localStorage.removeItem('mental_commons_token');
+            localStorage.removeItem('mc-user');
+            localStorage.removeItem('mc-email');
+            
+            log('✅ Account eliminato:', userEmail);
+            
+            // Logout e redirect
+            currentUser = null;
+            showMobileFriendlyAlert('✅ Account eliminato con successo');
+            
+            // Delay per permettere la visualizzazione del messaggio
+            setTimeout(() => {
+                window.location.href = '/index.html';
+            }, 2000);
+            
+        } catch (error) {
+            error('❌ Errore durante eliminazione account:', error);
+            showMobileFriendlyAlert('❌ Errore durante l\'eliminazione dell\'account');
+        }
+    } else if (confirmation !== null) {
+        showMobileFriendlyAlert('Eliminazione annullata. Devi digitare "ELIMINA" per confermare.');
     }
 }
 
@@ -4344,4 +4415,209 @@ function ensureCharCounterWorks() {
             setupUniversalCharCounter();
         }
     }, 1000);
+}
+
+// ========================================
+// SETUP EVENT LISTENERS PROFILO - NUOVA FUNZIONE
+// ========================================
+
+function setupProfileEventListeners() {
+    log('🔄 Configurazione event listeners per profilo...');
+    
+    // Bottone logout nell'header del profilo
+    const logoutHeaderBtn = document.getElementById('logout-header-btn');
+    if (logoutHeaderBtn) {
+        logoutHeaderBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            log('🚪 Logout richiesto dall\'header profilo');
+            logoutUser();
+        });
+        log('✅ Event listener logout header configurato');
+    }
+    
+    // Bottone modifica profilo
+    const editProfileBtn = document.getElementById('edit-profile-btn');
+    if (editProfileBtn) {
+        editProfileBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            log('✏️ Modifica profilo richiesta');
+            toggleEditProfileForm();
+        });
+        log('✅ Event listener modifica profilo configurato');
+    }
+    
+    // Bottone esporta dati
+    const exportDataBtn = document.getElementById('export-data-btn');
+    if (exportDataBtn) {
+        exportDataBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            log('📤 Esportazione dati richiesta');
+            exportUserData();
+        });
+        log('✅ Event listener esportazione dati configurato');
+    }
+    
+    // Bottone elimina account
+    const deleteAccountBtn = document.getElementById('delete-account-btn');
+    if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            log('🗑️ Eliminazione account richiesta');
+            deleteAccount();
+        });
+        log('✅ Event listener eliminazione account configurato');
+    }
+    
+    // Form di modifica profilo
+    const profileForm = document.getElementById('profile-form');
+    if (profileForm) {
+        profileForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            log('💾 Salvataggio profilo richiesto');
+            saveProfileChanges();
+        });
+        log('✅ Event listener form profilo configurato');
+    }
+    
+    // Bottone annulla modifica
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            log('❌ Annullamento modifica profilo');
+            hideEditProfileForm();
+        });
+        log('✅ Event listener annulla modifica configurato');
+    }
+    
+    log('✅ Tutti gli event listeners del profilo configurati');
+}
+
+// ========================================
+// FUNZIONI GESTIONE FORM MODIFICA PROFILO - NUOVE FUNZIONI
+// ========================================
+
+function toggleEditProfileForm() {
+    const editForm = document.getElementById('edit-profile-form');
+    const editBtn = document.getElementById('edit-profile-btn');
+    
+    if (!editForm || !editBtn) {
+        error('❌ Elementi form modifica profilo non trovati');
+        return;
+    }
+    
+    if (editForm.style.display === 'none' || !editForm.style.display) {
+        showEditProfileForm();
+    } else {
+        hideEditProfileForm();
+    }
+}
+
+function showEditProfileForm() {
+    const editForm = document.getElementById('edit-profile-form');
+    const editBtn = document.getElementById('edit-profile-btn');
+    
+    if (!editForm || !editBtn || !currentUser) return;
+    
+    // Popola il form con i dati attuali
+    const editName = document.getElementById('edit-name');
+    const editEmail = document.getElementById('edit-email');
+    
+    if (editName) editName.value = currentUser.name || '';
+    if (editEmail) editEmail.value = currentUser.email || '';
+    
+    // Mostra il form
+    editForm.style.display = 'block';
+    editBtn.textContent = 'Annulla modifica';
+    
+    log('✅ Form modifica profilo mostrato');
+}
+
+function hideEditProfileForm() {
+    const editForm = document.getElementById('edit-profile-form');
+    const editBtn = document.getElementById('edit-profile-btn');
+    
+    if (!editForm || !editBtn) return;
+    
+    editForm.style.display = 'none';
+    editBtn.textContent = 'Modifica le tue informazioni';
+    
+    log('✅ Form modifica profilo nascosto');
+}
+
+function saveProfileChanges() {
+    if (!currentUser) {
+        showMobileFriendlyAlert('Errore: utente non autenticato');
+        return;
+    }
+    
+    const editName = document.getElementById('edit-name');
+    const editEmail = document.getElementById('edit-email');
+    const editPassword = document.getElementById('edit-password');
+    const editConfirmPassword = document.getElementById('edit-confirm-password');
+    
+    if (!editName || !editEmail) {
+        showMobileFriendlyAlert('Errore: campi form non trovati');
+        return;
+    }
+    
+    const newName = editName.value.trim();
+    const newEmail = editEmail.value.trim();
+    const newPassword = editPassword ? editPassword.value.trim() : '';
+    const confirmPassword = editConfirmPassword ? editConfirmPassword.value.trim() : '';
+    
+    // Validazione
+    if (!newName) {
+        showMobileFriendlyAlert('Il nome è obbligatorio');
+        return;
+    }
+    
+    if (!newEmail || !isValidEmail(newEmail)) {
+        showMobileFriendlyAlert('Email non valida');
+        return;
+    }
+    
+    if (newPassword && newPassword !== confirmPassword) {
+        showMobileFriendlyAlert('Le password non coincidono');
+        return;
+    }
+    
+    if (newPassword && newPassword.length < 6) {
+        showMobileFriendlyAlert('La password deve essere di almeno 6 caratteri');
+        return;
+    }
+    
+    // Aggiorna i dati utente
+    const oldEmail = currentUser.email;
+    currentUser.name = newName;
+    currentUser.email = newEmail;
+    
+    if (newPassword) {
+        currentUser.password = newPassword; // In un'app reale, questo dovrebbe essere hashato
+    }
+    
+    // Salva i cambiamenti
+    try {
+        // Aggiorna localStorage
+        localStorage.setItem('mental_commons_user', JSON.stringify(currentUser));
+        
+        // Aggiorna anche nella lista utenti se esiste
+        const users = JSON.parse(localStorage.getItem('mc-users') || '[]');
+        const userIndex = users.findIndex(u => u.email === oldEmail || u.id === currentUser.id);
+        if (userIndex !== -1) {
+            users[userIndex] = currentUser;
+            localStorage.setItem('mc-users', JSON.stringify(users));
+        }
+        
+        // Aggiorna UI
+        updateProfileInfo(currentUser);
+        hideEditProfileForm();
+        
+        showMobileFriendlyAlert('Profilo aggiornato con successo!');
+        log('✅ Profilo salvato con successo');
+        
+    } catch (error) {
+        error('❌ Errore nel salvataggio profilo:', error);
+        showMobileFriendlyAlert('Errore nel salvataggio. Riprova.');
+    }
 }
