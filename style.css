@@ -3511,25 +3511,41 @@ body {
 
 /* Info Section */
 
-/* Stili per icona profilo nella navigazione */
+/* Stili per icona profilo nella navigazione - VERSIONE CORRETTA */
 .nav-profile-btn,
 .mobile-profile-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     padding: 0.5rem !important;
-    min-width: 40px;
-    height: 40px;
+    min-width: 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
 }
 
 .nav-profile-btn svg,
 .mobile-profile-btn svg {
-    transition: transform 0.2s ease;
+    width: 20px !important;
+    height: 20px !important;
+    transition: none !important;
+    flex-shrink: 0 !important;
 }
 
+/* Rimuovi tutti gli effetti di hover che cambiano dimensioni */
 .nav-profile-btn:hover svg,
 .mobile-profile-btn:hover svg {
-    transform: scale(1.1);
+    transform: none !important;
+}
+
+/* Rimuovi effetti di click che cambiano dimensioni */
+.nav-profile-btn:active,
+.nav-profile-btn:focus,
+.mobile-profile-btn:active,
+.mobile-profile-btn:focus {
+    transform: none !important;
+    outline: none !important;
 }
 
 /* ========================================
@@ -3761,25 +3777,34 @@ body {
     opacity: 1 !important;
     visibility: visible !important;
     display: flex !important;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
 }
 
 .nav-profile-btn svg {
-    width: 24px !important;
-    height: 24px !important;
+    width: 20px !important;
+    height: 20px !important;
     stroke: #fff !important;
     opacity: 1 !important;
+    transition: none !important;
+    transform: none !important;
+    flex-shrink: 0 !important;
 }
 
 .nav-profile-btn:hover {
     background: #fff !important;
+    transform: none !important;
 }
 
 .nav-profile-btn:hover svg {
     stroke: #000 !important;
+    transform: none !important;
+    width: 20px !important;
+    height: 20px !important;
 }
 
 /* Mobile navbar coerente */

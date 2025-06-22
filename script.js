@@ -3,7 +3,7 @@
 // ============================================
 // 🛠 MARKER VERSIONE - VERIFICA DEPLOY
 // ============================================
-console.log("🛠 Mental Commons script.js versione FIX 20250618-01 attivo");
+console.log("🛠 Mental Commons script.js versione FIX 20250618-02 attivo");
 
 // Sistema di logging che si adatta automaticamente all'ambiente
 // Definizione globale sicura per evitare dichiarazioni duplicate
@@ -11,21 +11,18 @@ if (typeof window.isProduction === 'undefined') {
   window.isProduction = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'production') || false;
 }
 
-// Definisci le funzioni di logging globalmente per evitare conflitti
-window.log = (...args) => { if (!window.isProduction) console.log(...args); };
-window.debug = (...args) => { if (!window.isProduction) console.debug(...args); };
-window.info = (...args) => { if (!window.isProduction) console.info(...args); };
-window.warn = (...args) => { if (!window.isProduction) console.warn(...args); };
-window.error = (...args) => { console.error(...args); };
-window.devError = (...args) => { if (!window.isProduction) console.error(...args); };
+// Definisci le funzioni di logging globalmente per evitare conflitti - VERSIONE SICURA
+if (typeof window.log === 'undefined') {
+  window.log = (...args) => { if (!window.isProduction) console.log(...args); };
+  window.debug = (...args) => { if (!window.isProduction) console.debug(...args); };
+  window.info = (...args) => { if (!window.isProduction) console.info(...args); };
+  window.warn = (...args) => { if (!window.isProduction) console.warn(...args); };
+  window.error = (...args) => { console.error(...args); };
+  window.devError = (...args) => { if (!window.isProduction) console.error(...args); };
+}
 
-// Alias locali per compatibilità
-const log = window.log;
-const debug = window.debug;
-const info = window.info;
-const warn = window.warn;
-const error = window.error;
-const devError = window.devError;
+// Alias locali per compatibilità - VERSIONE SICURA SENZA RIDICHIARAZIONE
+const { log, debug, info, warn, error, devError } = window;
 
 // Variabili globali
 let ucmeData = [];
@@ -233,6 +230,19 @@ function continueInitialization() {
     
     // Carica e mostra contatori poetici
     loadRitualStats();
+    
+    // Fallback per le statistiche se il primo caricamento fallisce
+    setTimeout(() => {
+        const ucmeElement = document.getElementById('ucme-count');
+        const risposteElement = document.getElementById('risposte-count');
+        const portatoriElement = document.getElementById('portatori-count');
+        
+        // Se gli elementi mostrano ancora "–" dopo 2 secondi, forza il caricamento
+        if (ucmeElement && ucmeElement.textContent === '–') {
+            log('🔄 Fallback: ricarico statistiche...');
+            loadRitualStats();
+        }
+    }, 2000);
     
     // Setup event listeners
     setupEventListeners();
@@ -3446,6 +3456,8 @@ window.addEventListener('load', () => {
 // ========================================
 
 async function loadRitualStats() {
+    log('📊 Caricamento statistiche avviato...');
+    
     try {
         // Carica UCMe con controllo di validità della risposta
         let ucmes = [];
@@ -3456,10 +3468,10 @@ async function loadRitualStats() {
             }
             const ucmeJson = await ucmeResponse.json();
             ucmes = ucmeJson.ucmes || [];
+            log('✅ UCMe caricate:', ucmes.length);
         } catch (error) {
-            log('File data.json non disponibile:', error.message);
-            showStatsUnavailableMessage();
-            return;
+            log('⚠️ File data.json non disponibile:', error.message);
+            ucmes = []; // Usa array vuoto invece di uscire
         }
         
         // Carica risposte con controllo di validità
@@ -3469,11 +3481,12 @@ async function loadRitualStats() {
             if (risposteResponse.ok) {
                 const risposteJson = await risposteResponse.json();
                 risposte = risposteJson.risposte || [];
+                log('✅ Risposte caricate:', risposte.length);
             } else {
-                log('File risposte.json non trovato, usando array vuoto');
+                log('⚠️ File risposte.json non trovato, usando array vuoto');
             }
         } catch (error) {
-            log('Errore nel caricamento risposte.json:', error.message);
+            log('⚠️ Errore nel caricamento risposte.json:', error.message);
         }
         
         // Calcola statistiche
@@ -3483,14 +3496,16 @@ async function loadRitualStats() {
         // Portatori attivi (email uniche nel campo portatore)
         const portatoriAttivi = new Set(risposte.map(r => r.portatore)).size;
         
-        // Aggiorna i contatori con animazione fade-in
-        updateStatsWithAnimation(ucmeCount, risposteCount, portatoriAttivi);
-        
-        log('Statistiche caricate:', {
+        log('📊 Statistiche calcolate:', {
             ucmes: ucmeCount,
             risposte: risposteCount,
             portatori: portatoriAttivi
         });
+        
+        // Aggiorna i contatori con animazione fade-in
+        updateStatsWithAnimation(ucmeCount, risposteCount, portatoriAttivi);
+        
+        log('✅ Statistiche caricate e visualizzate con successo');
         
     } catch (error) {
         error('Errore generale nel caricamento delle statistiche:', error);
@@ -3505,7 +3520,11 @@ function updateStatsWithAnimation(ucmeCount, risposteCount, portatoriCount) {
     const portatoriElement = document.getElementById('portatori-count');
     
     if (!ucmeElement || !risposteElement || !portatoriElement) {
-        warn('Elementi contatori non trovati');
+        warn('Elementi contatori non trovati - riprovando in 1 secondo...');
+        // Riprova dopo 1 secondo se gli elementi non sono ancora disponibili
+        setTimeout(() => {
+            updateStatsWithAnimation(ucmeCount, risposteCount, portatoriCount);
+        }, 1000);
         return;
     }
     
@@ -3520,23 +3539,31 @@ function updateStatsWithAnimation(ucmeCount, risposteCount, portatoriCount) {
     const finalRisposteCount = risposteCount + risposteOffset;
     const finalPortatoriCount = portatoriCount + portatoriOffset;
     
+    // Aggiornamento diretto prima dell'animazione per garantire che i valori siano sempre impostati
+    ucmeElement.textContent = finalUcmeCount || 0;
+    risposteElement.textContent = finalRisposteCount || 0;
+    portatoriElement.textContent = finalPortatoriCount || 0;
+    
+    log('📊 Valori statistiche impostati:', {
+        ucme: finalUcmeCount,
+        risposte: finalRisposteCount,
+        portatori: finalPortatoriCount
+    });
+    
     // Animazione di fade-in ritardata per effetto poetico
     setTimeout(() => {
-        ucmeElement.textContent = finalUcmeCount;
         ucmeElement.style.opacity = '0';
         ucmeElement.style.transition = 'opacity 0.8s ease';
         setTimeout(() => ucmeElement.style.opacity = '1', 100);
     }, 500);
     
     setTimeout(() => {
-        risposteElement.textContent = finalRisposteCount;
         risposteElement.style.opacity = '0';
         risposteElement.style.transition = 'opacity 0.8s ease';
         setTimeout(() => risposteElement.style.opacity = '1', 100);
     }, 800);
     
     setTimeout(() => {
-        portatoriElement.textContent = finalPortatoriCount;
         portatoriElement.style.opacity = '0';
         portatoriElement.style.transition = 'opacity 0.8s ease';
         setTimeout(() => portatoriElement.style.opacity = '1', 100);
@@ -3548,11 +3575,35 @@ function showStatsUnavailableMessage() {
     const risposteElement = document.getElementById('risposte-count');
     const portatoriElement = document.getElementById('portatori-count');
     
-    if (ucmeElement) ucmeElement.textContent = '?';
-    if (risposteElement) risposteElement.textContent = '?';
-    if (portatoriElement) portatoriElement.textContent = '?';
+    // Usa fallback con valori di default se gli elementi non sono trovati
+    if (ucmeElement) {
+        ucmeElement.textContent = '0';
+    } else {
+        setTimeout(() => {
+            const retryElement = document.getElementById('ucme-count');
+            if (retryElement) retryElement.textContent = '0';
+        }, 500);
+    }
     
-    log('📊 Statistiche non disponibili - usando placeholder');
+    if (risposteElement) {
+        risposteElement.textContent = '0';
+    } else {
+        setTimeout(() => {
+            const retryElement = document.getElementById('risposte-count');
+            if (retryElement) retryElement.textContent = '0';
+        }, 500);
+    }
+    
+    if (portatoriElement) {
+        portatoriElement.textContent = '0';
+    } else {
+        setTimeout(() => {
+            const retryElement = document.getElementById('portatori-count');
+            if (retryElement) retryElement.textContent = '0';
+        }, 500);
+    }
+    
+    log('📊 Statistiche non disponibili - usando fallback con 0');
 }
 
 // ========================================
