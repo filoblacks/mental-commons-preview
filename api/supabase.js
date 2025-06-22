@@ -324,7 +324,7 @@ async function updateLastLogin(userId) {
       .update({ last_login: new Date().toISOString() })
       .eq('id', userId);
     
-    if (error) throw err;
+    if (error) throw error;
     debug('✅ Ultimo login aggiornato');
   } catch (err) {
     error('❌ Errore aggiornamento login:', err);
@@ -396,15 +396,15 @@ async function saveUCMe(userId, content, title = null) {
       .single();
     
     debug('📥 Supabase UCMe insert result:', data);
-    debug('⚠ Supabase UCMe insert error:', err);
+    debug('⚠ Supabase UCMe insert error:', error);
     
     if (error) {
       error('❌ DETTAGLIO ERRORE SUPABASE UCMe:');
-      error('   Codice:', err.code);
-      error('   Messaggio:', err.message);
+      error('   Codice:', error.code);
+      error('   Messaggio:', error.message);
       error('   Dettagli:', error.details);
       error('   Hint:', error.hint);
-      throw err;
+      throw error;
     }
     
     debug('✅ UCMe salvata con successo:', data.id);
@@ -427,8 +427,8 @@ async function getUserUCMes(userId) {
       .order('created_at', { ascending: false });
     
     if (error) {
-      error('❌ Errore recupero UCMe:', err);
-      throw err;
+      error('❌ Errore recupero UCMe:', error);
+      throw error;
     }
     
     debug('✅ UCMe recuperate:', data?.length || 0);
@@ -462,7 +462,7 @@ async function saveUserSession(userId, token, deviceInfo = null) {
       .select()
       .single();
     
-    if (error) throw err;
+    if (error) throw error;
     
     debug('✅ Sessione salvata:', data.id);
     return data;
@@ -487,7 +487,7 @@ async function testDatabaseConnection() {
       .limit(1);
     
     if (error) {
-      error('❌ Connessione database fallita:', err);
+      error('❌ Connessione database fallita:', error);
       return false;
     }
     
@@ -551,11 +551,11 @@ async function testRLSPolicies() {
       }
     };
   } catch (err) {
-    error('❌ Errore test RLS completo:', JSON.stringify(error, null, 2));
+    error('❌ Errore test RLS completo:', JSON.stringify(err, null, 2));
     return {
       serviceKeyWorking: false,
       rlsTests: {},
-      errors: { general: error }
+      errors: { general: err }
     };
   }
 }
