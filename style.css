@@ -4149,3 +4149,91 @@ html.user-guest::after {
 .profile-icon[style*="scale"] {
     scale: 1 !important;
 }
+
+/* ========================================
+   PROFILE ERROR MESSAGES
+   ======================================== */
+
+.profile-error-message {
+    background-color: #1a0a0a;
+    border: 1px solid #cc3333;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    margin: 20px 0;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.profile-error-message h2 {
+    color: #ff6666;
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+.profile-error-message p {
+    color: #ccc;
+    font-size: 1rem;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.profile-error-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-error-btn {
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.profile-error-btn:hover {
+    background-color: #444;
+    border-color: #666;
+    color: #fff;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.profile-error-btn:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+    .profile-error-message {
+        padding: 20px 15px;
+        margin: 15px 0;
+    }
+    
+    .profile-error-message h2 {
+        font-size: 1.1rem;
+    }
+    
+    .profile-error-message p {
+        font-size: 0.9rem;
+    }
+    
+    .profile-error-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .profile-error-btn {
+        width: 100%;
+        padding: 12px 20px;
+    }
+}

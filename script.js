@@ -216,12 +216,16 @@ function continueInitialization() {
     log("🔍 Rilevamento pagina corrente:", {
         pathname: window.location.pathname,
         href: window.location.href,
-        includesDashboard: window.location.pathname.includes('dashboard.html')
+        includesDashboard: window.location.pathname.includes('dashboard.html'),
+        includesProfile: window.location.pathname.includes('profile.html')
     });
     
     if (window.location.pathname.includes('dashboard.html')) {
         log("✅ Pagina dashboard rilevata - inizializzo dashboard");
         initializeDashboard();
+    } else if (window.location.pathname.includes('profile.html')) {
+        log("✅ Pagina profile rilevata - inizializzo profilo");
+        initializeProfile();
     } else {
         log("🏠 Pagina non-dashboard rilevata - inizializzo home");
         // Inizializza schermata home
@@ -415,6 +419,162 @@ function initializeDashboard() {
     }, 500); // Piccolo delay per dare feedback visivo del caricamento
     
     log("🔚 FINE initializeDashboard - setTimeout impostato - timestamp:", new Date().toISOString());
+}
+
+// ========================================
+// GESTIONE PROFILO
+// ========================================
+
+function initializeProfile() {
+    log("🟢 INIZIO initializeProfile - timestamp:", new Date().toISOString());
+    log('🔄 Inizializzazione profilo...');
+    
+    // Elementi del profilo
+    const userVerification = document.getElementById('user-verification');
+    const profileContent = document.getElementById('profile-content');
+    const profileHeader = document.getElementById('profile-header');
+    const noAccess = document.getElementById('no-access');
+    
+    if (!userVerification || !profileContent || !noAccess) {
+        error('❌ Elementi profilo mancanti nel DOM:', {
+            userVerification: !!userVerification,
+            profileContent: !!profileContent,
+            profileHeader: !!profileHeader,
+            noAccess: !!noAccess
+        });
+        return;
+    }
+
+    log('✅ Tutti gli elementi DOM del profilo trovati');
+    
+    log("⏰ Impostazione setTimeout per caricamento profilo asincrono...");
+    setTimeout(() => {
+        log("⏰ AVVIO setTimeout callback profilo - timestamp:", new Date().toISOString());
+        try {
+            log('🔍 Controllo stato utente per profilo...');
+            
+            // Verifica se l'utente è loggato
+            if (!currentUser) {
+                log('⚠️ Utente non loggato, mostro schermata di accesso profilo');
+                userVerification.style.display = 'none';
+                noAccess.style.display = 'block';
+                return;
+            }
+            
+            log('✅ Utente loggato per profilo:', currentUser.email);
+            
+            // Carica i dati del profilo utente
+            log('🔄 Caricamento dati profilo...');
+            const profileData = loadProfileData(currentUser);
+            
+            if (!profileData) {
+                error('❌ Errore nel caricamento dati profilo');
+                showProfileErrorMessage();
+                return;
+            }
+            
+            log('🎨 Rendering profilo avviato...');
+            
+            // Aggiorna le informazioni del profilo
+            updateProfileInfo(profileData);
+            
+            // Aggiorna header del profilo se presente
+            if (profileHeader) {
+                const profileHeaderEmail = document.getElementById('profile-header-email');
+                if (profileHeaderEmail) {
+                    profileHeaderEmail.textContent = profileData.email || 'Email non disponibile';
+                }
+                profileHeader.style.display = 'block';
+            }
+            
+            log('🔄 Aggiornamento UI profilo - nascondo caricamento e mostro contenuto...');
+            
+            // ⚠️ CRITICO: SEMPRE nascondere caricamento e mostrare contenuto
+            log("🔄 FORZATURA aggiornamento UI profilo - questo DEVE sempre eseguire");
+            userVerification.style.display = 'none';
+            profileContent.style.display = 'block';
+            log("✅ UI profilo forzatamente aggiornata - caricamento nascosto, profilo mostrato");
+            
+            log('✅ Profilo completamente caricato e visualizzato');
+            
+        } catch (error) {
+            error('❌ Errore durante caricamento profilo:', error);
+            error('Stack trace:', error.stack);
+            
+            // Anche in caso di errore, mostra sempre l'UI base
+            userVerification.style.display = 'none';
+            profileContent.style.display = 'block';
+            
+            // Mostra messaggio di errore nel contenuto
+            showProfileErrorMessage();
+        }
+        
+        log("⏰ FINE setTimeout callback profilo - timestamp:", new Date().toISOString());
+    }, 500); // Piccolo delay per dare feedback visivo del caricamento
+    
+    log("🔚 FINE initializeProfile - setTimeout impostato - timestamp:", new Date().toISOString());
+}
+
+function loadProfileData(user) {
+    try {
+        log("🟢 Avvio funzione loadProfileData per:", user.email);
+        
+        if (!user || !user.email) {
+            error('❌ Dati utente non validi per profilo:', user);
+            return null;
+        }
+        
+        // Prepara i dati del profilo dall'utente corrente
+        const profileData = {
+            email: user.email,
+            name: user.name || user.firstName || 'Non specificato',
+            createdAt: user.createdAt || user.created_at || Date.now(),
+            lastLogin: user.lastLogin || user.last_login || Date.now(),
+            id: user.id || user.user_id || 'N/A'
+        };
+        
+        log('✅ Dati profilo preparati:', {
+            email: profileData.email,
+            name: profileData.name,
+            hasCreatedAt: !!profileData.createdAt,
+            hasLastLogin: !!profileData.lastLogin
+        });
+        
+        return profileData;
+        
+    } catch (error) {
+        error('❌ Errore nel caricamento dati profilo:', error);
+        error('Stack trace:', error.stack);
+        return null;
+    }
+}
+
+function showProfileErrorMessage() {
+    try {
+        const profileContent = document.getElementById('profile-content');
+        if (profileContent) {
+            profileContent.innerHTML = `
+                <div class="profile-error-message">
+                    <h2>❌ Errore nel caricamento del profilo</h2>
+                    <p>Impossibile caricare il profilo. Riprova più tardi.</p>
+                    <div class="profile-error-actions">
+                        <a href="dashboard.html" class="profile-error-btn">Torna alla Dashboard</a>
+                        <button onclick="window.location.reload()" class="profile-error-btn">Ricarica Pagina</button>
+                    </div>
+                </div>
+            `;
+            profileContent.style.display = 'block';
+        }
+        
+        const userVerification = document.getElementById('user-verification');
+        if (userVerification) {
+            userVerification.style.display = 'none';
+        }
+        
+        log('✅ Messaggio di errore profilo mostrato');
+    } catch (error) {
+        error('❌ Errore nel mostrare il messaggio di errore profilo:', error);
+    }
 }
 
 function loadDashboardData(email) {
@@ -3989,6 +4149,77 @@ function debugDashboard() {
 
 // Rendi la funzione disponibile globalmente per debug
 window.debugDashboard = debugDashboard;
+
+// Funzione di debug per il profilo
+function debugProfile() {
+    log('🔍 === DEBUG PROFILO ===');
+    
+    // Verifica elementi DOM
+    log('📊 Verifica elementi DOM profilo:');
+    const userVerification = document.getElementById('user-verification');
+    const profileContent = document.getElementById('profile-content');
+    const profileHeader = document.getElementById('profile-header');
+    const noAccess = document.getElementById('no-access');
+    
+    log({
+        userVerification: !!userVerification,
+        userVerificationDisplay: userVerification?.style.display,
+        profileContent: !!profileContent,
+        profileContentDisplay: profileContent?.style.display,
+        profileHeader: !!profileHeader,
+        profileHeaderDisplay: profileHeader?.style.display,
+        noAccess: !!noAccess,
+        noAccessDisplay: noAccess?.style.display
+    });
+    
+    // Verifica stato utente
+    log('👤 Stato utente corrente:');
+    log({
+        currentUser: currentUser,
+        hasCurrentUser: !!currentUser,
+        currentUserEmail: currentUser?.email
+    });
+    
+    // Se utente è loggato, prova a caricare i suoi dati profilo
+    if (currentUser) {
+        log('🔄 Test caricamento dati profilo...');
+        try {
+            const profileData = loadProfileData(currentUser);
+            log('✅ Dati profilo caricati:', profileData);
+        } catch (error) {
+            error('❌ Errore nel caricamento dati profilo:', error);
+        }
+    }
+    
+    log('🔍 === FINE DEBUG PROFILO ===');
+}
+
+// Rendi la funzione disponibile globalmente per debug
+window.debugProfile = debugProfile;
+
+// Funzione di emergenza per forzare la visualizzazione del profilo
+function forceProfileDisplay() {
+    log('🚨 FORZATURA EMERGENCY - Aggiornamento immediato stato visuale profilo');
+    
+    const userVerification = document.getElementById('user-verification');
+    const profileContent = document.getElementById('profile-content');
+    
+    if (userVerification) {
+        userVerification.style.display = 'none';
+        log('🚨 FORCED: Messaggio caricamento profilo nascosto');
+    }
+    
+    if (profileContent) {
+        profileContent.style.display = 'block';
+        log('🚨 FORCED: Profilo content mostrato');
+    }
+    
+    log('🚨 EMERGENCY FORCE PROFILE COMPLETED');
+    return { userVerification: !!userVerification, profileContent: !!profileContent };
+}
+
+// Rendi la funzione disponibile globalmente
+window.forceProfileDisplay = forceProfileDisplay;
 
 // ========================================
 // CHAR COUNTER FALLBACK
