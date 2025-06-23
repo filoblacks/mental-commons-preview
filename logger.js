@@ -13,7 +13,7 @@ const isProduction = () => {
   // Per il browser (controllo hostname)
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
-    return hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.includes('vercel.app');
+    return hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.includes('local');
   }
   
   return false;

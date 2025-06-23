@@ -8,7 +8,12 @@ console.log("🛠 Mental Commons script.js versione FIX 20250618-02 attivo");
 // Sistema di logging che si adatta automaticamente all'ambiente
 // Definizione globale sicura per evitare dichiarazioni duplicate
 if (typeof window.isProduction === 'undefined') {
-  window.isProduction = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'production') || false;
+  // Rileva modalità produzione in modo affidabile
+  window.isProduction = (
+    location.hostname !== 'localhost' && 
+    location.hostname !== '127.0.0.1' && 
+    !location.hostname.includes('local')
+  );
 }
 
 // Definisci le funzioni di logging globalmente per evitare conflitti - VERSIONE SICURA
@@ -551,15 +556,7 @@ function initializeDashboard() {
             dashboardContent.style.visibility = 'visible';
             dashboardContent.style.opacity = '1';
             
-            // 📱 FIX MOBILE AGGIUNTIVO: Forza visibilità container UCMe
-            const ucmeBlocksContainer = document.getElementById('ucme-blocks');
-            if (ucmeBlocksContainer) {
-                ucmeBlocksContainer.style.display = 'flex';
-                ucmeBlocksContainer.style.flexDirection = 'column';
-                ucmeBlocksContainer.style.visibility = 'visible';
-                ucmeBlocksContainer.style.opacity = '1';
-                log('📱 Container UCMe forzato visibile per mobile');
-            }
+
             
             log("✅ UI forzatamente aggiornata - caricamento nascosto, dashboard mostrata");
             
@@ -584,11 +581,7 @@ function initializeDashboard() {
                         <p>Ricarica la pagina o riprova più tardi.</p>
                     </div>
                 `;
-                // 📱 FIX MOBILE: Forza visibilità anche per errori
-                ucmeBlocks.style.display = 'flex';
-                ucmeBlocks.style.flexDirection = 'column';
-                ucmeBlocks.style.visibility = 'visible';
-                ucmeBlocks.style.opacity = '1';
+
             }
             
             updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
@@ -960,14 +953,8 @@ function renderDashboard(data) {
             log("✅ Contenuto dashboard mostrato");
         }
         
-        // 📱 Controllo specifico per mobile - forza visibilità UCMe
-        if (ucmeBlocksContainer) {
-            ucmeBlocksContainer.style.display = "flex";
-            ucmeBlocksContainer.style.flexDirection = "column";
-            ucmeBlocksContainer.style.visibility = "visible";
-            ucmeBlocksContainer.style.opacity = "1";
-            log("✅ Container UCMe forzato visibile per mobile");
-        }
+
+
         
         log('✅ Dashboard renderizzata con successo');
         
@@ -999,139 +986,37 @@ function renderDashboard(data) {
 
 function renderEmptyDashboard() {
     try {
-        log("🟢 Avvio funzione renderEmptyDashboard");
-        
-        // 🧩 Debug DOM - verifica elementi target esistano
-        const ucmeBlocks = document.getElementById('ucme-blocks');
-        const dashboardContent = document.getElementById("dashboard-content");
-        const userVerification = document.getElementById("user-verification");
-        log("🧩 Elementi DOM target trovati:", {
-            ucmeBlocks: !!ucmeBlocks,
-            dashboardContent: !!dashboardContent,
-            userVerification: !!userVerification
-        });
-        
-        log('📝 Rendering dashboard vuota...');
+        log('📝 Rendering dashboard vuota (produzione)');
         
         // Aggiorna informazioni profilo
-        log('👤 Aggiornamento informazioni profilo per dashboard vuota...');
         updateProfileInfo(currentUser);
-        log('✅ Informazioni profilo aggiornate');
         
-        // 🔥 DEBUG COMPLETO - Mostra TUTTE le informazioni disponibili
-        const isMobile = window.innerWidth <= 768;
-        
-        // Scansiona tutto il localStorage per UCMe dell'utente
-        let allLocalStorageData = {};
-        let foundUserData = [];
-        
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            try {
-                const value = localStorage.getItem(key);
-                allLocalStorageData[key] = value;
-                if (value && value.includes(currentUser.email)) {
-                    foundUserData.push({key, preview: value.substring(0, 100) + '...'});
-                }
-            } catch (e) {
-                allLocalStorageData[key] = 'Error parsing';
-            }
-        }
-        
-        const debugInfo = `
-            <div style="background: #333; padding: 15px; margin: 15px 0; font-size: 11px; border-radius: 8px; max-height: 400px; overflow-y: auto;">
-                <h4 style="color: #ff6b6b; margin-bottom: 10px;">🔥 DEBUG COMPLETO - TROVA LE TUE UCME</h4>
-                
-                <div style="margin-bottom: 15px;">
-                    <strong>👤 Utente corrente:</strong><br/>
-                    Email: ${currentUser.email}<br/>
-                    Nome: ${currentUser.name || 'N/A'}<br/>
-                    ID: ${currentUser.id || 'N/A'}
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <strong>📱 Dispositivo:</strong><br/>
-                    Viewport: ${window.innerWidth}x${window.innerHeight}<br/>
-                    Mobile: ${isMobile ? 'SÌ' : 'NO'}<br/>
-                    Timestamp: ${new Date().toISOString()}
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <strong>🗄️ LocalStorage Keys (${localStorage.length}):</strong><br/>
-                    ${Object.keys(allLocalStorageData).map(key => 
-                        `<span style="color: ${allLocalStorageData[key].includes(currentUser.email) ? '#4CAF50' : '#999'}">${key}</span>`
-                    ).join(', ')}
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <strong>🔍 Dati che contengono la tua email:</strong><br/>
-                    ${foundUserData.length > 0 ? 
-                        foundUserData.map(item => `<div style="margin: 5px 0;"><strong>${item.key}:</strong> ${item.preview}</div>`).join('') :
-                        '<span style="color: #ff6b6b;">❌ Nessun dato trovato con la tua email</span>'
-                    }
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <strong>📊 Array ucmeData globale:</strong><br/>
-                    Lunghezza: ${ucmeData.length}<br/>
-                    ${ucmeData.length > 0 ? 
-                        `Emails presenti: ${[...new Set(ucmeData.map(u => u.email || u.user || u.userEmail))].join(', ')}` :
-                        'Array vuoto'
-                    }
-                </div>
-            </div>
-        `;
-        
-        // Mostra messaggio per dashboard vuota
-        log('📝 Inserimento messaggio dashboard vuota...');
+        // Mostra messaggio pulito per dashboard vuota
+        const ucmeBlocks = document.getElementById('ucme-blocks');
         if (ucmeBlocks) {
             ucmeBlocks.innerHTML = `
                 <div class="empty-dashboard">
                     <p>Non hai ancora affidato nessun pensiero.</p>
                     <p>Quando condividerai la tua prima UCMe, apparirà qui.</p>
-                    ${debugInfo}
-                    <div style="margin-top: 20px;">
-                        <button onclick="createMobileTestUCMe()" style="background: #444; color: white; border: 1px solid #666; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 10px;">
-                            📱 Test UCMe Mobile
-                        </button>
-                        <button onclick="forceReloadAllUCMe()" style="background: #ff6b6b; color: white; border: 1px solid #ff6b6b; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
-                            🔄 Ricarica Tutto
-                        </button>
-                    </div>
                 </div>
             `;
-            log('✅ Messaggio dashboard vuota inserito con debug mobile');
-        } else {
-            error('❌ Elemento ucme-blocks non trovato nel DOM');
         }
         
-        // 🔄 Controllo stato visuale - garantisco sempre l'aggiornamento
-        log("🔄 Aggiornamento stato visuale - nascondo caricamento e mostro dashboard");
+        // Aggiorna stato visuale
+        const userVerification = document.getElementById('user-verification');
+        const dashboardContent = document.getElementById('dashboard-content');
+        
         if (userVerification) {
             userVerification.style.display = "none";
-            log("✅ Messaggio di caricamento nascosto");
         }
         if (dashboardContent) {
             dashboardContent.style.display = "block";
-            dashboardContent.style.visibility = "visible";
-            dashboardContent.style.opacity = "1";
-            log("✅ Contenuto dashboard mostrato");
-        }
-        
-        // 📱 FIX MOBILE: Forza visibilità container
-        if (ucmeBlocks) {
-            ucmeBlocks.style.display = "flex";
-            ucmeBlocks.style.flexDirection = "column";
-            ucmeBlocks.style.visibility = "visible";
-            ucmeBlocks.style.opacity = "1";
-            log("📱 Container UCMe forzato visibile per mobile");
         }
         
         log('✅ Dashboard vuota renderizzata');
         
     } catch (error) {
         error('❌ Errore nel rendering dashboard vuota:', error);
-        error('Stack trace:', error.stack);
         
         // Fallback per le informazioni profilo
         try {
@@ -1145,7 +1030,7 @@ function renderEmptyDashboard() {
         if (ucmeBlocks) {
             ucmeBlocks.innerHTML = `
                 <div class="empty-dashboard">
-                    <p>❌ Errore nella visualizzazione.</p>
+                    <p>Errore nella visualizzazione.</p>
                     <p>Ricarica la pagina per riprovare.</p>
                 </div>
             `;
@@ -1155,173 +1040,7 @@ function renderEmptyDashboard() {
     }
 }
 
-// 🔥 FUNZIONE TEST MOBILE - Per verificare immediatamente il funzionamento
-window.createMobileTestUCMe = function() {
-    log('📱 Creazione UCMe di test per mobile...');
-    
-    if (!currentUser) {
-        alert('❌ Utente non loggato');
-        return;
-    }
-    
-    // Crea UCMe di test
-    const testUcme = {
-        email: currentUser.email,
-        text: 'Questa è una UCMe di test creata su mobile per verificare la visualizzazione. Se vedi questo messaggio, la dashboard mobile funziona correttamente!',
-        tone: 'test',
-        timestamp: new Date().toISOString(),
-        response: 'Risposta di test dal Portatore. Anche questa dovrebbe essere visibile su mobile.',
-        responseDate: new Date().toISOString()
-    };
-    
-    // Aggiungi all'array locale
-    ucmeData.push(testUcme);
-    
-    // Salva nel localStorage
-    try {
-        localStorage.setItem('mentalCommons_ucmes', JSON.stringify(ucmeData));
-        log('✅ UCMe di test salvata nel localStorage');
-    } catch (error) {
-        error('❌ Errore salvataggio localStorage:', error);
-    }
-    
-    // Ricarica la dashboard
-    log('🔄 Ricaricamento dashboard per mostrare UCMe di test...');
-    initializeDashboard();
-    
-    alert('✅ UCMe di test creata! La dashboard dovrebbe ora mostrare l\'UCMe di test.');
-};
 
-// 🔥 FUNZIONE RICARICA FORZATA - Trova e carica TUTTE le UCMe possibili
-window.forceReloadAllUCMe = async function() {
-    log('🔄 RICARICA FORZATA - Ricerca aggressiva di tutte le UCMe...');
-    
-    if (!currentUser) {
-        alert('❌ Utente non loggato');
-        return;
-    }
-    
-    // Reset completo dell'array
-    ucmeData = [];
-    
-    // 1. Scansione completa localStorage con tutte le chiavi possibili
-    const allPossibleKeys = [
-        'mentalCommons_ucmes',
-        'mental_commons_ucmes', 
-        'mc-ucmes',
-        'ucmes',
-        'mentalCommons_data',
-        'mentalcommons_data',
-        'userData',
-        'user_data',
-        'ucme_data',
-        'formData',
-        'submittedData'
-    ];
-    
-    let foundUcmes = [];
-    
-    // Scansione per chiavi conosciute
-    allPossibleKeys.forEach(key => {
-        try {
-            const data = localStorage.getItem(key);
-            if (data) {
-                const parsed = JSON.parse(data);
-                if (Array.isArray(parsed)) {
-                    const userUcmes = parsed.filter(item => 
-                        (item.email === currentUser.email || 
-                         item.user === currentUser.email ||
-                         item.userEmail === currentUser.email) &&
-                        (item.text || item.content || item.message)
-                    );
-                    if (userUcmes.length > 0) {
-                        foundUcmes.push(...userUcmes);
-                        console.log(`🔥 TROVATE ${userUcmes.length} UCMe in ${key}:`, userUcmes);
-                    }
-                } else if ((parsed.email === currentUser.email || parsed.user === currentUser.email) && 
-                          (parsed.text || parsed.content)) {
-                    foundUcmes.push(parsed);
-                    console.log(`🔥 TROVATA 1 UCMe in ${key}:`, parsed);
-                }
-            }
-        } catch (e) {
-            // Ignora errori
-        }
-    });
-    
-    // 2. Scansione completa di TUTTO il localStorage
-    console.log('🔍 Scansione completa localStorage...');
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        try {
-            const value = localStorage.getItem(key);
-            if (value && value.includes(currentUser.email)) {
-                console.log(`🔍 Analizzando ${key} che contiene ${currentUser.email}`);
-                const parsed = JSON.parse(value);
-                
-                if (Array.isArray(parsed)) {
-                    const userUcmes = parsed.filter(item => 
-                        (item.email === currentUser.email || item.user === currentUser.email) &&
-                        (item.text || item.content || item.message)
-                    );
-                    if (userUcmes.length > 0) {
-                        foundUcmes.push(...userUcmes);
-                        console.log(`🔥 TROVATE ${userUcmes.length} UCMe aggiuntive in ${key}!`);
-                    }
-                } else if ((parsed.email === currentUser.email || parsed.user === currentUser.email) && 
-                          (parsed.text || parsed.content)) {
-                    foundUcmes.push(parsed);
-                    console.log(`🔥 TROVATA UCMe aggiuntiva in ${key}!`);
-                }
-            }
-        } catch (e) {
-            // Ignora errori di parsing
-        }
-    }
-    
-    // 3. Rimuovi duplicati e standardizza formato
-    const uniqueUcmes = [];
-    foundUcmes.forEach(ucme => {
-        // Standardizza il formato UCMe
-        const standardUcme = {
-            email: ucme.email || ucme.user || ucme.userEmail || currentUser.email,
-            text: ucme.text || ucme.content || ucme.message,
-            tone: ucme.tone || 'sconosciuto',
-            timestamp: ucme.timestamp || ucme.createdAt || ucme.date || new Date().toISOString(),
-            response: ucme.response || ucme.responseContent,
-            responseDate: ucme.responseDate || ucme.responseAt,
-            id: ucme.id || generateUniqueId()
-        };
-        
-        // Verifica duplicati
-        const exists = uniqueUcmes.some(existing => 
-            existing.text === standardUcme.text &&
-            Math.abs(new Date(existing.timestamp) - new Date(standardUcme.timestamp)) < 5000
-        );
-        
-        if (!exists && standardUcme.text && standardUcme.text.length > 10) {
-            uniqueUcmes.push(standardUcme);
-        }
-    });
-    
-    // 4. Aggiorna l'array globale
-    ucmeData = uniqueUcmes;
-    
-    // 5. Salva nel localStorage standard
-    try {
-        localStorage.setItem('mentalCommons_ucmes', JSON.stringify(ucmeData));
-        console.log('✅ UCMe salvate in localStorage standard');
-    } catch (error) {
-        console.error('❌ Errore salvataggio:', error);
-    }
-    
-    console.log(`🎉 TROVATE ${uniqueUcmes.length} UCMe totali per ${currentUser.email}`);
-    
-    // 6. Ricarica la dashboard
-    initializeDashboard();
-    
-    alert(`🎉 RICARICA COMPLETATA!\n\nTrovate ${uniqueUcmes.length} UCMe per ${currentUser.email}\n\nLa dashboard dovrebbe ora mostrare tutte le tue UCMe!`);
-};
 
 function renderUcmeBlocks(ucmes) {
     try {
@@ -1333,15 +1052,6 @@ function renderUcmeBlocks(ucmes) {
             return;
         }
         
-        log('✅ Container ucme-blocks trovato');
-        
-        // 📱 Forza visibilità per mobile - garantisce che le UCMe siano sempre visibili
-        container.style.display = 'flex';
-        container.style.flexDirection = 'column';
-        container.style.visibility = 'visible';
-        container.style.opacity = '1';
-        log('✅ Visibilità container forzata per mobile');
-        
         container.innerHTML = '';
         
         if (!ucmes || ucmes.length === 0) {
@@ -1351,47 +1061,23 @@ function renderUcmeBlocks(ucmes) {
         
         ucmes.forEach((ucme, index) => {
             try {
-                log(`📝 Creazione blocco UCMe ${index + 1}/${ucmes.length}:`, ucme.text?.substring(0, 50) + '...');
                 const ucmeBlock = createDashboardUcmeBlock(ucme, index);
-                
-                // 📱 Forza visibilità del blocco per mobile
-                ucmeBlock.style.display = 'block';
-                ucmeBlock.style.visibility = 'visible';
-                ucmeBlock.style.opacity = '1';
-                
                 container.appendChild(ucmeBlock);
-                log(`✅ Blocco UCMe ${index + 1} creato e aggiunto con visibilità forzata`);
             } catch (blockError) {
                 error(`❌ Errore nella creazione blocco UCMe ${index + 1}:`, blockError);
-                // Continua con il prossimo blocco
             }
         });
-        
-        // 📱 Verifica finale visibilità su mobile
-        const isMobile = window.innerWidth <= 768;
-        if (isMobile) {
-            log('📱 Dispositivo mobile rilevato - controllo finale visibilità UCMe');
-            const allBlocks = container.querySelectorAll('.ucme-block');
-            allBlocks.forEach((block, idx) => {
-                block.style.display = 'block';
-                block.style.visibility = 'visible';
-                block.style.opacity = '1';
-                log(`📱 Blocco ${idx + 1} - visibilità forzata per mobile`);
-            });
-        }
         
         log('✅ Rendering blocchi UCMe completato');
         
     } catch (error) {
         error('❌ Errore durante rendering blocchi UCMe:', error);
-        error('Stack trace:', error.stack);
         
-        // Fallback: mostra almeno un messaggio di errore
         const container = document.getElementById('ucme-blocks');
         if (container) {
             container.innerHTML = `
                 <div class="empty-dashboard">
-                    <p>❌ Errore nella visualizzazione dei tuoi pensieri.</p>
+                    <p>Errore nella visualizzazione dei tuoi pensieri.</p>
                     <p>Ricarica la pagina per riprovare.</p>
                 </div>
             `;
@@ -4274,101 +3960,9 @@ function clearAllData() {
 // FUNZIONI DI DEBUG E TEST
 // ========================================
 
-function createTestData() {
-    // Crea utenti di test
-    const testUsers = [
-        {
-            id: 'test_user_1',
-            email: 'test@email.com',
-            name: 'Marco',
-            accessCode: 'ABC123',
-            createdAt: '2024-12-10T10:00:00Z',
-            lastLogin: '2024-12-11T14:30:00Z',
-            isPortatore: false
-        },
-        {
-            id: 'test_user_2',
-            email: 'altro@email.com',
-            name: 'Sofia',
-            accessCode: 'XYZ789',
-            createdAt: '2024-12-08T15:20:00Z',
-            lastLogin: '2024-12-11T09:15:00Z',
-            isPortatore: true
-        }
-    ];
-    
-    // Dati di test per verificare il funzionamento
-    const testUcmes = [
-        {
-            id: "test_1",
-            email: "test@email.com",
-            text: "Ho un pensiero che non riesco a dire a voce. È come se avessi dentro qualcosa di importante ma ogni volta che provo a condividerlo con qualcuno, le parole si perdono. Non so se è paura del giudizio o semplicemente non so come esprimermi.",
-            tone: "calmo",
-            portatore: false,
-            timestamp: "2024-12-11T10:30:00Z",
-            status: "pending",
-            response: null,
-            metadata: {
-                characterCount: 280,
-                userAgent: "Test",
-                language: "it-IT",
-                version: "3.0",
-                userId: "test_user_1"
-            }
-        },
-        {
-            id: "test_2",
-            email: "test@email.com",
-            text: "Oggi ho sentito una connessione profonda con qualcuno e mi ha fatto riflettere su quanto sia raro trovare persone con cui puoi davvero essere te stesso. È un pensiero che mi riempie di gratitudine ma anche di malinconia.",
-            tone: "poetico",
-            portatore: true,
-            timestamp: "2024-12-10T14:20:00Z",
-            status: "completed",
-            response: "La tua riflessione tocca qualcosa di universale: il bisogno di autenticità nelle relazioni umane. È bello che tu abbia trovato quella connessione, e la malinconia che provi forse nasce dalla consapevolezza di quanto sia preziosa.",
-            metadata: {
-                characterCount: 250,
-                userAgent: "Test",
-                language: "it-IT",
-                version: "3.0",
-                userId: "test_user_1"
-            }
-        },
-        {
-            id: "test_3",
-            email: "altro@email.com",
-            text: "Mi sento come se stessi vivendo la vita di qualcun altro. Ogni giorno faccio le stesse cose, ma non sento che mi appartengano davvero. È come se fossi un attore che recita un ruolo che non ha scelto.",
-            tone: "neutro",
-            portatore: false,
-            timestamp: "2024-12-09T18:45:00Z",
-            status: "pending",
-            response: null,
-            metadata: {
-                characterCount: 220,
-                userAgent: "Test",
-                language: "it-IT",
-                version: "3.0",
-                userId: "test_user_2"
-            }
-        }
-    ];
-    
-    // Salva i dati nel localStorage
-    localStorage.setItem('mc-users', JSON.stringify(testUsers));
-    localStorage.setItem('mentalCommons_ucmes', JSON.stringify(testUcmes));
-    
-    // Aggiorna le variabili globali
-    ucmeData = testUcmes;
-    
-    log('Dati di test creati nel localStorage');
-    log('Utenti disponibili:');
-    testUsers.forEach(user => {
-        log(`- ${user.email} (codice: ${user.accessCode})`);
-    });
-}
 
-function clearTestData() {
-    clearAllData();
-}
+
+
 
 // Inizializzazione quando tutto è pronto
 window.addEventListener('load', () => {
