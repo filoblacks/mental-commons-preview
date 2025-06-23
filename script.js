@@ -500,6 +500,15 @@ function initializeDashboard() {
             if (ucmeBlocks) {
                 ucmeBlocks.innerHTML = `
                     <div class="empty-dashboard">
+                        <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
+                            <h3 style="color: #6c757d; margin-bottom: 10px;">🚧 Sistema in Sviluppo</h3>
+                            <p style="color: #6c757d; margin-bottom: 10px;">
+                                Stiamo ancora perfezionando la visualizzazione delle UCMe nella dashboard.
+                            </p>
+                            <p style="color: #6c757d; margin: 0;">
+                                Se non vedi i tuoi pensieri precedenti, è normale - stiamo lavorando per renderli disponibili presto.
+                            </p>
+                        </div>
                         <p>❌ Si è verificato un errore nel caricamento del tuo spazio.</p>
                         <p>Ricarica la pagina o riprova più tardi.</p>
                     </div>
