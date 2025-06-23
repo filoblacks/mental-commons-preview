@@ -370,7 +370,7 @@ async function updateUserProfile(userId, name, surname = null) {
 // OPERAZIONI DATABASE - UCME
 // ================================================================
 
-// Salva nuova UCMe
+// Salva nuova UCMe (autenticata)
 async function saveUCMe(userId, content, title = null) {
   try {
     debug('📝 Salvando nuova UCMe per utente:', userId);
@@ -411,6 +411,52 @@ async function saveUCMe(userId, content, title = null) {
     return data;
   } catch (err) {
     error('❌ Errore salvataggio UCMe:', err);
+    throw err;
+  }
+}
+
+// Salva nuova UCMe anonima
+async function saveAnonymousUCMe(email, content, title = null) {
+  try {
+    debug('👤 Salvando nuova UCMe anonima per email:', email);
+    debug('📝 Contenuto length:', content?.length);
+    debug('📝 Titolo:', title);
+    
+    const insertPayload = {
+      user_id: null, // NULL per UCMe anonime
+      anonymous_email: email, // Email per ricevere la risposta
+      content,
+      title,
+      status: 'attesa',
+      is_anonymous: true
+    };
+    
+    debug('📤 Supabase UCMe anonima insert payload:', insertPayload);
+    debug('📤 Query target table: ucmes');
+    debug('📤 Query type: INSERT ANONYMOUS');
+    
+    const { data, error } = await getSupabaseClient()
+      .from('ucmes')
+      .insert(insertPayload)
+      .select()
+      .single();
+    
+    debug('📥 Supabase UCMe anonima insert result:', data);
+    debug('⚠ Supabase UCMe anonima insert error:', error);
+    
+    if (error) {
+      error('❌ DETTAGLIO ERRORE SUPABASE UCMe ANONIMA:');
+      error('   Codice:', error.code);
+      error('   Messaggio:', error.message);
+      error('   Dettagli:', error.details);
+      error('   Hint:', error.hint);
+      throw error;
+    }
+    
+    debug('✅ UCMe anonima salvata con successo:', data.id);
+    return data;
+  } catch (err) {
+    error('❌ Errore salvataggio UCMe anonima:', err);
     throw err;
   }
 }
@@ -637,6 +683,7 @@ module.exports = {
   
   // Operazioni UCMe
   saveUCMe,
+  saveAnonymousUCMe,
   getUserUCMes,
   
   // Operazioni sessioni

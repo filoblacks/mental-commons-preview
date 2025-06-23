@@ -2557,7 +2557,16 @@ async function handleFormSubmission(event) {
         
         console.log('🚀 FASE 3: Invio al backend...');
         
-        const result = await submitUCMeToVercel(formData);
+        let result;
+        
+        // Determina se usare modalità autenticata o anonima
+        if (currentUser && currentUser.email) {
+            console.log('👤 Utente autenticato - modalità standard');
+            result = await submitUCMeToVercel(formData);
+        } else {
+            console.log('👤 Utente non autenticato - modalità anonima');
+            result = await submitAnonymousUCMe(formData);
+        }
         
         // ========================================
         // FASE 4: GESTIONE SUCCESSO
@@ -2600,6 +2609,10 @@ async function handleFormSubmission(event) {
             }
         }
         
+        // Log finale con modalità usata
+        const usedMode = currentUser ? 'AUTENTICATA' : 'ANONIMA';
+        console.log(`🎉 UCMe inviata con successo in modalità ${usedMode}!`);
+        
         // Mostra messaggio di successo
         showSuccessMessage();
         
@@ -2610,6 +2623,8 @@ async function handleFormSubmission(event) {
         console.log('📊 Risultato finale:', {
             ucmeId: result.ucme?.id,
             success: true,
+            mode: usedMode,
+            isAnonymous: result.ucme?.isAnonymous || false,
             timestamp: new Date().toISOString(),
             userEmail: formData.email
         });
@@ -2632,7 +2647,8 @@ async function handleFormSubmission(event) {
             email: document.getElementById('email')?.value || 'N/A',
             tone: document.getElementById('tone')?.value || 'N/A',
             acceptance: document.getElementById('acceptance')?.checked || false,
-            isUserLogged: !!currentUser
+            isUserLogged: !!currentUser,
+            expectedMode: currentUser ? 'AUTENTICATA' : 'ANONIMA'
         });
     }
 }
@@ -3224,6 +3240,221 @@ function resetForm() {
     const submitButton = document.getElementById('submit-button');
     if (submitButton) {
         submitButton.disabled = true;
+    }
+}
+
+// ========================================
+// INVIO UCME ANONIME (SENZA AUTENTICAZIONE)
+// ========================================
+
+async function submitAnonymousUCMe(formData) {
+    console.log('👤 ============================================');
+    console.log('👤 INVIO UCME ANONIMA - SENZA AUTENTICAZIONE');
+    console.log('👤 ============================================');
+    
+    // Determina l'URL base del backend
+    const BASE_URL = window.location.origin;
+    const UCME_ENDPOINT = `${BASE_URL}/api/ucme`;
+    
+    console.log('🌐 Endpoint UCMe:', UCME_ENDPOINT);
+    console.log('📋 Dati form ricevuti (UCMe anonima):', JSON.stringify(formData, null, 2));
+    
+    try {
+        // ========================================
+        // FASE 1: COSTRUZIONE PAYLOAD ANONIMO
+        // ========================================
+        
+        console.log('\n👤 FASE 1: Costruzione payload anonimo...');
+        
+        // Payload per UCMe anonima (no token di autenticazione)
+        const anonymousPayload = {
+            // Campi richiesti per UCMe anonime
+            content: formData.content || formData.text,
+            title: formData.title || null,
+            email: formData.email, // Required per UCMe anonime
+            
+            // Metadati opzionali
+            tone: formData.tone || 'neutro',
+            timestamp: formData.timestamp || new Date().toISOString(),
+            ucmeId: formData.id || generateUniqueId(),
+            
+            // Informazioni di contesto
+            userAgent: navigator.userAgent,
+            language: navigator.language || 'it',
+            platform: navigator.platform || 'unknown',
+            screenSize: `${window.innerWidth}x${window.innerHeight}`,
+            isMobile: window.innerWidth <= 768,
+            
+            // Flag di validazione
+            portatore: formData.portatore || false,
+            acceptance: formData.acceptance || true,
+            formValidated: true,
+            
+            // Indica che è una UCMe anonima
+            isAnonymous: true,
+            
+            // Versione sistema
+            version: '3.0',
+            apiVersion: '2.3.0'
+        };
+        
+        // Validazione payload anonimo
+        if (!anonymousPayload.content) {
+            throw new Error('Contenuto della UCMe mancante');
+        }
+        
+        if (typeof anonymousPayload.content !== 'string') {
+            throw new Error('Contenuto della UCMe deve essere una stringa');
+        }
+        
+        if (anonymousPayload.content.trim().length < 20) {
+            throw new Error('Contenuto della UCMe troppo breve (minimo 20 caratteri)');
+        }
+        
+        if (anonymousPayload.content.trim().length > 600) {
+            throw new Error('Contenuto della UCMe troppo lungo (massimo 600 caratteri)');
+        }
+        
+        if (!anonymousPayload.email) {
+            throw new Error('Email richiesta per ricevere la risposta alla tua UCMe');
+        }
+        
+        // Validazione formato email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(anonymousPayload.email)) {
+            throw new Error('Formato email non valido');
+        }
+        
+        // Log del payload completo che sarà inviato
+        console.log('📦 Payload UCMe ANONIMA da inviare:', JSON.stringify(anonymousPayload, null, 2));
+        console.log('📊 Validazione payload anonima completa:', {
+            hasContent: !!anonymousPayload.content,
+            contentType: typeof anonymousPayload.content,
+            contentLength: anonymousPayload.content?.length || 0,
+            hasEmail: !!anonymousPayload.email,
+            emailValid: emailRegex.test(anonymousPayload.email || ''),
+            hasTone: !!anonymousPayload.tone,
+            hasTimestamp: !!anonymousPayload.timestamp,
+            isAnonymous: true,
+            isValid: true
+        });
+        
+        // ========================================
+        // FASE 2: PREPARAZIONE RICHIESTA HTTP (SENZA TOKEN)
+        // ========================================
+        
+        console.log('\n📤 FASE 2: Preparazione richiesta HTTP anonima...');
+        
+        const headers = {
+            'Content-Type': 'application/json',
+            'X-Client-Version': '3.0',
+            'X-Request-ID': generateUniqueId(),
+            'X-Anonymous-Request': 'true'
+        };
+        
+        // IMPORTANTE: Non includere Authorization header per UCMe anonime
+        
+        const requestBody = JSON.stringify(anonymousPayload);
+        
+        const requestConfig = {
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            headers: headers,
+            body: requestBody
+        };
+        
+        console.log('📋 Headers per richiesta anonima:', {
+            'Content-Type': headers['Content-Type'],
+            'X-Client-Version': headers['X-Client-Version'],
+            'X-Request-ID': headers['X-Request-ID'],
+            'X-Anonymous-Request': headers['X-Anonymous-Request'],
+            'Authorization': 'NON PRESENTE (anonima)'
+        });
+        
+        console.log('📦 Request body length:', requestBody.length);
+        console.log('📦 Payload fields count:', Object.keys(anonymousPayload).length);
+        
+        // ========================================
+        // FASE 3: INVIO RICHIESTA ANONIMA
+        // ========================================
+        
+        console.log('\n🚀 FASE 3: Invio richiesta anonima al server...');
+        
+        let response;
+        let attempts = 0;
+        const maxAttempts = 2;
+        
+        while (attempts < maxAttempts) {
+            attempts++;
+            console.log(`🔄 Tentativo anonimo ${attempts}/${maxAttempts}...`);
+            
+            try {
+                response = await fetch(UCME_ENDPOINT, requestConfig);
+                break; // Successo, esci dal loop
+            } catch (fetchError) {
+                console.error(`❌ Errore fetch anonimo tentativo ${attempts}:`, fetchError.message);
+                
+                if (attempts === maxAttempts) {
+                    throw new Error('Impossibile connettersi al server. Verifica la connessione e riprova.');
+                }
+                
+                // Pausa prima del retry
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+        
+        console.log('📨 Response anonima ricevuta:', {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok,
+            headers: Object.fromEntries(response.headers.entries())
+        });
+        
+        // ========================================
+        // FASE 4: GESTIONE RISPOSTA ANONIMA
+        // ========================================
+        
+        console.log('\n📊 FASE 4: Elaborazione risposta anonima...');
+        
+        if (!response.ok) {
+            let errorDetails = {};
+            try {
+                errorDetails = await response.json();
+                console.error('   Dettagli errore server anonimo:', errorDetails);
+            } catch (e) {
+                console.error('   Impossibile leggere dettagli errore:', e.message);
+            }
+            
+            // Gestione errori specifici per UCMe anonime
+            if (response.status === 400) {
+                throw new Error(errorDetails.message || 'Dati della richiesta non validi. Controlla email e contenuto della UCMe.');
+            } else if (response.status === 429) {
+                throw new Error('Troppe richieste. Riprova tra qualche minuto.');
+            } else if (response.status >= 500) {
+                throw new Error('Errore del server. Riprova più tardi.');
+            } else {
+                throw new Error(errorDetails.message || `Errore del server (${response.status})`);
+            }
+        }
+        
+        const result = await response.json();
+        
+        console.log('✅ UCMe anonima inviata con successo!');
+        console.log('📊 Risultato server:', result);
+        
+        return result;
+        
+    } catch (error) {
+        console.error('💥 ============================================');
+        console.error('💥 ERRORE DURANTE INVIO UCME ANONIMA');
+        console.error('💥 ============================================');
+        console.error('💥 Messaggio:', error.message);
+        console.error('💥 Stack:', error.stack);
+        console.error('💥 Timestamp:', new Date().toISOString());
+        console.error('💥 ============================================');
+        
+        throw error; // Rilancia l'errore per gestione upstream
     }
 }
 

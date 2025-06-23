@@ -1,8 +1,8 @@
 // ================================================================
 // MENTAL COMMONS - UCME API CON SUPABASE
 // ================================================================
-// Versione: 2.2.0
-// Descrizione: API UCMe con backend persistente Supabase e autenticazione JWT
+// Versione: 2.3.0 - SUPPORTO UCMe ANONIME
+// Descrizione: API UCMe con backend persistente Supabase, supporta sia UCMe autenticate che anonime
 // Fix: Convertito a CommonJS puro per compatibilità Vercel + Fallback per testing
 
 // Sistema di logging per ambiente produzione
@@ -27,7 +27,7 @@ module.exports = async function handler(req, res) {
   // ================================================================
   
   debug('🟣 ============================================');
-  debug('🟣 MENTAL COMMONS - UCME API v2.2 SUPABASE');
+  debug('🟣 MENTAL COMMONS - UCME API v2.3 SUPABASE + ANONYMOUS');
   debug('🟣 ============================================');
   debug('📝 Timestamp:', new Date().toISOString());
   debug('📝 Headers ricevuti:', JSON.stringify(req.headers, null, 2));
@@ -91,7 +91,7 @@ module.exports = async function handler(req, res) {
       // GET: Recupera UCMe dell'utente
       return await handleGetUCMes(req, res);
     } else if (req.method === 'POST') {
-      // POST: Salva nuova UCMe
+      // POST: Salva nuova UCMe (autenticata o anonima)
       return await handlePostUCMe(req, res);
     } else {
       debug('❌ Metodo non valido:', req.method);
@@ -101,7 +101,7 @@ module.exports = async function handler(req, res) {
         debug: {
           receivedMethod: req.method,
           allowedMethods: ['GET', 'POST'],
-          apiVersion: '2.2.0',
+          apiVersion: '2.3.0',
           backend: 'supabase'
         }
       });
@@ -114,7 +114,7 @@ module.exports = async function handler(req, res) {
       debug: {
         error: handlerError.message,
         stack: handlerError.stack,
-        apiVersion: '2.2.0'
+        apiVersion: '2.3.0'
       }
     });
   }
@@ -125,14 +125,14 @@ module.exports = async function handler(req, res) {
 // ================================================================
 
 async function handlePostUCMeFallback(req, res) {
-  debug('📝 POST UCMe FALLBACK - Salvataggio su file locale');
+  debug('📝 POST UCMe FALLBACK - Salvataggio su file locale (autenticata o anonima)');
   
   try {
     const fs = require('fs').promises;
     const path = require('path');
     
-    // Validazione base
-    const { content, title } = req.body;
+    // Validazione base per supportare UCMe anonime
+    const { content, title, email } = req.body;
     
     if (!content || content.length < 20 || content.length > 600) {
       return res.status(400).json({
@@ -140,7 +140,25 @@ async function handlePostUCMeFallback(req, res) {
         message: 'Il contenuto deve essere tra 20 e 600 caratteri',
         debug: {
           contentLength: content?.length || 0,
-          apiVersion: '2.2.0',
+          apiVersion: '2.3.0',
+          mode: 'fallback'
+        }
+      });
+    }
+    
+    // Determina se è anonima (no token o email fornita nel body)
+    const authHeader = req.headers.authorization;
+    const isAnonymous = !authHeader || !authHeader.startsWith('Bearer ') || !!email;
+    
+    // Validazione email per UCMe anonime
+    if (isAnonymous && !email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email richiesta per UCMe anonime',
+        debug: {
+          isAnonymous: true,
+          hasEmail: !!email,
+          apiVersion: '2.3.0',
           mode: 'fallback'
         }
       });
@@ -153,6 +171,8 @@ async function handlePostUCMeFallback(req, res) {
       title: title?.trim() || null,
       status: 'attesa',
       createdAt: new Date().toISOString(),
+      isAnonymous: isAnonymous,
+      anonymousEmail: isAnonymous ? email : null,
       mode: 'fallback_local_file'
     };
     
@@ -187,7 +207,8 @@ async function handlePostUCMeFallback(req, res) {
       debug: {
         saveMethod: 'local_file_fallback',
         persistentStorage: false,
-        apiVersion: '2.2.0',
+        isAnonymous: isAnonymous,
+        apiVersion: '2.3.0',
         mode: 'fallback',
         warning: 'Configurazione Supabase non disponibile'
       }
@@ -200,7 +221,7 @@ async function handlePostUCMeFallback(req, res) {
       message: 'Errore durante salvataggio di emergenza',
       debug: {
         error: err.message,
-        apiVersion: '2.2.0',
+        apiVersion: '2.3.0',
         mode: 'fallback'
       }
     });
@@ -227,7 +248,7 @@ async function handleGetUCMesFallback(req, res) {
         debug: {
           method: 'local_file_fallback',
           persistentStorage: false,
-          apiVersion: '2.2.0',
+          apiVersion: '2.3.0',
           mode: 'fallback'
         }
       });
@@ -239,7 +260,7 @@ async function handleGetUCMesFallback(req, res) {
         ucmes: [],
         debug: {
           method: 'local_file_fallback',
-          apiVersion: '2.2.0',
+          apiVersion: '2.3.0',
           mode: 'fallback'
         }
       });
@@ -249,11 +270,11 @@ async function handleGetUCMesFallback(req, res) {
     return res.status(500).json({
       success: false,
       message: 'Errore lettura fallback',
-      debug: {
-        error: err.message,
-        apiVersion: '2.2.0',
-        mode: 'fallback'
-      }
+              debug: {
+          error: err.message,
+          apiVersion: '2.3.0',
+          mode: 'fallback'
+        }
     });
   }
 }
@@ -276,7 +297,7 @@ async function handleGetUCMes(req, res) {
         debug: {
           error: 'missing_auth_token',
           expectedHeader: 'Authorization: Bearer <token>',
-          apiVersion: '2.2.0'
+          apiVersion: '2.3.0'
         }
       });
     }
@@ -293,7 +314,7 @@ async function handleGetUCMes(req, res) {
         message: 'Token di autenticazione non valido',
         debug: {
           error: 'invalid_jwt_token',
-          apiVersion: '2.2.0'
+          apiVersion: '2.3.0'
         }
       });
     }
@@ -329,7 +350,7 @@ async function handleGetUCMes(req, res) {
         method: 'get_user_ucmes',
         backend: 'supabase',
         persistent: true,
-        apiVersion: '2.2.0'
+        apiVersion: '2.3.0'
       }
     });
     
@@ -340,7 +361,7 @@ async function handleGetUCMes(req, res) {
       message: 'Errore interno del server',
       debug: {
         error: err.message,
-        apiVersion: '2.2.0'
+        apiVersion: '2.3.0'
       }
     });
   }
@@ -351,53 +372,44 @@ async function handleGetUCMes(req, res) {
 // ================================================================
 
 async function handlePostUCMe(req, res) {
-  debug('📝 POST UCMe - Salvataggio nuova UCMe');
+  debug('📝 POST UCMe - Salvataggio nuova UCMe (autenticata o anonima)');
   debug('📝 UCMe save request (RAW):', JSON.stringify(req.body, null, 2));
   
   try {
     // ================================================================
-    // AUTENTICAZIONE JWT
+    // AUTENTICAZIONE JWT (OPZIONALE PER UCMe ANONIME)
     // ================================================================
     
-    // Estrai token JWT dall'header Authorization
+    // Estrai token JWT dall'header Authorization (opzionale)
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      debug('❌ Token JWT mancante nell\'header Authorization');
-      return res.status(401).json({
-        success: false,
-        message: 'Token di autenticazione richiesto per salvare UCMe',
-        debug: {
-          error: 'missing_auth_token',
-          expectedHeader: 'Authorization: Bearer <token>',
-          apiVersion: '2.2.0'
-        }
-      });
+    let decoded = null;
+    let isAnonymous = false;
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      debug('🎫 Token JWT ricevuto, verifico...');
+      
+      // Verifica token JWT
+      decoded = supabaseModule.verifyJWT(token);
+      if (!decoded) {
+        debug('❌ Token JWT non valido - procedo come anonimo');
+        isAnonymous = true;
+      } else {
+        debug('✅ Token JWT valido per utente:', decoded.userId);
+        isAnonymous = false;
+      }
+    } else {
+      debug('👤 Nessun token di autenticazione - modalità anonima');
+      isAnonymous = true;
     }
     
-    const token = authHeader.substring(7);
-    debug('🎫 Token JWT ricevuto, verifico...');
-    
-    // Verifica token JWT
-    const decoded = supabaseModule.verifyJWT(token);
-    if (!decoded) {
-      debug('❌ Token JWT non valido');
-      return res.status(401).json({
-        success: false,
-        message: 'Token di autenticazione non valido',
-        debug: {
-          error: 'invalid_jwt_token',
-          apiVersion: '2.2.0'
-        }
-      });
-    }
-    
-    debug('✅ Token JWT valido per utente:', decoded.userId);
+    debug('🔍 Modalità UCMe:', isAnonymous ? 'ANONIMA' : 'AUTENTICATA');
     
     // ================================================================
     // VALIDAZIONE INPUT
     // ================================================================
     
-    const { content, title } = req.body;
+    const { content, title, email } = req.body;
     
     // Log dettagliato dei dati ricevuti
     debug('📦 UCME SAVE PAYLOAD - Dati estratti dal body:');
@@ -406,8 +418,9 @@ async function handlePostUCMe(req, res) {
     debug('  📝 Content length:', content?.length);
     debug('  📋 Title:', title);
     debug('  📋 Title type:', typeof title);
-    debug('  👤 User ID (da JWT):', decoded.userId);
-    debug('  📧 User Email (da JWT):', decoded.email);
+    debug('  📧 Email dal body:', email);
+    debug('  👤 User ID (da JWT):', decoded?.userId || 'Anonimo');
+    debug('  📧 User Email (da JWT):', decoded?.email || 'N/A');
     
     // Validazione dati obbligatori
     if (!content) {
@@ -418,7 +431,8 @@ async function handlePostUCMe(req, res) {
         debug: {
           hasContent: !!content,
           contentLength: content?.length || 0,
-          apiVersion: '2.2.0'
+          isAnonymous: isAnonymous,
+          apiVersion: '2.3.0'
         }
       });
     }
@@ -434,9 +448,41 @@ async function handlePostUCMe(req, res) {
           minRequired: 20,
           maxAllowed: 600,
           isValid: content.length >= 20 && content.length <= 600,
-          apiVersion: '2.2.0'
+          isAnonymous: isAnonymous,
+          apiVersion: '2.3.0'
         }
       });
+    }
+    
+    // Validazione email per UCMe anonime
+    if (isAnonymous && !email) {
+      debug('❌ Email richiesta per UCMe anonime');
+      return res.status(400).json({
+        success: false,
+        message: 'Email richiesta per ricevere la risposta alla tua UCMe',
+        debug: {
+          hasEmail: !!email,
+          isAnonymous: isAnonymous,
+          apiVersion: '2.3.0'
+        }
+      });
+    }
+    
+    // Validazione formato email per UCMe anonime
+    if (isAnonymous && email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        debug('❌ Formato email non valido:', email);
+        return res.status(400).json({
+          success: false,
+          message: 'Formato email non valido',
+          debug: {
+            email: email,
+            isAnonymous: isAnonymous,
+            apiVersion: '2.3.0'
+          }
+        });
+      }
     }
     
     // ================================================================
@@ -466,12 +512,19 @@ async function handlePostUCMe(req, res) {
     debug('📥 SALVATAGGIO UCME - Inizio salvataggio in Supabase:');
     debug('  🔍 Tipo di storage: Supabase PostgreSQL');
     debug('  🔍 Fonte dati: Database persistente');
-    debug('  🔍 User ID:', decoded.userId);
+    debug('  🔍 Modalità:', isAnonymous ? 'ANONIMA' : 'AUTENTICATA');
+    debug('  🔍 User ID:', decoded?.userId || 'Anonimo');
+    debug('  📧 Email:', isAnonymous ? email : decoded?.email);
     debug('  📝 Contenuto length:', content.length);
     debug('  📋 Titolo:', title || 'Nessun titolo');
     
-    // Salva UCMe nel database
-    const savedUCMe = await supabaseModule.saveUCMe(decoded.userId, content.trim(), title?.trim() || null);
+    // Salva UCMe nel database (autenticata o anonima)
+    let savedUCMe;
+    if (isAnonymous) {
+      savedUCMe = await supabaseModule.saveAnonymousUCMe(email, content.trim(), title?.trim() || null);
+    } else {
+      savedUCMe = await supabaseModule.saveUCMe(decoded.userId, content.trim(), title?.trim() || null);
+    }
     
     debug('✅ UCMe salvata con successo nel database');
     debug('  📝 UCMe ID:', savedUCMe.id);
@@ -485,7 +538,8 @@ async function handlePostUCMe(req, res) {
     
     debug('📦 UCME SAVE RESULT - SUCCESSO:');
     debug('  📝 UCMe ID:', savedUCMe.id);
-    debug('  📧 Email utente:', decoded.email);
+    debug('  📧 Email utente:', isAnonymous ? email : decoded?.email);
+    debug('  🔍 Modalità:', isAnonymous ? 'ANONIMA' : 'AUTENTICATA');
     debug('  📊 Caratteri contenuto:', content.length);
     debug('  📋 Titolo:', title || 'Nessuno');
     debug('  💾 Persistenza: SÌ (Supabase)');
@@ -500,11 +554,17 @@ async function handlePostUCMe(req, res) {
         content: savedUCMe.content,
         title: savedUCMe.title,
         status: savedUCMe.status,
-        createdAt: savedUCMe.created_at
+        createdAt: savedUCMe.created_at,
+        isAnonymous: isAnonymous
       },
-      user: {
+      user: isAnonymous ? {
+        id: null,
+        email: email,
+        anonymous: true
+      } : {
         id: decoded.userId,
-        email: decoded.email
+        email: decoded.email,
+        anonymous: false
       },
       debug: {
         saveMethod: 'supabase_database',
@@ -512,8 +572,9 @@ async function handlePostUCMe(req, res) {
         storageType: 'postgresql',
         fileSystemUsed: false,
         databaseConnected: true,
+        isAnonymous: isAnonymous,
         timestamp: new Date().toISOString(),
-        apiVersion: '2.2.0',
+        apiVersion: '2.3.0',
         backend: 'supabase',
         crossDevice: true
       }
@@ -543,7 +604,7 @@ async function handlePostUCMe(req, res) {
         code: err.code || 'unknown',
         backend: 'supabase',
         timestamp: new Date().toISOString(),
-        apiVersion: '2.2.0'
+        apiVersion: '2.3.0'
       }
     });
   }
