@@ -537,8 +537,8 @@ function loadProfileData(user) {
         const profileData = {
             email: user.email,
             name: user.name || user.firstName || 'Non specificato',
-            createdAt: user.createdAt || user.created_at || Date.now(),
-            lastLogin: user.lastLogin || user.last_login || Date.now(),
+            createdAt: user.created_at || user.createdAt || Date.now(),
+            lastLogin: user.last_login || user.lastLogin || Date.now(),
             id: user.id || user.user_id || 'N/A'
         };
         
@@ -723,7 +723,18 @@ function renderDashboard(data) {
         }
         if (dashboardContent) {
             dashboardContent.style.display = "block";
+            dashboardContent.style.visibility = "visible";
+            dashboardContent.style.opacity = "1";
             log("✅ Contenuto dashboard mostrato");
+        }
+        
+        // 📱 Controllo specifico per mobile - forza visibilità UCMe
+        if (ucmeBlocksContainer) {
+            ucmeBlocksContainer.style.display = "flex";
+            ucmeBlocksContainer.style.flexDirection = "column";
+            ucmeBlocksContainer.style.visibility = "visible";
+            ucmeBlocksContainer.style.opacity = "1";
+            log("✅ Container UCMe forzato visibile per mobile");
         }
         
         log('✅ Dashboard renderizzata con successo');
@@ -839,6 +850,14 @@ function renderUcmeBlocks(ucmes) {
         }
         
         log('✅ Container ucme-blocks trovato');
+        
+        // 📱 Forza visibilità per mobile - garantisce che le UCMe siano sempre visibili
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.visibility = 'visible';
+        container.style.opacity = '1';
+        log('✅ Visibilità container forzata per mobile');
+        
         container.innerHTML = '';
         
         if (!ucmes || ucmes.length === 0) {
@@ -850,13 +869,32 @@ function renderUcmeBlocks(ucmes) {
             try {
                 log(`📝 Creazione blocco UCMe ${index + 1}/${ucmes.length}:`, ucme.text?.substring(0, 50) + '...');
                 const ucmeBlock = createDashboardUcmeBlock(ucme, index);
+                
+                // 📱 Forza visibilità del blocco per mobile
+                ucmeBlock.style.display = 'block';
+                ucmeBlock.style.visibility = 'visible';
+                ucmeBlock.style.opacity = '1';
+                
                 container.appendChild(ucmeBlock);
-                log(`✅ Blocco UCMe ${index + 1} creato e aggiunto`);
+                log(`✅ Blocco UCMe ${index + 1} creato e aggiunto con visibilità forzata`);
             } catch (blockError) {
                 error(`❌ Errore nella creazione blocco UCMe ${index + 1}:`, blockError);
                 // Continua con il prossimo blocco
             }
         });
+        
+        // 📱 Verifica finale visibilità su mobile
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            log('📱 Dispositivo mobile rilevato - controllo finale visibilità UCMe');
+            const allBlocks = container.querySelectorAll('.ucme-block');
+            allBlocks.forEach((block, idx) => {
+                block.style.display = 'block';
+                block.style.visibility = 'visible';
+                block.style.opacity = '1';
+                log(`📱 Blocco ${idx + 1} - visibilità forzata per mobile`);
+            });
+        }
         
         log('✅ Rendering blocchi UCMe completato');
         
@@ -948,9 +986,11 @@ function updateProfileInfo(user) {
         
         if (profileCreated) {
             try {
-                const createdDate = new Date(user.createdAt || Date.now()).toLocaleDateString('it-IT');
+                // Usa prima created_at (campo corretto del database), poi fallback su createdAt
+                const createdAt = user.created_at || user.createdAt;
+                const createdDate = new Date(createdAt || Date.now()).toLocaleDateString('it-IT');
                 profileCreated.textContent = createdDate;
-                log('✅ Data creazione profilo aggiornata');
+                log('✅ Data creazione profilo aggiornata:', createdDate, 'da campo:', createdAt ? 'created_at/createdAt' : 'fallback');
             } catch (dateError) {
                 error('❌ Errore nella formattazione data creazione:', dateError);
                 profileCreated.textContent = 'Data non disponibile';
@@ -959,9 +999,11 @@ function updateProfileInfo(user) {
         
         if (profileLastLogin) {
             try {
-                const lastLoginDate = new Date(user.lastLogin || Date.now()).toLocaleDateString('it-IT');
+                // Usa prima last_login (campo corretto del database), poi fallback su lastLogin
+                const lastLogin = user.last_login || user.lastLogin;
+                const lastLoginDate = new Date(lastLogin || Date.now()).toLocaleDateString('it-IT');
                 profileLastLogin.textContent = lastLoginDate;
-                log('✅ Data ultimo accesso aggiornata');
+                log('✅ Data ultimo accesso aggiornata:', lastLoginDate, 'da campo:', lastLogin ? 'last_login/lastLogin' : 'fallback');
             } catch (dateError) {
                 error('❌ Errore nella formattazione data ultimo accesso:', dateError);
                 profileLastLogin.textContent = 'Data non disponibile';
@@ -1826,181 +1868,13 @@ function debugLoginIssues() {
     return { users, localStorage: !!window.localStorage };
 }
 
-// Funzione per mostrare pannello debug sulla pagina
-function showDebugPanel() {
-    const debugInfo = debugLoginIssues();
-    
-    const panel = document.createElement('div');
-    panel.id = 'debug-panel';
-    panel.style.cssText = `
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        width: 300px;
-        max-height: 400px;
-        overflow-y: auto;
-        background: rgba(0,0,0,0.9);
-        color: white;
-        padding: 15px;
-        border-radius: 8px;
-        font-family: monospace;
-        font-size: 12px;
-        z-index: 10000;
-        border: 1px solid #333;
-    `;
-    
-    panel.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h4 style="margin: 0; color: #4CAF50;">🔍 Debug Login</h4>
-            <button onclick="document.getElementById('debug-panel').remove()" style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">×</button>
-        </div>
-        <div><strong>👥 Utenti registrati:</strong> ${debugInfo.users.length}</div>
-        <div><strong>💾 LocalStorage:</strong> ${debugInfo.localStorage ? '✅' : '❌'}</div>
-        <div><strong>📱 Mobile:</strong> ${isMobileDevice() ? '✅' : '❌'}</div>
-        <div style="margin-top: 10px;">
-            <button onclick="debugLoginIssues()" style="background: #2196F3; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; margin: 2px; font-size: 11px;">Debug</button>
-            <button onclick="showUsers()" style="background: #FF9800; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; margin: 2px; font-size: 11px;">Users</button>
-            <button onclick="createTestUser()" style="background: #4CAF50; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; margin: 2px; font-size: 11px;">Crea</button>
-        </div>
-        <div style="margin-top: 5px;">
-            <button onclick="syncUsersToBackendDebug()" style="background: #9C27B0; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; margin: 2px; font-size: 11px;">Sync ⬆️</button>
-            <button onclick="testBackendLogin()" style="background: #795548; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; margin: 2px; font-size: 11px;">Test Backend</button>
-        </div>
-    `;
-    
-    // Rimuovi pannello esistente se presente
-    const existing = document.getElementById('debug-panel');
-    if (existing) existing.remove();
-    
-    document.body.appendChild(panel);
-    log('🔍 Pannello debug mostrato');
-}
+// DEBUG CODE REMOVED FOR PRODUCTION
 
-// Funzione per creare utente test rapidamente
-function createTestUser() {
-    const email = prompt('Email utente test:', 'test@email.com');
-    const password = prompt('Password utente test:', 'password123');
-    
-    if (email && password) {
-        const result = debugMC.createQuickUser(email, password);
-        if (result) {
-            alert(`✅ Utente creato: ${email}`);
-            // Aggiorna debug panel se aperto
-            const panel = document.getElementById('debug-panel');
-            if (panel) {
-                showDebugPanel();
-            }
-        } else {
-            alert('❌ Errore: Utente già esistente');
-        }
-    }
-}
+// DEBUG CODE REMOVED FOR PRODUCTION
 
-// Funzioni debug per backend
-async function syncUsersToBackendDebug() {
-    try {
-        const result = await syncUsersToBackend();
-        alert(`Sync risultato: ${result.message}`);
-        log('📤 Sync completata:', result);
-    } catch (error) {
-        alert(`Errore sync: ${error.message}`);
-        error('❌ Errore sync:', error);
-    }
-}
+// DEBUG CODE REMOVED FOR PRODUCTION
 
-async function testBackendLogin() {
-    const email = prompt('Email test:');
-    const password = prompt('Password test:');
-    
-    if (email && password) {
-        try {
-            log('🔍 Debug test backend iniziato...');
-            log('📡 Endpoint:', `${window.location.origin}/api/login`);
-            log('📤 Payload:', { action: 'login', email, password: '[HIDDEN]' });
-            log('🔧 Backend: SUPABASE (Google Apps Script RIMOSSO)');
-            
-            const result = await loginWithBackend(email, password);
-            alert(`✅ Test login: ${result.success ? 'SUCCESS' : 'FAILED'}\n${result.message}`);
-            log('🧪 Test backend login SUCCESS:', result);
-        } catch (error) {
-            // Debug dettagliato errore
-            error('❌ Errore completo:', error);
-            error('❌ Stack trace:', error.stack);
-            error('❌ Message:', error.message);
-            error('❌ Name:', error.name);
-            
-            let errorMsg = error.message;
-            let helpMsg = '';
-            
-            if (error.message.includes('CORS') || error.message.includes('blocked')) {
-                errorMsg = '🚨 ERRORE CORS';
-                helpMsg = '\n\n🔧 SOLUZIONE:\n1. Verifica configurazione CORS Vercel\n2. Controlla header Access-Control-Allow-Origin\n3. Verifica che l\'API sia online';
-            } else if (error.message.includes('Failed to fetch') || error.message.includes('HTTP 0')) {
-                errorMsg = '🌐 ERRORE CONNESSIONE';
-                helpMsg = '\n\n🔧 POSSIBILI CAUSE:\n1. API Vercel offline\n2. URL endpoint non corretto\n3. Problemi di rete';
-            } else if (error.message.includes('HTTP')) {
-                errorMsg = `📡 ERRORE SERVER: ${error.message}`;
-                helpMsg = '\n\n🔧 Controlla log Vercel e Supabase per dettagli';
-            }
-            
-            alert(`❌ ${errorMsg}${helpMsg}`);
-        }
-    }
-}
-
-// Esponi le funzioni di debug aggiornate per Supabase
-window.debugMC = {
-    showPanel: showDebugPanel,
-    debug: debugLoginIssues,
-    // ❌ FUNZIONI DEPRECATE - localStorage non più usato per utenti
-    users: () => {
-        log('⚠️ DEPRECATO: Gli utenti sono ora gestiti solo in Supabase');
-        log('🔍 Per debug, controlla sessionStorage:', {
-            user: sessionStorage.getItem('mental_commons_user'),
-            token: sessionStorage.getItem('mental_commons_token')
-        });
-        return [];
-    },
-    clearUsers: () => {
-        log('⚠️ DEPRECATO: Pulizia localStorage non necessaria');
-        log('🔄 Eseguo logout completo invece...');
-        logoutUser();
-    },
-    testLogin: async (email, password) => {
-        log('🧪 Test login Supabase:', { email, password: '[HIDDEN]' });
-        try {
-            const result = await loginWithBackend(email, password);
-            log('🧪 Risultato:', result.success ? 'SUCCESSO' : 'FALLITO');
-            log('🧪 Dettagli:', result);
-            return result;
-        } catch (error) {
-            log('🧪 Errore:', error.message);
-            return { success: false, error: error.message };
-        }
-    },
-    testRegister: async (email, password, name) => {
-        log('🧪 Test registrazione Supabase:', { email, password: '[HIDDEN]', name });
-        try {
-            const result = await registerWithBackend(email, password, name);
-            log('🧪 Risultato:', result.success ? 'SUCCESSO' : 'FALLITO');
-            log('🧪 Dettagli:', result);
-            return result;
-        } catch (error) {
-            log('🧪 Errore:', error.message);
-            return { success: false, error: error.message };
-        }
-    },
-    currentUser: () => {
-        log('👤 Utente corrente:');
-        log('  sessionStorage:', sessionStorage.getItem('mental_commons_user'));
-        log('  currentUser var:', currentUser);
-        return currentUser;
-    },
-    logout: () => {
-        log('🚪 Logout di debug...');
-        logoutUser();
-    }
-};
+// DEBUG CODE REMOVED FOR PRODUCTION
 
 // ========================================
 // GESTIONE FORM AUTENTICAZIONE
@@ -3504,13 +3378,11 @@ function setupMobileDebugTrigger() {
             clearTimeout(tapTimer);
             tapCount = 0;
             
-            // Mostra debug panel su triplo tap
-            log('🔍 Triplo tap rilevato - mostrando debug panel');
-            showDebugPanel();
+            // DEBUG CODE REMOVED FOR PRODUCTION
         }
     });
     
-    log('📱 Debug trigger (triplo tap) configurato per mobile');
+    log('📱 Mobile optimizations configurato');
 }
 
 // 🔧 Funzione per determinare se permettere auto-registrazione

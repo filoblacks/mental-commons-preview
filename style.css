@@ -1298,29 +1298,49 @@ main,
 .checkbox-wrapper input[type="checkbox"] {
     width: 20px;
     height: 20px;
-    accent-color: #fff;
-    border: 1px solid #ccc;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: 2px solid #ccc;
     background: #000;
     cursor: pointer;
     margin: 0;
     flex-shrink: 0;
     margin-top: 2px;
-    border-radius: 3px;
-    transition: all 0.2s ease;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .checkbox-wrapper input[type="checkbox"]:hover {
     border-color: #fff;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .checkbox-wrapper input[type="checkbox"]:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4);
+    border-color: #fff;
 }
 
 .checkbox-wrapper input[type="checkbox"]:checked {
     background: #fff;
     border-color: #fff;
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked::after {
+    content: '✓';
+    color: #000;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .checkbox-wrapper label {
@@ -1929,6 +1949,9 @@ footer p {
     .ucme-block {
         padding: 1rem;
         margin-bottom: 1rem;
+        display: block !important; /* Forza visibilità su mobile */
+        visibility: visible !important;
+        opacity: 1 !important;
     }
 
     .ucme-status {
@@ -1943,6 +1966,20 @@ footer p {
     .ucme-response {
         padding: 0.875rem;
         margin-top: 0.75rem;
+    }
+    
+    /* Assicura che il container delle UCMe sia sempre visibile su mobile */
+    .ucme-blocks {
+        display: flex !important;
+        flex-direction: column !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    .dashboard-content {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
 
     .response-text {
@@ -2190,9 +2227,14 @@ footer p {
     }
     
     .checkbox-wrapper input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
+        width: 22px;
+        height: 22px;
         margin-top: 1px;
+        border-width: 2px;
+    }
+    
+    .checkbox-wrapper input[type="checkbox"]:checked::after {
+        font-size: 16px;
     }
     
     .submit-button {
@@ -2283,6 +2325,26 @@ footer p {
         padding: 0.15rem 0.35rem;
         font-size: 0.7rem;
     }
+    
+    /* 🔧 FIX CRITICO: Forza visibilità UCMe su tutti i dispositivi mobile */
+    .ucme-block {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    .ucme-blocks {
+        display: flex !important;
+        flex-direction: column !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    .dashboard-content {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
 }
 
 /* Landscape orientation on mobile */
@@ -2369,8 +2431,17 @@ footer p {
     }
     
     .checkbox-wrapper input[type="checkbox"] {
-        width: 24px;
-        height: 24px;
+        width: 26px;
+        height: 26px;
+        border-width: 3px;
+    }
+    
+    .checkbox-wrapper input[type="checkbox"]:checked::after {
+        font-size: 18px;
+    }
+    
+    .checkbox-wrapper input[type="checkbox"]:focus {
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5);
     }
     
     /* Increase touch targets */
@@ -3982,45 +4053,7 @@ html.auth-ready #main-cta {
     will-change: opacity, visibility;
 }
 
-/* DEBUG: Indicatori visivi per sviluppo */
-html.auth-ready::before {
-    content: "AUTH-READY";
-    position: fixed;
-    top: 0;
-    right: 0;
-    background: green;
-    color: white;
-    padding: 2px 6px;
-    font-size: 10px;
-    z-index: 9999;
-    display: none; /* Rimuovi per debug */
-}
-
-html.user-authenticated::after {
-    content: "AUTHENTICATED";
-    position: fixed;
-    top: 20px;
-    right: 0;
-    background: blue;
-    color: white;
-    padding: 2px 6px;
-    font-size: 10px;
-    z-index: 9999;
-    display: none; /* Rimuovi per debug */
-}
-
-html.user-guest::after {
-    content: "GUEST";
-    position: fixed;
-    top: 20px;
-    right: 0;
-    background: orange;
-    color: white;
-    padding: 2px 6px;
-    font-size: 10px;
-    z-index: 9999;
-    display: none; /* Rimuovi per debug */
-}
+/* DEBUG CODE REMOVED FOR PRODUCTION */
 
 /* ================================================================
    ICONA PROFILO - DIMENSIONI FISSE E CENTRATA (DEFINITIVO)
