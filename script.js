@@ -360,34 +360,110 @@ async function loadUCMeFromBackend(userEmail) {
 async function mergeUCMeData(userEmail) {
     log('🔄 Merge dati UCMe da tutte le fonti per:', userEmail);
     
-    // 1. Carica da localStorage
-    const localUcmes = ucmeData.filter(ucme => ucme.email === userEmail);
-    log('📱 UCMe da localStorage:', localUcmes.length);
+    // 🔥 DEBUG COMPLETO - Trova UCMe da TUTTE le fonti possibili
+    let allFoundUcmes = [];
     
-    // 2. Carica da backend
-    const backendUcmes = await loadUCMeFromBackend(userEmail);
-    log('☁️ UCMe da backend:', backendUcmes ? backendUcmes.length : 0);
+    // 1. Carica da localStorage con chiavi multiple
+    const possibleKeys = [
+        'mentalCommons_ucmes',
+        'mental_commons_ucmes', 
+        'mc-ucmes',
+        'ucmes',
+        'mentalCommons_data'
+    ];
     
-    // 3. Merge intelligente
-    let mergedUcmes = [...localUcmes];
-    
-    if (backendUcmes && backendUcmes.length > 0) {
-        // Aggiungi UCMe dal backend che non esistono già in localStorage
-        backendUcmes.forEach(backendUcme => {
-            const exists = localUcmes.some(localUcme => 
-                localUcme.timestamp === backendUcme.timestamp && 
-                localUcme.text === backendUcme.text
-            );
-            
-            if (!exists) {
-                mergedUcmes.push(backendUcme);
-                log('➕ Aggiunta UCMe dal backend:', backendUcme.text?.substring(0, 30) + '...');
+    possibleKeys.forEach(key => {
+        try {
+            const data = localStorage.getItem(key);
+            if (data) {
+                const parsed = JSON.parse(data);
+                if (Array.isArray(parsed)) {
+                    const userUcmes = parsed.filter(ucme => 
+                        ucme.email === userEmail || 
+                        ucme.user === userEmail ||
+                        ucme.userEmail === userEmail
+                    );
+                    if (userUcmes.length > 0) {
+                        allFoundUcmes.push(...userUcmes);
+                        log(`📱 Trovate ${userUcmes.length} UCMe in localStorage key: ${key}`);
+                    }
+                } else if (parsed.email === userEmail) {
+                    allFoundUcmes.push(parsed);
+                    log(`📱 Trovata 1 UCMe in localStorage key: ${key}`);
+                }
             }
-        });
+        } catch (e) {
+            // Ignora errori di parsing
+        }
+    });
+    
+    // 2. Carica da ucmeData globale
+    const localUcmes = ucmeData.filter(ucme => 
+        ucme.email === userEmail || 
+        ucme.user === userEmail ||
+        ucme.userEmail === userEmail
+    );
+    if (localUcmes.length > 0) {
+        allFoundUcmes.push(...localUcmes);
+        log('📱 UCMe da ucmeData globale:', localUcmes.length);
     }
     
-    log('🔗 UCMe totali dopo merge:', mergedUcmes.length);
-    return mergedUcmes;
+    // 3. Carica da backend
+    const backendUcmes = await loadUCMeFromBackend(userEmail);
+    if (backendUcmes && backendUcmes.length > 0) {
+        allFoundUcmes.push(...backendUcmes);
+        log('☁️ UCMe da backend:', backendUcmes.length);
+    }
+    
+    // 4. 🔥 RICERCA AGGRESSIVA - Trova TUTTE le UCMe in localStorage
+    log('🔍 RICERCA AGGRESSIVA - Scansione completa localStorage...');
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        try {
+            const value = localStorage.getItem(key);
+            if (value && value.includes(userEmail)) {
+                log(`🔍 Trovato riferimento a ${userEmail} in key: ${key}`);
+                const parsed = JSON.parse(value);
+                if (Array.isArray(parsed)) {
+                    const userUcmes = parsed.filter(item => 
+                        (item.email === userEmail || item.user === userEmail) &&
+                        (item.text || item.content || item.message)
+                    );
+                    if (userUcmes.length > 0) {
+                        allFoundUcmes.push(...userUcmes);
+                        log(`🔥 TROVATE ${userUcmes.length} UCMe nascoste in ${key}!`);
+                    }
+                } else if (parsed.email === userEmail && (parsed.text || parsed.content)) {
+                    allFoundUcmes.push(parsed);
+                    log(`🔥 TROVATA 1 UCMe nascosta in ${key}!`);
+                }
+            }
+        } catch (e) {
+            // Ignora errori
+        }
+    }
+    
+    // 5. Rimuovi duplicati
+    const uniqueUcmes = [];
+    allFoundUcmes.forEach(ucme => {
+        const exists = uniqueUcmes.some(existing => 
+            (existing.timestamp === ucme.timestamp && existing.text === ucme.text) ||
+            (existing.id === ucme.id && ucme.id) ||
+            (existing.text === ucme.text && Math.abs(new Date(existing.timestamp) - new Date(ucme.timestamp)) < 1000)
+        );
+        if (!exists) {
+            uniqueUcmes.push(ucme);
+        }
+    });
+    
+    log('🔗 UCMe totali uniche trovate:', uniqueUcmes.length);
+    log('📋 UCMe trovate:', uniqueUcmes.map(u => ({
+        text: u.text?.substring(0, 50) + '...',
+        timestamp: u.timestamp,
+        source: u.source || 'unknown'
+    })));
+    
+    return uniqueUcmes;
 }
 
 function initializeDashboard() {
@@ -942,17 +1018,69 @@ function renderEmptyDashboard() {
         updateProfileInfo(currentUser);
         log('✅ Informazioni profilo aggiornate');
         
-        // 📱 MOBILE DEBUG: Aggiungi informazioni di debug per mobile
+        // 🔥 DEBUG COMPLETO - Mostra TUTTE le informazioni disponibili
         const isMobile = window.innerWidth <= 768;
-        const mobileDebugInfo = isMobile ? `
-            <div style="background: #333; padding: 10px; margin: 10px 0; font-size: 12px; border-radius: 4px;">
-                📱 MOBILE DEBUG:<br/>
-                Viewport: ${window.innerWidth}x${window.innerHeight}<br/>
-                UserAgent: ${navigator.userAgent.substring(0, 50)}...<br/>
-                Timestamp: ${new Date().toISOString()}<br/>
-                Dashboard mobile: ATTIVA
+        
+        // Scansiona tutto il localStorage per UCMe dell'utente
+        let allLocalStorageData = {};
+        let foundUserData = [];
+        
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            try {
+                const value = localStorage.getItem(key);
+                allLocalStorageData[key] = value;
+                if (value && value.includes(currentUser.email)) {
+                    foundUserData.push({key, preview: value.substring(0, 100) + '...'});
+                }
+            } catch (e) {
+                allLocalStorageData[key] = 'Error parsing';
+            }
+        }
+        
+        const debugInfo = `
+            <div style="background: #333; padding: 15px; margin: 15px 0; font-size: 11px; border-radius: 8px; max-height: 400px; overflow-y: auto;">
+                <h4 style="color: #ff6b6b; margin-bottom: 10px;">🔥 DEBUG COMPLETO - TROVA LE TUE UCME</h4>
+                
+                <div style="margin-bottom: 15px;">
+                    <strong>👤 Utente corrente:</strong><br/>
+                    Email: ${currentUser.email}<br/>
+                    Nome: ${currentUser.name || 'N/A'}<br/>
+                    ID: ${currentUser.id || 'N/A'}
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <strong>📱 Dispositivo:</strong><br/>
+                    Viewport: ${window.innerWidth}x${window.innerHeight}<br/>
+                    Mobile: ${isMobile ? 'SÌ' : 'NO'}<br/>
+                    Timestamp: ${new Date().toISOString()}
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <strong>🗄️ LocalStorage Keys (${localStorage.length}):</strong><br/>
+                    ${Object.keys(allLocalStorageData).map(key => 
+                        `<span style="color: ${allLocalStorageData[key].includes(currentUser.email) ? '#4CAF50' : '#999'}">${key}</span>`
+                    ).join(', ')}
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <strong>🔍 Dati che contengono la tua email:</strong><br/>
+                    ${foundUserData.length > 0 ? 
+                        foundUserData.map(item => `<div style="margin: 5px 0;"><strong>${item.key}:</strong> ${item.preview}</div>`).join('') :
+                        '<span style="color: #ff6b6b;">❌ Nessun dato trovato con la tua email</span>'
+                    }
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <strong>📊 Array ucmeData globale:</strong><br/>
+                    Lunghezza: ${ucmeData.length}<br/>
+                    ${ucmeData.length > 0 ? 
+                        `Emails presenti: ${[...new Set(ucmeData.map(u => u.email || u.user || u.userEmail))].join(', ')}` :
+                        'Array vuoto'
+                    }
+                </div>
             </div>
-        ` : '';
+        `;
         
         // Mostra messaggio per dashboard vuota
         log('📝 Inserimento messaggio dashboard vuota...');
@@ -961,10 +1089,13 @@ function renderEmptyDashboard() {
                 <div class="empty-dashboard">
                     <p>Non hai ancora affidato nessun pensiero.</p>
                     <p>Quando condividerai la tua prima UCMe, apparirà qui.</p>
-                    ${mobileDebugInfo}
+                    ${debugInfo}
                     <div style="margin-top: 20px;">
-                        <button onclick="createMobileTestUCMe()" style="background: #444; color: white; border: 1px solid #666; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                        <button onclick="createMobileTestUCMe()" style="background: #444; color: white; border: 1px solid #666; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 10px;">
                             📱 Test UCMe Mobile
+                        </button>
+                        <button onclick="forceReloadAllUCMe()" style="background: #ff6b6b; color: white; border: 1px solid #ff6b6b; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                            🔄 Ricarica Tutto
                         </button>
                     </div>
                 </div>
@@ -1059,6 +1190,137 @@ window.createMobileTestUCMe = function() {
     initializeDashboard();
     
     alert('✅ UCMe di test creata! La dashboard dovrebbe ora mostrare l\'UCMe di test.');
+};
+
+// 🔥 FUNZIONE RICARICA FORZATA - Trova e carica TUTTE le UCMe possibili
+window.forceReloadAllUCMe = async function() {
+    log('🔄 RICARICA FORZATA - Ricerca aggressiva di tutte le UCMe...');
+    
+    if (!currentUser) {
+        alert('❌ Utente non loggato');
+        return;
+    }
+    
+    // Reset completo dell'array
+    ucmeData = [];
+    
+    // 1. Scansione completa localStorage con tutte le chiavi possibili
+    const allPossibleKeys = [
+        'mentalCommons_ucmes',
+        'mental_commons_ucmes', 
+        'mc-ucmes',
+        'ucmes',
+        'mentalCommons_data',
+        'mentalcommons_data',
+        'userData',
+        'user_data',
+        'ucme_data',
+        'formData',
+        'submittedData'
+    ];
+    
+    let foundUcmes = [];
+    
+    // Scansione per chiavi conosciute
+    allPossibleKeys.forEach(key => {
+        try {
+            const data = localStorage.getItem(key);
+            if (data) {
+                const parsed = JSON.parse(data);
+                if (Array.isArray(parsed)) {
+                    const userUcmes = parsed.filter(item => 
+                        (item.email === currentUser.email || 
+                         item.user === currentUser.email ||
+                         item.userEmail === currentUser.email) &&
+                        (item.text || item.content || item.message)
+                    );
+                    if (userUcmes.length > 0) {
+                        foundUcmes.push(...userUcmes);
+                        console.log(`🔥 TROVATE ${userUcmes.length} UCMe in ${key}:`, userUcmes);
+                    }
+                } else if ((parsed.email === currentUser.email || parsed.user === currentUser.email) && 
+                          (parsed.text || parsed.content)) {
+                    foundUcmes.push(parsed);
+                    console.log(`🔥 TROVATA 1 UCMe in ${key}:`, parsed);
+                }
+            }
+        } catch (e) {
+            // Ignora errori
+        }
+    });
+    
+    // 2. Scansione completa di TUTTO il localStorage
+    console.log('🔍 Scansione completa localStorage...');
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        try {
+            const value = localStorage.getItem(key);
+            if (value && value.includes(currentUser.email)) {
+                console.log(`🔍 Analizzando ${key} che contiene ${currentUser.email}`);
+                const parsed = JSON.parse(value);
+                
+                if (Array.isArray(parsed)) {
+                    const userUcmes = parsed.filter(item => 
+                        (item.email === currentUser.email || item.user === currentUser.email) &&
+                        (item.text || item.content || item.message)
+                    );
+                    if (userUcmes.length > 0) {
+                        foundUcmes.push(...userUcmes);
+                        console.log(`🔥 TROVATE ${userUcmes.length} UCMe aggiuntive in ${key}!`);
+                    }
+                } else if ((parsed.email === currentUser.email || parsed.user === currentUser.email) && 
+                          (parsed.text || parsed.content)) {
+                    foundUcmes.push(parsed);
+                    console.log(`🔥 TROVATA UCMe aggiuntiva in ${key}!`);
+                }
+            }
+        } catch (e) {
+            // Ignora errori di parsing
+        }
+    }
+    
+    // 3. Rimuovi duplicati e standardizza formato
+    const uniqueUcmes = [];
+    foundUcmes.forEach(ucme => {
+        // Standardizza il formato UCMe
+        const standardUcme = {
+            email: ucme.email || ucme.user || ucme.userEmail || currentUser.email,
+            text: ucme.text || ucme.content || ucme.message,
+            tone: ucme.tone || 'sconosciuto',
+            timestamp: ucme.timestamp || ucme.createdAt || ucme.date || new Date().toISOString(),
+            response: ucme.response || ucme.responseContent,
+            responseDate: ucme.responseDate || ucme.responseAt,
+            id: ucme.id || generateUniqueId()
+        };
+        
+        // Verifica duplicati
+        const exists = uniqueUcmes.some(existing => 
+            existing.text === standardUcme.text &&
+            Math.abs(new Date(existing.timestamp) - new Date(standardUcme.timestamp)) < 5000
+        );
+        
+        if (!exists && standardUcme.text && standardUcme.text.length > 10) {
+            uniqueUcmes.push(standardUcme);
+        }
+    });
+    
+    // 4. Aggiorna l'array globale
+    ucmeData = uniqueUcmes;
+    
+    // 5. Salva nel localStorage standard
+    try {
+        localStorage.setItem('mentalCommons_ucmes', JSON.stringify(ucmeData));
+        console.log('✅ UCMe salvate in localStorage standard');
+    } catch (error) {
+        console.error('❌ Errore salvataggio:', error);
+    }
+    
+    console.log(`🎉 TROVATE ${uniqueUcmes.length} UCMe totali per ${currentUser.email}`);
+    
+    // 6. Ricarica la dashboard
+    initializeDashboard();
+    
+    alert(`🎉 RICARICA COMPLETATA!\n\nTrovate ${uniqueUcmes.length} UCMe per ${currentUser.email}\n\nLa dashboard dovrebbe ora mostrare tutte le tue UCMe!`);
 };
 
 function renderUcmeBlocks(ucmes) {
