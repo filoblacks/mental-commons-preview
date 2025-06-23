@@ -890,6 +890,15 @@ function renderDashboard(data) {
         if (ucmeBlocks) {
             ucmeBlocks.innerHTML = `
                 <div class="empty-dashboard">
+                    <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
+                        <h3 style="color: #6c757d; margin-bottom: 10px;">🚧 Sistema in Sviluppo</h3>
+                        <p style="color: #6c757d; margin-bottom: 10px;">
+                            Stiamo ancora perfezionando la visualizzazione delle UCMe nella dashboard.
+                        </p>
+                        <p style="color: #6c757d; margin: 0;">
+                            Se non vedi i tuoi pensieri precedenti, è normale - stiamo lavorando per renderli disponibili presto.
+                        </p>
+                    </div>
                     <p>❌ Errore nella visualizzazione dei tuoi pensieri.</p>
                     <p>Ricarica la pagina per riprovare.</p>
                 </div>
@@ -962,6 +971,15 @@ function renderEmptyDashboard() {
         if (ucmeBlocks) {
             ucmeBlocks.innerHTML = `
                 <div class="empty-dashboard">
+                    <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
+                        <h3 style="color: #6c757d; margin-bottom: 10px;">🚧 Sistema in Sviluppo</h3>
+                        <p style="color: #6c757d; margin-bottom: 10px;">
+                            Stiamo ancora perfezionando la visualizzazione delle UCMe nella dashboard.
+                        </p>
+                        <p style="color: #6c757d; margin: 0;">
+                            Se non vedi i tuoi pensieri precedenti, è normale - stiamo lavorando per renderli disponibili presto.
+                        </p>
+                    </div>
                     <p>Errore nella visualizzazione.</p>
                     <p>Ricarica la pagina per riprovare.</p>
                 </div>
@@ -987,7 +1005,22 @@ function renderUcmeBlocks(ucmes) {
         container.innerHTML = '';
         
         if (!ucmes || ucmes.length === 0) {
-            log('⚠️ Nessuna UCMe da renderizzare');
+            log('⚠️ Nessuna UCMe da renderizzare - mostro messaggio informativo');
+            container.innerHTML = `
+                <div class="empty-dashboard">
+                    <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
+                        <h3 style="color: #6c757d; margin-bottom: 10px;">🚧 Sistema in Sviluppo</h3>
+                        <p style="color: #6c757d; margin-bottom: 10px;">
+                            Stiamo ancora perfezionando la visualizzazione delle UCMe nella dashboard.
+                        </p>
+                        <p style="color: #6c757d; margin: 0;">
+                            Se non vedi i tuoi pensieri precedenti, è normale - stiamo lavorando per renderli disponibili presto.
+                        </p>
+                    </div>
+                    <p>Non hai ancora affidato nessun pensiero.</p>
+                    <p>Quando condividerai la tua prima UCMe, apparirà qui.</p>
+                </div>
+            `;
             return;
         }
         
@@ -1009,6 +1042,15 @@ function renderUcmeBlocks(ucmes) {
         if (container) {
             container.innerHTML = `
                 <div class="empty-dashboard">
+                    <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
+                        <h3 style="color: #6c757d; margin-bottom: 10px;">🚧 Sistema in Sviluppo</h3>
+                        <p style="color: #6c757d; margin-bottom: 10px;">
+                            Stiamo ancora perfezionando la visualizzazione delle UCMe nella dashboard.
+                        </p>
+                        <p style="color: #6c757d; margin: 0;">
+                            Se non vedi i tuoi pensieri precedenti, è normale - stiamo lavorando per renderli disponibili presto.
+                        </p>
+                    </div>
                     <p>Errore nella visualizzazione dei tuoi pensieri.</p>
                     <p>Ricarica la pagina per riprovare.</p>
                 </div>
