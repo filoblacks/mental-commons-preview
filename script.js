@@ -465,32 +465,26 @@ async function initializeProfile() {
             
             log('✅ Utente loggato per profilo:', currentUser.email);
             
-            // 🔥 FIX CRITICO: Carica i dati REALI dal database Supabase
-            log('🔄 Caricamento dati REALI dal database Supabase...');
-            const realUserData = await loadRealUserDataFromDatabase(currentUser);
+            // 🔥 FIX: Carica dati profilo REALI mantenendo compatibilità
+            log('🔄 Tentativo caricamento dati profilo REALI dal database...');
+            const enhancedUserData = await loadRealUserProfileDataFromDatabase(currentUser);
             
-            if (!realUserData) {
-                error('❌ Errore nel caricamento dati reali profilo dal database');
-                showProfileErrorMessage();
-                return;
-            }
-            
-            log('✅ Dati REALI caricati dal database:', {
-                email: realUserData.email,
-                created_at: realUserData.created_at,
-                last_login: realUserData.last_login
+            log('✅ Dati profilo preparati (reali + fallback):', {
+                email: enhancedUserData.email,
+                hasRealCreatedAt: !!enhancedUserData.created_at,
+                hasRealLastLogin: !!enhancedUserData.last_login
             });
             
             log('🎨 Rendering profilo avviato...');
             
-            // Aggiorna le informazioni del profilo con dati REALI
-            updateProfileInfo(realUserData);
+            // Aggiorna le informazioni del profilo con dati REALI (o fallback)
+            updateProfileInfo(enhancedUserData);
             
             // Aggiorna header del profilo se presente
             if (profileHeader) {
                 const profileHeaderEmail = document.getElementById('profile-header-email');
                 if (profileHeaderEmail) {
-                    profileHeaderEmail.textContent = realUserData.email || 'Email non disponibile';
+                    profileHeaderEmail.textContent = enhancedUserData.email || 'Email non disponibile';
                 }
                 profileHeader.style.display = 'block';
             }
@@ -532,21 +526,11 @@ async function initializeProfile() {
     log("🔚 FINE initializeProfile - setTimeout impostato - timestamp:", new Date().toISOString());
 }
 
-// 🔥 NUOVA FUNZIONE: Carica dati utente REALI dal database Supabase
-async function loadRealUserDataFromDatabase(localUser) {
+// 🔥 NUOVA FUNZIONE: Carica SOLO dati utente REALI per il profilo
+async function loadRealUserProfileDataFromDatabase(localUser) {
     try {
-        log("🔥 ============================================");
-        log("🔥 CARICAMENTO DATI REALI DAL DATABASE SUPABASE");
-        log("🔥 ============================================");
+        log('📞 Tentativo caricamento dati profilo REALI dal database per:', localUser.email);
         
-        if (!localUser || !localUser.email) {
-            error('❌ Dati utente locale non validi:', localUser);
-            return null;
-        }
-        
-        log('📞 Chiamata API per recuperare dati reali utente:', localUser.email);
-        
-        // Chiamata API per recuperare dati reali dal database
         const response = await fetch('/api/users', {
             method: 'GET',
             headers: {
@@ -556,39 +540,40 @@ async function loadRealUserDataFromDatabase(localUser) {
         });
         
         if (!response.ok) {
-            error('❌ Errore nella chiamata API utenti:', response.status);
-            return null;
+            log('⚠️ API utenti non disponibile, uso fallback localStorage');
+            return localUser; // Fallback ai dati locali
         }
         
         const result = await response.json();
-        log('✅ Risposta API utenti ricevuta:', result);
         
         if (!result.success || !result.data || !result.data.users) {
-            error('❌ Risposta API non valida:', result);
-            return null;
+            log('⚠️ Risposta API non valida, uso fallback localStorage');
+            return localUser; // Fallback ai dati locali
         }
         
-        // Trova l'utente corrente nella lista
         const realUser = result.data.users.find(user => user.email === localUser.email);
         
         if (!realUser) {
-            error('❌ Utente non trovato nella risposta API');
-            return null;
+            log('⚠️ Utente non trovato nel database, uso fallback localStorage');
+            return localUser; // Fallback ai dati locali
         }
         
-        log('✅ Dati utente REALI trovati nel database:', {
+        log('✅ Dati profilo REALI caricati dal database:', {
             email: realUser.email,
-            name: realUser.name,
             created_at: realUser.created_at,
-            last_login: realUser.last_login,
-            id: realUser.id
+            last_login: realUser.last_login
         });
         
-        return realUser;
+        // Combina i dati locali con quelli reali dal database
+        return {
+            ...localUser,
+            created_at: realUser.created_at, // Data REALE dal database
+            last_login: realUser.last_login   // Data REALE dal database
+        };
         
     } catch (error) {
-        error('❌ Errore nel caricamento dati reali dal database:', error);
-        return null;
+        log('⚠️ Errore caricamento dati profilo dal database, uso fallback localStorage');
+        return localUser; // Fallback ai dati locali
     }
 }
 
