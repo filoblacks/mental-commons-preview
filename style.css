@@ -113,6 +113,35 @@ body {
     background-color: #000;
 }
 
+/* 🔥 FIX CRITICO MOBILE - FORZA VISIBILITÀ UCME */
+.ucme-blocks {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.ucme-block {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.dashboard-content {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
 .dashboard-header {
     text-align: center;
     margin-bottom: 4rem;
@@ -3061,6 +3090,61 @@ html {
 
 /* Layout mobile specifico */
 @media (max-width: 768px) {
+    /* 🔥 FIX CRITICO MOBILE - FORZATURA VISIBILITÀ DASHBOARD */
+    .dashboard-main {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        padding: 90px 0 4rem 0 !important; /* 36px header + 45px sticky + 9px margin */
+    }
+    
+    .dashboard-content {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        max-width: 100% !important;
+        padding: 0 1rem !important;
+    }
+    
+    .ucme-blocks {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1.5rem !important;
+        margin-bottom: 2rem !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    .ucme-block {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        background: #111 !important;
+        border: 1px solid #333 !important;
+        border-radius: 8px !important;
+        padding: 1rem !important;
+        margin-bottom: 1rem !important;
+        position: relative !important;
+        overflow: visible !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    .empty-dashboard {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        text-align: center !important;
+        padding: 2rem 1rem !important;
+        background: #111 !important;
+        border-radius: 8px !important;
+        margin: 1rem 0 !important;
+    }
+    
+    .user-verification {
+        display: none !important; /* Nascondi sempre su mobile */
+    }
+
     /* Mostra header mobile */
     .mobile-header {
         display: flex;

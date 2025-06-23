@@ -312,6 +312,84 @@ function updateNavigation(activeScreen) {
 // GESTIONE DASHBOARD
 // ========================================
 
+// ========================================
+// 🔥 FIX CRITICO MOBILE - CARICAMENTO UCME DAL BACKEND
+// ========================================
+
+async function loadUCMeFromBackend(userEmail) {
+    try {
+        log('🔄 Tentativo caricamento UCMe dal backend per:', userEmail);
+        
+        const token = localStorage.getItem('mental_commons_token');
+        if (!token) {
+            log('⚠️ Nessun token disponibile, uso solo localStorage');
+            return null;
+        }
+
+        const response = await fetch('/api/ucmes', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                'X-User-Email': userEmail
+            }
+        });
+
+        if (!response.ok) {
+            log('⚠️ API UCMe non disponibile, uso fallback localStorage');
+            return null;
+        }
+
+        const result = await response.json();
+        log('📡 Risposta API UCMe:', result);
+
+        if (result.success && result.data && Array.isArray(result.data)) {
+            log('✅ UCMe caricate dal backend:', result.data.length);
+            return result.data;
+        } else {
+            log('⚠️ Nessuna UCMe trovata nel backend');
+            return null;
+        }
+
+    } catch (error) {
+        log('❌ Errore caricamento UCMe da backend:', error);
+        return null;
+    }
+}
+
+async function mergeUCMeData(userEmail) {
+    log('🔄 Merge dati UCMe da tutte le fonti per:', userEmail);
+    
+    // 1. Carica da localStorage
+    const localUcmes = ucmeData.filter(ucme => ucme.email === userEmail);
+    log('📱 UCMe da localStorage:', localUcmes.length);
+    
+    // 2. Carica da backend
+    const backendUcmes = await loadUCMeFromBackend(userEmail);
+    log('☁️ UCMe da backend:', backendUcmes ? backendUcmes.length : 0);
+    
+    // 3. Merge intelligente
+    let mergedUcmes = [...localUcmes];
+    
+    if (backendUcmes && backendUcmes.length > 0) {
+        // Aggiungi UCMe dal backend che non esistono già in localStorage
+        backendUcmes.forEach(backendUcme => {
+            const exists = localUcmes.some(localUcme => 
+                localUcme.timestamp === backendUcme.timestamp && 
+                localUcme.text === backendUcme.text
+            );
+            
+            if (!exists) {
+                mergedUcmes.push(backendUcme);
+                log('➕ Aggiunta UCMe dal backend:', backendUcme.text?.substring(0, 30) + '...');
+            }
+        });
+    }
+    
+    log('🔗 UCMe totali dopo merge:', mergedUcmes.length);
+    return mergedUcmes;
+}
+
 function initializeDashboard() {
     log("🟢 INIZIO initializeDashboard - timestamp:", new Date().toISOString());
     log('🔄 Inizializzazione dashboard...');
@@ -333,7 +411,7 @@ function initializeDashboard() {
     log('✅ Tutti gli elementi DOM trovati');
     
     log("⏰ Impostazione setTimeout per caricamento asincrono...");
-    setTimeout(() => {
+    setTimeout(async () => {
         log("⏰ AVVIO setTimeout callback - timestamp:", new Date().toISOString());
         try {
             log('🔍 Controllo stato utente...');
@@ -347,30 +425,35 @@ function initializeDashboard() {
             }
             
             log('✅ Utente loggato:', currentUser.email);
-            log('📊 Dati ucmeData disponibili:', ucmeData.length, 'UCMe totali');
             
-            // Carica i dati dell'utente
-            log('🔄 Caricamento dati dashboard...');
-            const userData = loadDashboardData(currentUser.email);
-            log('📋 Dati dashboard ricevuti:', JSON.stringify({
-                isEmpty: userData?.isEmpty,
-                ucmesLength: userData?.ucmes?.length,
-                hasUser: !!userData?.user,
-                hasStats: !!userData?.stats
+            // 🔥 FIX CRITICO MOBILE: Carica UCMe da tutte le fonti
+            log('🔄 Caricamento UCMe da tutte le fonti (localStorage + backend)...');
+            const allUserUcmes = await mergeUCMeData(currentUser.email);
+            
+            log('📊 UCMe caricate per dashboard:', {
+                totalCount: allUserUcmes.length,
+                emails: allUserUcmes.map(u => u.email),
+                texts: allUserUcmes.map(u => u.text?.substring(0, 30) + '...')
+            });
+            
+            // Crea userData con le UCMe caricate
+            const userData = {
+                isEmpty: allUserUcmes.length === 0,
+                ucmes: allUserUcmes,
+                user: currentUser,
+                stats: {
+                    total: allUserUcmes.length,
+                    withResponse: allUserUcmes.filter(ucme => ucme.response).length,
+                    pending: allUserUcmes.filter(ucme => !ucme.response).length
+                }
+            };
+            
+            log('📋 Dati dashboard creati:', JSON.stringify({
+                isEmpty: userData.isEmpty,
+                ucmesLength: userData.ucmes.length,
+                hasUser: !!userData.user,
+                hasStats: !!userData.stats
             }, null, 2));
-            
-            // Verifica validità dei dati
-            if (!userData) {
-                error('❌ userData è null o undefined');
-                updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
-                return;
-            }
-            
-            if (!userData.ucmes && !userData.isEmpty) {
-                error('❌ Struttura dati non valida:', userData);
-                updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
-                return;
-            }
             
             log('🎨 Rendering dashboard avviato...');
             
@@ -389,6 +472,19 @@ function initializeDashboard() {
             log("🔄 FORZATURA aggiornamento UI - questo DEVE sempre eseguire");
             userVerification.style.display = 'none';
             dashboardContent.style.display = 'block';
+            dashboardContent.style.visibility = 'visible';
+            dashboardContent.style.opacity = '1';
+            
+            // 📱 FIX MOBILE AGGIUNTIVO: Forza visibilità container UCMe
+            const ucmeBlocksContainer = document.getElementById('ucme-blocks');
+            if (ucmeBlocksContainer) {
+                ucmeBlocksContainer.style.display = 'flex';
+                ucmeBlocksContainer.style.flexDirection = 'column';
+                ucmeBlocksContainer.style.visibility = 'visible';
+                ucmeBlocksContainer.style.opacity = '1';
+                log('📱 Container UCMe forzato visibile per mobile');
+            }
+            
             log("✅ UI forzatamente aggiornata - caricamento nascosto, dashboard mostrata");
             
             log('✅ Dashboard completamente caricata e visualizzata');
@@ -400,6 +496,8 @@ function initializeDashboard() {
             // Anche in caso di errore, mostra sempre l'UI base
             userVerification.style.display = 'none';
             dashboardContent.style.display = 'block';
+            dashboardContent.style.visibility = 'visible';
+            dashboardContent.style.opacity = '1';
             
             // Mostra messaggio di errore nel contenuto
             const ucmeBlocks = document.getElementById('ucme-blocks');
@@ -410,6 +508,11 @@ function initializeDashboard() {
                         <p>Ricarica la pagina o riprova più tardi.</p>
                     </div>
                 `;
+                // 📱 FIX MOBILE: Forza visibilità anche per errori
+                ucmeBlocks.style.display = 'flex';
+                ucmeBlocks.style.flexDirection = 'column';
+                ucmeBlocks.style.visibility = 'visible';
+                ucmeBlocks.style.opacity = '1';
             }
             
             updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
@@ -839,6 +942,18 @@ function renderEmptyDashboard() {
         updateProfileInfo(currentUser);
         log('✅ Informazioni profilo aggiornate');
         
+        // 📱 MOBILE DEBUG: Aggiungi informazioni di debug per mobile
+        const isMobile = window.innerWidth <= 768;
+        const mobileDebugInfo = isMobile ? `
+            <div style="background: #333; padding: 10px; margin: 10px 0; font-size: 12px; border-radius: 4px;">
+                📱 MOBILE DEBUG:<br/>
+                Viewport: ${window.innerWidth}x${window.innerHeight}<br/>
+                UserAgent: ${navigator.userAgent.substring(0, 50)}...<br/>
+                Timestamp: ${new Date().toISOString()}<br/>
+                Dashboard mobile: ATTIVA
+            </div>
+        ` : '';
+        
         // Mostra messaggio per dashboard vuota
         log('📝 Inserimento messaggio dashboard vuota...');
         if (ucmeBlocks) {
@@ -846,9 +961,15 @@ function renderEmptyDashboard() {
                 <div class="empty-dashboard">
                     <p>Non hai ancora affidato nessun pensiero.</p>
                     <p>Quando condividerai la tua prima UCMe, apparirà qui.</p>
+                    ${mobileDebugInfo}
+                    <div style="margin-top: 20px;">
+                        <button onclick="createMobileTestUCMe()" style="background: #444; color: white; border: 1px solid #666; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                            📱 Test UCMe Mobile
+                        </button>
+                    </div>
                 </div>
             `;
-            log('✅ Messaggio dashboard vuota inserito');
+            log('✅ Messaggio dashboard vuota inserito con debug mobile');
         } else {
             error('❌ Elemento ucme-blocks non trovato nel DOM');
         }
@@ -861,7 +982,18 @@ function renderEmptyDashboard() {
         }
         if (dashboardContent) {
             dashboardContent.style.display = "block";
+            dashboardContent.style.visibility = "visible";
+            dashboardContent.style.opacity = "1";
             log("✅ Contenuto dashboard mostrato");
+        }
+        
+        // 📱 FIX MOBILE: Forza visibilità container
+        if (ucmeBlocks) {
+            ucmeBlocks.style.display = "flex";
+            ucmeBlocks.style.flexDirection = "column";
+            ucmeBlocks.style.visibility = "visible";
+            ucmeBlocks.style.opacity = "1";
+            log("📱 Container UCMe forzato visibile per mobile");
         }
         
         log('✅ Dashboard vuota renderizzata');
@@ -891,6 +1023,43 @@ function renderEmptyDashboard() {
         updateDashboardStatus('Errore nella visualizzazione del tuo spazio.');
     }
 }
+
+// 🔥 FUNZIONE TEST MOBILE - Per verificare immediatamente il funzionamento
+window.createMobileTestUCMe = function() {
+    log('📱 Creazione UCMe di test per mobile...');
+    
+    if (!currentUser) {
+        alert('❌ Utente non loggato');
+        return;
+    }
+    
+    // Crea UCMe di test
+    const testUcme = {
+        email: currentUser.email,
+        text: 'Questa è una UCMe di test creata su mobile per verificare la visualizzazione. Se vedi questo messaggio, la dashboard mobile funziona correttamente!',
+        tone: 'test',
+        timestamp: new Date().toISOString(),
+        response: 'Risposta di test dal Portatore. Anche questa dovrebbe essere visibile su mobile.',
+        responseDate: new Date().toISOString()
+    };
+    
+    // Aggiungi all'array locale
+    ucmeData.push(testUcme);
+    
+    // Salva nel localStorage
+    try {
+        localStorage.setItem('mentalCommons_ucmes', JSON.stringify(ucmeData));
+        log('✅ UCMe di test salvata nel localStorage');
+    } catch (error) {
+        error('❌ Errore salvataggio localStorage:', error);
+    }
+    
+    // Ricarica la dashboard
+    log('🔄 Ricaricamento dashboard per mostrare UCMe di test...');
+    initializeDashboard();
+    
+    alert('✅ UCMe di test creata! La dashboard dovrebbe ora mostrare l\'UCMe di test.');
+};
 
 function renderUcmeBlocks(ucmes) {
     try {
