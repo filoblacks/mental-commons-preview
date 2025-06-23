@@ -312,14 +312,21 @@ function updateNavigation(activeScreen) {
 // GESTIONE DASHBOARD
 // ========================================
 
-function initializeDashboard() {
+async function initializeDashboard() {
     log("🟢 INIZIO initializeDashboard - timestamp:", new Date().toISOString());
     log('🔄 Inizializzazione dashboard...');
     
-    // Elementi della dashboard
+    // Trova gli elementi della dashboard
     const userVerification = document.getElementById('user-verification');
     const dashboardContent = document.getElementById('dashboard-content');
     const noAccess = document.getElementById('no-access');
+    
+    // 🔍 Debug - verifica presenza elementi DOM
+    log('🔍 Verifica elementi DOM dashboard:', {
+        userVerification: !!userVerification,
+        dashboardContent: !!dashboardContent,
+        noAccess: !!noAccess
+    });
     
     if (!userVerification || !dashboardContent || !noAccess) {
         error('❌ Elementi dashboard mancanti nel DOM:', {
@@ -330,68 +337,51 @@ function initializeDashboard() {
         return;
     }
 
-    log('✅ Tutti gli elementi DOM trovati');
+    log('✅ Tutti gli elementi DOM della dashboard trovati');
     
-    log("⏰ Impostazione setTimeout per caricamento asincrono...");
-    setTimeout(() => {
-        log("⏰ AVVIO setTimeout callback - timestamp:", new Date().toISOString());
+    // Aggiornamento UI immediato - prepara il setup
+    log("⏰ Impostazione setTimeout per caricamento dashboard asincrono...");
+    setTimeout(async () => {
+        log("⏰ AVVIO setTimeout callback dashboard - timestamp:", new Date().toISOString());
         try {
-            log('🔍 Controllo stato utente...');
+            log('🔍 Controllo stato utente per dashboard...');
             
             // Verifica se l'utente è loggato
             if (!currentUser) {
-                log('⚠️ Utente non loggato, mostro schermata di accesso');
+                log('⚠️ Utente non loggato, mostro schermata di accesso dashboard');
                 userVerification.style.display = 'none';
                 noAccess.style.display = 'block';
                 return;
             }
             
-            log('✅ Utente loggato:', currentUser.email);
-            log('📊 Dati ucmeData disponibili:', ucmeData.length, 'UCMe totali');
+            log('✅ Utente loggato per dashboard:', currentUser.email);
             
-            // Carica i dati dell'utente
-            log('🔄 Caricamento dati dashboard...');
-            const userData = loadDashboardData(currentUser.email);
-            log('📋 Dati dashboard ricevuti:', JSON.stringify({
-                isEmpty: userData?.isEmpty,
-                ucmesLength: userData?.ucmes?.length,
-                hasUser: !!userData?.user,
-                hasStats: !!userData?.stats
-            }, null, 2));
+            // 🔥 FIX CRITICO: Carica le UCMe REALI dal database Supabase
+            log('🔄 Caricamento UCMe REALI dal database Supabase...');
+            const realUcmeData = await loadRealUCMeDataFromDatabase(currentUser);
             
-            // Verifica validità dei dati
-            if (!userData) {
-                error('❌ userData è null o undefined');
-                updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
-                return;
-            }
-
-            if (!userData.ucmes && !userData.isEmpty) {
-                error('❌ Struttura dati non valida:', userData);
-                updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
-                return;
-            }
-            
-            log('🎨 Rendering dashboard avviato...');
-            
-            // Rendering della dashboard
-            if (userData.isEmpty) {
-                log('📝 Dati vuoti, mostro dashboard vuota');
+            if (!realUcmeData) {
+                log('⚠️ Nessuna UCMe trovata o errore nel caricamento, mostro dashboard vuota');
                 renderEmptyDashboard();
-            } else {
-                log('📝 Rendering dashboard con dati:', userData.ucmes.length, 'UCMe trovate');
-                renderDashboard(userData);
+                return;
             }
             
-            log('🔄 Aggiornamento UI - nascondo caricamento e mostro contenuto...');
+            log('✅ UCMe REALI caricate dal database:', realUcmeData.length, 'UCMe trovate');
             
-            // ⚠️ CRITICO: SEMPRE nascondere caricamento e mostrare contenuto, anche se ci sono errori nel rendering
-            log("🔄 FORZATURA aggiornamento UI - questo DEVE sempre eseguire");
-            userVerification.style.display = 'none';
-            dashboardContent.style.display = 'block';
-            log("✅ UI forzatamente aggiornata - caricamento nascosto, dashboard mostrata");
+            // Prepara i dati per il rendering
+            const dashboardData = {
+                isEmpty: realUcmeData.length === 0,
+                ucmes: realUcmeData,
+                user: currentUser,
+                stats: {
+                    total: realUcmeData.length,
+                    withResponse: realUcmeData.filter(ucme => ucme.response || ucme.response_text).length,
+                    pending: realUcmeData.filter(ucme => !ucme.response && !ucme.response_text).length
+                }
+            };
             
-            log('✅ Dashboard completamente caricata e visualizzata');
+            log('🎨 Rendering dashboard con dati REALI...');
+            renderDashboard(dashboardData);
             
         } catch (error) {
             error('❌ Errore durante caricamento dashboard:', error);
@@ -401,31 +391,86 @@ function initializeDashboard() {
             userVerification.style.display = 'none';
             dashboardContent.style.display = 'block';
             
-            // Mostra messaggio di errore nel contenuto
-            const ucmeBlocks = document.getElementById('ucme-blocks');
-            if (ucmeBlocks) {
-                ucmeBlocks.innerHTML = `
-                    <div class="empty-dashboard">
-                        <p>❌ Si è verificato un errore nel caricamento del tuo spazio.</p>
-                        <p>Ricarica la pagina o riprova più tardi.</p>
-                    </div>
-                `;
-            }
-            
-            updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
+            // Mostra UCMe vuote in caso di errore
+            renderEmptyDashboard();
         }
         
-        log("⏰ FINE setTimeout callback - timestamp:", new Date().toISOString());
+        log("⏰ FINE setTimeout callback dashboard - timestamp:", new Date().toISOString());
     }, 500); // Piccolo delay per dare feedback visivo del caricamento
     
     log("🔚 FINE initializeDashboard - setTimeout impostato - timestamp:", new Date().toISOString());
+}
+
+// 🔥 NUOVA FUNZIONE: Carica UCMe REALI dal database Supabase
+async function loadRealUCMeDataFromDatabase(user) {
+    try {
+        log("🔥 ============================================");
+        log("🔥 CARICAMENTO UCME REALI DAL DATABASE SUPABASE");
+        log("🔥 ============================================");
+        
+        if (!user || !user.email) {
+            error('❌ Dati utente non validi per caricamento UCMe:', user);
+            return [];
+        }
+        
+        log('📞 Chiamata API per recuperare UCMe reali utente:', user.email);
+        
+        // Chiamata API per recuperare UCMe reali dal database
+        const response = await fetch('/api/ucmes', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('mental_commons_token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            error('❌ Errore nella chiamata API UCMe:', response.status, response.statusText);
+            return [];
+        }
+        
+        const result = await response.json();
+        log('✅ Risposta API UCMe ricevuta:', result);
+        
+        if (!result.success) {
+            error('❌ Risposta API UCMe non valida:', result);
+            return [];
+        }
+        
+        // Filtra le UCMe dell'utente corrente e converte nel formato atteso
+        const userUcmes = (result.data || []).map(ucme => ({
+            id: ucme.id,
+            email: user.email, // Assicura che sia collegato all'utente
+            text: ucme.content || ucme.text,
+            title: ucme.title,
+            timestamp: ucme.created_at,
+            status: ucme.status,
+            response: ucme.response_text || ucme.response,
+            responseDate: ucme.response_date,
+            tone: ucme.tone || 'thoughtful'
+        }));
+        
+        log('✅ UCMe REALI trasformate:', userUcmes.length, 'UCMe processate');
+        log('📋 Dettagli UCMe:', userUcmes.map(ucme => ({
+            id: ucme.id,
+            text: ucme.text?.substring(0, 50) + '...',
+            hasResponse: !!ucme.response,
+            status: ucme.status
+        })));
+        
+        return userUcmes;
+        
+    } catch (error) {
+        error('❌ Errore nel caricamento UCMe reali dal database:', error);
+        return [];
+    }
 }
 
 // ========================================
 // GESTIONE PROFILO
 // ========================================
 
-function initializeProfile() {
+async function initializeProfile() {
     log("🟢 INIZIO initializeProfile - timestamp:", new Date().toISOString());
     log('🔄 Inizializzazione profilo...');
     
@@ -448,7 +493,7 @@ function initializeProfile() {
     log('✅ Tutti gli elementi DOM del profilo trovati');
     
     log("⏰ Impostazione setTimeout per caricamento profilo asincrono...");
-    setTimeout(() => {
+    setTimeout(async () => {
         log("⏰ AVVIO setTimeout callback profilo - timestamp:", new Date().toISOString());
         try {
             log('🔍 Controllo stato utente per profilo...');
@@ -463,26 +508,32 @@ function initializeProfile() {
             
             log('✅ Utente loggato per profilo:', currentUser.email);
             
-            // Carica i dati del profilo utente
-            log('🔄 Caricamento dati profilo...');
-            const profileData = loadProfileData(currentUser);
+            // 🔥 FIX CRITICO: Carica i dati REALI dal database Supabase
+            log('🔄 Caricamento dati REALI dal database Supabase...');
+            const realUserData = await loadRealUserDataFromDatabase(currentUser);
             
-            if (!profileData) {
-                error('❌ Errore nel caricamento dati profilo');
+            if (!realUserData) {
+                error('❌ Errore nel caricamento dati reali profilo dal database');
                 showProfileErrorMessage();
                 return;
             }
             
+            log('✅ Dati REALI caricati dal database:', {
+                email: realUserData.email,
+                created_at: realUserData.created_at,
+                last_login: realUserData.last_login
+            });
+            
             log('🎨 Rendering profilo avviato...');
             
-            // Aggiorna le informazioni del profilo
-            updateProfileInfo(profileData);
+            // Aggiorna le informazioni del profilo con dati REALI
+            updateProfileInfo(realUserData);
             
             // Aggiorna header del profilo se presente
             if (profileHeader) {
                 const profileHeaderEmail = document.getElementById('profile-header-email');
                 if (profileHeaderEmail) {
-                    profileHeaderEmail.textContent = profileData.email || 'Email non disponibile';
+                    profileHeaderEmail.textContent = realUserData.email || 'Email non disponibile';
                 }
                 profileHeader.style.display = 'block';
             }
@@ -522,6 +573,66 @@ function initializeProfile() {
     }, 500); // Piccolo delay per dare feedback visivo del caricamento
     
     log("🔚 FINE initializeProfile - setTimeout impostato - timestamp:", new Date().toISOString());
+}
+
+// 🔥 NUOVA FUNZIONE: Carica dati utente REALI dal database Supabase
+async function loadRealUserDataFromDatabase(localUser) {
+    try {
+        log("🔥 ============================================");
+        log("🔥 CARICAMENTO DATI REALI DAL DATABASE SUPABASE");
+        log("🔥 ============================================");
+        
+        if (!localUser || !localUser.email) {
+            error('❌ Dati utente locale non validi:', localUser);
+            return null;
+        }
+        
+        log('📞 Chiamata API per recuperare dati reali utente:', localUser.email);
+        
+        // Chiamata API per recuperare dati reali dal database
+        const response = await fetch('/api/users', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('mental_commons_token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            error('❌ Errore nella chiamata API utenti:', response.status);
+            return null;
+        }
+        
+        const result = await response.json();
+        log('✅ Risposta API utenti ricevuta:', result);
+        
+        if (!result.success || !result.data || !result.data.users) {
+            error('❌ Risposta API non valida:', result);
+            return null;
+        }
+        
+        // Trova l'utente corrente nella lista
+        const realUser = result.data.users.find(user => user.email === localUser.email);
+        
+        if (!realUser) {
+            error('❌ Utente non trovato nella risposta API');
+            return null;
+        }
+        
+        log('✅ Dati utente REALI trovati nel database:', {
+            email: realUser.email,
+            name: realUser.name,
+            created_at: realUser.created_at,
+            last_login: realUser.last_login,
+            id: realUser.id
+        });
+        
+        return realUser;
+        
+    } catch (error) {
+        error('❌ Errore nel caricamento dati reali dal database:', error);
+        return null;
+    }
 }
 
 function loadProfileData(user) {
@@ -851,12 +962,27 @@ function renderUcmeBlocks(ucmes) {
         
         log('✅ Container ucme-blocks trovato');
         
-        // 📱 Forza visibilità per mobile - garantisce che le UCMe siano sempre visibili
-        container.style.display = 'flex';
-        container.style.flexDirection = 'column';
-        container.style.visibility = 'visible';
-        container.style.opacity = '1';
-        log('✅ Visibilità container forzata per mobile');
+        // 🔥 FIX CRITICO MOBILE: Forza visibilità totale su TUTTI i dispositivi
+        container.style.display = 'flex !important';
+        container.style.flexDirection = 'column !important';
+        container.style.visibility = 'visible !important';
+        container.style.opacity = '1 !important';
+        container.style.overflow = 'visible !important';
+        container.style.height = 'auto !important';
+        container.style.maxHeight = 'none !important';
+        
+        // 📱 Controllo device mobile e forza stili aggiuntivi
+        const isMobileDevice = window.innerWidth <= 768;
+        if (isMobileDevice) {
+            container.style.width = '100% !important';
+            container.style.margin = '0 !important';
+            container.style.padding = '0 !important';
+            container.style.transform = 'none !important';
+            container.style.position = 'static !important';
+            log('📱 Dispositivo mobile rilevato - stili mobile forzati');
+        }
+        
+        log('✅ Visibilità container TOTALMENTE forzata per mobile');
         
         container.innerHTML = '';
         
@@ -986,11 +1112,25 @@ function updateProfileInfo(user) {
         
         if (profileCreated) {
             try {
-                // Usa prima created_at (campo corretto del database), poi fallback su createdAt
-                const createdAt = user.created_at || user.createdAt;
-                const createdDate = new Date(createdAt || Date.now()).toLocaleDateString('it-IT');
+                // 🔥 FIX CRITICO: Usa il campo created_at dal database Supabase (campo REALE)
+                let createdAtValue;
+                if (user.created_at) {
+                    // Dato REALE dal database
+                    createdAtValue = user.created_at;
+                    log('✅ USANDO DATA REALE dal database:', createdAtValue);
+                } else if (user.createdAt) {
+                    // Fallback su localStorage
+                    createdAtValue = user.createdAt;
+                    log('⚠️ USANDO FALLBACK da localStorage:', createdAtValue);
+                } else {
+                    // Fallback finale
+                    createdAtValue = Date.now();
+                    log('⚠️ USANDO FALLBACK corrente:', createdAtValue);
+                }
+                
+                const createdDate = new Date(createdAtValue).toLocaleDateString('it-IT');
                 profileCreated.textContent = createdDate;
-                log('✅ Data creazione profilo aggiornata:', createdDate, 'da campo:', createdAt ? 'created_at/createdAt' : 'fallback');
+                log('✅ Data creazione profilo aggiornata:', createdDate, 'da:', createdAtValue);
             } catch (dateError) {
                 error('❌ Errore nella formattazione data creazione:', dateError);
                 profileCreated.textContent = 'Data non disponibile';
@@ -999,18 +1139,32 @@ function updateProfileInfo(user) {
         
         if (profileLastLogin) {
             try {
-                // Usa prima last_login (campo corretto del database), poi fallback su lastLogin
-                const lastLogin = user.last_login || user.lastLogin;
-                const lastLoginDate = new Date(lastLogin || Date.now()).toLocaleDateString('it-IT');
+                // Usa il campo last_login dal database Supabase (campo REALE)
+                let lastLoginValue;
+                if (user.last_login) {
+                    // Dato REALE dal database
+                    lastLoginValue = user.last_login;
+                    log('✅ USANDO DATA ULTIMO ACCESSO REALE dal database:', lastLoginValue);
+                } else if (user.lastLogin) {
+                    // Fallback su localStorage
+                    lastLoginValue = user.lastLogin;
+                    log('⚠️ USANDO FALLBACK ultimo accesso da localStorage:', lastLoginValue);
+                } else {
+                    // Fallback finale
+                    lastLoginValue = Date.now();
+                    log('⚠️ USANDO FALLBACK ultimo accesso corrente:', lastLoginValue);
+                }
+                
+                const lastLoginDate = new Date(lastLoginValue).toLocaleDateString('it-IT');
                 profileLastLogin.textContent = lastLoginDate;
-                log('✅ Data ultimo accesso aggiornata:', lastLoginDate, 'da campo:', lastLogin ? 'last_login/lastLogin' : 'fallback');
+                log('✅ Data ultimo accesso aggiornata:', lastLoginDate, 'da:', lastLoginValue);
             } catch (dateError) {
                 error('❌ Errore nella formattazione data ultimo accesso:', dateError);
                 profileLastLogin.textContent = 'Data non disponibile';
             }
         }
         
-        log('✅ Profilo completamente aggiornato');
+        log('✅ Profilo completamente aggiornato con dati REALI');
         
     } catch (error) {
         error('❌ Errore durante aggiornamento profilo:', error);
