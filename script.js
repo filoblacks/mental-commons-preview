@@ -323,14 +323,15 @@ function updateNavigation(activeScreen) {
 
 async function loadUCMeFromBackend(userEmail) {
     try {
-        log('🔄 Tentativo caricamento UCMe dal backend per:', userEmail);
+        log('🔄 Caricamento UCMe dal backend per:', userEmail);
         
         const token = localStorage.getItem('mental_commons_token');
         if (!token) {
-            log('⚠️ Nessun token disponibile, uso solo localStorage');
-            return null;
+            log('⚠️ Nessun token disponibile per API');
+            return [];
         }
 
+        // API call identica per mobile e desktop
         const response = await fetch('/api/ucmes', {
             method: 'GET',
             headers: {
@@ -341,134 +342,57 @@ async function loadUCMeFromBackend(userEmail) {
         });
 
         if (!response.ok) {
-            log('⚠️ API UCMe non disponibile, uso fallback localStorage');
-            return null;
+            log('⚠️ API UCMe non disponibile (status:', response.status, ')');
+            return [];
         }
 
         const result = await response.json();
-        log('📡 Risposta API UCMe:', result);
-
+        
         if (result.success && result.data && Array.isArray(result.data)) {
             log('✅ UCMe caricate dal backend:', result.data.length);
             return result.data;
         } else {
-            log('⚠️ Nessuna UCMe trovata nel backend');
-            return null;
+            log('⚠️ Nessuna UCMe nel backend');
+            return [];
         }
 
     } catch (error) {
-        log('❌ Errore caricamento UCMe da backend:', error);
-        return null;
+        error('❌ Errore caricamento UCMe da backend:', error);
+        return [];
     }
 }
 
 async function mergeUCMeData(userEmail) {
-    log('🔄 Merge dati UCMe da tutte le fonti per:', userEmail);
+    log('🔄 Caricamento UCMe per:', userEmail);
     
-    // 🔥 DEBUG COMPLETO - Trova UCMe da TUTTE le fonti possibili
-    let allFoundUcmes = [];
-    
-    // 1. Carica da localStorage con chiavi multiple
-    const possibleKeys = [
-        'mentalCommons_ucmes',
-        'mental_commons_ucmes', 
-        'mc-ucmes',
-        'ucmes',
-        'mentalCommons_data'
-    ];
-    
-    possibleKeys.forEach(key => {
-        try {
-            const data = localStorage.getItem(key);
-            if (data) {
-                const parsed = JSON.parse(data);
-                if (Array.isArray(parsed)) {
-                    const userUcmes = parsed.filter(ucme => 
-                        ucme.email === userEmail || 
-                        ucme.user === userEmail ||
-                        ucme.userEmail === userEmail
-                    );
-                    if (userUcmes.length > 0) {
-                        allFoundUcmes.push(...userUcmes);
-                        log(`📱 Trovate ${userUcmes.length} UCMe in localStorage key: ${key}`);
-                    }
-                } else if (parsed.email === userEmail) {
-                    allFoundUcmes.push(parsed);
-                    log(`📱 Trovata 1 UCMe in localStorage key: ${key}`);
-                }
-            }
-        } catch (e) {
-            // Ignora errori di parsing
-        }
-    });
-    
-    // 2. Carica da ucmeData globale
-    const localUcmes = ucmeData.filter(ucme => 
-        ucme.email === userEmail || 
-        ucme.user === userEmail ||
-        ucme.userEmail === userEmail
-    );
-    if (localUcmes.length > 0) {
-        allFoundUcmes.push(...localUcmes);
-        log('📱 UCMe da ucmeData globale:', localUcmes.length);
-    }
-    
-    // 3. Carica da backend
+    // PRIORITÀ: Backend sempre prima - comportamento identico mobile/desktop
     const backendUcmes = await loadUCMeFromBackend(userEmail);
-    if (backendUcmes && backendUcmes.length > 0) {
-        allFoundUcmes.push(...backendUcmes);
-        log('☁️ UCMe da backend:', backendUcmes.length);
+    
+    // Se abbiamo dati dal backend, usiamo quelli (fonte autorevole)
+    if (backendUcmes.length > 0) {
+        log('✅ Usando UCMe dal backend:', backendUcmes.length);
+        return backendUcmes;
     }
     
-    // 4. 🔥 RICERCA AGGRESSIVA - Trova TUTTE le UCMe in localStorage
-    log('🔍 RICERCA AGGRESSIVA - Scansione completa localStorage...');
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        try {
-            const value = localStorage.getItem(key);
-            if (value && value.includes(userEmail)) {
-                log(`🔍 Trovato riferimento a ${userEmail} in key: ${key}`);
-                const parsed = JSON.parse(value);
-                if (Array.isArray(parsed)) {
-                    const userUcmes = parsed.filter(item => 
-                        (item.email === userEmail || item.user === userEmail) &&
-                        (item.text || item.content || item.message)
-                    );
-                    if (userUcmes.length > 0) {
-                        allFoundUcmes.push(...userUcmes);
-                        log(`🔥 TROVATE ${userUcmes.length} UCMe nascoste in ${key}!`);
-                    }
-                } else if (parsed.email === userEmail && (parsed.text || parsed.content)) {
-                    allFoundUcmes.push(parsed);
-                    log(`🔥 TROVATA 1 UCMe nascosta in ${key}!`);
-                }
+    // Fallback: localStorage solo come ultima risorsa
+    try {
+        const localData = localStorage.getItem('mentalCommons_ucmes');
+        if (localData) {
+            const parsed = JSON.parse(localData);
+            if (Array.isArray(parsed)) {
+                const userUcmes = parsed.filter(ucme => 
+                    ucme.email === userEmail || ucme.user === userEmail
+                );
+                log('✅ Fallback localStorage:', userUcmes.length, 'UCMe');
+                return userUcmes;
             }
-        } catch (e) {
-            // Ignora errori
         }
+    } catch (e) {
+        log('⚠️ Errore lettura localStorage:', e.message);
     }
     
-    // 5. Rimuovi duplicati
-    const uniqueUcmes = [];
-    allFoundUcmes.forEach(ucme => {
-        const exists = uniqueUcmes.some(existing => 
-            (existing.timestamp === ucme.timestamp && existing.text === ucme.text) ||
-            (existing.id === ucme.id && ucme.id) ||
-            (existing.text === ucme.text && Math.abs(new Date(existing.timestamp) - new Date(ucme.timestamp)) < 1000)
-        );
-        if (!exists) {
-            uniqueUcmes.push(ucme);
-        }
-    });
-    
-    log('🔗 UCMe totali uniche trovate:', uniqueUcmes.length);
-    log('📋 UCMe trovate:', uniqueUcmes.map(u => ({
-        text: u.text?.substring(0, 50) + '...',
-        timestamp: u.timestamp,
-        source: u.source || 'unknown'
-    })));
-    
-    return uniqueUcmes;
+    log('⚠️ Nessuna UCMe trovata');
+    return [];
 }
 
 function initializeDashboard() {
@@ -507,8 +431,7 @@ function initializeDashboard() {
             
             log('✅ Utente loggato:', currentUser.email);
             
-            // 🔥 FIX CRITICO MOBILE: Carica UCMe da tutte le fonti
-            log('🔄 Caricamento UCMe da tutte le fonti (localStorage + backend)...');
+            log('🔄 Caricamento UCMe per dashboard...');
             const allUserUcmes = await mergeUCMeData(currentUser.email);
             
             log('📊 UCMe caricate per dashboard:', {
@@ -538,12 +461,12 @@ function initializeDashboard() {
             
             log('🎨 Rendering dashboard avviato...');
             
-            // Rendering della dashboard
+            // Rendering della dashboard - comportamento identico mobile/desktop
             if (userData.isEmpty) {
-                log('📝 Dati vuoti, mostro dashboard vuota');
+                log('📝 Rendering dashboard vuota');
                 renderEmptyDashboard();
             } else {
-                log('📝 Rendering dashboard con dati:', userData.ucmes.length, 'UCMe trovate');
+                log('📝 Rendering dashboard con', userData.ucmes.length, 'UCMe');
                 renderDashboard(userData);
             }
             
@@ -588,7 +511,7 @@ function initializeDashboard() {
         }
         
         log("⏰ FINE setTimeout callback - timestamp:", new Date().toISOString());
-    }, 500); // Piccolo delay per dare feedback visivo del caricamento
+    }, 100); // Delay minimizzato per evitare problemi mobile
     
     log("🔚 FINE initializeDashboard - setTimeout impostato - timestamp:", new Date().toISOString());
 }

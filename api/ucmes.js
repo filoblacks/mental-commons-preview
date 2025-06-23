@@ -73,19 +73,31 @@ export default async function handler(req, res) {
 
         console.log('🔍 [API UCMe] Ricerca UCMe per utente:', userEmail);
 
-        // Per ora, restituisci un array vuoto come fallback
-        // In futuro qui potremmo implementare la ricerca nel database
-        const ucmes = [];
+        // Carica UCMe reali dal database Supabase
+        const { data: ucmes, error: dbError } = await supabase
+            .from('ucmes')
+            .select('*')
+            .eq('email', userEmail)
+            .order('created_at', { ascending: false });
 
-        console.log('✅ [API UCMe] UCMe trovate:', ucmes.length);
+        if (dbError) {
+            console.error('❌ [API UCMe] Errore database:', dbError);
+            return res.status(500).json({
+                success: false,
+                error: 'database_error',
+                message: 'Errore nel caricamento UCMe dal database'
+            });
+        }
+
+        console.log('✅ [API UCMe] UCMe caricate dal database:', ucmes?.length || 0);
 
         return res.status(200).json({
             success: true,
-            data: ucmes,
-            message: `Trovate ${ucmes.length} UCMe per l'utente`,
+            data: ucmes || [],
+            message: `Trovate ${ucmes?.length || 0} UCMe per l'utente`,
             meta: {
                 userEmail,
-                count: ucmes.length,
+                count: ucmes?.length || 0,
                 timestamp: new Date().toISOString()
             }
         });
