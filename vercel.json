@@ -10,7 +10,7 @@
     "api/*.js": {
       "maxDuration": 10,
       "memory": 512,
-      "runtime": "nodejs18.x"
+      "runtime": "nodejs20.x"
     }
   },
   "headers": [
