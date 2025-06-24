@@ -127,6 +127,11 @@ export default asyncErrorHandler(async function handler(req, res) {
 
 async function handleGetUCMes(req, res) {
   debug('📥 GET UCMes request');
+  debug('🔍 Request headers:', {
+    userAgent: req.headers['user-agent'],
+    origin: req.headers.origin,
+    xUserEmail: req.headers['x-user-email']
+  });
   
   // Autenticazione richiesta per GET
   await new Promise((resolve, reject) => {
@@ -140,11 +145,28 @@ async function handleGetUCMes(req, res) {
   const userEmail = req.user.email;
   
   debug('✅ User authenticated for GET:', { userId, email: userEmail });
+  debug('🔍 About to query UCMes for userId:', userId);
   
   try {
     const ucmes = await getUserUCMes(userId);
     
-    debug('✅ UCMes retrieved:', ucmes?.length || 0);
+    debug('✅ UCMes retrieved from database:', ucmes?.length || 0);
+    
+    // Log dettagliato delle UCMe per debug cross-device
+    if (ucmes && ucmes.length > 0) {
+      debug('📝 UCMes details:');
+      ucmes.forEach((ucme, index) => {
+        debug(`  UCMe ${index + 1}:`, {
+          id: ucme.id,
+          user_id: ucme.user_id,
+          content_preview: ucme.content?.substring(0, 50) + '...',
+          created_at: ucme.created_at,
+          status: ucme.status
+        });
+      });
+    } else {
+      debug('📝 No UCMes found for user:', userId);
+    }
     
     const responseData = createSuccessResponse(
       ucmes || [],
@@ -153,7 +175,12 @@ async function handleGetUCMes(req, res) {
         correlationId: req.correlationId,
         count: ucmes?.length || 0,
         userEmail,
-        timestamp: new Date().toISOString()
+        userId,
+        timestamp: new Date().toISOString(),
+        deviceInfo: {
+          userAgent: req.headers['user-agent']?.substring(0, 100),
+          isMobile: req.headers['user-agent']?.toLowerCase().includes('mobile')
+        }
       }
     );
     
@@ -164,6 +191,7 @@ async function handleGetUCMes(req, res) {
       correlationId: req.correlationId
     });
     
+    debug('🚀 Sending response with', ucmes?.length || 0, 'UCMes');
     return res.status(200).json(responseData);
     
   } catch (err) {

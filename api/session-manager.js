@@ -247,14 +247,21 @@ async function validateSession(token, req) {
       return { valid: false, error: 'Session inactive' };
     }
     
-    // Verifica device fingerprint per prevenire session hijacking
-    const currentFingerprint = generateDeviceFingerprint(req);
-    if (session.deviceFingerprint !== currentFingerprint) {
-      warn(`🚨 Device fingerprint mismatch for session ${sessionId}`);
-      warn(`Expected: ${session.deviceFingerprint}, Got: ${currentFingerprint}`);
-      await invalidateSession(sessionId, 'device_mismatch');
-      return { valid: false, error: 'Device mismatch' };
-    }
+            // 🔥 FIX CRITICO: Rimosso controllo device fingerprint per permettere accesso cross-device
+        // Questo permetterà allo stesso utente di vedere le sue UCMe da mobile E desktop
+        // Il controllo fingerprint causava la creazione di sessioni separate per device,
+        // impedendo la visualizzazione uniforme delle UCMe cross-device
+        
+        const currentFingerprint = generateDeviceFingerprint(req);
+        if (session.deviceFingerprint !== currentFingerprint) {
+            debug(`📱 Device fingerprint diverso rilevato per session ${sessionId}`);
+            debug(`Originale: ${session.deviceFingerprint}, Corrente: ${currentFingerprint}`);
+            debug(`✅ Accesso cross-device consentito - stesso utente, device diverso`);
+            
+            // Aggiorna il fingerprint della sessione per il device corrente
+            session.deviceFingerprint = currentFingerprint;
+            activeSessions.set(sessionId, session);
+        }
     
     // Aggiorna ultima attività
     session.lastActivity = Date.now();

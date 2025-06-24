@@ -25,29 +25,73 @@ window.DashboardModule = {
     async loadUserData(email) {
         try {
             dashLog('📊 Caricamento dati utente dashboard...');
+            dashLog('📧 Email utente:', email);
+            
+            const token = localStorage.getItem('mental_commons_token');
+            if (!token) {
+                dashError('❌ Token mancante - impossibile caricare UCMe');
+                this.renderEmptyDashboard();
+                return [];
+            }
+            
+            dashLog('🔑 Token presente - procedo con API call...');
             
             const response = await fetch('/api/ucme', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('mental_commons_token')}`
+                    'Authorization': `Bearer ${token}`,
+                    'X-User-Email': email  // Header aggiuntivo per debug
                 }
             });
             
+            dashLog('📡 Risposta API ricevuta:', {
+                status: response.status,
+                statusText: response.statusText,
+                ok: response.ok
+            });
+            
+            if (!response.ok) {
+                dashError('❌ API call fallita:', response.status, response.statusText);
+                this.renderEmptyDashboard();
+                return [];
+            }
+            
             const result = await response.json();
+            
+            dashLog('📦 Dati ricevuti dall\'API:', {
+                success: result.success,
+                hasData: !!result.data,
+                dataType: typeof result.data,
+                isArray: Array.isArray(result.data),
+                count: result.data?.length || 0
+            });
             
             if (result.success && Array.isArray(result.data)) {
                 dashLog('✅ UCMe caricate dal backend unificato:', result.data.length);
+                
+                // Log delle UCMe per debug
+                result.data.forEach((ucme, index) => {
+                    dashLog(`📝 UCMe ${index + 1}:`, {
+                        id: ucme.id,
+                        content_preview: ucme.content?.substring(0, 50) + '...',
+                        created_at: ucme.created_at,
+                        user_id: ucme.user_id,
+                        status: ucme.status
+                    });
+                });
+                
                 this.renderDashboard(result.data);
                 return result.data;
             } else {
-                dashError('❌ Errore caricamento dati:', result.message);
+                dashError('❌ Struttura dati non valida o array vuoto:', result);
                 this.renderEmptyDashboard();
                 return [];
             }
             
         } catch (error) {
             dashError('❌ Errore dashboard:', error);
+            dashError('Stack trace:', error.stack);
             this.renderEmptyDashboard();
             return [];
         }

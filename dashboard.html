@@ -198,12 +198,44 @@
         </div>
     </footer>
 
+    <!-- 🚀 DASHBOARD OTTIMIZZATA - CARICAMENTO PERFORMANTE -->
     <script src="/auth.js?v=202506172330"></script>
+    
+    <!-- Dashboard Module - Caricamento prioritario per UCMe -->
+    <script src="/dashboard-module.js?v=202506212003"></script>
     
     <!-- SPRINT 2: REAL-TIME SYNC MODULES -->
     <script src="https://unpkg.com/@supabase/supabase-js@2" defer></script>
     <script src="/script-realtime.js?v=1.0.0" defer></script>
     
+    <!-- Script principale - caricamento dopo dashboard module -->
     <script src="/script.js?v=202506212003"></script>
+    
+    <!-- 🔥 INIZIALIZZAZIONE DASHBOARD UNIFICATA -->
+    <script>
+        window.addEventListener('DOMContentLoaded', async function() {
+            // Assicura che il DashboardModule sia caricato e inizializzato
+            if (window.DashboardModule) {
+                await window.DashboardModule.init();
+                
+                // Verifica autenticazione immediata
+                if (window.immediateAuthState && window.immediateAuthState.isAuthenticated) {
+                    console.log('🚀 Caricamento dashboard per utente autenticato:', window.immediateAuthState.user.email);
+                    
+                    // Carica UCMe usando il modulo ottimizzato
+                    try {
+                        const ucmes = await window.DashboardModule.loadUserData(window.immediateAuthState.user.email);
+                        console.log('✅ UCMe caricate via DashboardModule:', ucmes.length);
+                    } catch (error) {
+                        console.error('❌ Errore caricamento via DashboardModule:', error);
+                        // Fallback al sistema principale
+                        if (typeof initializeDashboard === 'function') {
+                            initializeDashboard();
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html> 
