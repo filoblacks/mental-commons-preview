@@ -4722,7 +4722,7 @@ window.forceToggleProfileForm = function() {
             if (savedUser) {
                 user = JSON.parse(savedUser);
                 window.currentUser = user;
-                console.log('✅ Utente recuperato dal localStorage:', user.email);
+                console.log('✅ Utente recuperato dal localStorage: [REDACTED]');
             } else {
                 alert('❌ ERRORE: Nessun utente loggato trovato!');
                 return;
@@ -4863,7 +4863,7 @@ window.forceSaveProfile = function(event) {
         window.forceToggleProfileForm();
         
         alert('✅ Profilo aggiornato con successo!');
-        console.log('✅ Profilo salvato:', user.email);
+        console.log('✅ Profilo salvato: [REDACTED]');
         
     } catch (error) {
         console.error('❌ Errore nel salvataggio:', error);

@@ -1,10 +1,12 @@
 // ================================================================
 // Sistema di logging per ambiente produzione
 const { log, debug, info, warn, error } = require("../logger.js");
+// Sistema di rate limiting
+const { rateLimitMiddleware, checkRateLimitByIdentifier } = require('./rate-limiter.js');
 // MENTAL COMMONS - LOGIN API CON SUPABASE
 // ================================================================
-// Versione: 2.0.0
-// Descrizione: API login con backend persistente Supabase
+// Versione: 2.1.0 - SECURITY UPDATE
+// Descrizione: API login con backend persistente Supabase + Rate Limiting
 
 import { 
   findUserByEmail, 
@@ -22,25 +24,40 @@ export default async function handler(req, res) {
   // ================================================================
   
   debug('🟣 ============================================');
-  debug('🟣 MENTAL COMMONS - LOGIN API v2.0 SUPABASE');
+  debug('🟣 MENTAL COMMONS - LOGIN API v2.1 SECURITY');
   debug('🟣 ============================================');
   debug('🔑 Timestamp:', new Date().toISOString());
-  debug('🔑 Headers ricevuti:', JSON.stringify(req.headers, null, 2));
   debug('🔑 Metodo:', req.method);
   debug('🔑 User-Agent:', req.headers['user-agent']);
   debug('🔑 Origin:', req.headers.origin);
-  debug('🔑 Referer:', req.headers.referer);
   
   // Log configurazione Supabase
   logConfiguration();
   
   // ================================================================
+  // RATE LIMITING SECURITY CHECK
+  // ================================================================
+  
+  const rateLimitCheck = rateLimitMiddleware('login');
+  const rateLimitResult = await new Promise((resolve) => {
+    rateLimitCheck(req, res, () => resolve({ allowed: true }));
+  });
+  
+  if (!rateLimitResult.allowed) {
+    // La risposta è già stata inviata dal middleware
+    return;
+  }
+  
+  // ================================================================
   // GESTIONE CORS E METODI
   // ================================================================
   
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' ? 'https://mental-commons.vercel.app' : '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
   
   if (req.method === 'OPTIONS') {
     debug('🔑 Risposta CORS OPTIONS inviata');

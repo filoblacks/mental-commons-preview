@@ -71,7 +71,7 @@ export default async function handler(req, res) {
             });
         }
 
-        console.log('🔍 [API UCMe] Ricerca UCMe per utente:', userEmail);
+        console.log('🔍 [API UCMe] Ricerca UCMe per utente: [REDACTED]');
 
         // Carica UCMe reali dal database Supabase
         const { data: ucmes, error: dbError } = await supabase

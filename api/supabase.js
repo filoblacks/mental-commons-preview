@@ -80,7 +80,37 @@ function getSupabaseClient() {
 // ================================================================
 
 const SALT_ROUNDS = 10;
-const JWT_SECRET = process.env.JWT_SECRET || 'mental-commons-secret-key-change-in-production';
+
+// 🔐 SICUREZZA CRITICA: Controlla JWT_SECRET all'avvio
+function validateJWTSecret() {
+  const jwtSecret = process.env.JWT_SECRET;
+  
+  if (!jwtSecret) {
+    throw new Error('🚨 SECURITY ERROR: JWT_SECRET environment variable is required but not set');
+  }
+  
+  if (jwtSecret === 'mental-commons-secret-key-change-in-production') {
+    throw new Error('🚨 SECURITY ERROR: JWT_SECRET is still using default value. Change it immediately in production');
+  }
+  
+  if (jwtSecret.length < 32) {
+    throw new Error('🚨 SECURITY ERROR: JWT_SECRET must be at least 32 characters long for security');
+  }
+  
+  return jwtSecret;
+}
+
+// Ottieni JWT_SECRET con validazione
+function getJWTSecret() {
+  try {
+    return validateJWTSecret();
+  } catch (error) {
+    error('❌ JWT Secret validation failed:', error.message);
+    process.exit(1); // Blocca l'avvio se il JWT_SECRET non è sicuro
+  }
+}
+
+const JWT_SECRET = getJWTSecret();
 
 // Hash password con bcrypt
 async function hashPassword(password) {
