@@ -392,134 +392,88 @@ async function getUserUCMes(userEmail) {
     return [];
 }
 
+// 🔥 FIX CRITICO: Dashboard semplificata che SEMPRE carica dati reali
 function initializeDashboard() {
-    log("🟢 INIZIO initializeDashboard - timestamp:", new Date().toISOString());
-    log('🔄 Inizializzazione dashboard...');
+    log("🔥 DASHBOARD SEMPLIFICATA - Caricamento UCMe reali...");
     
     // Elementi della dashboard
     const userVerification = document.getElementById('user-verification');
     const dashboardContent = document.getElementById('dashboard-content');
     const noAccess = document.getElementById('no-access');
     
+    // Verifica elementi DOM
     if (!userVerification || !dashboardContent || !noAccess) {
-        error('❌ Elementi dashboard mancanti nel DOM:', {
-            userVerification: !!userVerification,
-            dashboardContent: !!dashboardContent,
-            noAccess: !!noAccess
-        });
+        error('❌ Elementi dashboard mancanti');
         return;
     }
 
-    log('✅ Tutti gli elementi DOM trovati');
+    // Verifica autenticazione
+    if (!currentUser) {
+        log('❌ Utente non autenticato');
+        userVerification.style.display = 'none';
+        noAccess.style.display = 'block';
+        return;
+    }
     
-    log("⏰ Impostazione setTimeout per caricamento asincrono...");
+    log('✅ Utente autenticato:', currentUser.email);
+    
+    // CARICAMENTO DIRETTO E IMMEDIATO delle UCMe reali
     setTimeout(async () => {
-        log("⏰ AVVIO setTimeout callback - timestamp:", new Date().toISOString());
         try {
-            log('🔍 Controllo stato utente...');
+            log('🔄 Caricamento UCMe dal backend...');
+            const ucmes = await loadUCMeFromBackend(currentUser.email);
             
-            // Verifica se l'utente è loggato
-            if (!currentUser) {
-                log('⚠️ Utente non loggato, mostro schermata di accesso');
-                userVerification.style.display = 'none';
-                noAccess.style.display = 'block';
-                return;
-            }
+            log('📦 UCMe ricevute:', ucmes ? ucmes.length : 0);
             
-            log('✅ Utente loggato:', currentUser.email);
-            
-            log('🔄 Caricamento UCMe per dashboard...');
-            const allUserUcmes = await getUserUCMes(currentUser.email);
-            
-            log('📊 UCMe caricate per dashboard:', {
-                totalCount: allUserUcmes.length,
-                emails: allUserUcmes.map(u => u.email),
-                texts: allUserUcmes.map(u => u.text?.substring(0, 30) + '...')
-            });
-            
-            // Crea userData con le UCMe caricate
-            const userData = {
-                isEmpty: allUserUcmes.length === 0,
-                ucmes: allUserUcmes,
-                user: currentUser,
-                stats: {
-                    total: allUserUcmes.length,
-                    withResponse: allUserUcmes.filter(ucme => ucme.response).length,
-                    pending: allUserUcmes.filter(ucme => !ucme.response).length
-                }
-            };
-            
-            log('📋 Dati dashboard creati:', JSON.stringify({
-                isEmpty: userData.isEmpty,
-                ucmesLength: userData.ucmes.length,
-                hasUser: !!userData.user,
-                hasStats: !!userData.stats
-            }, null, 2));
-            
-            log('🎨 Rendering dashboard avviato...');
-            
-            // Rendering della dashboard - comportamento identico mobile/desktop
-            if (userData.isEmpty) {
-                log('📝 Rendering dashboard vuota');
-                renderEmptyDashboard();
-            } else {
-                log('📝 Rendering dashboard con', userData.ucmes.length, 'UCMe');
-                renderDashboard(userData);
-            }
-            
-            log('🔄 Aggiornamento UI - nascondo caricamento e mostro contenuto...');
-            
-            // ⚠️ CRITICO: SEMPRE nascondere caricamento e mostrare contenuto, anche se ci sono errori nel rendering
-            log("🔄 FORZATURA aggiornamento UI - questo DEVE sempre eseguire");
+            // Mostra la dashboard
             userVerification.style.display = 'none';
             dashboardContent.style.display = 'block';
             dashboardContent.style.visibility = 'visible';
             dashboardContent.style.opacity = '1';
             
-
+            // Renderizza le UCMe
+            if (ucmes && ucmes.length > 0) {
+                log('✅ Rendering', ucmes.length, 'UCMe reali');
+                renderUcmeBlocksReal(ucmes);
+            } else {
+                log('📝 Nessuna UCMe - mostro dashboard vuota');
+                const container = document.getElementById('ucme-blocks');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="empty-dashboard">
+                            <h3>Non hai ancora condiviso pensieri</h3>
+                            <p>La tua area personale è il luogo dove ritrovi tutto quello che hai condiviso e le risposte che hai ricevuto.</p>
+                            <p><strong>Inizia ora a condividere il tuo primo pensiero.</strong></p>
+                            <a href="/#form" class="new-ucme-button">Condividi il tuo primo pensiero</a>
+                        </div>
+                    `;
+                }
+            }
             
-            log("✅ UI forzatamente aggiornata - caricamento nascosto, dashboard mostrata");
-            
-            log('✅ Dashboard completamente caricata e visualizzata');
+            log('✅ Dashboard caricata con successo');
             
         } catch (error) {
-            error('❌ Errore durante caricamento dashboard:', error);
-            error('Stack trace:', error.stack);
+            error('❌ Errore caricamento dashboard:', error);
             
-            // Anche in caso di errore, mostra sempre l'UI base
+            // Anche in caso di errore, mostra l'UI
             userVerification.style.display = 'none';
             dashboardContent.style.display = 'block';
             dashboardContent.style.visibility = 'visible';
             dashboardContent.style.opacity = '1';
             
-            // Mostra messaggio di errore nel contenuto
-            const ucmeBlocks = document.getElementById('ucme-blocks');
-            if (ucmeBlocks) {
-                ucmeBlocks.innerHTML = `
+            // Messaggio di errore semplice
+            const container = document.getElementById('ucme-blocks');
+            if (container) {
+                container.innerHTML = `
                     <div class="empty-dashboard">
-                        <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
-                            <h3 style="color: #6c757d; margin-bottom: 10px;">🚧 Sistema in Sviluppo</h3>
-                            <p style="color: #6c757d; margin-bottom: 10px;">
-                                Stiamo ancora perfezionando la visualizzazione delle UCMe nella dashboard.
-                            </p>
-                            <p style="color: #6c757d; margin: 0;">
-                                Se non vedi i tuoi pensieri precedenti, è normale - stiamo lavorando per renderli disponibili presto.
-                            </p>
-                        </div>
-                        <p>❌ Si è verificato un errore nel caricamento del tuo spazio.</p>
-                        <p>Ricarica la pagina o riprova più tardi.</p>
+                        <h3>Problema di connessione</h3>
+                        <p>Ricarica la pagina per visualizzare i tuoi pensieri.</p>
+                        <button onclick="window.location.reload()" class="new-ucme-button">Ricarica</button>
                     </div>
                 `;
-
             }
-            
-            updateDashboardStatus('Il tuo spazio non è disponibile ora. Riprova più tardi.');
         }
-        
-        log("⏰ FINE setTimeout callback - timestamp:", new Date().toISOString());
-    }, 100); // Delay minimizzato per evitare problemi mobile
-    
-    log("🔚 FINE initializeDashboard - setTimeout impostato - timestamp:", new Date().toISOString());
+    }, 100);
 }
 
 
@@ -858,24 +812,33 @@ function renderDashboard(data) {
         error('❌ Errore nel rendering dashboard:', error);
         error('Stack trace:', error.stack);
         
-        // In caso di errore, mostra comunque un contenuto base
+        // 🔥 FIX CRITICO: SEMPRE TENTARE DI CARICARE DATI REALI
         const ucmeBlocks = document.getElementById('ucme-blocks');
-        if (ucmeBlocks) {
-            ucmeBlocks.innerHTML = `
-                <div class="empty-dashboard">
-                    <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
-                        <h3 style="color: #6c757d; margin-bottom: 10px;">🚧 Sistema in Sviluppo</h3>
-                        <p style="color: #6c757d; margin-bottom: 10px;">
-                            Stiamo ancora perfezionando la visualizzazione delle UCMe nella dashboard.
-                        </p>
-                        <p style="color: #6c757d; margin: 0;">
-                            Se non vedi i tuoi pensieri precedenti, è normale - stiamo lavorando per renderli disponibili presto.
-                        </p>
-                    </div>
-                    <p>❌ Errore nella visualizzazione dei tuoi pensieri.</p>
-                    <p>Ricarica la pagina per riprovare.</p>
-                </div>
-            `;
+        if (ucmeBlocks && data && data.user) {
+            setTimeout(async () => {
+                try {
+                    const realUcmes = await loadUCMeFromBackend(data.user.email);
+                    if (realUcmes && realUcmes.length > 0) {
+                        renderUcmeBlocksReal(realUcmes);
+                    } else {
+                        ucmeBlocks.innerHTML = `
+                            <div class="empty-dashboard">
+                                <h3>Non hai ancora condiviso pensieri</h3>
+                                <p>Inizia ora a condividere il tuo primo pensiero.</p>
+                                <a href="/#form" class="new-ucme-button">Condividi ora</a>
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    ucmeBlocks.innerHTML = `
+                        <div class="empty-dashboard">
+                            <h3>Problema di connessione</h3>
+                            <p>Ricarica la pagina per vedere i tuoi pensieri.</p>
+                            <button onclick="window.location.reload()" class="new-ucme-button">Ricarica</button>
+                        </div>
+                    `;
+                }
+            }, 500);
         }
         
         // Fallback per le informazioni profilo
@@ -896,24 +859,36 @@ function renderEmptyDashboard() {
         // Aggiorna informazioni profilo
         updateProfileInfo(currentUser);
         
-        // Mostra messaggio pulito per dashboard vuota
+        // 🔥 FIX CRITICO: SEMPRE PROVARE A CARICARE DATI REALI
         const ucmeBlocks = document.getElementById('ucme-blocks');
-        if (ucmeBlocks) {
-            ucmeBlocks.innerHTML = `
-                <div class="empty-dashboard">
-                    <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
-                        <h3 style="color: #6c757d; margin-bottom: 10px;">🚧 Sistema in Sviluppo</h3>
-                        <p style="color: #6c757d; margin-bottom: 10px;">
-                            Stiamo ancora perfezionando la visualizzazione delle UCMe nella dashboard.
-                        </p>
-                        <p style="color: #6c757d; margin: 0;">
-                            Se non vedi i tuoi pensieri precedenti, è normale - stiamo lavorando per renderli disponibili presto.
-                        </p>
-                    </div>
-                    <p>Non hai ancora affidato nessun pensiero.</p>
-                    <p>Quando condividerai la tua prima UCMe, apparirà qui.</p>
-                </div>
-            `;
+        if (ucmeBlocks && currentUser) {
+            // Prima verifica se ci sono davvero UCMe nel database
+            setTimeout(async () => {
+                try {
+                    const realUcmes = await loadUCMeFromBackend(currentUser.email);
+                    if (realUcmes && realUcmes.length > 0) {
+                        log('🔄 TROVATE UCMe reali nel database:', realUcmes.length);
+                        renderUcmeBlocksReal(realUcmes);
+                    } else {
+                        ucmeBlocks.innerHTML = `
+                            <div class="empty-dashboard">
+                                <h3>Non hai ancora condiviso pensieri</h3>
+                                <p>La tua area personale è il luogo dove ritrovi tutto quello che hai condiviso e le risposte che hai ricevuto.</p>
+                                <p><strong>Inizia ora a condividere il tuo primo pensiero.</strong></p>
+                                <a href="/#form" class="new-ucme-button">Condividi il tuo primo pensiero</a>
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    ucmeBlocks.innerHTML = `
+                        <div class="empty-dashboard">
+                            <h3>Problema di connessione</h3>
+                            <p>Ricarica la pagina per visualizzare i tuoi pensieri.</p>
+                            <button onclick="window.location.reload()" class="new-ucme-button">Ricarica</button>
+                        </div>
+                    `;
+                }
+            }, 500);
         }
         
         // Aggiorna stato visuale
@@ -939,24 +914,33 @@ function renderEmptyDashboard() {
             error('❌ Errore anche nell\'aggiornamento profilo:', profileError);
         }
         
-        // Fallback per il contenuto
+        // 🔥 FIX CRITICO: SEMPRE CARICARE DATI REALI, MAI PLACEHOLDER
         const ucmeBlocks = document.getElementById('ucme-blocks');
-        if (ucmeBlocks) {
-            ucmeBlocks.innerHTML = `
-                <div class="empty-dashboard">
-                    <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
-                        <h3 style="color: #6c757d; margin-bottom: 10px;">🚧 Sistema in Sviluppo</h3>
-                        <p style="color: #6c757d; margin-bottom: 10px;">
-                            Stiamo ancora perfezionando la visualizzazione delle UCMe nella dashboard.
-                        </p>
-                        <p style="color: #6c757d; margin: 0;">
-                            Se non vedi i tuoi pensieri precedenti, è normale - stiamo lavorando per renderli disponibili presto.
-                        </p>
-                    </div>
-                    <p>Errore nella visualizzazione.</p>
-                    <p>Ricarica la pagina per riprovare.</p>
-                </div>
-            `;
+        if (ucmeBlocks && currentUser) {
+            setTimeout(async () => {
+                try {
+                    const realUcmes = await loadUCMeFromBackend(currentUser.email);
+                    if (realUcmes && realUcmes.length > 0) {
+                        renderUcmeBlocksReal(realUcmes);
+                    } else {
+                        ucmeBlocks.innerHTML = `
+                            <div class="empty-dashboard">
+                                <h3>Non hai ancora condiviso pensieri</h3>
+                                <p>Inizia ora a condividere il tuo primo pensiero.</p>
+                                <a href="/#form" class="new-ucme-button">Condividi ora</a>
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    ucmeBlocks.innerHTML = `
+                        <div class="empty-dashboard">
+                            <h3>Problema di connessione</h3>
+                            <p>Ricarica per visualizzare i tuoi pensieri.</p>
+                            <button onclick="window.location.reload()" class="new-ucme-button">Ricarica</button>
+                        </div>
+                    `;
+                }
+            }, 500);
         }
         
         updateDashboardStatus('Errore nella visualizzazione del tuo spazio.');
@@ -978,22 +962,35 @@ function renderUcmeBlocks(ucmes) {
         container.innerHTML = '';
         
         if (!ucmes || ucmes.length === 0) {
-            log('⚠️ Nessuna UCMe da renderizzare - mostro messaggio informativo');
-            container.innerHTML = `
-                <div class="empty-dashboard">
-                    <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
-                        <h3 style="color: #6c757d; margin-bottom: 10px;">🚧 Sistema in Sviluppo</h3>
-                        <p style="color: #6c757d; margin-bottom: 10px;">
-                            Stiamo ancora perfezionando la visualizzazione delle UCMe nella dashboard.
-                        </p>
-                        <p style="color: #6c757d; margin: 0;">
-                            Se non vedi i tuoi pensieri precedenti, è normale - stiamo lavorando per renderli disponibili presto.
-                        </p>
-                    </div>
-                    <p>Non hai ancora affidato nessun pensiero.</p>
-                    <p>Quando condividerai la tua prima UCMe, apparirà qui.</p>
-                </div>
-            `;
+            // 🔥 FIX CRITICO: NON MOSTRARE MAI PLACEHOLDER - RIPROVA A CARICARE
+            log('⚠️ Nessuna UCMe ricevuta - riprovo caricamento diretto');
+            if (currentUser) {
+                setTimeout(async () => {
+                    try {
+                        const retryUcmes = await loadUCMeFromBackend(currentUser.email);
+                        if (retryUcmes && retryUcmes.length > 0) {
+                            log('🔄 RETRY SUCCESS: Trovate', retryUcmes.length, 'UCMe al secondo tentativo');
+                            renderUcmeBlocksReal(retryUcmes);
+                        } else {
+                            container.innerHTML = `
+                                <div class="empty-dashboard">
+                                    <h3>Non hai ancora condiviso pensieri</h3>
+                                    <p>Inizia ora a condividere il tuo primo pensiero.</p>
+                                    <a href="/#form" class="new-ucme-button">Condividi ora</a>
+                                </div>
+                            `;
+                        }
+                    } catch (error) {
+                        container.innerHTML = `
+                            <div class="empty-dashboard">
+                                <h3>Problema di connessione</h3>
+                                <p>Controlla la connessione e ricarica.</p>
+                                <button onclick="window.location.reload()" class="new-ucme-button">Ricarica</button>
+                            </div>
+                        `;
+                    }
+                }, 1000);
+            }
             return;
         }
         
@@ -1011,42 +1008,71 @@ function renderUcmeBlocks(ucmes) {
     } catch (error) {
         error('❌ Errore durante rendering blocchi UCMe:', error);
         
+        // 🔥 FIX CRITICO: MAI PLACEHOLDER - SEMPRE DATI REALI
         const container = document.getElementById('ucme-blocks');
-        if (container) {
-            container.innerHTML = `
-                <div class="empty-dashboard">
-                    <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
-                        <h3 style="color: #6c757d; margin-bottom: 10px;">🚧 Sistema in Sviluppo</h3>
-                        <p style="color: #6c757d; margin-bottom: 10px;">
-                            Stiamo ancora perfezionando la visualizzazione delle UCMe nella dashboard.
-                        </p>
-                        <p style="color: #6c757d; margin: 0;">
-                            Se non vedi i tuoi pensieri precedenti, è normale - stiamo lavorando per renderli disponibili presto.
-                        </p>
-                    </div>
-                    <p>Errore nella visualizzazione dei tuoi pensieri.</p>
-                    <p>Ricarica la pagina per riprovare.</p>
-                </div>
-            `;
+        if (container && currentUser) {
+            setTimeout(async () => {
+                try {
+                    const realUcmes = await loadUCMeFromBackend(currentUser.email);
+                    if (realUcmes && realUcmes.length > 0) {
+                        renderUcmeBlocksReal(realUcmes);
+                    } else {
+                        container.innerHTML = `
+                            <div class="empty-dashboard">
+                                <h3>Non hai ancora condiviso pensieri</h3>
+                                <p>Inizia ora a condividere il tuo primo pensiero.</p>
+                                <a href="/#form" class="new-ucme-button">Condividi ora</a>
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    container.innerHTML = `
+                        <div class="empty-dashboard">
+                            <h3>Problema di connessione</h3>
+                            <p>Ricarica per vedere i tuoi pensieri.</p>
+                            <button onclick="window.location.reload()" class="new-ucme-button">Ricarica</button>
+                        </div>
+                    `;
+                }
+            }, 500);
         }
     }
 }
 
-function createDashboardUcmeBlock(ucme, index) {
-    const block = document.createElement('div');
-    block.className = `ucme-block ${ucme.response ? 'risposto' : 'in-attesa'}`;
-    block.style.animationDelay = `${index * 0.1}s`;
+// 🔥 FIX CRITICO: Funzione semplificata per rendering UCMe reali
+function renderUcmeBlocksReal(ucmes) {
+    const container = document.getElementById('ucme-blocks');
+    if (!container || !ucmes) return;
     
-    const date = new Date(ucme.timestamp);
-    const formattedDate = date.toLocaleDateString('it-IT', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+    container.innerHTML = '';
+    
+    ucmes.forEach((ucme, index) => {
+        const block = createDashboardUcmeBlock(ucme, index);
+        if (block) {
+            container.appendChild(block);
+        }
     });
     
-    const statusText = ucme.response ? 'Risposta ricevuta' : 'In attesa di risposta';
+    log('✅ Renderizzate', ucmes.length, 'UCMe reali');
+}
+
+function createDashboardUcmeBlock(ucme, index) {
+    const block = document.createElement('div');
+    
+    // Usa i dati dalla struttura Supabase
+    const hasResponse = ucme.risposta && ucme.risposta.trim();
+    block.className = `ucme-block ${hasResponse ? 'risposto' : 'in-attesa'}`;
+    block.style.animationDelay = `${index * 0.1}s`;
+    
+    const date = new Date(ucme.created_at || ucme.timestamp);
+    const formattedDate = date.toLocaleDateString('it-IT', {
+        day: 'numeric',
+        month: 'long', 
+        year: 'numeric'
+    });
+    
+    const statusText = hasResponse ? 'Risposta ricevuta' : 'In attesa di risposta';
+    const content = ucme.content || ucme.pensiero || ucme.text || 'Contenuto non disponibile';
     
     block.innerHTML = `
         <div class="ucme-header">
@@ -1055,7 +1081,7 @@ function createDashboardUcmeBlock(ucme, index) {
         </div>
         <div class="ucme-content">
             <div class="ucme-text">
-                <p>${ucme.text}</p>
+                <p>${content}</p>
             </div>
             <div class="ucme-meta">
                 <span class="ucme-tone">Tono: ${ucme.tone || 'neutro'}</span>
