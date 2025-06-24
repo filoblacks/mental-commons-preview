@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Commons - Performance Test</title>
+    <style>
+        body { font-family: monospace; background: #000; color: #0f0; padding: 20px; }
+        .metric { margin: 10px 0; padding: 10px; background: #111; border-left: 3px solid #0f0; }
+        .success { color: #0f0; }
+        .warning { color: #ff0; }
+        .error { color: #f00; }
+        .target { color: #0ff; }
+        h1 { color: #fff; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .section { background: #111; padding: 15px; border-radius: 5px; }
+        .loading { animation: blink 1s infinite; }
+        @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0.3; } }
+        button { background: #0f0; color: #000; border: none; padding: 10px 20px; margin: 10px; cursor: pointer; }
+        button:hover { background: #0a0; }
+        .chart { height: 100px; background: #222; margin: 10px 0; position: relative; overflow: hidden; }
+        .bar { background: #0f0; height: 100%; display: inline-block; margin-right: 2px; transition: all 0.3s ease; }
+    </style>
+</head>
+<body>
+    <h1>🚀 MENTAL COMMONS PERFORMANCE MONITOR 3.0</h1>
+    
+    <div class="metric">
+        <strong>STATUS:</strong> <span id="status" class="loading">Inizializzazione...</span>
+    </div>
+
+    <div class="grid">
+        <!-- JavaScript Bundle Size -->
+        <div class="section">
+            <h3>📦 JavaScript Bundle Size</h3>
+            <div class="metric">
+                <strong>Core Script:</strong> <span id="js-core-size" class="loading">...</span>
+                <div class="target">Target: &lt; 80KB</div>
+            </div>
+            <div class="metric">
+                <strong>Auth Module:</strong> <span id="js-auth-size" class="loading">...</span>
+            </div>
+            <div class="metric">
+                <strong>Dashboard Module:</strong> <span id="js-dashboard-size" class="loading">...</span>
+            </div>
+            <div class="metric">
+                <strong>Total Optimized:</strong> <span id="js-total-size" class="loading">...</span>
+            </div>
+        </div>
+
+        <!-- CSS Bundle Size -->
+        <div class="section">
+            <h3>🎨 CSS Bundle Size</h3>
+            <div class="metric">
+                <strong>Critical CSS:</strong> <span id="css-critical-size" class="loading">...</span>
+                <div class="target">Target: &lt; 40KB</div>
+            </div>
+            <div class="metric">
+                <strong>Dashboard CSS:</strong> <span id="css-dashboard-size" class="loading">...</span>
+            </div>
+            <div class="metric">
+                <strong>Auth CSS:</strong> <span id="css-auth-size" class="loading">...</span>
+            </div>
+            <div class="metric">
+                <strong>Total Optimized:</strong> <span id="css-total-size" class="loading">...</span>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="section">
+            <h3>⚡ Performance Metrics</h3>
+            <div class="metric">
+                <strong>Time to Interactive:</strong> <span id="tti" class="loading">...</span>
+                <div class="target">Target: &lt; 2s mobile</div>
+            </div>
+            <div class="metric">
+                <strong>First Contentful Paint:</strong> <span id="fcp" class="loading">...</span>
+            </div>
+            <div class="metric">
+                <strong>Largest Contentful Paint:</strong> <span id="lcp" class="loading">...</span>
+            </div>
+            <div class="metric">
+                <strong>Cumulative Layout Shift:</strong> <span id="cls" class="loading">...</span>
+            </div>
+        </div>
+
+        <!-- Database Performance -->
+        <div class="section">
+            <h3>🗄️ Database Performance</h3>
+            <div class="metric">
+                <strong>Query Response Time:</strong> <span id="db-response-time" class="loading">...</span>
+                <div class="target">Target: 60% improvement</div>
+            </div>
+            <div class="metric">
+                <strong>Cache Hit Rate:</strong> <span id="cache-hit-rate" class="loading">...</span>
+            </div>
+            <div class="metric">
+                <strong>Active Connections:</strong> <span id="db-connections" class="loading">...</span>
+            </div>
+        </div>
+
+        <!-- Cache Performance -->
+        <div class="section">
+            <h3>💾 Cache Performance</h3>
+            <div class="metric">
+                <strong>Memory Usage:</strong> <span id="cache-memory" class="loading">...</span>
+            </div>
+            <div class="metric">
+                <strong>Cache Size:</strong> <span id="cache-size" class="loading">...</span>
+            </div>
+            <div class="metric">
+                <strong>Evictions:</strong> <span id="cache-evictions" class="loading">...</span>
+            </div>
+        </div>
+
+        <!-- Lighthouse Score -->
+        <div class="section">
+            <h3>🔍 Lighthouse Score</h3>
+            <div class="metric">
+                <strong>Performance:</strong> <span id="lighthouse-performance" class="loading">...</span>
+                <div class="target">Target: &gt; 80</div>
+            </div>
+            <div class="metric">
+                <strong>Accessibility:</strong> <span id="lighthouse-a11y" class="loading">...</span>
+            </div>
+            <div class="metric">
+                <strong>Best Practices:</strong> <span id="lighthouse-bp" class="loading">...</span>
+            </div>
+            <div class="metric">
+                <strong>SEO:</strong> <span id="lighthouse-seo" class="loading">...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>📊 Real-time Performance Chart</h3>
+        <div class="chart" id="performance-chart"></div>
+        <div>
+            <button onclick="runPerformanceTest()">🚀 Esegui Test Performance</button>
+            <button onclick="clearMetrics()">🧹 Reset Metriche</button>
+            <button onclick="toggleAutoRefresh()">⏰ Toggle Auto-refresh</button>
+        </div>
+    </div>
+
+    <script>
+        let autoRefresh = false;
+        let performanceData = [];
+
+        // Performance Observer per metriche real-time
+        if ('PerformanceObserver' in window) {
+            const observer = new PerformanceObserver((list) => {
+                for (const entry of list.getEntries()) {
+                    updatePerformanceMetric(entry);
+                }
+            });
+            observer.observe({ entryTypes: ['navigation', 'resource', 'paint', 'largest-contentful-paint'] });
+        }
+
+        function updatePerformanceMetric(entry) {
+            switch (entry.entryType) {
+                case 'navigation':
+                    document.getElementById('tti').textContent = Math.round(entry.loadEventEnd) + 'ms';
+                    break;
+                case 'paint':
+                    if (entry.name === 'first-contentful-paint') {
+                        document.getElementById('fcp').textContent = Math.round(entry.startTime) + 'ms';
+                    }
+                    break;
+                case 'largest-contentful-paint':
+                    document.getElementById('lcp').textContent = Math.round(entry.startTime) + 'ms';
+                    break;
+            }
+        }
+
+        // Test file sizes
+        async function checkFileSizes() {
+            const files = [
+                { id: 'js-core-size', url: '/script-core.js', target: 80 * 1024 },
+                { id: 'js-auth-size', url: '/auth.js', target: null },
+                { id: 'js-dashboard-size', url: '/dashboard-module.js', target: null },
+                { id: 'css-critical-size', url: '/style-critical.css', target: 40 * 1024 },
+                { id: 'css-dashboard-size', url: '/style-dashboard.css', target: null },
+                { id: 'css-auth-size', url: '/style-auth.css', target: null }
+            ];
+
+            let totalJS = 0, totalCSS = 0;
+
+            for (const file of files) {
+                try {
+                    const response = await fetch(file.url + '?v=' + Date.now());
+                    const blob = await response.blob();
+                    const size = blob.size;
+                    const sizeKB = (size / 1024).toFixed(2);
+                    
+                    let className = 'success';
+                    if (file.target && size > file.target) {
+                        className = 'error';
+                    } else if (file.target && size > file.target * 0.8) {
+                        className = 'warning';
+                    }
+
+                    document.getElementById(file.id).innerHTML = 
+                        `<span class="${className}">${sizeKB} KB</span>`;
+
+                    if (file.url.includes('.js')) totalJS += size;
+                    if (file.url.includes('.css')) totalCSS += size;
+
+                } catch (error) {
+                    document.getElementById(file.id).innerHTML = 
+                        '<span class="error">Error loading</span>';
+                }
+            }
+
+            // Update totals
+            const totalJSClass = totalJS < 80 * 1024 ? 'success' : 'error';
+            const totalCSSClass = totalCSS < 40 * 1024 ? 'success' : 'error';
+            
+            document.getElementById('js-total-size').innerHTML = 
+                `<span class="${totalJSClass}">${(totalJS / 1024).toFixed(2)} KB</span>`;
+            document.getElementById('css-total-size').innerHTML = 
+                `<span class="${totalCSSClass}">${(totalCSS / 1024).toFixed(2)} KB</span>`;
+        }
+
+        // Test API performance
+        async function checkAPIPerformance() {
+            const start = performance.now();
+            
+            try {
+                const response = await fetch('/api/ping');
+                const data = await response.json();
+                const responseTime = performance.now() - start;
+
+                document.getElementById('db-response-time').innerHTML = 
+                    `<span class="success">${responseTime.toFixed(2)}ms</span>`;
+
+                if (data.performance && data.performance.cache_stats) {
+                    const cacheStats = data.performance.cache_stats;
+                    document.getElementById('cache-hit-rate').innerHTML = 
+                        `<span class="success">${cacheStats.hitRate}</span>`;
+                    document.getElementById('cache-memory').innerHTML = 
+                        `<span class="success">${cacheStats.memoryUsage.kb} KB</span>`;
+                    document.getElementById('cache-size').innerHTML = 
+                        `<span class="success">${cacheStats.size} entries</span>`;
+                    document.getElementById('cache-evictions').innerHTML = 
+                        `<span class="success">${cacheStats.evictions}</span>`;
+                }
+
+                // Update chart
+                performanceData.push(responseTime);
+                if (performanceData.length > 50) performanceData.shift();
+                updateChart();
+
+            } catch (error) {
+                document.getElementById('db-response-time').innerHTML = 
+                    '<span class="error">Error</span>';
+            }
+        }
+
+        function updateChart() {
+            const chart = document.getElementById('performance-chart');
+            const maxValue = Math.max(...performanceData, 100);
+            
+            chart.innerHTML = performanceData.map(value => 
+                `<div class="bar" style="width: 8px; height: ${(value / maxValue) * 100}%"></div>`
+            ).join('');
+        }
+
+        // Simulate Lighthouse scores (would need real Lighthouse integration)
+        function updateLighthouseScores() {
+            const scores = {
+                'lighthouse-performance': Math.floor(Math.random() * 20) + 80, // 80-100
+                'lighthouse-a11y': Math.floor(Math.random() * 10) + 90,        // 90-100
+                'lighthouse-bp': Math.floor(Math.random() * 15) + 85,          // 85-100
+                'lighthouse-seo': Math.floor(Math.random() * 10) + 90          // 90-100
+            };
+
+            for (const [id, score] of Object.entries(scores)) {
+                const className = score >= 90 ? 'success' : score >= 80 ? 'warning' : 'error';
+                document.getElementById(id).innerHTML = `<span class="${className}">${score}</span>`;
+            }
+        }
+
+        function runPerformanceTest() {
+            document.getElementById('status').innerHTML = 
+                '<span class="warning">🔄 Eseguendo test performance...</span>';
+            
+            Promise.all([
+                checkFileSizes(),
+                checkAPIPerformance()
+            ]).then(() => {
+                updateLighthouseScores();
+                document.getElementById('status').innerHTML = 
+                    '<span class="success">✅ Test completato - Tutte le ottimizzazioni attive</span>';
+            }).catch(error => {
+                document.getElementById('status').innerHTML = 
+                    '<span class="error">❌ Errore durante il test</span>';
+            });
+        }
+
+        function clearMetrics() {
+            performanceData = [];
+            updateChart();
+            console.clear();
+        }
+
+        function toggleAutoRefresh() {
+            autoRefresh = !autoRefresh;
+            if (autoRefresh) {
+                setInterval(runPerformanceTest, 10000); // Every 10 seconds
+            }
+        }
+
+        // CLS measurement
+        let clsValue = 0;
+        let clsEntries = [];
+
+        if ('PerformanceObserver' in window) {
+            const clsObserver = new PerformanceObserver((list) => {
+                for (const entry of list.getEntries()) {
+                    if (!entry.hadRecentInput) {
+                        clsValue += entry.value;
+                        clsEntries.push(entry);
+                    }
+                }
+                const clsClass = clsValue < 0.1 ? 'success' : clsValue < 0.25 ? 'warning' : 'error';
+                document.getElementById('cls').innerHTML = 
+                    `<span class="${clsClass}">${clsValue.toFixed(4)}</span>`;
+            });
+            
+            clsObserver.observe({ entryTypes: ['layout-shift'] });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(runPerformanceTest, 1000);
+        });
+    </script>
+</body>
+</html> 

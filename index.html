@@ -14,104 +14,60 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css?v=202506212003">
+    <!-- CSS ottimizzato con lazy loading -->
+    <link rel="stylesheet" href="/style-critical.css?v=3.0.0">
+    <link rel="preload" href="/style-dashboard.css?v=3.0.0" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/style-auth.css?v=3.0.0" as="style" onload="this.onload=null;this.rel='stylesheet'">
     
-    <!-- 🚀 CONTROLLO AUTH IMMEDIATO - PREVIENE FLICKER -->
+    <!-- 🚀 ANTI-FLICKER OTTIMIZZATO - SOLO CSS -->
     <script>
-        (function() {
-            'use strict';
+        // Sistema di logging minimo e ottimizzato
+        window.isProduction = location.hostname !== 'localhost' && !location.hostname.includes('local');
+        const log = (...args) => { if (!window.isProduction) console.log(...args); };
+        
+        // Controllo auth ultrarapido
+        try {
+            const token = localStorage.getItem('mental_commons_token');
+            const userJson = localStorage.getItem('mental_commons_user');
+            const html = document.documentElement;
             
-            // Sistema di logging produzione-aware - Usa funzione globale sicura
-            if (typeof window.isProduction === 'undefined') {
-              window.isProduction = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'production') || false;
-            }
-            const PRODUCTION_MODE = window.isProduction;
-            const log = (...args) => { if (!PRODUCTION_MODE) console.log(...args); };
-            const debug = (...args) => { if (!PRODUCTION_MODE) console.debug(...args); };
-            const error = (...args) => { console.error(...args); };
-            const warn = (...args) => { if (!PRODUCTION_MODE) console.warn(...args); };
-            
-            const startTime = performance.now();
-            debug('🚀 [AUTH-IMMEDIATE] Controllo auth immediato avviato', { timestamp: startTime });
-            
-            // 1. Controllo sincrono del token
-            try {
-                const token = localStorage.getItem('mental_commons_token');
-                const userJson = localStorage.getItem('mental_commons_user');
-                
-                let isAuthenticated = false;
-                let authUser = null;
-                
-                if (token && userJson) {
-                    // Decodifica JWT velocemente (solo per scadenza)
-                    try {
-                        const payload = JSON.parse(atob(token.split('.')[1]));
-                        const currentTime = Math.floor(Date.now() / 1000);
-                        const isExpired = currentTime >= (payload.exp - 300); // 5min buffer
-                        
-                        if (!isExpired) {
-                            authUser = JSON.parse(userJson);
-                            isAuthenticated = true;
-                            debug('✅ [AUTH-IMMEDIATE] Token valido trovato', { email: authUser.email });
-                        } else {
-                            debug('⏰ [AUTH-IMMEDIATE] Token scaduto, pulizia');
-                            localStorage.removeItem('mental_commons_token');
-                            localStorage.removeItem('mental_commons_user');
-                        }
-                    } catch (e) {
-                        warn('⚠️ [AUTH-IMMEDIATE] Errore parsing token:', e.message);
+            if (token && userJson) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const now = Math.floor(Date.now() / 1000);
+                    
+                    if (now < payload.exp - 300) {
+                        html.className = 'auth-ready user-authenticated';
+                        window.immediateAuthState = {
+                            isAuthenticated: true,
+                            user: JSON.parse(userJson),
+                            verified: true
+                        };
+                        log('✅ Auth: utente autenticato');
+                    } else {
                         localStorage.removeItem('mental_commons_token');
                         localStorage.removeItem('mental_commons_user');
+                        html.className = 'auth-ready user-guest';
+                        window.immediateAuthState = { isAuthenticated: false, user: null, verified: true };
+                        log('⏰ Auth: token scaduto');
                     }
+                } catch (e) {
+                    localStorage.removeItem('mental_commons_token');
+                    localStorage.removeItem('mental_commons_user');
+                    html.className = 'auth-ready user-guest';
+                    window.immediateAuthState = { isAuthenticated: false, user: null, verified: true };
+                    log('⚠️ Auth: parsing error');
                 }
-                
-                // 2. Applica stato auth PRIMA del rendering
-                const htmlElement = document.documentElement;
-                
-                if (isAuthenticated) {
-                    htmlElement.classList.add('auth-ready', 'user-authenticated');
-                    htmlElement.classList.remove('auth-loading', 'user-guest');
-                    
-                    // Pre-configura variabili globali
-                    window.immediateAuthState = {
-                        isAuthenticated: true,
-                        user: authUser,
-                        verified: true
-                    };
-                    
-                    debug('✅ [AUTH-IMMEDIATE] Stato autenticato applicato');
-                } else {
-                    htmlElement.classList.add('auth-ready', 'user-guest');
-                    htmlElement.classList.remove('auth-loading', 'user-authenticated');
-                    
-                    // Pre-configura variabili globali
-                    window.immediateAuthState = {
-                        isAuthenticated: false,
-                        user: null,
-                        verified: true
-                    };
-                    
-                    debug('👤 [AUTH-IMMEDIATE] Stato guest applicato');
-                }
-                
-                const endTime = performance.now();
-                debug('🚀 [AUTH-IMMEDIATE] Controllo completato in', (endTime - startTime).toFixed(2), 'ms');
-                
-            } catch (error) {
-                error('❌ [AUTH-IMMEDIATE] Errore critico:', error);
-                
-                // Fallback sicuro
-                document.documentElement.classList.add('auth-ready', 'user-guest');
-                document.documentElement.classList.remove('auth-loading', 'user-authenticated');
-                
-                window.immediateAuthState = {
-                    isAuthenticated: false,
-                    user: null,
-                    verified: true,
-                    error: error.message
-                };
+            } else {
+                html.className = 'auth-ready user-guest';
+                window.immediateAuthState = { isAuthenticated: false, user: null, verified: true };
+                log('👤 Auth: guest user');
             }
-        })();
+        } catch (error) {
+            document.documentElement.className = 'auth-ready user-guest';
+            window.immediateAuthState = { isAuthenticated: false, user: null, verified: true, error: error.message };
+            console.error('❌ Auth error:', error);
+        }
     </script>
 </head>
 <body>
@@ -409,7 +365,7 @@
         </div>
     </footer>
 
-    <script src="/auth.js?v=202506172330"></script>
-    <script src="/script.js?v=202506212003"></script>
+    <!-- JavaScript ottimizzato con code splitting -->
+    <script src="/script-core.js?v=3.0.0" defer></script>
 </body>
 </html> 

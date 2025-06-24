@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "echo 'Building static files...'",
+  "buildCommand": "echo 'Building optimized Mental Commons 3.0...'",
   "outputDirectory": ".",
   "public": true,
   "env": {
@@ -8,13 +8,42 @@
   },
   "functions": {
     "api/*.js": {
-      "maxDuration": 10
+      "maxDuration": 10,
+      "memory": 512,
+      "runtime": "nodejs18.x"
     }
   },
   "headers": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/ping",
       "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=60, s-maxage=60" },
+        { "key": "Access-Control-Allow-Origin", "value": "https://mental-commons.vercel.app" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Vary", "value": "Accept-Encoding" }
+      ]
+    },
+    {
+      "source": "/api/(login|register|validate-token)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
+        { "key": "Access-Control-Allow-Origin", "value": "https://mental-commons.vercel.app" },
+        { "key": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" },
+        { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains" },
+        { "key": "Referrer-Policy", "value": "no-referrer" }
+      ]
+    },
+    {
+      "source": "/api/(ucme|ucmes|users)",
+      "headers": [
+        { "key": "Cache-Control", "value": "private, max-age=0, must-revalidate" },
         { "key": "Access-Control-Allow-Origin", "value": "https://mental-commons.vercel.app" },
         { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
@@ -22,62 +51,113 @@
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "X-XSS-Protection", "value": "1; mode=block" },
         { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains" },
-        { "key": "Referrer-Policy", "value": "no-referrer" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+        { "key": "Referrer-Policy", "value": "no-referrer" }
       ]
     },
     {
-      "source": "/(.*\\.(css|js))$",
+      "source": "/(.*\\.(css))$",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" }
+        { "key": "Content-Type", "value": "text/css" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Vary", "value": "Accept-Encoding" },
+        { "key": "Content-Encoding", "value": "gzip" }
+      ]
+    },
+    {
+      "source": "/(.*\\.(js))$", 
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "Content-Type", "value": "application/javascript" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Vary", "value": "Accept-Encoding" },
+        { "key": "Content-Encoding", "value": "gzip" }
+      ]
+    },
+    {
+      "source": "/(.*\\.(svg|ico))$",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=31536000" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Vary", "value": "Accept-Encoding" }
       ]
     },
     {
       "source": "/(.*\\.(html))$",
       "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "X-XSS-Protection", "value": "1; mode=block" },
         { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains" },
-        { "key": "Referrer-Policy", "value": "no-referrer" }
+        { "key": "Referrer-Policy", "value": "no-referrer" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co" }
       ]
     }
   ],
   "routes": [
     {
-      "src": "/style.css",
-      "dest": "/style.css",
-      "headers": { "Content-Type": "text/css" }
+      "src": "/style-critical.css",
+      "dest": "/style-critical.css",
+      "headers": { 
+        "Content-Type": "text/css",
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
     },
     {
-      "src": "/script.js", 
-      "dest": "/script.js",
-      "headers": { "Content-Type": "application/javascript" }
+      "src": "/style-dashboard.css",
+      "dest": "/style-dashboard.css", 
+      "headers": { 
+        "Content-Type": "text/css",
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/style-auth.css", 
+      "dest": "/style-auth.css",
+      "headers": { 
+        "Content-Type": "text/css",
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/script-core.js",
+      "dest": "/script-core.js",
+      "headers": { 
+        "Content-Type": "application/javascript",
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/auth.js",
+      "dest": "/auth.js",
+      "headers": { 
+        "Content-Type": "application/javascript",
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/dashboard-module.js",
+      "dest": "/dashboard-module.js",
+      "headers": { 
+        "Content-Type": "application/javascript",
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
     },
     {
       "src": "/logo.svg",
       "dest": "/logo.svg", 
-      "headers": { "Content-Type": "image/svg+xml" }
+      "headers": { 
+        "Content-Type": "image/svg+xml",
+        "Cache-Control": "public, max-age=86400, stale-while-revalidate=31536000"
+      }
     },
     {
-      "src": "/favicon.svg",
-      "dest": "/favicon.svg",
-      "headers": { "Content-Type": "image/svg+xml" }
-    },
-    {
-      "src": "/favicon-32x32.svg",
-      "dest": "/favicon-32x32.svg",
-      "headers": { "Content-Type": "image/svg+xml" }
-    },
-    {
-      "src": "/favicon-16x16.svg", 
-      "dest": "/favicon-16x16.svg",
-      "headers": { "Content-Type": "image/svg+xml" }
-    },
-    {
-      "src": "/favicon.ico",
-      "dest": "/favicon.ico"
+      "src": "/favicon\\.(svg|ico)",
+      "dest": "/favicon.$1",
+      "headers": { 
+        "Cache-Control": "public, max-age=86400, stale-while-revalidate=31536000"
+      }
     },
     {
       "src": "/api/(.*)",
@@ -86,6 +166,20 @@
     {
       "src": "/(.*)",
       "dest": "/$1"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/dashboard",
+      "destination": "/dashboard.html"
+    },
+    {
+      "source": "/login", 
+      "destination": "/login.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/profile.html"
     }
   ]
 } 

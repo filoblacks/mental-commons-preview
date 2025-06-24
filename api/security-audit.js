@@ -1,391 +1,216 @@
 // ================================================================
-// MENTAL COMMONS - SECURITY AUDIT API
+// MENTAL COMMONS - SECURITY AUDIT ENDPOINT
 // ================================================================
-// Versione: 1.0.0
-// Descrizione: Endpoint per verificare lo stato delle misure di sicurezza
+// Versione: 3.0.0 - SECURITY HARDENING SPRINT 2 - COMPLETO
+// Descrizione: Endpoint per eseguire audit di sicurezza completo
 
-const { debug, info, error, secureLog } = require('../logger.js');
-const { getRateLimitStats } = require('./rate-limiter.js');
+const { runSecurityTests } = require('./security-test.js');
+const { 
+  createSuccessResponse,
+  createErrorResponse,
+  asyncErrorHandler,
+  correlationMiddleware,
+  ValidationError
+} = require('./error-handler.js');
+const { debug, info, warn, error } = require('../logger.js');
 
-export default async function handler(req, res) {
-  debug('🔒 ============================================');
-  debug('🔒 MENTAL COMMONS - SECURITY AUDIT API');
-  debug('🔒 ============================================');
+export default asyncErrorHandler(async function handler(req, res) {
+  // ================================================================
+  // SECURITY HEADERS E CORS
+  // ================================================================
   
-  // Rate limiting applicato anche qui
-  const { rateLimitMiddleware } = require('./rate-limiter.js');
-  const rateLimitCheck = rateLimitMiddleware('api');
-  const rateLimitResult = await new Promise((resolve) => {
-    rateLimitCheck(req, res, () => resolve({ allowed: true }));
-  });
-  
-  if (!rateLimitResult.allowed) {
-    return; // Rate limit exceeded
-  }
-  
-  // Security headers
   res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' ? 'https://mental-commons.vercel.app' : '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    debug('📝 CORS OPTIONS response sent');
+    return res.status(200).end();
   }
+  
+  // ================================================================
+  // METODO VALIDATION
+  // ================================================================
   
   if (req.method !== 'GET') {
-    return res.status(405).json({
-      success: false,
-      message: 'Method not allowed'
-    });
+    throw new ValidationError(
+      'Metodo non consentito. Utilizzare GET.',
+      'METHOD_NOT_ALLOWED',
+      { receivedMethod: req.method, expectedMethod: 'GET' }
+    );
   }
   
-  try {
-    const auditResults = await performSecurityAudit();
+  // ================================================================
+  // CORRELATION ID E LOGGING
+  // ================================================================
+  
+  correlationMiddleware(req, res, () => {});
+  
+  debug('🔒 ============================================');
+  debug('🔒 SECURITY AUDIT ENDPOINT v3.0');
+  debug('🔒 ============================================');
+  debug('🔒 Correlation ID:', req.correlationId);
+  debug('🔒 Timestamp:', new Date().toISOString());
+  debug('🔒 Environment:', process.env.NODE_ENV);
+  
+  // ================================================================
+  // RESTRIZIONI AMBIENTE
+  // ================================================================
+  
+  // In produzione, limita l'accesso al security audit
+  if (process.env.NODE_ENV === 'production') {
+    const adminKey = req.query.admin_key;
+    const expectedKey = process.env.ADMIN_SECURITY_KEY;
     
-    // Log dell'audit (sanitizzato)
-    secureLog('🔒 Security audit completato:', {
-      criticalIssues: auditResults.summary.criticalIssues,
-      totalScore: auditResults.summary.score,
-      timestamp: auditResults.timestamp
-    });
-    
-    const httpStatus = auditResults.summary.criticalIssues > 0 ? 500 : 200;
-    
-    return res.status(httpStatus).json({
-      success: auditResults.summary.criticalIssues === 0,
-      message: auditResults.summary.criticalIssues === 0 ? 
-        'Security audit passed' : 
-        'Security vulnerabilities detected',
-      audit: auditResults,
-      timestamp: new Date().toISOString()
-    });
-    
-  } catch (auditError) {
-    error('❌ Security audit failed:', auditError.message);
-    
-    return res.status(500).json({
-      success: false,
-      message: 'Security audit failed',
-      error: auditError.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-}
-
-/**
- * Esegue un audit completo della sicurezza
- */
-async function performSecurityAudit() {
-  const audit = {
-    timestamp: new Date().toISOString(),
-    version: '1.0.0',
-    checks: {},
-    summary: {
-      score: 0,
-      maxScore: 0,
-      criticalIssues: 0,
-      warnings: 0,
-      passed: 0
+    if (!adminKey || !expectedKey || adminKey !== expectedKey) {
+      warn('🚨 Unauthorized security audit attempt in production');
+      throw new ValidationError(
+        'Accesso non autorizzato',
+        'UNAUTHORIZED_ACCESS',
+        { environment: 'production' }
+      );
     }
-  };
-  
-  // SEC-001: JWT Secret Security
-  audit.checks.jwtSecurity = checkJWTSecurity();
-  updateAuditScore(audit, audit.checks.jwtSecurity);
-  
-  // SEC-002: Rate Limiting
-  audit.checks.rateLimiting = checkRateLimiting();
-  updateAuditScore(audit, audit.checks.rateLimiting);
-  
-  // SEC-003: CORS Configuration
-  audit.checks.corsConfiguration = checkCORSConfiguration();
-  updateAuditScore(audit, audit.checks.corsConfiguration);
-  
-  // SEC-004: Logging Sanitization
-  audit.checks.loggingSanitization = checkLoggingSanitization();
-  updateAuditScore(audit, audit.checks.loggingSanitization);
-  
-  // Environmental Security
-  audit.checks.environmentSecurity = checkEnvironmentSecurity();
-  updateAuditScore(audit, audit.checks.environmentSecurity);
-  
-  // Headers Security
-  audit.checks.securityHeaders = checkSecurityHeaders();
-  updateAuditScore(audit, audit.checks.securityHeaders);
-  
-  return audit;
-}
-
-/**
- * Verifica la sicurezza del JWT
- */
-function checkJWTSecurity() {
-  const check = {
-    name: 'JWT Secret Security',
-    category: 'SEC-001',
-    critical: true,
-    tests: [],
-    status: 'unknown'
-  };
-  
-  try {
-    const jwtSecret = process.env.JWT_SECRET;
-    
-    // Test 1: JWT_SECRET exists
-    check.tests.push({
-      name: 'JWT_SECRET environment variable exists',
-      passed: !!jwtSecret,
-      critical: true,
-      message: jwtSecret ? 'JWT_SECRET is set' : 'JWT_SECRET is missing'
-    });
-    
-    if (jwtSecret) {
-      // Test 2: Not default value
-      const isDefault = jwtSecret === 'mental-commons-secret-key-change-in-production';
-      check.tests.push({
-        name: 'JWT_SECRET is not default value',
-        passed: !isDefault,
-        critical: true,
-        message: isDefault ? 'JWT_SECRET is still default - CRITICAL VULNERABILITY' : 'JWT_SECRET has been changed'
-      });
-      
-      // Test 3: Minimum length
-      const hasMinLength = jwtSecret.length >= 32;
-      check.tests.push({
-        name: 'JWT_SECRET minimum length (32 chars)',
-        passed: hasMinLength,
-        critical: true,
-        message: `JWT_SECRET length: ${jwtSecret.length} chars (min: 32)`
-      });
-    }
-    
-    const allCriticalPassed = check.tests.filter(t => t.critical).every(t => t.passed);
-    check.status = allCriticalPassed ? 'passed' : 'failed';
-    
-  } catch (error) {
-    check.status = 'error';
-    check.error = error.message;
   }
   
-  return check;
-}
-
-/**
- * Verifica il rate limiting
- */
-function checkRateLimiting() {
-  const check = {
-    name: 'Rate Limiting Protection',
-    category: 'SEC-002',
-    critical: true,
-    tests: [],
-    status: 'unknown'
-  };
+  // ================================================================
+  // ESECUZIONE SECURITY AUDIT
+  // ================================================================
   
-  try {
-    // Test 1: Rate limiter module available
-    let rateLimiterAvailable = false;
-    try {
-      require('./rate-limiter.js');
-      rateLimiterAvailable = true;
-    } catch (e) {
-      // Module not available
+  info('🔍 Starting comprehensive security audit...');
+  
+  const auditStartTime = Date.now();
+  const testResults = await runSecurityTests();
+  const auditEndTime = Date.now();
+  const totalDuration = (auditEndTime - auditStartTime) / 1000;
+  
+  // ================================================================
+  // ANALISI RISULTATI E RACCOMANDAZIONI
+  // ================================================================
+  
+  const recommendations = [];
+  const criticalIssues = [];
+  
+  if (testResults.success) {
+    recommendations.push('✅ Tutti i test di sicurezza sono passati');
+    recommendations.push('🔒 Sistema conforme agli standard di sicurezza');
+    recommendations.push('📊 Mantenere monitoraggio continuo');
+  } else {
+    for (const result of testResults.results) {
+      if (!result.passed) {
+        if (result.test.includes('Password Policy') || 
+            result.test.includes('Input Validation') ||
+            result.test.includes('Session Management')) {
+          criticalIssues.push({
+            test: result.test,
+            severity: 'CRITICAL',
+            details: result.details,
+            timestamp: result.timestamp
+          });
+        }
+        
+        recommendations.push(`❌ ${result.test}: ${result.details}`);
+      }
     }
     
-    check.tests.push({
-      name: 'Rate limiter module available',
-      passed: rateLimiterAvailable,
-      critical: true,
-      message: rateLimiterAvailable ? 'Rate limiter module loaded' : 'Rate limiter module missing'
-    });
-    
-    if (rateLimiterAvailable) {
-      // Test 2: Rate limiting stats
-      const stats = getRateLimitStats();
-      check.tests.push({
-        name: 'Rate limiting system functional',
-        passed: true,
-        critical: false,
-        message: `Rate limiter active with ${stats.totalActiveKeys} tracked clients`
-      });
+    if (criticalIssues.length > 0) {
+      recommendations.push('🚨 ATTENZIONE: Rilevati problemi di sicurezza critici');
+      recommendations.push('🔧 Intervento immediato richiesto');
     }
-    
-    check.status = check.tests.every(t => !t.critical || t.passed) ? 'passed' : 'failed';
-    
-  } catch (error) {
-    check.status = 'error';
-    check.error = error.message;
   }
   
-  return check;
-}
-
-/**
- * Verifica la configurazione CORS
- */
-function checkCORSConfiguration() {
-  const check = {
-    name: 'CORS Configuration',
-    category: 'SEC-003',
-    critical: true,
-    tests: [],
-    status: 'unknown'
-  };
+  // ================================================================
+  // COMPLIANCE REPORT
+  // ================================================================
   
-  const isProduction = process.env.NODE_ENV === 'production';
-  
-  check.tests.push({
-    name: 'Production environment detection',
-    passed: true,
-    critical: false,
-    message: `Environment: ${isProduction ? 'production' : 'development'}`
-  });
-  
-  check.tests.push({
-    name: 'CORS properly configured for environment',
-    passed: true, // Assumiamo corretto se siamo arrivati qui
-    critical: true,
-    message: isProduction ? 
-      'Production CORS limited to mental-commons.vercel.app' : 
-      'Development CORS allows localhost'
-  });
-  
-  check.status = 'passed';
-  return check;
-}
-
-/**
- * Verifica la sanitizzazione dei log
- */
-function checkLoggingSanitization() {
-  const check = {
-    name: 'Logging Sanitization',
-    category: 'SEC-004',
-    critical: true,
-    tests: [],
-    status: 'unknown'
-  };
-  
-  try {
-    // Test 1: Logger module available
-    let loggerAvailable = false;
-    let sanitizationAvailable = false;
-    
-    try {
-      const logger = require('../logger.js');
-      loggerAvailable = true;
-      sanitizationAvailable = typeof logger.sanitizeObject === 'function';
-    } catch (e) {
-      // Logger not available
+  const complianceReport = {
+    OWASP_Top10: {
+      'A01_Broken_Access_Control': testResults.results.some(r => r.test.includes('Session Management') && r.passed) ? 'COMPLIANT' : 'NON_COMPLIANT',
+      'A02_Cryptographic_Failures': testResults.results.some(r => r.test.includes('Password Policy') && r.passed) ? 'COMPLIANT' : 'NON_COMPLIANT',
+      'A03_Injection': testResults.results.some(r => r.test.includes('Input Validation') && r.passed) ? 'COMPLIANT' : 'NON_COMPLIANT',
+      'A05_Security_Misconfiguration': testResults.results.some(r => r.test.includes('Error Handling') && r.passed) ? 'COMPLIANT' : 'NON_COMPLIANT'
+    },
+    ISO27001: {
+      'Access_Management': testResults.results.some(r => r.test.includes('Session Management') && r.passed) ? 'COMPLIANT' : 'NON_COMPLIANT',
+      'Cryptography': testResults.results.some(r => r.test.includes('Password Policy') && r.passed) ? 'COMPLIANT' : 'NON_COMPLIANT',
+      'System_Security': testResults.results.some(r => r.test.includes('Rate Limiting') && r.passed) ? 'COMPLIANT' : 'NON_COMPLIANT'
     }
-    
-    check.tests.push({
-      name: 'Secure logger module available',
-      passed: loggerAvailable,
-      critical: true,
-      message: loggerAvailable ? 'Logger module loaded' : 'Logger module missing'
-    });
-    
-    check.tests.push({
-      name: 'Sanitization functions available',
-      passed: sanitizationAvailable,
-      critical: true,
-      message: sanitizationAvailable ? 'Log sanitization active' : 'Log sanitization missing'
-    });
-    
-    check.status = check.tests.every(t => !t.critical || t.passed) ? 'passed' : 'failed';
-    
-  } catch (error) {
-    check.status = 'error';
-    check.error = error.message;
+  };
+  
+  // ================================================================
+  // SECURITY SCORE CALCULATION
+  // ================================================================
+  
+  const securityScore = testResults.summary ? testResults.summary.successRate : 0;
+  let securityGrade = 'F';
+  
+  if (securityScore >= 95) securityGrade = 'A+';
+  else if (securityScore >= 90) securityGrade = 'A';
+  else if (securityScore >= 85) securityGrade = 'B+';
+  else if (securityScore >= 80) securityGrade = 'B';
+  else if (securityScore >= 75) securityGrade = 'C+';
+  else if (securityScore >= 70) securityGrade = 'C';
+  else if (securityScore >= 60) securityGrade = 'D';
+  
+  // ================================================================
+  // RISPOSTA COMPLETA
+  // ================================================================
+  
+  const responseData = createSuccessResponse(
+    {
+      auditResults: {
+        status: testResults.success ? 'PASSED' : 'FAILED',
+        securityScore: securityScore,
+        securityGrade: securityGrade,
+        summary: testResults.summary,
+        testResults: testResults.results,
+        criticalIssues: criticalIssues,
+        recommendations: recommendations,
+        complianceReport: complianceReport
+      },
+      systemInfo: {
+        environment: process.env.NODE_ENV,
+        auditTimestamp: new Date().toISOString(),
+        auditDuration: totalDuration,
+        correlationId: req.correlationId
+      },
+      securityHardening: {
+        version: '3.0.0',
+        sprintCompleted: 'SPRINT_2_SECURITY_HARDENING',
+        featuresImplemented: [
+          'Advanced Password Policy with HaveIBeenPwned',
+          'Complete Input Validation and Sanitization',
+          'Secure Session Management',
+          'Uniform Error Handling'
+        ],
+        securityLevel: securityScore >= 90 ? 'HIGH' : securityScore >= 70 ? 'MEDIUM' : 'LOW'
+      }
+    },
+    testResults.success ? 'Security audit completato con successo' : 'Security audit completato con avvisi',
+    {
+      correlationId: req.correlationId,
+      auditType: 'comprehensive',
+      securityHardeningComplete: testResults.success
+    }
+  );
+  
+  info(`🔒 Security audit completed - Score: ${securityScore}% (${securityGrade})`);
+  info(`📊 Tests: ${testResults.summary?.total || 0} - Passed: ${testResults.summary?.passed || 0} - Failed: ${testResults.summary?.failed || 0}`);
+  
+  if (testResults.success) {
+    info('🎉 ALL SECURITY REQUIREMENTS MET! SPRINT 2 COMPLETE!');
+  } else {
+    warn(`⚠️ Security issues detected: ${criticalIssues.length} critical`);
   }
   
-  return check;
-}
+  return res.status(testResults.success ? 200 : 206).json(responseData);
+});
 
-/**
- * Verifica la sicurezza dell'ambiente
- */
-function checkEnvironmentSecurity() {
-  const check = {
-    name: 'Environment Security',
-    category: 'ENV',
-    critical: false,
-    tests: [],
-    status: 'unknown'
-  };
-  
-  const isProduction = process.env.NODE_ENV === 'production';
-  
-  check.tests.push({
-    name: 'NODE_ENV properly set',
-    passed: !!process.env.NODE_ENV,
-    critical: false,
-    message: `NODE_ENV: ${process.env.NODE_ENV || 'not set'}`
-  });
-  
-  check.tests.push({
-    name: 'Supabase configuration present',
-    passed: !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY),
-    critical: false,
-    message: 'Database configuration verified'
-  });
-  
-  check.status = check.tests.every(t => t.passed) ? 'passed' : 'warning';
-  return check;
-}
+// ================================================================
+// EXPORT CON MIDDLEWARE DI SICUREZZA
+// ================================================================
 
-/**
- * Verifica gli header di sicurezza
- */
-function checkSecurityHeaders() {
-  const check = {
-    name: 'Security Headers',
-    category: 'HEADERS',
-    critical: false,
-    tests: [],
-    status: 'passed'
-  };
-  
-  const expectedHeaders = [
-    'X-Content-Type-Options: nosniff',
-    'X-Frame-Options: DENY',
-    'X-XSS-Protection: 1; mode=block'
-  ];
-  
-  expectedHeaders.forEach(header => {
-    check.tests.push({
-      name: `Security header: ${header}`,
-      passed: true, // Assumiamo corretto se configurato in vercel.json
-      critical: false,
-      message: 'Configured in vercel.json'
-    });
-  });
-  
-  return check;
-}
-
-/**
- * Aggiorna il punteggio dell'audit
- */
-function updateAuditScore(audit, check) {
-  const tests = check.tests || [];
-  
-  tests.forEach(test => {
-    audit.summary.maxScore++;
-    
-    if (test.passed) {
-      audit.summary.score++;
-      audit.summary.passed++;
-    } else if (test.critical) {
-      audit.summary.criticalIssues++;
-    } else {
-      audit.summary.warnings++;
-    }
-  });
-} 
+// Il gestore degli errori viene applicato automaticamente da asyncErrorHandler 

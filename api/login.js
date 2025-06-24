@@ -18,38 +18,31 @@ import {
   logConfiguration
 } from './supabase.js';
 
-export default async function handler(req, res) {
+// ================================================================
+// MENTAL COMMONS - LOGIN API SECURITY HARDENED
+// ================================================================
+// Versione: 3.0.0 - SECURITY HARDENING SPRINT 2 - COMPLETO
+// Descrizione: API login con sicurezza avanzata integrata
+
+// ================================================================
+// SECURITY IMPORTS
+// ================================================================
+const { validateAndSanitize, loginSchema } = require('./validation.js');
+const { createSession, setSecureSessionCookie } = require('./session-manager.js');
+const { 
+  ValidationError, 
+  AuthenticationError, 
+  DatabaseError,
+  createSuccessResponse,
+  logError,
+  logSuccess,
+  asyncErrorHandler,
+  correlationMiddleware
+} = require('./error-handler.js');
+
+export default asyncErrorHandler(async function handler(req, res) {
   // ================================================================
-  // LOGGING INIZIALE E CONFIGURAZIONE
-  // ================================================================
-  
-  debug('🟣 ============================================');
-  debug('🟣 MENTAL COMMONS - LOGIN API v2.1 SECURITY');
-  debug('🟣 ============================================');
-  debug('🔑 Timestamp:', new Date().toISOString());
-  debug('🔑 Metodo:', req.method);
-  debug('🔑 User-Agent:', req.headers['user-agent']);
-  debug('🔑 Origin:', req.headers.origin);
-  
-  // Log configurazione Supabase
-  logConfiguration();
-  
-  // ================================================================
-  // RATE LIMITING SECURITY CHECK
-  // ================================================================
-  
-  const rateLimitCheck = rateLimitMiddleware('login');
-  const rateLimitResult = await new Promise((resolve) => {
-    rateLimitCheck(req, res, () => resolve({ allowed: true }));
-  });
-  
-  if (!rateLimitResult.allowed) {
-    // La risposta è già stata inviata dal middleware
-    return;
-  }
-  
-  // ================================================================
-  // GESTIONE CORS E METODI
+  // SECURITY HEADERS E CORS
   // ================================================================
   
   res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' ? 'https://mental-commons.vercel.app' : '*');
@@ -58,215 +51,234 @@ export default async function handler(req, res) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   
   if (req.method === 'OPTIONS') {
-    debug('🔑 Risposta CORS OPTIONS inviata');
-    res.status(200).end();
-    return;
+    debug('🔑 CORS OPTIONS response sent');
+    return res.status(200).end();
   }
+  
+  // ================================================================
+  // METODO VALIDATION
+  // ================================================================
   
   if (req.method !== 'POST') {
-    debug('❌ Metodo non valido:', req.method);
-    return res.status(405).json({
-      success: false,
-      message: 'Metodo non consentito. Utilizzare POST.',
-      debug: {
-        receivedMethod: req.method,
-        expectedMethod: 'POST',
-        apiVersion: '2.0.0',
-        backend: 'supabase'
-      }
-    });
+    throw new ValidationError(
+      'Metodo non consentito. Utilizzare POST.',
+      'METHOD_NOT_ALLOWED',
+      { receivedMethod: req.method, expectedMethod: 'POST' }
+    );
   }
   
   // ================================================================
-  // VALIDAZIONE INPUT
+  // RATE LIMITING CHECK
   // ================================================================
   
-  debug('🔐 Tentativo di login ricevuto - BACKEND SUPABASE');
-  debug('🔑 Body ricevuto (RAW):', JSON.stringify(req.body, null, 2));
-  
-  const { email, password } = req.body;
-  
-  // Log dettagliato dei dati ricevuti
-  debug('📦 LOGIN PAYLOAD - Dati estratti dal body:');
-  debug('  📧 Email:', email);
-  debug('  📧 Email type:', typeof email);
-  debug('  📧 Email length:', email?.length);
-  debug('  🔑 Password presente:', !!password);
-  debug('  🔑 Password type:', typeof password);
-  debug('  🔑 Password length:', password?.length);
-  
-  if (!email || !password) {
-    debug('❌ Dati mancanti nel login');
-    return res.status(400).json({
-      success: false,
-      message: 'Email e password sono richiesti',
-      debug: {
-        hasEmail: !!email,
-        hasPassword: !!password,
-        emailValue: email || 'MISSING',
-        passwordPresent: !!password,
-        apiVersion: '2.0.0',
-        backend: 'supabase'
-      }
+  const rateLimitCheck = rateLimitMiddleware('login');
+  await new Promise((resolve, reject) => {
+    rateLimitCheck(req, res, (err) => {
+      if (err) reject(err);
+      else resolve();
     });
+  });
+  
+  // ================================================================
+  // CORRELATION ID E LOGGING INIZIALE
+  // ================================================================
+  
+  correlationMiddleware(req, res, () => {});
+  
+  debug('🟣 ============================================');
+  debug('🟣 LOGIN API v3.0 - SECURITY HARDENED');
+  debug('🟣 ============================================');
+  debug('🔑 Correlation ID:', req.correlationId);
+  debug('🔑 Timestamp:', new Date().toISOString());
+  debug('🔑 Method:', req.method);
+  debug('🔑 User-Agent:', req.headers['user-agent']);
+  debug('🔑 Origin:', req.headers.origin);
+  
+  logConfiguration();
+  
+  // ================================================================
+  // INPUT VALIDATION E SANITIZZAZIONE
+  // ================================================================
+  
+  debug('🔍 Starting input validation and sanitization...');
+  
+  const validationResult = await validateAndSanitize(req.body, loginSchema);
+  
+  if (!validationResult.valid) {
+    throw new ValidationError(
+      'Dati di login non validi',
+      'LOGIN_DATA_INVALID',
+      { 
+        validationErrors: validationResult.errors,
+        correlationId: req.correlationId
+      }
+    );
   }
   
+  const { email, password } = validationResult.data;
+  
+  debug('✅ Input validation passed');
+  debug('📦 Validated data:', {
+    email: email,
+    passwordLength: password.length
+  });
+  
   // ================================================================
-  // TEST CONNESSIONE DATABASE
+  // DATABASE CONNECTION TEST
   // ================================================================
   
-  debug('🔍 Test connessione database prima del login...');
+  debug('🔍 Testing database connection...');
   const dbConnected = await testDatabaseConnection();
   
   if (!dbConnected) {
-    debug('❌ Connessione database fallita');
-    return res.status(500).json({
-      success: false,
-      message: 'Errore di connessione al database',
-      debug: {
-        error: 'database_connection_failed',
-        backend: 'supabase',
-        timestamp: new Date().toISOString()
-      }
-    });
+    throw new DatabaseError(
+      'Servizio temporaneamente non disponibile',
+      'DATABASE_CONNECTION_FAILED',
+      { correlationId: req.correlationId }
+    );
   }
+  
+  debug('✅ Database connection verified');
   
   // ================================================================
   // PROCESSO DI AUTENTICAZIONE
   // ================================================================
   
-  try {
-    // 1. Ricerca utente nel database
-    debug('📥 RICERCA UTENTE - Inizio ricerca in Supabase:');
-    debug('  🔍 Tipo di storage: Supabase PostgreSQL');
-    debug('  🔍 Fonte dati: Database persistente');
-    debug('  🔍 Account ricercato:', email);
+  debug('🔐 Starting authentication process...');
+  
+  // 1. Ricerca utente nel database
+  debug('📥 Searching user in database...');
+  const user = await findUserByEmail(email);
+  
+  if (!user) {
+    debug('❌ User not found in database');
+    // Delay artificiale per prevenire timing attacks
+    await new Promise(resolve => setTimeout(resolve, 100));
     
-    const user = await findUserByEmail(email);
+    throw new AuthenticationError(
+      'Credenziali non valide',
+      'INVALID_CREDENTIALS',
+      { 
+        reason: 'user_not_found',
+        correlationId: req.correlationId
+      }
+    );
+  }
+  
+  debug('✅ User found in database');
+  debug('📦 User info:', {
+    userId: user.id,
+    name: user.name,
+    role: user.role,
+    isActive: user.is_active,
+    lastLogin: user.last_login
+  });
+  
+  // Verifica se l'account è attivo
+  if (!user.is_active) {
+    debug('❌ User account is inactive');
+    throw new AuthenticationError(
+      'Account disabilitato',
+      'ACCOUNT_DISABLED',
+      { 
+        userId: user.id,
+        correlationId: req.correlationId
+      }
+    );
+  }
+  
+  // 2. Verifica password
+  debug('🔐 Verifying password...');
+  const isPasswordValid = await verifyPassword(password, user.password_hash);
+  
+  if (!isPasswordValid) {
+    debug('❌ Password verification failed');
+    // Delay artificiale per prevenire timing attacks
+    await new Promise(resolve => setTimeout(resolve, 100));
     
-    if (!user) {
-      debug('❌ Account non trovato nel database');
-      debug('📦 LOGIN RESULT - FALLIMENTO:');
-      debug('  📧 Email ricevuta:', email);
-      debug('  👤 Account esistente: NO');
-      debug('  🔍 Ricerca completata in database persistente');
-      
-      return res.status(401).json({
-        success: false,
-        message: 'Account non trovato. Registrati per accedere.',
-        debug: {
-          error: 'user_not_found',
-          receivedEmail: email,
-          searchCompleted: true,
-          backend: 'supabase',
-          suggestion: 'register_first'
-        }
-      });
-    }
-    
-    debug('✅ Account trovato nel database');
-    debug('  👤 User ID:', user.id);
-    debug('  👤 Nome:', user.name);
-    debug('  👤 Ruolo:', user.role);
-    debug('  👤 Attivo:', user.is_active);
-    debug('  👤 Ultimo login:', user.last_login);
-    
-    // 2. Verifica password
-    debug('🔐 Verifica password...');
-    const isPasswordValid = await verifyPassword(password, user.password_hash);
-    
-    if (!isPasswordValid) {
-      debug('❌ Password non valida');
-      debug('📦 LOGIN RESULT - FALLIMENTO:');
-      debug('  📧 Email match: SÌ');
-      debug('  🔑 Password match: NO');
-      debug('  👤 Account esistente: SÌ');
-      
-      return res.status(401).json({
-        success: false,
-        message: 'Password non corretta',
-        debug: {
-          error: 'invalid_password',
-          userExists: true,
-          emailMatch: true,
-          passwordMatch: false,
-          backend: 'supabase'
-        }
-      });
-    }
-    
-    debug('✅ Password valida');
-    
-    // 3. Genera JWT token
-    debug('🎫 Generazione token JWT...');
-    const token = generateJWT(user.id, user.email);
-    
-    // 4. Salva sessione (opzionale, non bloccante)
-    const deviceInfo = req.headers['user-agent'];
-    await saveUserSession(user.id, token, deviceInfo);
-    
-    // 5. Aggiorna ultimo login
-    await updateLastLogin(user.id);
-    
-    // ================================================================
-    // RISPOSTA DI SUCCESSO
-    // ================================================================
-    
-    debug('📦 LOGIN RESULT - SUCCESSO:');
-    debug('  📧 Email match: ESATTO');
-    debug('  🔑 Password match: ESATTO');
-    debug('  👤 Account esistente: SÌ');
-    debug('  🎫 JWT Token: GENERATO');
-    debug('  💾 Persistenza: SÌ (Supabase)');
-    debug('  🔄 Cross-device: SÌ');
-    
-    const responseData = {
-      success: true,
-      message: 'Login effettuato con successo',
+    throw new AuthenticationError(
+      'Credenziali non valide',
+      'INVALID_CREDENTIALS',
+      { 
+        reason: 'invalid_password',
+        userId: user.id,
+        correlationId: req.correlationId
+      }
+    );
+  }
+  
+  debug('✅ Password verification successful');
+  
+  // ================================================================
+  // CREAZIONE SESSIONE SICURA
+  // ================================================================
+  
+  debug('🔐 Creating secure session...');
+  
+  const sessionResult = await createSession(user.id, user.email, req);
+  
+  // Configura cookie sicuro
+  setSecureSessionCookie(res, sessionResult.token);
+  
+  debug('✅ Secure session created');
+  debug('📦 Session info:', {
+    sessionId: sessionResult.sessionId,
+    expiresAt: new Date(sessionResult.expiresAt).toISOString()
+  });
+  
+  // ================================================================
+  // AGGIORNAMENTO ULTIMO LOGIN
+  // ================================================================
+  
+  debug('📅 Updating last login timestamp...');
+  await updateLastLogin(user.id);
+  debug('✅ Last login timestamp updated');
+  
+  // ================================================================
+  // RISPOSTA DI SUCCESSO
+  // ================================================================
+  
+  const responseData = createSuccessResponse(
+    {
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role
+        surname: user.surname,
+        role: user.role,
+        lastLogin: new Date().toISOString()
       },
-      token: token,
-      debug: {
-        loginMethod: 'supabase_database',
-        accountSource: 'persistent_database',
-        timestamp: new Date().toISOString(),
-        apiVersion: '2.0.0',
-        backend: 'supabase',
-        crossDevice: true,
-        persistent: true
+      session: {
+        expiresAt: sessionResult.expiresAt
       }
-    };
-    
-    debug('🔑 Login response preparata:', JSON.stringify(responseData, null, 2));
-    res.status(200).json(responseData);
-    
-  } catch (error) {
-    // ================================================================
-    // GESTIONE ERRORI
-    // ================================================================
-    
-    error('💥 Errore durante il processo di login:', error);
-    error('💥 Stack trace:', error.stack);
-    
-    return res.status(500).json({
-      success: false,
-      message: 'Errore interno del server durante il login',
-      debug: {
-        error: error.message,
-        code: error.code || 'unknown',
-        backend: 'supabase',
-        timestamp: new Date().toISOString(),
-        apiVersion: '2.0.0'
-      }
-    });
-  }
+    },
+    'Login completato con successo',
+    {
+      correlationId: req.correlationId,
+      securityLevel: 'high',
+      authenticationMethod: 'password'
+    }
+  );
   
-  debug('🔚 Fine processo login - timestamp:', new Date().toISOString());
-  debug('🟣 ============================================');
-} 
+  // Log successo
+  logSuccess('User login completed successfully', req, {
+    userId: user.id,
+    email: user.email,
+    correlationId: req.correlationId,
+    sessionId: sessionResult.sessionId
+  });
+  
+  debug('✅ Login process completed successfully');
+  debug('📤 Sending success response');
+  
+  return res.status(200).json(responseData);
+});
+
+// ================================================================
+// EXPORT CON MIDDLEWARE DI SICUREZZA
+// ================================================================
+
+// Il gestore degli errori viene applicato automaticamente da asyncErrorHandler 

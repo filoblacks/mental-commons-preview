@@ -1,3 +1,20 @@
+// Mental Commons - Authentication Module 3.0
+// Modulo separato per gestione autenticazione - Code Splitting
+
+// Sistema di logging produzione-aware
+if (typeof window.isProduction === 'undefined') {
+  window.isProduction = (
+    location.hostname !== 'localhost' && 
+    location.hostname !== '127.0.0.1' && 
+    !location.hostname.includes('local')
+  );
+}
+
+const PRODUCTION_MODE = window.isProduction;
+const authLog = (...args) => { if (!PRODUCTION_MODE) console.log(...args); };
+const authDebug = (...args) => { if (!PRODUCTION_MODE) console.debug(...args); };
+const authError = (...args) => { console.error(...args); };
+
 // ================================================================
 // MENTAL COMMONS - SISTEMA AUTENTICAZIONE PERSISTENTE
 // ================================================================
@@ -486,4 +503,130 @@ window.PersistentAuth = {
     init: initPersistentAuth
 };
 
-        console.debug('📚 Sistema autenticazione persistente caricato'); 
+        console.debug('📚 Sistema autenticazione persistente caricato');
+
+// ========================================
+// PERSISTENT AUTH SYSTEM - MODULO SEPARATO
+// ========================================
+
+window.PersistentAuth = {
+    init() {
+        authLog('🔐 PersistentAuth modulo inizializzato');
+        this.setupTokenValidation();
+        this.setupAutoRefresh();
+    },
+
+    async validateToken(token) {
+        if (!token) return false;
+        
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const currentTime = Math.floor(Date.now() / 1000);
+            const isExpired = currentTime >= (payload.exp - 300); // 5min buffer
+            
+            if (isExpired) {
+                authDebug('⏰ Token scaduto');
+                this.clearAuth();
+                return false;
+            }
+            
+            return true;
+        } catch (e) {
+            authError('❌ Errore validazione token:', e);
+            this.clearAuth();
+            return false;
+        }
+    },
+
+    clearAuth() {
+        localStorage.removeItem('mental_commons_token');
+        localStorage.removeItem('mental_commons_user');
+        authDebug('🧹 Auth data cleared');
+    },
+
+    setupTokenValidation() {
+        // Validazione token periodica
+        setInterval(() => {
+            const token = localStorage.getItem('mental_commons_token');
+            if (token && !this.validateToken(token)) {
+                authLog('🔄 Token non valido rimosso automaticamente');
+                window.location.reload();
+            }
+        }, 300000); // Ogni 5 minuti
+    },
+
+    setupAutoRefresh() {
+        // Auto-refresh token quando necessario
+        authDebug('🔄 Auto-refresh token configurato');
+    }
+};
+
+// ========================================
+// AUTH API CALLS - MODULO SEPARATO
+// ========================================
+
+window.AuthAPI = {
+    async login(email, password) {
+        try {
+            authLog('🔐 Tentativo login per:', email);
+            
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success && result.token) {
+                localStorage.setItem('mental_commons_token', result.token);
+                localStorage.setItem('mental_commons_user', JSON.stringify(result.user));
+                authLog('✅ Login completato con successo');
+                return { success: true, user: result.user };
+            }
+            
+            return { success: false, message: result.message || 'Login fallito' };
+            
+        } catch (error) {
+            authError('❌ Errore login:', error);
+            return { success: false, message: 'Errore di connessione' };
+        }
+    },
+
+    async register(email, password, name, surname = null) {
+        try {
+            authLog('📝 Tentativo registrazione per:', email);
+            
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password, name, surname })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                authLog('✅ Registrazione completata con successo');
+                return { success: true };
+            }
+            
+            return { success: false, message: result.message || 'Registrazione fallita' };
+            
+        } catch (error) {
+            authError('❌ Errore registrazione:', error);
+            return { success: false, message: 'Errore di connessione' };
+        }
+    },
+
+    logout() {
+        window.PersistentAuth.clearAuth();
+        authLog('👋 Logout completato');
+        window.location.href = '/';
+    }
+};
+
+authLog('🔐 Auth modulo caricato'); 
