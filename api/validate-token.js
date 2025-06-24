@@ -6,9 +6,9 @@ const { log, debug, info, warn, error } = require("../logger.js");
 // Versione: 1.0.0
 // Descrizione: Endpoint per validare JWT token
 
-import { verifyJWT } from './supabase.js';
+const { verifyJWT } = require('./supabase.js');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   debug('🔐 ============================================');
   debug('🔐 MENTAL COMMONS - TOKEN VALIDATION API');
   debug('🔐 ============================================');

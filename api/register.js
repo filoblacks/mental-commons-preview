@@ -41,7 +41,7 @@ const {
   correlationMiddleware
 } = require('./error-handler.js');
 
-export default asyncErrorHandler(async function handler(req, res) {
+module.exports = asyncErrorHandler(async function handler(req, res) {
   // ================================================================
   // SECURITY HEADERS E CORS
   // ================================================================

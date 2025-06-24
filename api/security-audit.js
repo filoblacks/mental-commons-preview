@@ -14,7 +14,7 @@ const {
 } = require('./error-handler.js');
 const { debug, info, warn, error } = require('../logger.js');
 
-export default asyncErrorHandler(async function handler(req, res) {
+module.exports = asyncErrorHandler(async function handler(req, res) {
   // ================================================================
   // SECURITY HEADERS E CORS
   // ================================================================
