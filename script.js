@@ -2455,6 +2455,18 @@ function validateForm() {
     
     const isFormValid = textValid && emailValid && toneValid && checkboxValid;
     
+    debug('🧪 validateForm()', {
+        textLength: textarea.value.length,
+        textValid,
+        email: email.value,
+        emailValid,
+        tone: tone.value,
+        toneValid,
+        acceptanceChecked: checkbox.checked,
+        checkboxValid,
+        isFormValid
+    });
+    
     submitButton.disabled = !isFormValid;
     
     return isFormValid;
