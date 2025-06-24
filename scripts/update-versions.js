@@ -28,6 +28,18 @@ function updateVersionsInFile(filePath, cssVersion, jsVersion) {
             /href="\/style\.css\?v=[\w\d]+"/g,
             `href="/style.css?v=${cssVersion}"`
         );
+        content = content.replace(
+            /href="[^\"]*style-critical\.css[^\"]*"/g,
+            `href="/style-critical.css?v=${cssVersion}"`
+        );
+        content = content.replace(
+            /href="[^\"]*style-dashboard\.css[^\"]*"/g,
+            `href="/style-dashboard.css?v=${cssVersion}"`
+        );
+        content = content.replace(
+            /href="[^\"]*style-auth\.css[^\"]*"/g,
+            `href="/style-auth.css?v=${cssVersion}"`
+        );
         
         // Aggiorna JS version
         content = content.replace(

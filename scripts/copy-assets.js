@@ -40,6 +40,19 @@ function updateHTMLVersions(config) {
                     /href="[^"]*style\.css[^"]*"/g,
                     `href="/style.css?v=${config.assets.css}"`
                 );
+                // >>> NEW: aggiorno anche i CSS suddivisi (critical, dashboard, auth)
+                content = content.replace(
+                    /href="[^"]*style-critical\.css[^"]*"/g,
+                    `href="/style-critical.css?v=${config.assets.css}"`
+                );
+                content = content.replace(
+                    /href="[^"]*style-dashboard\.css[^"]*"/g,
+                    `href="/style-dashboard.css?v=${config.assets.css}"`
+                );
+                content = content.replace(
+                    /href="[^"]*style-auth\.css[^"]*"/g,
+                    `href="/style-auth.css?v=${config.assets.css}"`
+                );
                 
                 // Aggiorna JS version  
                 content = content.replace(
