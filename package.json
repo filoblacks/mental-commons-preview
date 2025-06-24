@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vercel dev",
     "dev-frontend": "python3 -m http.server 8000 --directory src/html",
-    "build": "echo 'Build completed - static files only'",
+    "build": "node scripts/copy-assets.js",
     "deploy": "npm run bump-version && npm run build && vercel --prod",
     "bump-version": "node scripts/update-versions.js bump",
     "update-versions": "node scripts/update-versions.js",
