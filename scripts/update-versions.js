@@ -46,6 +46,17 @@ function updateVersionsInFile(filePath, cssVersion, jsVersion) {
             /src="\/script\.js(\?v=[\w\d]+)?"/g,
             `src="/script.js?v=${jsVersion}"`
         );
+        // script-core.js
+        content = content.replace(
+            /src="\/script-core\.js(\?v=[\w\d]+)?"/g,
+            `src="/script-core.js?v=${jsVersion}"`
+        );
+        
+        // Fix env path
+        content = content.replace(
+            /src="\/api\/env\.js"/g,
+            `src="/api/env"`
+        );
         
         fs.writeFileSync(filePath, content, 'utf8');
         info(`✅ Aggiornato: ${filePath}`);

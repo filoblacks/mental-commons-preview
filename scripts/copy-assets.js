@@ -56,8 +56,18 @@ function updateHTMLVersions(config) {
                 
                 // Aggiorna JS version  
                 content = content.replace(
-                    /src="[^"]*script\.js[^"]*"/g,
+                    /src="[^"]*script\.js[^\"]*"/g,
                     `src="/script.js?v=${config.assets.js}"`
+                );
+                // >>> NEW: script-core.js
+                content = content.replace(
+                    /src="[^"]*script-core\.js[^\"]*"/g,
+                    `src="/script-core.js?v=${config.assets.js}"`
+                );
+                // >>> NEW: fix endpoint env path
+                content = content.replace(
+                    /src="[^"]*\/api\/env\.js"/g,
+                    `src="/api/env"`
                 );
                 
                 fs.writeFileSync(filePath, content, 'utf8');

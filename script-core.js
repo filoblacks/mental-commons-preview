@@ -12,7 +12,14 @@ if (typeof window.isProduction === 'undefined') {
   );
 }
 
-const { log, debug, info, warn, error } = window;
+// Evita conflitto con variabili globali già dichiarate in inline-script
+const {
+  log: mcLog = console.log,
+  debug: mcDebug = console.debug,
+  info: mcInfo = console.info,
+  warn: mcWarn = console.warn,
+  error: mcError = console.error,
+} = window;
 
 // Variabili globali essenziali
 let currentUser = null;
@@ -27,12 +34,12 @@ const ModuleLoader = {
     
     async load(moduleName) {
         if (this.loaded.has(moduleName)) {
-            debug(`✅ Modulo ${moduleName} già caricato`);
+            mcDebug(`✅ Modulo ${moduleName} già caricato`);
             return;
         }
         
         try {
-            debug(`🔄 Caricamento modulo ${moduleName}...`);
+            mcDebug(`🔄 Caricamento modulo ${moduleName}...`);
             
             const script = document.createElement('script');
             script.src = `/${moduleName}.js?v=${Date.now()}`;
@@ -41,11 +48,11 @@ const ModuleLoader = {
             const loadPromise = new Promise((resolve, reject) => {
                 script.onload = () => {
                     this.loaded.add(moduleName);
-                    debug(`✅ Modulo ${moduleName} caricato`);
+                    mcDebug(`✅ Modulo ${moduleName} caricato`);
                     resolve();
                 };
                 script.onerror = () => {
-                    error(`❌ Errore caricamento modulo ${moduleName}`);
+                    mcError(`❌ Errore caricamento modulo ${moduleName}`);
                     reject(new Error(`Failed to load ${moduleName}`));
                 };
             });
@@ -54,7 +61,7 @@ const ModuleLoader = {
             await loadPromise;
             
         } catch (err) {
-            error(`❌ Errore caricamento ${moduleName}:`, err);
+            mcError(`❌ Errore caricamento ${moduleName}:`, err);
             throw err;
         }
     }
@@ -65,15 +72,15 @@ const ModuleLoader = {
 // ========================================
 
 async function initializeApp() {
-    log('🚀 Inizializzazione Mental Commons Core...');
+    mcLog('🚀 Inizializzazione Mental Commons Core...');
     
     // Verifica stato auth immediato
     if (window.immediateAuthState && window.immediateAuthState.verified) {
-        log('✅ Stato auth immediato trovato');
+        mcLog('✅ Stato auth immediato trovato');
         
         if (window.immediateAuthState.isAuthenticated) {
             currentUser = window.immediateAuthState.user;
-            log('👤 Utente autenticato:', currentUser.email);
+            mcLog('👤 Utente autenticato:', currentUser.email);
         }
     }
     
@@ -91,7 +98,7 @@ async function initializeApp() {
         }
     }
     
-    log('✅ Core inizializzazione completata');
+    mcLog('✅ Core inizializzazione completata');
 }
 
 // ========================================
@@ -120,7 +127,7 @@ function setupBasicEventListeners() {
         }
     });
     
-    debug('🔗 Event listeners di base configurati');
+    mcDebug('🔗 Event listeners di base configurati');
 }
 
 function setupNavigation() {
@@ -172,7 +179,7 @@ function showScreen(screenName) {
 
 function updateNavigation(activeScreen) {
     // Update navigation state
-    debug(`🧭 Navigazione aggiornata: ${activeScreen}`);
+    mcDebug(`🧭 Navigazione aggiornata: ${activeScreen}`);
 }
 
 function scrollToForm() {
@@ -202,7 +209,7 @@ async function handleFormSubmission(event) {
         resetForm();
         
     } catch (error) {
-        error('❌ Errore invio form:', error);
+        mcError('❌ Errore invio form:', error);
         showErrorMessage('Errore durante l\'invio. Riprova.');
     } finally {
         hideLoadingState();
@@ -361,7 +368,7 @@ async function updateStatsDisplay() {
             document.getElementById('portatori-count').textContent = stats.stats.portatori_count || '–';
         }
     } catch (error) {
-        debug('⚠️ Errore caricamento statistiche:', error);
+        mcDebug('⚠️ Errore caricamento statistiche:', error);
     }
 }
 
@@ -389,4 +396,4 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(updateStatsDisplay, 30000);
 });
 
-log('✅ Mental Commons Core Script caricato'); 
+mcLog('✅ Mental Commons Core Script caricato'); 
