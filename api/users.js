@@ -5,7 +5,7 @@ const { log, debug, info, warn, error } = require("../logger.js");
 // ================================================================
 // Endpoint per recuperare tutti gli utenti dal database e aggiornare profili
 
-const { getAllUsers, updateUserProfile } = require('./supabase.js');
+const { getAllUsers, updateUserProfile } = require('../lib/supabase.js');
 
 module.exports = async function handler(req, res) {
   // Configurazione CORS

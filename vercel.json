@@ -13,18 +13,6 @@
   },
   "headers": [
     {
-      "source": "/api/ping",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=60, s-maxage=60" },
-        { "key": "Access-Control-Allow-Origin", "value": "https://mental-commons.vercel.app" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Vary", "value": "Accept-Encoding" }
-      ]
-    },
-    {
       "source": "/api/(login|register|validate-token)",
       "headers": [
         { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
@@ -111,6 +99,22 @@
     {
       "source": "/profile",
       "destination": "/profile.html"
+    },
+    {
+      "source": "/api/login",
+      "destination": "/api/auth?action=login"
+    },
+    {
+      "source": "/api/register",
+      "destination": "/api/auth?action=register"
+    },
+    {
+      "source": "/api/validate-token",
+      "destination": "/api/auth?action=validate-token"
+    },
+    {
+      "source": "/api/ucme-list",
+      "destination": "/api/ucme?action=list"
     }
   ]
 } 
