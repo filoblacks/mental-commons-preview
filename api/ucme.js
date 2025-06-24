@@ -25,7 +25,7 @@ const { debug, info, warn, error } = require("../logger.js");
 const { rateLimitMiddleware } = require('./rate-limiter.js');
 
 // Database operations
-import { 
+const { 
   saveUCMe, 
   saveAnonymousUCMe,
   getUserUCMes,
@@ -33,9 +33,9 @@ import {
   deleteUCMe,
   testDatabaseConnection,
   logConfiguration
-} from './supabase.js';
+} = require('./supabase.js');
 
-export default asyncErrorHandler(async function handler(req, res) {
+module.exports = asyncErrorHandler(async function handler(req, res) {
   // ================================================================
   // SECURITY HEADERS E CORS
   // ================================================================
