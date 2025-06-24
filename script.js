@@ -4490,9 +4490,9 @@ document.addEventListener('DOMContentLoaded', () => {
     textarea.addEventListener('input', () => {
       counter.textContent = textarea.value.length;
     });
-    console.log("✅ Contatore UCMe attivato");
+    debug("✅ Contatore UCMe attivato (quick init)");
   } else {
-    console.error("❌ Contatore UCMe non inizializzato: elementi mancanti");
+    debug("ℹ️ Contatore UCMe non presente su questa pagina - nessun errore");
   }
 });
 
@@ -5025,3 +5025,8 @@ function saveProfileChanges() {
         showMobileFriendlyAlert('Errore nel salvataggio. Riprova.');
     }
 }
+
+// Inizializzazione char counter universale direttamente al DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    setupUniversalCharCounter();
+});
