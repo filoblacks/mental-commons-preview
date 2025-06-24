@@ -1,8 +1,18 @@
 {
-  "version": "202506212003",
-  "last_updated": "2025-06-21T18:03:23.697Z",
+  "version": "202501060001",
+  "last_updated": "2025-01-06T10:00:00.000Z",
+  "sprint": "Sprint 2: Real-Time Sync & Conflict Resolution",
+  "release": "3.1.0",
   "assets": {
     "css": "202506212003",
-    "js": "202506212003"
+    "js": "202506212003",
+    "realtime": "1.0.0"
+  },
+  "features": {
+    "realtime_sync": true,
+    "background_sync_worker": true,
+    "conflict_resolution": true,
+    "cross_device_testing": true,
+    "offline_support": true
   }
 }

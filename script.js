@@ -185,6 +185,22 @@ function continueInitialization() {
     log('🚀 INIZIALIZZAZIONE CONTINUA - ANTI-FLICKER');
     log('🚀 ============================================');
     
+    // ========================================
+    // SPRINT 2: INIZIALIZZA REAL-TIME SYNC
+    // ========================================
+    log('🔄 SPRINT 2: Inizializzazione Real-Time Sync...');
+    
+    // Inizializza sistema real-time se disponibile
+    if (typeof window.RealTimeFrontend !== 'undefined') {
+        window.RealTimeFrontend.init().then(() => {
+            log('✅ Sistema Real-Time inizializzato');
+        }).catch((error) => {
+            error('❌ Errore inizializzazione Real-Time:', error);
+        });
+    } else {
+        warn('⚠️ Modulo Real-Time non disponibile - caricamento manuale necessario');
+    }
+    
     // Verifica se esiste già lo stato auth immediato
     if (window.immediateAuthState && window.immediateAuthState.verified) {
         log('✅ Stato auth immediato trovato:', window.immediateAuthState);
@@ -214,8 +230,8 @@ function continueInitialization() {
     // Mostra onboarding se necessario
     checkAndShowOnboarding();
     
-    // Carica dati esistenti 
-    loadExistingData();
+    // Carica solo i dati portatore (UCMe ora vengono caricate via API)
+    loadPortatoreData();
     
     // Controlla se siamo nella pagina dashboard e inizializzala
     log("🔍 Rilevamento pagina corrente:", {
@@ -331,13 +347,12 @@ async function loadUCMeFromBackend(userEmail) {
             return [];
         }
 
-        // API call identica per mobile e desktop
-        const response = await fetch('/api/ucmes', {
+        // API call all'endpoint unificato GET /api/ucme
+        const response = await fetch('/api/ucme', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-                'X-User-Email': userEmail
+                'Authorization': `Bearer ${token}`
             }
         });
 
@@ -362,36 +377,18 @@ async function loadUCMeFromBackend(userEmail) {
     }
 }
 
-async function mergeUCMeData(userEmail) {
+async function getUserUCMes(userEmail) {
     log('🔄 Caricamento UCMe per:', userEmail);
     
-    // PRIORITÀ: Backend sempre prima - comportamento identico mobile/desktop
+    // UNICA FONTE: Backend API
     const backendUcmes = await loadUCMeFromBackend(userEmail);
     
-    // Se abbiamo dati dal backend, usiamo quelli (fonte autorevole)
     if (backendUcmes.length > 0) {
-        log('✅ Usando UCMe dal backend:', backendUcmes.length);
+        log('✅ UCMe caricate dal backend:', backendUcmes.length);
         return backendUcmes;
     }
     
-    // Fallback: localStorage solo come ultima risorsa
-    try {
-        const localData = localStorage.getItem('mentalCommons_ucmes');
-        if (localData) {
-            const parsed = JSON.parse(localData);
-            if (Array.isArray(parsed)) {
-                const userUcmes = parsed.filter(ucme => 
-                    ucme.email === userEmail || ucme.user === userEmail
-                );
-                log('✅ Fallback localStorage:', userUcmes.length, 'UCMe');
-                return userUcmes;
-            }
-        }
-    } catch (e) {
-        log('⚠️ Errore lettura localStorage:', e.message);
-    }
-    
-    log('⚠️ Nessuna UCMe trovata');
+    log('⚠️ Nessuna UCMe trovata nel backend');
     return [];
 }
 
@@ -432,7 +429,7 @@ function initializeDashboard() {
             log('✅ Utente loggato:', currentUser.email);
             
             log('🔄 Caricamento UCMe per dashboard...');
-            const allUserUcmes = await mergeUCMeData(currentUser.email);
+            const allUserUcmes = await getUserUCMes(currentUser.email);
             
             log('📊 UCMe caricate per dashboard:', {
                 totalCount: allUserUcmes.length,
@@ -743,49 +740,19 @@ function showProfileErrorMessage() {
     }
 }
 
-function loadDashboardData(email) {
+// ❌ FUNZIONE RIMOSSA: loadDashboardData()
+// Questa funzione utilizzava ucmeData da localStorage
+// ✅ SOSTITUITA CON: getUserUCMes() che carica via API e renderizza direttamente
+
+async function loadDashboardDataFromAPI(email) {
     try {
-        log("🟢 Avvio funzione loadDashboardData");
+        log("🟢 Avvio caricamento dashboard da API");
         log('🔍 Caricamento dati dashboard per email:', email);
-        log("📦 Dati di input:", JSON.stringify({
-            email: email,
-            ucmeDataType: typeof ucmeData,
-            ucmeDataIsArray: Array.isArray(ucmeData),
-            ucmeDataLength: ucmeData?.length,
-            currentUser: currentUser
-        }, null, 2));
-        log('📊 ucmeData completo:', ucmeData);
         
-        // Verifica che ucmeData sia un array valido
-        if (!Array.isArray(ucmeData)) {
-            error('❌ ucmeData non è un array valido:', typeof ucmeData, ucmeData);
-            return {
-                isEmpty: true,
-                ucmes: [],
-                user: currentUser
-            };
-        }
+        // Carica UCMe via API
+        const userUcmes = await getUserUCMes(email);
         
-        // Carica UCMe dell'utente
-        const userUcmes = ucmeData.filter(ucme => {
-            log('🔍 Verifica UCMe:', {
-                ucmeEmail: ucme.email,
-                targetEmail: email,
-                match: ucme.email === email
-            });
-            return ucme.email === email;
-        });
-        
-        log('✅ UCMe trovate per', email, ':', userUcmes.length);
-        
-        // Log dettagliato delle UCMe trovate
-        if (userUcmes.length > 0) {
-            log('📋 UCMe dell\'utente:', userUcmes.map(ucme => ({
-                text: ucme.text?.substring(0, 50) + '...',
-                timestamp: ucme.timestamp,
-                hasResponse: !!ucme.response
-            })));
-        }
+        log('✅ UCMe caricate da API:', userUcmes.length);
         
         // Se non ci sono UCMe, restituisce struttura vuota
         if (userUcmes.length === 0) {
@@ -797,31 +764,24 @@ function loadDashboardData(email) {
             };
         }
         
-        // Ordina UCMe per timestamp (più recenti prima)
-        log('🔄 Ordinamento UCMe per timestamp...');
-        const sortedUcmes = userUcmes.sort((a, b) => {
-            const dateA = new Date(a.timestamp || 0);
-            const dateB = new Date(b.timestamp || 0);
-            return dateB - dateA;
-        });
-        
-        log('✅ UCMe ordinate:', sortedUcmes.map(ucme => ({
-            text: ucme.text?.substring(0, 30) + '...',
-            timestamp: ucme.timestamp
+        // Le UCMe dall'API sono già ordinate per created_at DESC
+        log('✅ UCMe già ordinate dal backend:', userUcmes.map(ucme => ({
+            content: ucme.content?.substring(0, 30) + '...',
+            created_at: ucme.created_at
         })));
         
         const dashboardData = {
             isEmpty: false,
-            ucmes: sortedUcmes,
+            ucmes: userUcmes,
             user: currentUser,
             stats: {
-                total: sortedUcmes.length,
-                withResponse: sortedUcmes.filter(ucme => ucme.response).length,
-                pending: sortedUcmes.filter(ucme => !ucme.response).length
+                total: userUcmes.length,
+                withResponse: userUcmes.filter(ucme => ucme.status === 'risposto').length,
+                pending: userUcmes.filter(ucme => ucme.status === 'attesa').length
             }
         };
         
-        log('✅ Dati dashboard preparati:', {
+        log('✅ Dati dashboard preparati da API:', {
             isEmpty: dashboardData.isEmpty,
             ucmesCount: dashboardData.ucmes.length,
             stats: dashboardData.stats
@@ -830,9 +790,13 @@ function loadDashboardData(email) {
         return dashboardData;
         
     } catch (error) {
-        error('❌ Errore nel caricamento dati dashboard:', error);
+        error('❌ Errore nel caricamento dati dashboard da API:', error);
         error('Stack trace:', error.stack);
-        return null;
+        return {
+            isEmpty: true,
+            ucmes: [],
+            user: currentUser
+        };
     }
 }
 
@@ -1747,43 +1711,14 @@ function createHistoryItem(ucme, index) {
 // GESTIONE DATI
 // ========================================
 
-function loadExistingData() {
-    log('🟣 FASE 4 DEBUG - VERIFICA STORAGE');
-    log('📊 Caricamento dati esistenti...');
+// ❌ FUNZIONE RIMOSSA: loadExistingData()
+// Questa funzione caricava UCMe da localStorage come fonte autorevole
+// ✅ SOSTITUITA CON: API calls a /api/ucme (getUserUCMes)
+
+function loadPortatoreData() {
+    log('📊 Caricamento candidature Portatore...');
     
-    // 🔍 VERIFICA DOVE VENGONO SALVATI I DATI
-    log('🔍 VERIFICA STORAGE - Fonti di dati:');
-    log('  📁 localStorage: disponibile');
-    log('  📁 File JSON: statici dal build');
-    log('  🗄️ Database: NON CONNESSO');
-    log('  ☁️ API Vercel: NON persistente (solo log)');
-    
-    // Carica UCMe dal localStorage
-    const savedUcmes = localStorage.getItem('mentalCommons_ucmes');
-    if (savedUcmes) {
-        try {
-            ucmeData = JSON.parse(savedUcmes);
-            log(`✅ Caricate ${ucmeData.length} UCMe dal localStorage`);
-            log('📦 Storage attuale - localStorage UCMe:', {
-                count: ucmeData.length,
-                persistent: 'Solo fino a clear browser data',
-                crossDevice: 'NO - solo questo browser',
-                sample: ucmeData.slice(0, 2).map(u => ({ 
-                    email: u.email, 
-                    timestamp: u.timestamp,
-                    text: u.text?.substring(0, 30) + '...' 
-                }))
-            });
-        } catch (error) {
-            error('Errore nel caricamento UCMe:', error);
-            ucmeData = [];
-        }
-    } else {
-        log('📭 Nessuna UCMe trovata in localStorage');
-        log('⚠️ CONFERMA: localStorage vuoto - le UCMe salvate via API non sono qui');
-    }
-    
-    // Carica candidature Portatore dal localStorage
+    // Carica candidature Portatore dal localStorage (ancora utilizzato per i portatori)
     const savedPortatori = localStorage.getItem('mentalCommons_portatori');
     if (savedPortatori) {
         try {
@@ -1795,45 +1730,7 @@ function loadExistingData() {
         }
     } else {
         log('📭 Nessun portatore trovato in localStorage');
-    }
-    
-    // 🔍 VERIFICA PERSISTENZA REALE
-    log('🔍 VERIFICA PERSISTENZA STORAGE:');
-    log('  📱 Mobile vs Desktop: localStorage separato per device');
-    log('  🔄 Reset browser: Tutti i dati localStorage persi');
-    log('  ☁️ Vercel serverless: Nessun filesystem persistente');
-    log('  📊 UCMe inviate via API: Solo in log console (non recuperabili)');
-    
-    log('📋 Stato dati completo:', {
-        ucmes: ucmeData.length,
-        portatori: portatoreData.length,
-        storageType: 'localStorage_only',
-        persistent: false,
-        crossDevice: false
-    });
-    
-    // 🚨 EVIDENZIA PROBLEMA PERSISTENZA
-    if (ucmeData.length === 0) {
-        log('🚨 STORAGE ISSUE: Nessuna UCMe in localStorage');
-        log('🚨 POSSIBILI CAUSE:');
-        log('  1. UCMe inviate solo via API (solo log, non storage)');
-        log('  2. Browser data cleared');
-        log('  3. Device diverso da quello usato per inviare');
-        log('  4. Nessuna UCMe mai inviata');
-    }
-}
-
-function saveUcmeDataLocal(newUcme) {
-    // Aggiungi la nuova UCMe all'array
-    ucmeData.push(newUcme);
-    
-    // Salva nel localStorage
-    try {
-        localStorage.setItem('mentalCommons_ucmes', JSON.stringify(ucmeData));
-        log('UCMe salvata nel localStorage');
-    } catch (error) {
-        error('Errore nel salvataggio UCMe:', error);
-        throw new Error('Errore nel salvataggio locale');
+        portatoreData = [];
     }
 }
 
@@ -2444,11 +2341,11 @@ function deleteAccount() {
             const filteredUsers = users.filter(u => u.email !== userEmail && u.id !== currentUser.id);
             localStorage.setItem('mc-users', JSON.stringify(filteredUsers));
             
-            // Rimuovi UCMe dell'utente
-            if (Array.isArray(ucmeData)) {
-                ucmeData = ucmeData.filter(ucme => ucme.email !== userEmail);
-                localStorage.setItem('mentalCommons_ucmes', JSON.stringify(ucmeData));
-            }
+                // ❌ RIMOSSO: Eliminazione UCMe da localStorage
+    // ✅ Le UCMe vengono eliminate tramite API DELETE /api/ucme
+    
+    // TODO: Implementare chiamata API per eliminare tutte le UCMe dell'utente
+    // await deleteAllUserUCMes(userEmail);
             
             // Pulisci tutti i dati utente
             localStorage.removeItem('mental_commons_user');
@@ -2519,11 +2416,77 @@ function isValidEmail(email) {
 async function handleFormSubmission(event) {
     event.preventDefault();
     console.log('📝 ============================================');
-    console.log('📝 GESTIONE INVIO FORM UCME');
+    console.log('📝 GESTIONE INVIO FORM UCME - SPRINT 2');
     console.log('📝 ============================================');
     
     showLoadingState();
     hideAuthError();
+    
+    // ========================================
+    // SPRINT 2: REAL-TIME SYNC INTEGRATION
+    // ========================================
+    
+    // Verifica se siamo offline e il sistema real-time è attivo
+    if (window.RealTimeFrontend && window.RealTimeFrontend.initialized && 
+        !navigator.onLine && currentUser) {
+        
+        console.log('🔴 Modalità offline - gestione attraverso sistema real-time');
+        
+        try {
+            // Raccolta dati form per modalità offline
+            const formData = collectFormData();
+            
+            // Crea UCMe temporanea con ID locale
+            const tempUCMe = {
+                id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                content: formData.content,
+                title: formData.title || null,
+                user_id: currentUser.userId || currentUser.id,
+                email: currentUser.email,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                synced: false,
+                temp: true
+            };
+            
+            // Aggiungi alla coda background sync
+            if (window.RealTimeFrontend.backgroundSyncWorker) {
+                window.RealTimeFrontend.backgroundSyncWorker.addToQueue({
+                    type: 'create',
+                    data: tempUCMe
+                });
+            }
+            
+            // Salva temporaneamente in localStorage
+            const localUCMes = JSON.parse(localStorage.getItem('mc-ucmes') || '[]');
+            localUCMes.unshift(tempUCMe);
+            localStorage.setItem('mc-ucmes', JSON.stringify(localUCMes));
+            
+            hideLoadingState();
+            resetForm();
+            showSuccessMessage();
+            
+            // Aggiorna dashboard se visibile
+            if (currentScreen === 'dashboard') {
+                loadUserDashboard();
+            }
+            
+            // Mostra notifica offline
+            if (window.RealTimeFrontend.showRealTimeNotification) {
+                window.RealTimeFrontend.showRealTimeNotification(
+                    'Pensiero salvato offline - sincronizzerà automaticamente', 
+                    'info'
+                );
+            }
+            
+            console.log('✅ UCMe salvata offline con successo');
+            return;
+            
+        } catch (error) {
+            console.error('❌ Errore gestione offline:', error);
+            // Continua con il flusso normale in caso di errore
+        }
+    }
     
     try {
         // ========================================
@@ -4003,18 +3966,12 @@ function updateStickyStats() {
     let realStats = { ucme: 0, risposte: 0, portatori: 0 };
     
     try {
-        // Prova a caricare ucmeData se disponibile
-        if (typeof ucmeData !== 'undefined' && Array.isArray(ucmeData)) {
-            realStats.ucme = ucmeData.length;
-            log('✅ UCMe reali caricate:', realStats.ucme);
-        }
+        // ❌ RIMOSSO: Caricamento UCMe da localStorage
+        // ✅ Le statistiche UCMe ora vengono caricate dal backend in tempo reale
         
-        // Prova a caricare dati da localStorage come fallback
-        const localUcmes = JSON.parse(localStorage.getItem('mc-ucmes') || '[]');
-        if (Array.isArray(localUcmes) && localUcmes.length > realStats.ucme) {
-            realStats.ucme = localUcmes.length;
-            log('✅ UCMe da localStorage:', realStats.ucme);
-        }
+        // Per ora manteniamo statistiche base, ma implementeremo chiamata API
+        // per caricare il conteggio reale dal database in futuro
+        realStats.ucme = 0;
         
         // Simula risposte e portatori basandoti sui dati reali
         realStats.risposte = Math.floor(realStats.ucme * 0.7); // 70% delle UCMe ha ricevuto risposta
@@ -4305,7 +4262,8 @@ function resetAllData() {
     try {
         localStorage.removeItem('mc-users');
         localStorage.removeItem('mc-user');
-        localStorage.removeItem('mc-ucme-data');
+        // ❌ RIMOSSO: localStorage.removeItem('mc-ucme-data');
+    // ✅ Le UCMe non sono più in localStorage
         localStorage.removeItem('mc-onboarded');
         localStorage.removeItem('mc-email');
         

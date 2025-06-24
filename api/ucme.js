@@ -1,8 +1,8 @@
 // ================================================================
-// MENTAL COMMONS - UCME API SECURITY HARDENED
+// MENTAL COMMONS - UNIFIED UCME API
 // ================================================================
-// Versione: 3.0.0 - SECURITY HARDENING SPRINT 2 - COMPLETO
-// Descrizione: API UCMe con sicurezza avanzata integrata
+// Versione: 4.0.0 - UNIFIED RESTful ENDPOINT
+// Descrizione: Endpoint unificato per tutte le operazioni UCMe (GET, POST, PUT, DELETE)
 
 // ================================================================
 // SECURITY IMPORTS
@@ -28,6 +28,9 @@ const { rateLimitMiddleware } = require('./rate-limiter.js');
 import { 
   saveUCMe, 
   saveAnonymousUCMe,
+  getUserUCMes,
+  updateUCMe,
+  deleteUCMe,
   testDatabaseConnection,
   logConfiguration
 } from './supabase.js';
@@ -38,8 +41,8 @@ export default asyncErrorHandler(async function handler(req, res) {
   // ================================================================
   
   res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' ? 'https://mental-commons.vercel.app' : '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-User-Email');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
@@ -51,16 +54,21 @@ export default asyncErrorHandler(async function handler(req, res) {
   }
   
   // ================================================================
-  // METODO VALIDATION
+  // CORRELATION ID E LOGGING INIZIALE
   // ================================================================
   
-  if (req.method !== 'POST') {
-    throw new ValidationError(
-      'Metodo non consentito. Utilizzare POST.',
-      'METHOD_NOT_ALLOWED',
-      { receivedMethod: req.method, expectedMethod: 'POST' }
-    );
-  }
+  correlationMiddleware(req, res, () => {});
+  
+  debug('🟣 ============================================');
+  debug('🟣 UNIFIED UCME API v4.0');
+  debug('🟣 ============================================');
+  debug('📝 Correlation ID:', req.correlationId);
+  debug('📝 Timestamp:', new Date().toISOString());
+  debug('📝 Method:', req.method);
+  debug('📝 User-Agent:', req.headers['user-agent']);
+  debug('📝 Origin:', req.headers.origin);
+  
+  logConfiguration();
   
   // ================================================================
   // RATE LIMITING CHECK
@@ -75,21 +83,104 @@ export default asyncErrorHandler(async function handler(req, res) {
   });
   
   // ================================================================
-  // CORRELATION ID E LOGGING INIZIALE
+  // DATABASE CONNECTION TEST
   // ================================================================
   
-  correlationMiddleware(req, res, () => {});
+  debug('🔍 Testing database connection...');
+  const dbConnected = await testDatabaseConnection();
   
-  debug('🟣 ============================================');
-  debug('🟣 UCME API v3.0 - SECURITY HARDENED');
-  debug('🟣 ============================================');
-  debug('📝 Correlation ID:', req.correlationId);
-  debug('📝 Timestamp:', new Date().toISOString());
-  debug('📝 Method:', req.method);
-  debug('📝 User-Agent:', req.headers['user-agent']);
-  debug('📝 Origin:', req.headers.origin);
+  if (!dbConnected) {
+    throw new DatabaseError(
+      'Servizio temporaneamente non disponibile',
+      'DATABASE_CONNECTION_FAILED',
+      { correlationId: req.correlationId }
+    );
+  }
   
-  logConfiguration();
+  debug('✅ Database connection verified');
+  
+  // ================================================================
+  // ROUTING BASATO SU METODO HTTP
+  // ================================================================
+  
+  switch (req.method) {
+    case 'GET':
+      return handleGetUCMes(req, res);
+    case 'POST':
+      return handleCreateUCMe(req, res);
+    case 'PUT':
+      return handleUpdateUCMe(req, res);
+    case 'DELETE':
+      return handleDeleteUCMe(req, res);
+    default:
+      throw new ValidationError(
+        'Metodo HTTP non supportato',
+        'METHOD_NOT_ALLOWED',
+        { receivedMethod: req.method, supportedMethods: ['GET', 'POST', 'PUT', 'DELETE'] }
+      );
+  }
+});
+
+// ================================================================
+// HANDLER GET - RECUPERA UCME
+// ================================================================
+
+async function handleGetUCMes(req, res) {
+  debug('📥 GET UCMes request');
+  
+  // Autenticazione richiesta per GET
+  await new Promise((resolve, reject) => {
+    requireAuthentication()(req, res, (err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+  
+  const userId = req.user.userId;
+  const userEmail = req.user.email;
+  
+  debug('✅ User authenticated for GET:', { userId, email: userEmail });
+  
+  try {
+    const ucmes = await getUserUCMes(userId);
+    
+    debug('✅ UCMes retrieved:', ucmes?.length || 0);
+    
+    const responseData = createSuccessResponse(
+      ucmes || [],
+      `Trovate ${ucmes?.length || 0} UCMe per l'utente`,
+      {
+        correlationId: req.correlationId,
+        count: ucmes?.length || 0,
+        userEmail,
+        timestamp: new Date().toISOString()
+      }
+    );
+    
+    logSuccess('UCMes retrieved successfully', req, {
+      userId,
+      email: userEmail,
+      count: ucmes?.length || 0,
+      correlationId: req.correlationId
+    });
+    
+    return res.status(200).json(responseData);
+    
+  } catch (err) {
+    throw new DatabaseError(
+      'Errore nel caricamento UCMe',
+      'UCME_FETCH_FAILED',
+      { userId, correlationId: req.correlationId, originalError: err.message }
+    );
+  }
+}
+
+// ================================================================
+// HANDLER POST - CREA UCME
+// ================================================================
+
+async function handleCreateUCMe(req, res) {
+  debug('📝 POST UCMe request');
   
   // ================================================================
   // INPUT VALIDATION E SANITIZZAZIONE
@@ -120,23 +211,6 @@ export default asyncErrorHandler(async function handler(req, res) {
     isAnonymous: anonymous,
     hasEmail: !!email
   });
-  
-  // ================================================================
-  // DATABASE CONNECTION TEST
-  // ================================================================
-  
-  debug('🔍 Testing database connection...');
-  const dbConnected = await testDatabaseConnection();
-  
-  if (!dbConnected) {
-    throw new DatabaseError(
-      'Servizio temporaneamente non disponibile',
-      'DATABASE_CONNECTION_FAILED',
-      { correlationId: req.correlationId }
-    );
-  }
-  
-  debug('✅ Database connection verified');
   
   // ================================================================
   // GESTIONE AUTENTICAZIONE / ANONIMO
@@ -257,10 +331,140 @@ export default asyncErrorHandler(async function handler(req, res) {
   debug('📤 Sending success response');
   
   return res.status(201).json(responseData);
-});
+}
 
 // ================================================================
-// EXPORT CON MIDDLEWARE DI SICUREZZA
+// HANDLER PUT - AGGIORNA UCME
 // ================================================================
 
-// Il gestore degli errori viene applicato automaticamente da asyncErrorHandler 
+async function handleUpdateUCMe(req, res) {
+  debug('🔄 PUT UCMe request');
+  
+  // Autenticazione richiesta per PUT
+  await new Promise((resolve, reject) => {
+    requireAuthentication()(req, res, (err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+  
+  const userId = req.user.userId;
+  const userEmail = req.user.email;
+  const ucmeId = req.query.id || req.body.id;
+  
+  if (!ucmeId) {
+    throw new ValidationError(
+      'ID UCMe richiesto per l\'aggiornamento',
+      'UCME_ID_REQUIRED',
+      { correlationId: req.correlationId }
+    );
+  }
+  
+  debug('✅ User authenticated for PUT:', { userId, email: userEmail, ucmeId });
+  
+  try {
+    const updatedUCMe = await updateUCMe(ucmeId, userId, req.body);
+    
+    if (!updatedUCMe) {
+      throw new DatabaseError(
+        'UCMe non trovata o non autorizzato',
+        'UCME_NOT_FOUND_OR_UNAUTHORIZED',
+        { ucmeId, userId, correlationId: req.correlationId }
+      );
+    }
+    
+    const responseData = createSuccessResponse(
+      { ucme: updatedUCMe },
+      'UCMe aggiornata con successo',
+      {
+        correlationId: req.correlationId,
+        ucmeId: updatedUCMe.id,
+        timestamp: new Date().toISOString()
+      }
+    );
+    
+    logSuccess('UCMe updated successfully', req, {
+      ucmeId: updatedUCMe.id,
+      userId,
+      email: userEmail,
+      correlationId: req.correlationId
+    });
+    
+    return res.status(200).json(responseData);
+    
+  } catch (err) {
+    throw new DatabaseError(
+      'Errore nell\'aggiornamento UCMe',
+      'UCME_UPDATE_FAILED',
+      { ucmeId, userId, correlationId: req.correlationId, originalError: err.message }
+    );
+  }
+}
+
+// ================================================================
+// HANDLER DELETE - ELIMINA UCME
+// ================================================================
+
+async function handleDeleteUCMe(req, res) {
+  debug('🗑️ DELETE UCMe request');
+  
+  // Autenticazione richiesta per DELETE
+  await new Promise((resolve, reject) => {
+    requireAuthentication()(req, res, (err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+  
+  const userId = req.user.userId;
+  const userEmail = req.user.email;
+  const ucmeId = req.query.id || req.body.id;
+  
+  if (!ucmeId) {
+    throw new ValidationError(
+      'ID UCMe richiesto per l\'eliminazione',
+      'UCME_ID_REQUIRED',
+      { correlationId: req.correlationId }
+    );
+  }
+  
+  debug('✅ User authenticated for DELETE:', { userId, email: userEmail, ucmeId });
+  
+  try {
+    const deleted = await deleteUCMe(ucmeId, userId);
+    
+    if (!deleted) {
+      throw new DatabaseError(
+        'UCMe non trovata o non autorizzato',
+        'UCME_NOT_FOUND_OR_UNAUTHORIZED',
+        { ucmeId, userId, correlationId: req.correlationId }
+      );
+    }
+    
+    const responseData = createSuccessResponse(
+      { ucmeId },
+      'UCMe eliminata con successo',
+      {
+        correlationId: req.correlationId,
+        ucmeId,
+        timestamp: new Date().toISOString()
+      }
+    );
+    
+    logSuccess('UCMe deleted successfully', req, {
+      ucmeId,
+      userId,
+      email: userEmail,
+      correlationId: req.correlationId
+    });
+    
+    return res.status(200).json(responseData);
+    
+  } catch (err) {
+    throw new DatabaseError(
+      'Errore nell\'eliminazione UCMe',
+      'UCME_DELETE_FAILED',
+      { ucmeId, userId, correlationId: req.correlationId, originalError: err.message }
+    );
+  }
+} 

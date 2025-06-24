@@ -26,18 +26,18 @@ window.DashboardModule = {
         try {
             dashLog('📊 Caricamento dati utente dashboard...');
             
-            const response = await fetch('/api/ucmes', {
-                method: 'POST',
+            const response = await fetch('/api/ucme', {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('mental_commons_token')}`
-                },
-                body: JSON.stringify({ action: 'getUserUCMes', email })
+                }
             });
             
             const result = await response.json();
             
-            if (result.success) {
+            if (result.success && Array.isArray(result.data)) {
+                dashLog('✅ UCMe caricate dal backend unificato:', result.data.length);
                 this.renderDashboard(result.data);
                 return result.data;
             } else {

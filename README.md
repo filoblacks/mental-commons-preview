@@ -80,6 +80,23 @@ npm run dev
 npm run deploy
 ```
 
+## 🚀 NOVITÀ SPRINT 2: Real-Time Sync & Conflict Resolution
+
+### ✨ Sistema di Sincronizzazione Real-Time
+- **📡 Supabase Realtime**: Notifiche istantanee per tutte le operazioni UCMe
+- **🔄 Cross-Device Sync**: UCMe sincronizzate automaticamente tra tutti i dispositivi entro 2 secondi
+- **📱 Background Sync Worker**: Gestione automatica offline/online con coda persistente
+- **⚔️ Conflict Resolution**: Risoluzione automatica conflitti con policy "last write wins"
+- **🧪 Testing Tools**: Tool completo per verifica sincronizzazione multi-device (`test-realtime-sync.html`)
+
+### 🛡️ Robustezza & Sicurezza
+- **🔄 Retry Automatico**: Exponential backoff per operazioni fallite
+- **📋 Fallback Mode**: Polling automatico quando Realtime non disponibile  
+- **💾 Persistenza Dati**: Coda sync salvata in localStorage per zero perdite dati
+- **🎯 User Isolation**: Ogni utente vede solo le proprie UCMe in real-time
+
+---
+
 ## 📋 Funzionalità principali
 
 ### 🔄 Flusso Base

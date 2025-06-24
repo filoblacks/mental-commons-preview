@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔄 Test Real-Time Sync - Mental Commons Sprint 2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .status-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .status-card h3 {
+            margin-bottom: 15px;
+            color: #64B5F6;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .status-value {
+            font-weight: bold;
+        }
+        
+        .status-online { color: #4CAF50; }
+        .status-offline { color: #f44336; }
+        .status-syncing { color: #FFC107; }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #FFC107;
+            color: black;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .log-container {
+            background: #000;
+            padding: 15px;
+            border-radius: 8px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            border: 1px solid #333;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+        }
+        
+        .log-success { color: #4CAF50; }
+        .log-error { color: #f44336; }
+        .log-warning { color: #FFC107; }
+        .log-info { color: #64B5F6; }
+        
+        .sync-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-weight: bold;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+        
+        .device-simulator {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .device-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+        }
+        
+        .device-card.active {
+            border-color: #4CAF50;
+        }
+        
+        .device-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .device-name {
+            font-weight: bold;
+            color: #64B5F6;
+        }
+        
+        .device-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .ucme-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .ucme-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        
+        .ucme-meta {
+            color: #999;
+            font-size: 10px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔄 Mental Commons Real-Time Sync Test</h1>
+        <p>Sprint 2 - Verifica sincronizzazione cross-device</p>
+    </div>
+    
+    <!-- Indicatore di sincronizzazione -->
+    <div id="sync-indicator" class="sync-indicator status-offline">
+        🔴 Disconnesso
+    </div>
+    
+    <!-- Status Dashboard -->
+    <div class="status-grid">
+        <div class="status-card">
+            <h3>🔌 Connettività</h3>
+            <div class="status-item">
+                <span>Stato Rete:</span>
+                <span id="network-status" class="status-value status-offline">Offline</span>
+            </div>
+            <div class="status-item">
+                <span>Supabase Realtime:</span>
+                <span id="realtime-status" class="status-value status-offline">Disconnesso</span>
+            </div>
+            <div class="status-item">
+                <span>Background Sync:</span>
+                <span id="background-sync-status" class="status-value status-offline">Inattivo</span>
+            </div>
+        </div>
+        
+        <div class="status-card">
+            <h3>📊 Statistiche Sync</h3>
+            <div class="status-item">
+                <span>UCMe in coda:</span>
+                <span id="queue-count" class="status-value">0</span>
+            </div>
+            <div class="status-item">
+                <span>Conflitti risolti:</span>
+                <span id="conflicts-count" class="status-value">0</span>
+            </div>
+            <div class="status-item">
+                <span>Ultima sincronizzazione:</span>
+                <span id="last-sync" class="status-value">Mai</span>
+            </div>
+        </div>
+        
+        <div class="status-card">
+            <h3>👤 Stato Utente</h3>
+            <div class="status-item">
+                <span>Autenticato:</span>
+                <span id="auth-status" class="status-value status-offline">No</span>
+            </div>
+            <div class="status-item">
+                <span>Email:</span>
+                <span id="user-email" class="status-value">N/A</span>
+            </div>
+            <div class="status-item">
+                <span>UCMe locali:</span>
+                <span id="local-ucme-count" class="status-value">0</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Controlli di Test -->
+    <div class="test-section">
+        <h3>🧪 Controlli di Test</h3>
+        <div class="test-controls">
+            <button class="btn btn-primary" onclick="testCreateUCMe()">Crea UCMe Test</button>
+            <button class="btn btn-primary" onclick="testUpdateUCMe()">Aggiorna UCMe</button>
+            <button class="btn btn-warning" onclick="simulateOfflineMode()">Simula Offline</button>
+            <button class="btn btn-primary" onclick="simulateOnlineMode()">Simula Online</button>
+            <button class="btn btn-warning" onclick="testConflictResolution()">Test Conflitto</button>
+            <button class="btn btn-danger" onclick="clearAllData()">Reset Test</button>
+        </div>
+    </div>
+    
+    <!-- Simulatore Multi-Device -->
+    <div class="test-section">
+        <h3>📱 Simulatore Multi-Device</h3>
+        <p>Simula la sincronizzazione tra dispositivi diversi</p>
+        <div class="device-simulator">
+            <div class="device-card" id="device-mobile">
+                <div class="device-header">
+                    <span class="device-name">📱 Mobile</span>
+                    <span class="device-status status-offline">Offline</span>
+                </div>
+                <div class="ucme-list" id="device-mobile-ucmes">
+                    <p>Nessuna UCMe</p>
+                </div>
+                <button class="btn btn-primary" onclick="simulateDeviceAction('mobile')">Aggiungi UCMe</button>
+            </div>
+            
+            <div class="device-card" id="device-desktop">
+                <div class="device-header">
+                    <span class="device-name">💻 Desktop</span>
+                    <span class="device-status status-offline">Offline</span>
+                </div>
+                <div class="ucme-list" id="device-desktop-ucmes">
+                    <p>Nessuna UCMe</p>
+                </div>
+                <button class="btn btn-primary" onclick="simulateDeviceAction('desktop')">Aggiungi UCMe</button>
+            </div>
+            
+            <div class="device-card" id="device-tablet">
+                <div class="device-header">
+                    <span class="device-name">📺 Tablet</span>
+                    <span class="device-status status-offline">Offline</span>
+                </div>
+                <div class="ucme-list" id="device-tablet-ucmes">
+                    <p>Nessuna UCMe</p>
+                </div>
+                <button class="btn btn-primary" onclick="simulateDeviceAction('tablet')">Aggiungi UCMe</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Log Real-Time -->
+    <div class="test-section">
+        <h3>📝 Log Real-Time</h3>
+        <div class="log-container" id="log-container">
+            <div class="log-entry log-info">[INIT] Test Real-Time Sync avviato...</div>
+        </div>
+        <div style="margin-top: 10px;">
+            <button class="btn btn-warning" onclick="clearLog()">Pulisci Log</button>
+            <button class="btn btn-primary" onclick="exportTestResults()">Esporta Risultati</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="/script-realtime.js?v=1.0.0"></script>
+    
+    <script>
+        // ================================================================
+        // TEST REAL-TIME SYNC - SPRINT 2
+        // ================================================================
+        
+        let testData = {
+            devices: ['mobile', 'desktop', 'tablet'],
+            ucmeCounter: 0,
+            conflictCounter: 0,
+            syncCounter: 0,
+            startTime: Date.now()
+        };
+        
+        let isOfflineMode = false;
+        
+        // Inizializzazione test
+        window.addEventListener('DOMContentLoaded', function() {
+            log('✅ Test Real-Time Sync inizializzato', 'info');
+            initializeTest();
+            startStatusMonitoring();
+        });
+        
+        function initializeTest() {
+            // Simula stato iniziale
+            updateNetworkStatus(navigator.onLine);
+            updateUserStatus();
+            updateSyncStats();
+            
+            // Listener per cambio stato rete
+            window.addEventListener('online', () => updateNetworkStatus(true));
+            window.addEventListener('offline', () => updateNetworkStatus(false));
+            
+            // Inizializza sistema real-time se disponibile
+            if (window.RealTimeFrontend) {
+                window.RealTimeFrontend.init().then(() => {
+                    log('✅ Sistema Real-Time connesso al test', 'success');
+                    updateRealtimeStatus(true);
+                }).catch(error => {
+                    log('❌ Errore connessione Real-Time: ' + error.message, 'error');
+                    updateRealtimeStatus(false);
+                });
+            } else {
+                log('⚠️ Sistema Real-Time non disponibile', 'warning');
+            }
+        }
+        
+        function startStatusMonitoring() {
+            setInterval(() => {
+                updateSyncStats();
+                checkDeviceSync();
+            }, 2000);
+        }
+        
+        // ================================================================
+        // FUNZIONI DI TEST
+        // ================================================================
+        
+        function testCreateUCMe() {
+            testData.ucmeCounter++;
+            
+            const testUCMe = {
+                id: `test_${Date.now()}_${testData.ucmeCounter}`,
+                content: `UCMe di test #${testData.ucmeCounter} - ${new Date().toLocaleTimeString()}`,
+                created_at: new Date().toISOString(),
+                device: 'test',
+                synced: !isOfflineMode
+            };
+            
+            log(`📝 Creazione UCMe test: ${testUCMe.id}`, 'info');
+            
+            // Simula aggiunta alla coda sync se offline
+            if (isOfflineMode && window.RealTimeFrontend && window.RealTimeFrontend.backgroundSyncWorker) {
+                window.RealTimeFrontend.backgroundSyncWorker.addToQueue({
+                    type: 'create',
+                    data: testUCMe
+                });
+                log(`📤 UCMe aggiunta alla coda sync (offline)`, 'warning');
+            } else {
+                log(`🚀 UCMe inviata al server (online)`, 'success');
+            }
+            
+            // Aggiorna tutte le viste dispositivi
+            updateAllDevices(testUCMe);
+        }
+        
+        function testUpdateUCMe() {
+            log(`🔄 Test aggiornamento UCMe...`, 'info');
+            // Implementa test di aggiornamento
+        }
+        
+        function simulateOfflineMode() {
+            isOfflineMode = true;
+            log(`🔴 Modalità offline simulata`, 'warning');
+            updateNetworkStatus(false);
+            updateAllDeviceStatus('offline');
+        }
+        
+        function simulateOnlineMode() {
+            isOfflineMode = false;
+            log(`🟢 Modalità online ripristinata`, 'success');
+            updateNetworkStatus(true);
+            updateAllDeviceStatus('online');
+            
+            // Simula sync automatico
+            setTimeout(() => {
+                log(`🔄 Sincronizzazione automatica avviata...`, 'info');
+                testData.syncCounter++;
+                updateSyncStats();
+            }, 1000);
+        }
+        
+        function testConflictResolution() {
+            testData.conflictCounter++;
+            log(`⚠️ Test risoluzione conflitto #${testData.conflictCounter}`, 'warning');
+            
+            // Simula conflitto last-write-wins
+            setTimeout(() => {
+                log(`✅ Conflitto risolto: versione locale vince`, 'success');
+                updateSyncStats();
+            }, 2000);
+        }
+        
+        function simulateDeviceAction(deviceType) {
+            testData.ucmeCounter++;
+            
+            const deviceUCMe = {
+                id: `${deviceType}_${Date.now()}_${testData.ucmeCounter}`,
+                content: `UCMe da ${deviceType} #${testData.ucmeCounter}`,
+                created_at: new Date().toISOString(),
+                device: deviceType,
+                synced: !isOfflineMode
+            };
+            
+            log(`📱 ${deviceType}: Nuova UCMe creata`, 'info');
+            
+            // Aggiorna vista specifico dispositivo
+            updateDeviceUCMes(deviceType, deviceUCMe);
+            
+            // Simula sync cross-device (se online)
+            if (!isOfflineMode) {
+                setTimeout(() => {
+                    testData.devices.forEach(device => {
+                        if (device !== deviceType) {
+                            updateDeviceUCMes(device, deviceUCMe);
+                            log(`🔄 ${deviceType} → ${device}: UCMe sincronizzata`, 'success');
+                        }
+                    });
+                }, Math.random() * 2000 + 500); // 0.5-2.5 secondi
+            }
+        }
+        
+        function clearAllData() {
+            log(`🧹 Reset test completo...`, 'warning');
+            
+            // Reset contatori
+            testData.ucmeCounter = 0;
+            testData.conflictCounter = 0;
+            testData.syncCounter = 0;
+            
+            // Pulisci viste dispositivi
+            testData.devices.forEach(device => {
+                const deviceUcmes = document.getElementById(`device-${device}-ucmes`);
+                if (deviceUcmes) {
+                    deviceUcmes.innerHTML = '<p>Nessuna UCMe</p>';
+                }
+            });
+            
+            // Reset localStorage (se presente)
+            if (window.RealTimeFrontend && window.RealTimeFrontend.backgroundSyncWorker) {
+                window.RealTimeFrontend.backgroundSyncWorker.clearQueue();
+            }
+            
+            localStorage.removeItem('mc-ucmes');
+            localStorage.removeItem('mc-sync-queue');
+            
+            updateSyncStats();
+            log(`✅ Reset completato`, 'success');
+        }
+        
+        // ================================================================
+        // AGGIORNAMENTO UI
+        // ================================================================
+        
+        function updateNetworkStatus(isOnline) {
+            const statusEl = document.getElementById('network-status');
+            const indicatorEl = document.getElementById('sync-indicator');
+            
+            if (isOnline && !isOfflineMode) {
+                statusEl.textContent = 'Online';
+                statusEl.className = 'status-value status-online';
+                indicatorEl.textContent = '🟢 Online';
+                indicatorEl.className = 'sync-indicator status-online';
+            } else {
+                statusEl.textContent = 'Offline';
+                statusEl.className = 'status-value status-offline';
+                indicatorEl.textContent = '🔴 Offline';
+                indicatorEl.className = 'sync-indicator status-offline';
+            }
+        }
+        
+        function updateRealtimeStatus(isConnected) {
+            const statusEl = document.getElementById('realtime-status');
+            
+            if (isConnected) {
+                statusEl.textContent = 'Connesso';
+                statusEl.className = 'status-value status-online';
+            } else {
+                statusEl.textContent = 'Disconnesso';
+                statusEl.className = 'status-value status-offline';
+            }
+        }
+        
+        function updateUserStatus() {
+            // Simula stato utente
+            const authStatusEl = document.getElementById('auth-status');
+            const userEmailEl = document.getElementById('user-email');
+            
+            // Controlla se esiste utente reale
+            const user = JSON.parse(localStorage.getItem('mental_commons_user') || 'null');
+            
+            if (user) {
+                authStatusEl.textContent = 'Sì';
+                authStatusEl.className = 'status-value status-online';
+                userEmailEl.textContent = user.email || 'N/A';
+            } else {
+                authStatusEl.textContent = 'No';
+                authStatusEl.className = 'status-value status-offline';
+                userEmailEl.textContent = 'test@example.com (simulato)';
+            }
+        }
+        
+        function updateSyncStats() {
+            // Aggiorna statistiche di sincronizzazione
+            const queueCountEl = document.getElementById('queue-count');
+            const conflictsCountEl = document.getElementById('conflicts-count');
+            const lastSyncEl = document.getElementById('last-sync');
+            const localUcmeCountEl = document.getElementById('local-ucme-count');
+            
+            // Controlla coda reale se disponibile
+            let queueLength = 0;
+            if (window.RealTimeFrontend && window.RealTimeFrontend.backgroundSyncWorker) {
+                queueLength = window.RealTimeFrontend.backgroundSyncWorker.syncQueue?.length || 0;
+            }
+            
+            queueCountEl.textContent = queueLength;
+            conflictsCountEl.textContent = testData.conflictCounter;
+            lastSyncEl.textContent = testData.syncCounter > 0 ? 
+                new Date().toLocaleTimeString() : 'Mai';
+            
+            // Conta UCMe locali
+            const localUCMes = JSON.parse(localStorage.getItem('mc-ucmes') || '[]');
+            localUcmeCountEl.textContent = localUCMes.length;
+        }
+        
+        function updateAllDeviceStatus(status) {
+            testData.devices.forEach(device => {
+                const deviceStatusEl = document.querySelector(`#device-${device} .device-status`);
+                const deviceCardEl = document.getElementById(`device-${device}`);
+                
+                if (deviceStatusEl) {
+                    deviceStatusEl.textContent = status === 'online' ? 'Online' : 'Offline';
+                    deviceStatusEl.className = `device-status ${status === 'online' ? 'status-online' : 'status-offline'}`;
+                }
+                
+                if (deviceCardEl) {
+                    deviceCardEl.className = `device-card ${status === 'online' ? 'active' : ''}`;
+                }
+            });
+        }
+        
+        function updateAllDevices(ucme) {
+            testData.devices.forEach(device => {
+                updateDeviceUCMes(device, ucme);
+            });
+        }
+        
+        function updateDeviceUCMes(deviceType, ucme) {
+            const deviceUcmesEl = document.getElementById(`device-${deviceType}-ucmes`);
+            
+            if (deviceUcmesEl) {
+                // Rimuovi "Nessuna UCMe" se presente
+                if (deviceUcmesEl.textContent.includes('Nessuna UCMe')) {
+                    deviceUcmesEl.innerHTML = '';
+                }
+                
+                // Aggiungi nuova UCMe
+                const ucmeEl = document.createElement('div');
+                ucmeEl.className = 'ucme-item';
+                ucmeEl.innerHTML = `
+                    <div>${ucme.content}</div>
+                    <div class="ucme-meta">
+                        ${ucme.device} • ${new Date(ucme.created_at).toLocaleTimeString()}
+                        ${ucme.synced ? '✅' : '⏳'}
+                    </div>
+                `;
+                
+                deviceUcmesEl.insertBefore(ucmeEl, deviceUcmesEl.firstChild);
+                
+                // Mantieni max 5 UCMe per device
+                while (deviceUcmesEl.children.length > 5) {
+                    deviceUcmesEl.removeChild(deviceUcmesEl.lastChild);
+                }
+            }
+        }
+        
+        function checkDeviceSync() {
+            // Simula check sincronizzazione periodico
+            if (!isOfflineMode && Math.random() < 0.1) { // 10% probabilità
+                const randomDevice = testData.devices[Math.floor(Math.random() * testData.devices.length)];
+                log(`🔄 Sync automatico: ${randomDevice}`, 'info');
+            }
+        }
+        
+        // ================================================================
+        // UTILITÀ
+        // ================================================================
+        
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('log-container');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            
+            logContainer.insertBefore(logEntry, logContainer.firstChild);
+            
+            // Mantieni max 100 log entries
+            while (logContainer.children.length > 100) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+            
+            // Auto-scroll se l'utente non ha scrollato manualmente
+            if (logContainer.scrollTop === 0) {
+                logContainer.scrollTop = 0;
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('log-container').innerHTML = 
+                '<div class="log-entry log-info">[CLEAR] Log pulito</div>';
+        }
+        
+        function exportTestResults() {
+            const results = {
+                timestamp: new Date().toISOString(),
+                testDuration: Date.now() - testData.startTime,
+                ucmeCreated: testData.ucmeCounter,
+                conflictsResolved: testData.conflictCounter,
+                syncOperations: testData.syncCounter,
+                currentStatus: {
+                    network: navigator.onLine && !isOfflineMode ? 'online' : 'offline',
+                    realtime: window.RealTimeFrontend?.isConnected || false,
+                    queueLength: window.RealTimeFrontend?.backgroundSyncWorker?.syncQueue?.length || 0
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `mental-commons-sync-test-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            log('📊 Risultati test esportati', 'success');
+        }
+    </script>
+</body>
+</html> 

@@ -515,6 +515,75 @@ async function getUserUCMes(userId) {
   }
 }
 
+// Aggiorna UCMe esistente
+async function updateUCMe(ucmeId, userId, updateData) {
+  try {
+    debug('🔄 Aggiornando UCMe:', { ucmeId, userId });
+    debug('📝 Dati aggiornamento:', updateData);
+    
+    // Crea payload di aggiornamento sicuro
+    const updatePayload = {};
+    
+    // Solo questi campi sono aggiornabili
+    if (updateData.content !== undefined) {
+      updatePayload.content = updateData.content;
+    }
+    if (updateData.title !== undefined) {
+      updatePayload.title = updateData.title;
+    }
+    if (updateData.status !== undefined) {
+      updatePayload.status = updateData.status;
+    }
+    
+    // Aggiorna solo se appartiene all'utente
+    const { data, error } = await getSupabaseClient()
+      .from('ucmes')
+      .update(updatePayload)
+      .eq('id', ucmeId)
+      .eq('user_id', userId)
+      .select()
+      .single();
+    
+    if (error) {
+      error('❌ Errore aggiornamento UCMe:', error);
+      throw error;
+    }
+    
+    debug('✅ UCMe aggiornata con successo:', data?.id);
+    return data;
+  } catch (err) {
+    error('❌ Errore aggiornamento UCMe:', err);
+    throw err;
+  }
+}
+
+// Elimina UCMe
+async function deleteUCMe(ucmeId, userId) {
+  try {
+    debug('🗑️ Eliminando UCMe:', { ucmeId, userId });
+    
+    // Elimina solo se appartiene all'utente
+    const { data, error } = await getSupabaseClient()
+      .from('ucmes')
+      .delete()
+      .eq('id', ucmeId)
+      .eq('user_id', userId)
+      .select()
+      .single();
+    
+    if (error) {
+      error('❌ Errore eliminazione UCMe:', error);
+      throw error;
+    }
+    
+    debug('✅ UCMe eliminata con successo:', data?.id);
+    return data;
+  } catch (err) {
+    error('❌ Errore eliminazione UCMe:', err);
+    throw err;
+  }
+}
+
 // ================================================================
 // OPERAZIONI DATABASE - SESSIONI
 // ================================================================
@@ -715,6 +784,8 @@ module.exports = {
   saveUCMe,
   saveAnonymousUCMe,
   getUserUCMes,
+  updateUCMe,
+  deleteUCMe,
   
   // Operazioni sessioni
   saveUserSession,
