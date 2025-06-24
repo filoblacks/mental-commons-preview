@@ -51,7 +51,7 @@ window.RealTimeFrontend = {
     rtLog('🔄 Configurazione Supabase Realtime...');
     
     // Usa le stesse variabili ambiente dal backend
-    const supabaseUrl = window.SUPABASE_URL || 'https://kvkugwywzgrcskiiqrpm.supabase.co';
+    const supabaseUrl = window.SUPABASE_URL;
     const supabaseAnonKey = window.SUPABASE_ANON_KEY;
     
     if (!supabaseAnonKey) {

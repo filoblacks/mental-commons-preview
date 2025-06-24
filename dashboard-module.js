@@ -36,7 +36,7 @@ window.DashboardModule = {
             
             dashLog('🔑 Token presente - procedo con API call...');
             
-            const response = await fetch('/api/ucme', {
+            const response = await fetch('/api/ucme-list', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -99,12 +99,21 @@ window.DashboardModule = {
 
     renderDashboard(ucmes) {
         const dashboardContent = document.querySelector('.dashboard-content');
-        if (!dashboardContent) return;
+        if (!dashboardContent) {
+            dashError('❌ Elemento dashboard-content non trovato nel DOM');
+            return;
+        }
 
+        dashLog('🎨 Renderizzazione dashboard con', ucmes?.length || 0, 'UCMe');
+        
         if (!ucmes || ucmes.length === 0) {
+            dashLog('📊 Nessuna UCMe da renderizzare - mostro dashboard vuota');
             this.renderEmptyDashboard();
             return;
         }
+
+        // FORZA VISUALIZZAZIONE
+        dashboardContent.style.display = 'block';
 
         const ucmeBlocks = ucmes.map((ucme, index) => 
             this.createDashboardUcmeBlock(ucme, index)
@@ -131,13 +140,26 @@ window.DashboardModule = {
             }, index * 100);
         });
 
+        // Nascondi il messaggio di caricamento
+        const userVerification = document.getElementById('user-verification');
+        if (userVerification) {
+            userVerification.style.display = 'none';
+            dashLog('🔄 Messaggio di caricamento nascosto');
+        }
+
         dashLog('✅ Dashboard renderizzata con', ucmes.length, 'UCMe');
     },
 
     renderEmptyDashboard() {
         const dashboardContent = document.querySelector('.dashboard-content');
-        if (!dashboardContent) return;
+        if (!dashboardContent) {
+            dashError('❌ Elemento dashboard-content non trovato per dashboard vuota');
+            return;
+        }
 
+        // FORZA VISUALIZZAZIONE ANCHE PER DASHBOARD VUOTA
+        dashboardContent.style.display = 'block';
+        
         dashboardContent.innerHTML = `
             <div class="empty-dashboard">
                 <h3>Non hai ancora condiviso pensieri</h3>
@@ -147,7 +169,14 @@ window.DashboardModule = {
             </div>
         `;
 
-        dashLog('📊 Dashboard vuota renderizzata');
+        // Nascondi il messaggio di caricamento per dashboard vuota
+        const userVerification = document.getElementById('user-verification');
+        if (userVerification) {
+            userVerification.style.display = 'none';
+            dashLog('🔄 Messaggio di caricamento nascosto per dashboard vuota');
+        }
+
+        dashLog('📊 Dashboard vuota renderizzata e forzata a display: block');
     },
 
     createDashboardUcmeBlock(ucme, index) {
@@ -170,7 +199,7 @@ window.DashboardModule = {
                 </div>
                 <div class="ucme-content">
                     <div class="ucme-text">
-                        <p>${ucme.pensiero || ucme.content}</p>
+                        <p>${ucme.pensiero || ucme.content || 'Contenuto non disponibile'}</p>
                     </div>
                     ${ucme.tono ? `<div class="ucme-meta">
                         <span class="ucme-tone">Tono: ${ucme.tono}</span>

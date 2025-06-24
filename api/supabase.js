@@ -5,17 +5,6 @@
 // Descrizione: Libreria per operazioni database Supabase
 // Fix: Convertito a CommonJS puro per compatibilità Vercel
 
-const { createClient } = require('@supabase/supabase-js');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-
-// Sistema di logging per ambiente produzione
-const { log, debug, info, warn, error } = require('../logger.js');
-
-// ================================================================
-// CONFIGURAZIONE SUPABASE
-// ================================================================
-
 // ================================================================
 // 🟣 LAZY LOADING - RISOLUZIONE PROBLEMA IMPORT/ENV
 // ================================================================
@@ -23,6 +12,13 @@ const { log, debug, info, warn, error } = require('../logger.js');
 // dopo che le variabili d'ambiente sono state caricate
 
 let supabase = null;
+
+// Import dipendenze
+const { createClient } = require('@supabase/supabase-js');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+// Sistema di logging per ambiente produzione
+const { log, debug, info, warn, error } = require('../logger.js');
 
 function getSupabaseClient() {
   if (!supabase) {

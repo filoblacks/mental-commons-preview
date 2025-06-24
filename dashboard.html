@@ -14,7 +14,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css?v=202506241729">
+    <link rel="stylesheet" href="/style.css?v=202506241759">
+    
+    <!-- Variabili ambiente pubbliche (Supabase) -->
+    <script src="/api/env.js"></script>
     
     <!-- 🚀 CONTROLLO AUTH IMMEDIATO - PREVIENE FLICKER -->
     <script>
@@ -30,6 +33,8 @@
                 !location.hostname.includes('local')
               );
             }
+            
+            // ⚡️ CONFIGURAZIONE AMBIENTE SUPABASE
             const PRODUCTION_MODE = window.isProduction;
             const log = (...args) => { if (!PRODUCTION_MODE) console.log(...args); };
             const debug = (...args) => { if (!PRODUCTION_MODE) console.debug(...args); };
@@ -162,7 +167,7 @@
                 <p>Caricamento del tuo spazio...</p>
             </div>
 
-            <div id="dashboard-content" class="dashboard-content" style="display: none;">
+            <div id="dashboard-content" class="dashboard-content">
                 <div id="ucme-blocks" class="ucme-blocks">
                     <!-- Le UCMe verranno inserite qui via JavaScript -->
                 </div>
@@ -209,7 +214,7 @@
     <script src="/script-realtime.js?v=1.0.0" defer></script>
     
     <!-- Script principale - caricamento dopo dashboard module -->
-    <script src="/script.js?v=202506241729"></script>
+    <script src="/script.js?v=202506241759"></script>
     
     <!-- 🔥 INIZIALIZZAZIONE DASHBOARD SEMPLIFICATA -->
     <script>
@@ -238,7 +243,7 @@
                             try {
                                 const token = localStorage.getItem('mental_commons_token');
                                 if (token) {
-                                    const response = await fetch('/api/ucme', {
+                                    const response = await fetch('/api/ucme-list', {
                                         method: 'GET',
                                         headers: {
                                             'Content-Type': 'application/json',

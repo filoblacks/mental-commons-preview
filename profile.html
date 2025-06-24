@@ -16,14 +16,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/style.css?v=202506172330">
     
+    <!-- Variabili ambiente pubbliche (Supabase) -->
+    <script src="/api/env.js"></script>
+    
     <!-- 🚀 CONTROLLO AUTH IMMEDIATO - PREVIENE FLICKER -->
     <script>
         (function() {
             'use strict';
             
             // Sistema di logging produzione-aware
-                    if (typeof window.isProduction === 'undefined') {
-              window.isProduction = (process.env.NODE_ENV === 'production');
+            if (typeof window.isProduction === 'undefined') {
+              window.isProduction = (
+                location.hostname !== 'localhost' &&
+                location.hostname !== '127.0.0.1' &&
+                !location.hostname.includes('local')
+              );
             }
             const PRODUCTION_MODE = window.isProduction;
             const log = (...args) => { if (!PRODUCTION_MODE) console.log(...args); };

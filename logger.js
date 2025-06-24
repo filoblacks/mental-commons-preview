@@ -6,8 +6,8 @@
 
 // Determina l'ambiente corrente
 const isProduction = () => {
-  // Per le API (Node.js/Vercel)
-  if (typeof process !== 'undefined' && process.env) {
+  // Per le API (Node.js/Vercel) - Solo server-side
+  if (typeof process !== 'undefined' && process.env && typeof window === 'undefined') {
     return process.env.NODE_ENV === 'production';
   }
   
@@ -114,7 +114,7 @@ function sanitizeLogArgs(args) {
  * Logger principale per messaggi informativi
  * Attivo solo in development
  */
-export function log(...args) {
+function log(...args) {
   if (!PRODUCTION_MODE) {
     const sanitizedArgs = sanitizeLogArgs(args);
     console.log(...sanitizedArgs);
@@ -125,7 +125,7 @@ export function log(...args) {
  * Logger per debug dettagliato
  * Attivo solo in development
  */
-export function debug(...args) {
+function debug(...args) {
   if (!PRODUCTION_MODE) {
     const sanitizedArgs = sanitizeLogArgs(args);
     console.debug(...sanitizedArgs);
@@ -136,7 +136,7 @@ export function debug(...args) {
  * Logger per informazioni generali
  * Attivo solo in development
  */
-export function info(...args) {
+function info(...args) {
   if (!PRODUCTION_MODE) {
     const sanitizedArgs = sanitizeLogArgs(args);
     console.info(...sanitizedArgs);
@@ -147,7 +147,7 @@ export function info(...args) {
  * Logger per warning
  * Attivo solo in development
  */
-export function warn(...args) {
+function warn(...args) {
   if (!PRODUCTION_MODE) {
     const sanitizedArgs = sanitizeLogArgs(args);
     console.warn(...sanitizedArgs);
@@ -159,7 +159,7 @@ export function warn(...args) {
  * SEMPRE attivo (anche in production) MA SANITIZZATO
  * Usa questo solo per errori che devono essere tracciati in produzione
  */
-export function error(...args) {
+function error(...args) {
   const sanitizedArgs = sanitizeLogArgs(args);
   console.error(...sanitizedArgs);
 }
@@ -168,7 +168,7 @@ export function error(...args) {
  * Logger per errori critici ma solo in development
  * Per errori che non vogliamo vedere in produzione
  */
-export function devError(...args) {
+function devError(...args) {
   if (!PRODUCTION_MODE) {
     const sanitizedArgs = sanitizeLogArgs(args);
     console.error(...sanitizedArgs);
@@ -178,7 +178,7 @@ export function devError(...args) {
 /**
  * Logger SICURO per production - Rimuove TUTTI i dati sensibili
  */
-export function secureLog(...args) {
+function secureLog(...args) {
   const sanitizedArgs = sanitizeLogArgs(args);
   
   if (PRODUCTION_MODE) {
@@ -196,7 +196,7 @@ export function secureLog(...args) {
 /**
  * Utility per logging condizionale
  */
-export const Logger = {
+const Logger = {
   log,
   debug,
   info,
