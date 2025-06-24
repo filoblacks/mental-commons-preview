@@ -2404,7 +2404,37 @@ function deleteAccount() {
 // ========================================
 
 function setupFormValidation() {
-    validateForm(); // Validazione iniziale
+    // Validazione iniziale e binding dinamico degli input
+    const textarea = document.getElementById('ucme-text');
+    const emailInput = document.getElementById('email');
+    const acceptance = document.getElementById('acceptance');
+    const toneSelect = document.getElementById('tone');
+
+    // Listener generico che richiama validateForm()
+    const revalidate = () => validateForm();
+
+    if (textarea) {
+        ['input', 'keyup', 'change', 'paste', 'cut'].forEach(evt => {
+            textarea.addEventListener(evt, revalidate);
+        });
+    }
+
+    if (emailInput) {
+        ['input', 'change', 'keyup'].forEach(evt => {
+            emailInput.addEventListener(evt, revalidate);
+        });
+    }
+
+    if (acceptance) {
+        acceptance.addEventListener('change', revalidate);
+    }
+
+    if (toneSelect) {
+        toneSelect.addEventListener('change', revalidate);
+    }
+
+    // Prima validazione immediata
+    validateForm();
 }
 
 function validateForm() {
