@@ -44,17 +44,19 @@
 
       if (typeof ucme_count !== 'undefined') {
         const el = document.querySelector('#ucme-count');
-        if (el) el.textContent = ucme_count;
+        if (el) el.textContent = ucme_count + 21;
       }
 
       if (typeof risposte_count !== 'undefined') {
         const el = document.querySelector('#risposte-count');
-        if (el) el.textContent = risposte_count;
+        if (el) el.textContent = risposte_count + 16;
+        const elAlt = document.querySelector('#replies-count');
+        if (elAlt) elAlt.textContent = risposte_count + 16;
       }
 
       if (typeof portatori_count !== 'undefined') {
         const el = document.querySelector('#portatori-count');
-        if (el) el.textContent = portatori_count;
+        if (el) el.textContent = portatori_count + 13;
       }
     }
 

@@ -50,14 +50,18 @@ export function updateStickyHeader(ucmes = [], users = []) {
     if (el) el.textContent = typeof value === 'number' && value >= 0 ? value : '0';
   };
 
-  // Supportiamo sia id primari che alternativi (retro-compatibilità)
-  setText('#ucme-count', ucmeCount);
-  setText('#risposte-count', repliesCount);
-  setText('#replies-count', repliesCount);
-  setText('#portatori-count', portatoriCount);
+  // Offset costanti richiesti
+  const OFFSET_UCME = 21;
+  const OFFSET_RISPOSTE = 16;
+  const OFFSET_PORTATORI = 13;
+
+  setText('#ucme-count', ucmeCount + OFFSET_UCME);
+  setText('#risposte-count', repliesCount + OFFSET_RISPOSTE);
+  setText('#replies-count', repliesCount + OFFSET_RISPOSTE);
+  setText('#portatori-count', portatoriCount + OFFSET_PORTATORI);
 
   console.log(
-    `[Sticky Stats] UCMe: ${ucmeCount}, Risposte: ${repliesCount}, Portatori: ${portatoriCount}`
+    `[Sticky Stats] (con offset) UCMe: ${ucmeCount + OFFSET_UCME}, Risposte: ${repliesCount + OFFSET_RISPOSTE}, Portatori: ${portatoriCount + OFFSET_PORTATORI}`
   );
 }
 
