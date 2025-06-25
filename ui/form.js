@@ -1,6 +1,6 @@
 import { postUCME } from '../core/api.js';
-import { getToken, getCurrentUser } from '../core/auth.js';
-import { isValidEmail, generateUniqueId, MAX_TEXT_LENGTH, MIN_TEXT_LENGTH } from '../utils/helpers.js';
+import { getToken } from '../core/auth.js';
+import { isValidEmail, MAX_TEXT_LENGTH, MIN_TEXT_LENGTH } from '../utils/helpers.js';
 import { log } from '../core/logger.js';
 
 const formId = 'ucme-form';
@@ -73,14 +73,12 @@ function collectData(form) {
     return null;
   }
 
-  const user = getCurrentUser();
-  return {
-    id: generateUniqueId(),
+  // Costruiamo il payload rispettando lo schema di validazione backend
+  const payload = {
     content,
     email,
-    tone,
-    title: null,
-    userId: user?.id ?? null,
-    timestamp: new Date().toISOString(),
+    tone, // verrà ignorato dal backend ma utile per eventuali log
   };
+
+  return payload;
 } 
