@@ -2434,8 +2434,21 @@ function setupFormValidation() {
         toneSelect.addEventListener('change', revalidate);
     }
 
+    // Pre-compila l'email se utente già loggato
+    prefillEmailIfLogged();
+
     // Prima validazione immediata
     validateForm();
+}
+
+function prefillEmailIfLogged() {
+    if (!currentUser) return;
+    const emailInput = document.getElementById('email');
+    if (emailInput && emailInput.value.trim() === '') {
+        emailInput.value = currentUser.email;
+        if (typeof validateForm === 'function') validateForm();
+        log('📧 Email precompilata automaticamente');
+    }
 }
 
 function validateForm() {
