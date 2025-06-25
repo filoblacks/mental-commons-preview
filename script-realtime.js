@@ -38,42 +38,57 @@
     // Mantieni riferimento globale per eventuali altri script
     window.supabase = supabase;
 
-    // Sottoscrizione a modifiche della tabella 'stats' che contiene i contatori aggregati
-    const channel = supabase.channel('mc_public_stats');
+    // Handler comune per aggiornare i contatori -------------------
+    function updateCounters(data = {}) {
+      const { ucme_count, risposte_count, portatori_count } = data;
 
-    channel
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'stats'
-      }, (payload) => {
-        const data = payload?.new || {};
-        if (!data) return;
+      if (typeof ucme_count !== 'undefined') {
+        const el = document.querySelector('#ucme-count');
+        if (el) el.textContent = ucme_count;
+      }
 
-        const { ucme_count, risposte_count, portatori_count } = data;
+      if (typeof risposte_count !== 'undefined') {
+        const el = document.querySelector('#risposte-count');
+        if (el) el.textContent = risposte_count;
+      }
 
-        if (typeof ucme_count !== 'undefined') {
-          const el = document.querySelector('#ucme-count');
-          if (el) el.textContent = ucme_count;
-        }
+      if (typeof portatori_count !== 'undefined') {
+        const el = document.querySelector('#portatori-count');
+        if (el) el.textContent = portatori_count;
+      }
+    }
 
-        if (typeof risposte_count !== 'undefined') {
-          const el = document.querySelector('#risposte-count');
-          if (el) el.textContent = risposte_count;
-        }
+    // Sottoscrizione a modifiche della tabella 'stats' -------------
+    if (typeof supabase.channel === 'function') {
+      // Supabase v2
+      const channel = supabase.channel('mc_public_stats');
 
-        if (typeof portatori_count !== 'undefined') {
-          const el = document.querySelector('#portatori-count');
-          if (el) el.textContent = portatori_count;
-        }
-      })
-      .subscribe((status, err) => {
-        if (err) {
-          console.error('[Realtime] Errore sottoscrizione:', err.message || err);
-        } else {
-          console.log('[Realtime] Stato canale:', status);
-        }
-      });
+      channel
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'stats'
+        }, (payload) => {
+          const data = payload?.new || {};
+          updateCounters(data);
+        })
+        .subscribe((status, err) => {
+          if (err) console.error('[Realtime] Errore sottoscrizione (v2):', err.message || err);
+          else console.log('[Realtime] Stato canale (v2):', status);
+        });
+    } else if (typeof supabase.from === 'function') {
+      // Supabase v1 fallback
+      const realtimeChannel = supabase
+        .from('stats')
+        .on('*', (payload) => {
+          const data = payload?.new || {};
+          updateCounters(data);
+        })
+        .subscribe();
+      console.log('[Realtime] Canale v1 inizializzato', realtimeChannel?.id || '');
+    } else {
+      console.warn('[Realtime] Client Supabase sconosciuto: nessun metodo channel/from disponibile.');
+    }
 
   } catch (err) {
     console.error('[Realtime] Errore inizializzazione realtime:', err.message || err);
