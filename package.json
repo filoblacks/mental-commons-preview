@@ -3,8 +3,11 @@
   "version": "3.0.0",
   "description": "Mental Commons - Piattaforma peer-to-peer per la riflessione condivisa",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "echo \"Nessuna build necessaria per l'MVP\"",
+    "dev": "vite dev",
+    "build": "vite build",
+    "lint": "eslint src ui core utils --fix",
+    "preview": "vite preview",
+    "vercel": "vercel dev",
     "start": "vercel dev",
     "test": "echo \"Tests non implementati\" && exit 0"
   },
@@ -39,5 +42,9 @@
     "type": "git",
     "url": "https://github.com/filippodelministro/mental-commons"
   },
-  "homepage": "https://mental-commons.vercel.app"
+  "homepage": "https://mental-commons.vercel.app",
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "eslint": "^8.57.0"
+  }
 }

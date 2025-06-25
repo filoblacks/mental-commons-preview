@@ -204,95 +204,13 @@
     </footer>
 
     <!-- 🚀 DASHBOARD OTTIMIZZATA - CARICAMENTO PERFORMANTE -->
-    <script src="/auth.js?v=202506172330"></script>
-    
-    <!-- Dashboard Module - Caricamento prioritario per UCMe -->
-    <script src="/dashboard-module.js?v=202506212003"></script>
+    <!-- auth.js legacy rimosso -->
     
     <!-- SPRINT 2: REAL-TIME SYNC MODULES -->
     <script src="https://unpkg.com/@supabase/supabase-js@2" defer></script>
     <script src="/script-realtime.js?v=1.0.0" defer></script>
     
-    <!-- Script principale - caricamento dopo dashboard module -->
-    <script src="/script.js?v=202506251624"></script>
-    
-    <!-- 🔥 INIZIALIZZAZIONE DASHBOARD SEMPLIFICATA -->
-    <script>
-        window.addEventListener('DOMContentLoaded', function() {
-            console.log('🔥 DOM LOADED - Inizializzazione dashboard...');
-            
-            // Verifica autenticazione immediata
-            if (window.immediateAuthState && window.immediateAuthState.isAuthenticated) {
-                console.log('✅ Utente autenticato:', window.immediateAuthState.user.email);
-                
-                // USA SEMPRE DashboardModule per la dashboard
-                if (window.DashboardModule) {
-                    setTimeout(async () => {
-                        try {
-                            await window.DashboardModule.init();
-                            console.log('📊 Caricamento UCMe via DashboardModule...');
-                            
-                            const ucmes = await window.DashboardModule.loadUserData(window.immediateAuthState.user.email);
-                            console.log('✅ Dashboard caricata:', ucmes ? ucmes.length : 0, 'UCMe');
-                            
-                        } catch (error) {
-                            console.error('❌ Errore DashboardModule:', error);
-                            
-                            // FALLBACK: Caricamento diretto senza DashboardModule
-                            console.log('🔄 Fallback: caricamento diretto...');
-                            try {
-                                const token = localStorage.getItem('mental_commons_token');
-                                if (token) {
-                                    const response = await fetch('/api/ucme-list', {
-                                        method: 'GET',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'Authorization': `Bearer ${token}`
-                                        }
-                                    });
-                                    
-                                    if (response.ok) {
-                                        const result = await response.json();
-                                        if (result.success && result.data) {
-                                            console.log('✅ Fallback riuscito:', result.data.length, 'UCMe');
-                                            // Renderizza direttamente
-                                            const container = document.querySelector('.dashboard-content');
-                                            if (container && result.data.length > 0) {
-                                                const ucmeBlocks = result.data.map((ucme, index) => `
-                                                    <div class="ucme-block">
-                                                        <div class="ucme-header">
-                                                            <div class="ucme-status">${ucme.risposta ? 'Risposta ricevuta' : 'In attesa di risposta'}</div>
-                                                            <div class="ucme-date">${new Date(ucme.created_at).toLocaleDateString('it-IT')}</div>
-                                                        </div>
-                                                        <div class="ucme-content">
-                                                            <div class="ucme-text">
-                                                                <p>${ucme.content}</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                `).join('');
-                                                
-                                                container.innerHTML = `
-                                                    <div class="ucme-blocks">${ucmeBlocks}</div>
-                                                    <div class="dashboard-actions">
-                                                        <a href="/#form" class="new-ucme-button">Condividi un nuovo pensiero</a>
-                                                    </div>
-                                                `;
-                                                container.style.display = 'block';
-                                            }
-                                        }
-                                    }
-                                }
-                            } catch (fallbackError) {
-                                console.error('❌ Anche fallback fallito:', fallbackError);
-                            }
-                        }
-                    }, 200);
-                }
-            } else {
-                console.log('❌ Nessuna autenticazione trovata');
-            }
-        });
-    </script>
+    <!-- Modulo principale per Vite (dev) -->
+    <script type="module" src="/src/main.js"></script>
 </body>
 </html> 
