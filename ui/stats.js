@@ -4,9 +4,12 @@ import { log } from '../core/logger.js';
 
 // Inizializza il caricamento delle statistiche sticky in tutte le pagine
 export async function initStats() {
+  // Impostiamo subito la baseline offset (0 + offset) per evitare flash
+  updateStickyHeader([], []);
+
   const token = getToken();
   if (!token) {
-    // L'utente non è autenticato → manteniamo il placeholder
+    // Utente non autenticato: manteniamo i valori baseline
     return;
   }
 
