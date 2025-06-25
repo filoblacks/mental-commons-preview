@@ -2074,8 +2074,8 @@ async function handleLoginSubmit(event) {
         }
         
     } catch (error) {
-        console.console.error('❌ Errore CRITICO durante login Supabase:', error);
-        console.console.error('Stack trace:', error.stack);
+        console.error('❌ Errore CRITICO durante login Supabase:', error);
+        console.error('Stack trace:', error.stack);
         
         // 🚨 NESSUN FALLBACK - SOLO SUPABASE
         log('🚨 NESSUN FALLBACK - LOGIN FALLITO');
@@ -2221,8 +2221,8 @@ async function handleRegisterSubmit(event) {
         }
         
     } catch (error) {
-        console.console.error('❌ Errore CRITICO durante registrazione Supabase:', error);
-        console.console.error('Stack trace:', error.stack);
+        console.error('❌ Errore CRITICO durante registrazione Supabase:', error);
+        console.error('Stack trace:', error.stack);
         
         // 🚨 NESSUN FALLBACK - SOLO SUPABASE
         log('🚨 NESSUN FALLBACK - REGISTRAZIONE FALLITA');
@@ -2354,7 +2354,7 @@ function exportUserData() {
         log('✅ Esportazione completata');
         
     } catch (error) {
-        console.console.error('❌ Errore durante esportazione:', error);
+        console.error('❌ Errore durante esportazione:', error);
         showMobileFriendlyAlert('❌ Errore durante l\'esportazione');
     }
 }
@@ -2404,7 +2404,7 @@ function deleteAccount() {
             }, 2000);
             
         } catch (error) {
-            console.console.error('❌ Errore durante eliminazione account:', error);
+            console.error('❌ Errore durante eliminazione account:', error);
             showMobileFriendlyAlert('❌ Errore durante l\'eliminazione dell\'account');
         }
     } else if (confirmation !== null) {
@@ -2613,7 +2613,7 @@ async function handleFormSubmission(event) {
             return;
             
         } catch (error) {
-            console.console.error('❌ Errore gestione offline:', error);
+            console.error('❌ Errore gestione offline:', error);
             // Continua con il flusso normale in caso di errore
         }
     }
@@ -2681,7 +2681,7 @@ async function handleFormSubmission(event) {
             formData = collectFormData();
             console.log('✅ Dati form raccolti con successo');
         } catch (error) {
-            console.console.error('❌ Errore durante raccolta dati form:', error.message);
+            console.error('❌ Errore durante raccolta dati form:', error.message);
             throw new Error(`Errore nella preparazione dati: ${error.message}`);
         }
         
@@ -2778,13 +2778,13 @@ async function handleFormSubmission(event) {
         });
         
     } catch (error) {
-        console.console.error('💥 ============================================');
-        console.console.error('💥 ERRORE DURANTE INVIO FORM UCME');
-        console.console.error('💥 ============================================');
-        console.console.error('💥 Messaggio:', error.message);
-        console.console.error('💥 Stack:', error.stack);
-        console.console.error('💥 Timestamp:', new Date().toISOString());
-        console.console.error('💥 ============================================');
+        console.error('💥 ============================================');
+        console.error('💥 ERRORE DURANTE INVIO FORM UCME');
+        console.error('💥 ============================================');
+        console.error('💥 Messaggio:', error.message);
+        console.error('💥 Stack:', error.stack);
+        console.error('💥 Timestamp:', new Date().toISOString());
+        console.error('💥 ============================================');
         
         showErrorMessage(error.message);
         hideLoadingState();
@@ -3231,7 +3231,7 @@ async function submitUCMeToVercel(formData) {
         
         if (!response.ok) {
             const errorData = await response.json();
-            console.console.error('❌ Errore HTTP generico:', {
+            console.error('❌ Errore HTTP generico:', {
                 status: response.status,
                 statusText: response.statusText,
                 errorData: errorData
@@ -3250,7 +3250,7 @@ async function submitUCMeToVercel(formData) {
         });
         
         if (!result.success) {
-            console.console.error('❌ Operazione fallita secondo il server:', result.message);
+            console.error('❌ Operazione fallita secondo il server:', result.message);
             throw new Error(result.message || 'Errore sconosciuto dal server');
         }
         
@@ -3266,13 +3266,13 @@ async function submitUCMeToVercel(formData) {
         return result;
         
     } catch (error) {
-        console.console.error('💥 ============================================');
-        console.console.error('💥 ERRORE CRITICO DURANTE INVIO UCME');
-        console.console.error('💥 ============================================');
-        console.console.error('💥 Messaggio:', error.message);
-        console.console.error('💥 Stack:', error.stack);
-        console.console.error('💥 Endpoint:', UCME_ENDPOINT);
-        console.console.error('💥 Form Data originali:', JSON.stringify(formData, null, 2));
+        console.error('💥 ============================================');
+        console.error('💥 ERRORE CRITICO DURANTE INVIO UCME');
+        console.error('💥 ============================================');
+        console.error('💥 Messaggio:', error.message);
+        console.error('💥 Stack:', error.stack);
+        console.error('💥 Endpoint:', UCME_ENDPOINT);
+        console.error('💥 Form Data originali:', JSON.stringify(formData, null, 2));
         
         // Sistema di export per debug come richiesto dall'utente
         const debugExport = {
@@ -3292,7 +3292,7 @@ async function submitUCMeToVercel(formData) {
         localStorage.setItem('mc-debug-export', JSON.stringify(debugExport, null, 2));
         console.log('💾 Debug export salvato in localStorage come "mc-debug-export"');
         console.log('🔧 Per esportare: copy(localStorage.getItem("mc-debug-export"))');
-        console.console.error('💥 ============================================');
+        console.error('💥 ============================================');
         
         // Re-throw con messaggi user-friendly
         if (error.message.includes('Token') || error.message.includes('Sessione')) {
@@ -3594,13 +3594,13 @@ async function submitAnonymousUCMe(formData) {
         return result;
         
     } catch (error) {
-        console.console.error('💥 ============================================');
-        console.console.error('💥 ERRORE DURANTE INVIO UCME ANONIMA');
-        console.console.error('💥 ============================================');
-        console.console.error('💥 Messaggio:', error.message);
-        console.console.error('💥 Stack:', error.stack);
-        console.console.error('💥 Timestamp:', new Date().toISOString());
-        console.console.error('💥 ============================================');
+        console.error('💥 ============================================');
+        console.error('💥 ERRORE DURANTE INVIO UCME ANONIMA');
+        console.error('💥 ============================================');
+        console.error('💥 Messaggio:', error.message);
+        console.error('💥 Stack:', error.stack);
+        console.error('💥 Timestamp:', new Date().toISOString());
+        console.error('💥 ============================================');
         
         throw error; // Rilancia l'errore per gestione upstream
     }
@@ -4954,7 +4954,7 @@ window.forceSaveProfile = function(event) {
         console.log('✅ Profilo salvato: [REDACTED]');
         
     } catch (error) {
-        console.console.error('❌ Errore nel salvataggio:', error);
+        console.error('❌ Errore nel salvataggio:', error);
         alert('❌ Errore nel salvataggio. Riprova.');
     }
 };
