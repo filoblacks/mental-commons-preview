@@ -2,6 +2,7 @@ import { initDashboard } from '../ui/dashboard.js';
 import { initProfile } from '../ui/profile.js';
 import { initForm } from '../ui/form.js';
 import { initLogin } from '../ui/login.js';
+import { initStats } from '../ui/stats.js';
 import { log } from '../core/logger.js';
 
 function domReady(cb) {
@@ -20,4 +21,7 @@ domReady(() => {
   if (path.includes('profile.html')) initProfile();
   if (path.includes('login.html')) initLogin();
   if (document.getElementById('ucme-form')) initForm();
+
+  // Statistiche sticky globali (visibili su tutte le pagine)
+  initStats();
 }); 
