@@ -19,20 +19,24 @@ function domReady(cb) {
 domReady(() => {
   log('App Mental Commons inizializzata (modulare)');
 
-  const path = window.location.pathname;
-  if (path.includes('dashboard.html')) {
-    initDashboard();
-    initPortatoreUcmeSection();
-  }
-  if (path.includes('profile.html')) {
-    initProfile();
-    initPortatoreSection();
-  }
+  const path = window.location.pathname.toLowerCase();
+  const isDashboard = path.includes('dashboard');
+  const isProfile = path.includes('profile');
+
   if (path.includes('login.html')) initLogin();
   if (document.getElementById('ucme-form')) initForm();
 
   // Statistiche sticky globali (visibili su tutte le pagine)
   initStats();
+
+  if (isDashboard) {
+    initDashboard();
+    initPortatoreUcmeSection();
+  }
+  if (isProfile) {
+    initProfile();
+    initPortatoreSection();
+  }
 
   if (path.includes('admin.html')) initAdmin();
 }); 
