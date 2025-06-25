@@ -70,6 +70,7 @@ export async function initProfile() {
   const nameEl  = document.getElementById('profile-name');
   const createdEl = document.getElementById('profile-created');
   const lastEl = document.getElementById('profile-last-login');
+  const headerEmailEl = document.getElementById('profile-header-email');
 
   if (!(emailEl && nameEl && createdEl && lastEl)) {
     log('Elementi profilo non trovati nel DOM');
@@ -89,6 +90,7 @@ export async function initProfile() {
   }
 
   // Popola UI
+  if (headerEmailEl) headerEmailEl.textContent = realUser.email;
   emailEl.textContent = realUser.email;
   nameEl.textContent = realUser.name || 'Non specificato';
   createdEl.textContent = new Date(realUser.created_at || Date.now()).toLocaleDateString('it-IT');
