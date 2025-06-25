@@ -63,9 +63,9 @@ export function updateStickyHeader(ucmes = [], users = []) {
   setText('#replies-count', repliesCount + OFFSET_RISPOSTE);
   setText('#portatori-count', portatoriCount + OFFSET_PORTATORI);
 
-  console.log(
-    `[Sticky Stats] (con offset) UCMe: ${ucmeCount + OFFSET_UCME}, Risposte: ${repliesCount + OFFSET_RISPOSTE}, Portatori: ${portatoriCount + OFFSET_PORTATORI}`
-  );
+  // console.log(
+  //   `[Sticky Stats] (con offset) UCMe: ${ucmeCount + OFFSET_UCME}, Risposte: ${repliesCount + OFFSET_RISPOSTE}, Portatori: ${portatoriCount + OFFSET_PORTATORI}`
+  // );
 }
 
 function calculateReplies(ucmes = []) {
