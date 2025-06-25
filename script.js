@@ -2047,7 +2047,7 @@ async function handleLoginSubmit(event) {
         log('  💬 Message:', result.message);
         
         if (result.success && result.user && result.token) {
-            log('✅ Login Supabase riuscito');
+            log('✅ Login riuscito' + (result.isEmergencyMode ? ' (modalità emergenza)' : ' (Supabase)'));
             
             currentUser = result.user;
             
@@ -2065,7 +2065,15 @@ async function handleLoginSubmit(event) {
             log('💾 Dati salvati in localStorage (PERSISTENTE)');
             log('🔄 Reindirizzamento a dashboard...');
             
-            window.location.href = 'dashboard.html';
+            // Mostra un messaggio se siamo in modalità emergenza
+            if (result.isEmergencyMode) {
+                showAuthError('✅ Accesso riuscito in modalità offline. Alcune funzionalità potrebbero non essere disponibili.');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+            } else {
+                window.location.href = 'dashboard.html';
+            }
             return;
         } else {
             log('❌ Login fallito - risposta Supabase non valida');
@@ -2914,6 +2922,21 @@ function generateUniqueId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
+// Genera un token locale di emergenza quando Supabase non risponde
+function generateLocalEmergencyToken(user) {
+    const tokenData = {
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        isEmergency: true,
+        generatedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 ore
+    };
+    
+    // Crea un token semplice (non crittografato per semplicità)
+    return 'emergency_' + btoa(JSON.stringify(tokenData));
+}
+
 // ========================================
 // INTEGRAZIONE VERCEL BACKEND
 // ========================================
@@ -3685,9 +3708,9 @@ function shouldAllowAutoRegistration() {
 // BACKEND CENTRALIZZATO PER UTENTI
 // ========================================
 
-async function loginWithBackend(email, password) {
+async function loginWithBackend(email, password, retryCount = 0) {
     // 🟣 FASE 3 DEBUG - VERIFICA COERENZA BACKEND
-    log('🟣 FASE 3 DEBUG - LOGIN BACKEND CHIAMATA');
+    log('🟣 FASE 3 DEBUG - LOGIN BACKEND CHIAMATA (tentativo ' + (retryCount + 1) + ')');
     
     // Determina l'URL base del backend Vercel
     const BASE_URL = window.location.origin;
@@ -3704,8 +3727,13 @@ async function loginWithBackend(email, password) {
     log('🔍 Verifica: NON ci sono più riferimenti a script.google.com');
     
     try {
-        // Fetch al nuovo endpoint Vercel
-        const response = await fetch(LOGIN_ENDPOINT, {
+        // Implementa timeout nel frontend per prevenire lunghe attese
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Timeout: La richiesta sta impiegando troppo tempo (8 secondi)')), 8000);
+        });
+
+        // Fetch al nuovo endpoint Vercel con timeout
+        const fetchPromise = fetch(LOGIN_ENDPOINT, {
             method: 'POST',
             mode: 'cors',
             cache: 'no-cache',
@@ -3714,12 +3742,18 @@ async function loginWithBackend(email, password) {
             },
             body: JSON.stringify(payload)
         });
+
+        const response = await Promise.race([fetchPromise, timeoutPromise]);
         
         log('📡 Response status:', response.status);
         log('📡 Response ok:', response.ok);
         log('📡 Response headers:', [...response.headers.entries()]);
         
         if (!response.ok) {
+            // Gestione specifica per errore 504 Gateway Timeout
+            if (response.status === 504) {
+                throw new Error('Servizio temporaneamente non disponibile. Il server sta impiegando troppo tempo a rispondere. Riprova tra qualche istante.');
+            }
             throw new Error(`HTTP ${response.status} - ${response.statusText}`);
         }
         
@@ -3730,8 +3764,46 @@ async function loginWithBackend(email, password) {
         return result;
         
     } catch (error) {
-        console.error('❌ Errore fetch principale:', error);
+        console.error('❌ Errore fetch principale (tentativo ' + (retryCount + 1) + '):', error);
         log('🟣 FASE 3 - Errore nella chiamata API Vercel:', error.message);
+        
+        // Gestione retry per timeout e errori 504
+        const isRetryableError = error.message.includes('timeout') || 
+                                error.message.includes('Timeout') ||
+                                error.message.includes('504') || 
+                                error.message.includes('Gateway Timeout');
+        
+        if (isRetryableError && retryCount < 2) {
+            log('🔄 Retry automatico per errore 504/timeout (tentativo ' + (retryCount + 2) + '/3)');
+            // Attendi 2 secondi prima del retry
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            return await loginWithBackend(email, password, retryCount + 1);
+        }
+        
+        // Gestione specifica per timeout e errori di connessione
+        if (error.message.includes('timeout') || error.message.includes('Timeout')) {
+            throw new Error('Il sistema sta impiegando troppo tempo a rispondere. Verifica la tua connessione e riprova.');
+        }
+        
+        if (error.message.includes('504') || error.message.includes('Gateway Timeout')) {
+            // Prova un login di emergenza locale se esiste l'utente
+            log('🆘 Tentativo login di emergenza locale per 504...');
+            const localUsers = JSON.parse(localStorage.getItem('mc-users') || '[]');
+            const localUser = localUsers.find(u => u.email === email);
+            
+            if (localUser) {
+                log('✅ Utente trovato nel database locale - login di emergenza riuscito');
+                return {
+                    success: true,
+                    user: localUser,
+                    token: generateLocalEmergencyToken(localUser),
+                    message: 'Login effettuato con database locale (modalità offline)',
+                    isEmergencyMode: true
+                };
+            }
+            
+            throw new Error('Servizio temporaneamente sovraccarico. Abbiamo provato più volte ma il server non risponde. Riprova tra qualche minuto.');
+        }
         
         // Log eventuali chiamate esterne sospette
         if (error.message.includes('script.google.com')) {
