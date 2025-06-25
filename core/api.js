@@ -80,4 +80,54 @@ export function postUCME(payload, token) {
     body: payload,
     token,
   });
+}
+
+// --------------------------------------------------------------
+// PORTATORE (SPRINT-4)
+// --------------------------------------------------------------
+export function getPortatoreStatus(token) {
+  return request('/api/portatore/status', { token });
+}
+
+export function registerPortatore(bio, token) {
+  return request('/api/portatore/register', {
+    method: 'POST',
+    body: { bio },
+    token,
+  });
+}
+
+export function revokePortatore(token) {
+  return request('/api/portatore/revoke', {
+    method: 'DELETE',
+    token,
+  });
+}
+
+export function getPendingUCMEs(token) {
+  return request('/api/admin/ucme/pending', { token });
+}
+
+export function assignUCMe(ucmeId, portatoreId, token) {
+  return request('/api/admin/ucme/assign', {
+    method: 'POST',
+    body: { ucme_id: ucmeId, portatore_id: portatoreId },
+    token,
+  });
+}
+
+export function getActivePortatori(token) {
+  return request('/api/admin/portatori/active', { token });
+}
+
+export function getPortatoreAssignedUCMEs(token) {
+  return request('/api/portatore/ucme', { token });
+}
+
+export function updatePortatoreUcmeStatus(ucmeId, newStatus, token) {
+  return request('/api/portatore/ucme/status', {
+    method: 'PATCH',
+    body: { ucme_id: ucmeId, new_status: newStatus },
+    token,
+  });
 } 

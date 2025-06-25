@@ -247,6 +247,30 @@
                     </div>
                 </div>
 
+                <!-- Sezione "Diventa Portatore" -->
+                <section id="portatore-section" class="portatore-section" style="margin-top: 3rem;">
+                    <h2>Diventa Portatore</h2>
+                    <p id="portatore-status-message" style="margin-bottom: 1rem; opacity: 0.85;">Caricamento stato…</p>
+
+                    <!-- Form candidatura -->
+                    <div id="portatore-form-container" style="display:none;">
+                        <div class="form-group">
+                            <label for="portatore-bio">La tua bio (max 300 caratteri)</label>
+                            <textarea id="portatore-bio" rows="4" maxlength="300" placeholder="Racconta in breve la tua motivazione e il tuo percorso…" style="width:100%;"></textarea>
+                            <small class="char-counter"><span id="bio-char-count">0</span>/300</small>
+                        </div>
+                        <button id="portatore-save-btn" class="profile-action-btn" disabled>Salva candidatura</button>
+                    </div>
+
+                    <!-- Stato attivo -->
+                    <div id="portatore-active-container" style="display:none;">
+                        <h3>La tua Bio da Portatore</h3>
+                        <p id="current-portatore-bio" style="white-space:pre-wrap; margin-bottom:1.5rem;"></p>
+                        <button id="portatore-edit-btn" class="profile-action-btn">Modifica bio</button>
+                        <button id="portatore-revoke-btn" class="profile-danger-btn" style="margin-left:0.75rem;">Revoca candidatura</button>
+                    </div>
+                </section>
+
                 <!-- Azioni Account -->
                 <div class="account-actions-section">
                     <h2>Azioni Account</h2>

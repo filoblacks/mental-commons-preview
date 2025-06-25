@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Assegna UCMe | Mental Commons</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/style.css?v=202506251624" />
+  <script src="/api/env"></script>
+</head>
+<body>
+  <header class="top-navigation-container">
+    <div class="ritual-actions">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <span>Admin</span>
+    </div>
+  </header>
+
+  <main class="container" style="padding:2rem;">
+    <h1>UCMe da assegnare</h1>
+    <table class="admin-table" style="width:100%;border-collapse:collapse; margin-bottom:3rem;">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Mittente</th>
+          <th>Data</th>
+          <th>Anteprima</th>
+          <th>Assegna</th>
+        </tr>
+      </thead>
+      <tbody id="pending-ucme-body">
+        <tr><td colspan="5">Caricamento…</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Portatori attivi</h2>
+    <table class="admin-table" style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th>ID Portatore</th>
+          <th>Nome</th>
+          <th>Email</th>
+          <th>Bio</th>
+        </tr>
+      </thead>
+      <tbody id="active-portatori-body">
+        <tr><td colspan="4">Caricamento…</td></tr>
+      </tbody>
+    </table>
+
+  </main>
+
+  <footer style="text-align:center;padding:2rem 0;">
+    © 2025 — Mental Commons
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html> 

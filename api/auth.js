@@ -74,7 +74,7 @@ async function handleLogin(req, res) {
   }
 
   const token = generateJWT(user.id, user.email);
-  return res.status(200).json({ success: true, token, user: { id: user.id, email: user.email, name: user.name } });
+  return res.status(200).json({ success: true, token, user: { id: user.id, email: user.email, name: user.name, role: user.role, is_admin: user.is_admin } });
 }
 
 async function handleRegister(req, res) {
@@ -90,7 +90,7 @@ async function handleRegister(req, res) {
   const newUser = await createUser(email, password, name, surname);
   const token = generateJWT(newUser.id, newUser.email);
 
-  return res.status(201).json({ success: true, token, user: { id: newUser.id, email: newUser.email, name: newUser.name } });
+  return res.status(201).json({ success: true, token, user: { id: newUser.id, email: newUser.email, name: newUser.name, role: newUser.role, is_admin: newUser.is_admin } });
 }
 
 async function handleValidateToken(req, res) {

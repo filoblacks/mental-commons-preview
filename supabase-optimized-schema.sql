@@ -326,4 +326,139 @@ COMMENT ON FUNCTION cleanup_old_data(INTEGER) IS
 ANALYZE users;
 ANALYZE ucmes;
 ANALYZE responses;
-ANALYZE user_sessions; 
+ANALYZE user_sessions;
+
+-- ================================================================
+-- FASE 0 – RUOLI PORTATORI & RISPOSTE (SPRINT-4)
+-- Separazione dei ruoli Depositori / Portatori e sistema risposte UCMe
+-- ================================================================
+
+-- 1️⃣  Aggiunta colonna di stato al profilo utente
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS is_portatore BOOLEAN DEFAULT FALSE;
+
+-- 2️⃣  Tabella Portatori
+CREATE TABLE IF NOT EXISTS portatori (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID UNIQUE REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    bio TEXT,
+    attivo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 2.1  Trigger aggiornamento automatico updated_at
+CREATE OR REPLACE FUNCTION trg_portatori_set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS set_updated_at_portatori ON portatori;
+CREATE TRIGGER set_updated_at_portatori
+    BEFORE UPDATE ON portatori
+    FOR EACH ROW
+    EXECUTE FUNCTION trg_portatori_set_updated_at();
+
+-- 2.2  Trigger sincronizzazione flag users.is_portatore
+CREATE OR REPLACE FUNCTION trg_sync_is_portatore_ins()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE users SET is_portatore = TRUE WHERE id = NEW.user_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION trg_sync_is_portatore_del()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE users SET is_portatore = FALSE WHERE id = OLD.user_id;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS set_is_portatore_true ON portatori;
+CREATE TRIGGER set_is_portatore_true
+    AFTER INSERT ON portatori
+    FOR EACH ROW
+    EXECUTE FUNCTION trg_sync_is_portatore_ins();
+
+DROP TRIGGER IF EXISTS set_is_portatore_false ON portatori;
+CREATE TRIGGER set_is_portatore_false
+    AFTER DELETE ON portatori
+    FOR EACH ROW
+    EXECUTE FUNCTION trg_sync_is_portatore_del();
+
+-- 3️⃣  Tabella Risposte
+CREATE TABLE IF NOT EXISTS risposte (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    ucme_id UUID REFERENCES ucmes(id) ON DELETE CASCADE,
+    portatore_id UUID REFERENCES portatori(id),
+    testo TEXT NOT NULL,
+    visibile BOOLEAN DEFAULT TRUE,
+    letto_da_utente BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 4️⃣  Row-Level Security (RLS) ------------------------------------------------
+-- Portatori
+ALTER TABLE portatori ENABLE ROW LEVEL SECURITY;
+
+-- Solo il proprietario può leggere/aggiornare/cancellare il proprio record
+CREATE POLICY portatori_select_own ON portatori
+    FOR SELECT USING (user_id = auth.uid());
+CREATE POLICY portatori_update_own ON portatori
+    FOR UPDATE USING (user_id = auth.uid());
+CREATE POLICY portatori_delete_own ON portatori
+    FOR DELETE USING (user_id = auth.uid());
+
+-- Risposte
+ALTER TABLE risposte ENABLE ROW LEVEL SECURITY;
+
+-- SELECT: portatore autore
+CREATE POLICY risposte_select_by_portatore ON risposte
+    FOR SELECT USING (
+        portatore_id IN (SELECT id FROM portatori p WHERE p.user_id = auth.uid())
+    );
+
+-- SELECT: depositore autore UCMe
+CREATE POLICY risposte_select_by_depositore ON risposte
+    FOR SELECT USING (
+        ucme_id IN (SELECT id FROM ucmes u WHERE u.user_id = auth.uid())
+    );
+
+-- INSERT / UPDATE / DELETE: solo portatore autore
+CREATE POLICY risposte_insert_by_portatore ON risposte
+    FOR INSERT WITH CHECK (
+        portatore_id IN (SELECT id FROM portatori p WHERE p.user_id = auth.uid())
+    );
+CREATE POLICY risposte_update_by_portatore ON risposte
+    FOR UPDATE USING (
+        portatore_id IN (SELECT id FROM portatori p WHERE p.user_id = auth.uid())
+    );
+CREATE POLICY risposte_delete_by_portatore ON risposte
+    FOR DELETE USING (
+        portatore_id IN (SELECT id FROM portatori p WHERE p.user_id = auth.uid())
+    );
+
+-- 5️⃣  Indici per performance --------------------------------------------------
+CREATE INDEX IF NOT EXISTS idx_risposte_ucme_created
+    ON risposte (ucme_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_risposte_portatore_created
+    ON risposte (portatore_id, created_at DESC);
+
+-- 6️⃣  Commenti di schema -------------------------------------------------------
+COMMENT ON TABLE portatori IS 'Utenti formati (Portatori) abilitati a rispondere alle UCMe';
+COMMENT ON COLUMN portatori.attivo IS 'Flag soft-delete per disattivare un Portatore';
+COMMENT ON TABLE risposte  IS 'Risposte dei Portatori alle UCMe';
+
+-- 7️⃣  Analizza nuove tabelle ---------------------------------------------------
+ANALYZE portatori;
+ANALYZE risposte;
+
+-- ================================================================
+-- Fine FASE 0
+-- ================================================================ 
