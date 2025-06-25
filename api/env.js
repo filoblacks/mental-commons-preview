@@ -8,9 +8,9 @@
 // ================================================================
 
 ;(function () {
-  // Se lo script viene caricato direttamente nel browser (es. durante lo
-  // sviluppo locale con un semplice server statico) l'oggetto `module` non è
-  // definito. In tal caso mostriamo un avviso e interrompiamo l'esecuzione.
+  // Esegui la logica server-side solo se siamo in un contesto Node
+  // (module definito e con exports). In tutti gli altri casi il file è
+  // stato caricato come asset statico: evitiamo ReferenceError e usciamo.
   if (typeof module === 'undefined' || typeof module.exports === 'undefined') {
     if (typeof console !== 'undefined') {
       console.warn('⚠️  /api/env.js è stato caricato come script client: nessuna variabile ambiente viene esposta. Assicurati di servire questo endpoint da una funzione serverless o simile.');
