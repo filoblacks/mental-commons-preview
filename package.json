@@ -4,13 +4,9 @@
   "description": "Mental Commons - Piattaforma peer-to-peer per la riflessione condivisa",
   "scripts": {
     "dev": "vercel dev",
-    "dev-frontend": "python3 -m http.server 8000 --directory src/html",
-    "build": "node scripts/copy-assets.js",
-    "deploy": "npm run bump-version && npm run build && vercel --prod",
-    "bump-version": "node scripts/update-versions.js bump",
-    "update-versions": "node scripts/update-versions.js",
-    "test": "echo \"Tests not implemented yet\" && exit 0",
-    "lint": "echo \"Linting not configured yet\" && exit 0"
+    "build": "echo \"Nessuna build necessaria per l'MVP\"",
+    "start": "vercel dev",
+    "test": "echo \"Tests non implementati\" && exit 0"
   },
   "keywords": [
     "mental-health",
