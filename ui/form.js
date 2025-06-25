@@ -1,5 +1,5 @@
 import { postUCME } from '../core/api.js';
-import { getToken } from '../core/auth.js';
+import { getToken, getCurrentUser } from '../core/auth.js';
 import { isValidEmail, MAX_TEXT_LENGTH, MIN_TEXT_LENGTH } from '../utils/helpers.js';
 import { log } from '../core/logger.js';
 
@@ -12,6 +12,7 @@ export function initForm() {
   const textarea = document.getElementById('ucme-text');
   const counter = document.getElementById(counterId);
   const submitBtn = document.getElementById('submit-button');
+  const emailInput = document.getElementById('email');
 
   textarea?.addEventListener('input', () => {
     const len = textarea.value.length;
@@ -52,6 +53,21 @@ export function initForm() {
 
   // Inizializza stato bottone alla prima apertura pagina
   validateForm();
+
+  /* Auto-precompilazione email se utente loggato */
+  try {
+    const user = getCurrentUser();
+    if (user && user.email && emailInput) {
+      emailInput.value = user.email;
+      // Forziamo una validazione iniziale in caso di prefill
+      if (typeof validateForm === 'function') {
+        validateForm();
+      }
+    }
+  } catch (err) {
+    // Non facciamo nulla: comportamento fallback se non autenticato
+    log('Prefill email non riuscito (probabile utente guest)', err?.message || err);
+  }
 }
 
 function collectData(form) {
