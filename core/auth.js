@@ -2,8 +2,8 @@
 import { login as apiLogin, register as apiRegister } from './api.js';
 import { log } from './logger.js';
 
-const STORAGE_TOKEN = 'mc_token';
-const STORAGE_USER = 'mc_user';
+const STORAGE_TOKEN = 'mental_commons_token';
+const STORAGE_USER = 'mental_commons_user';
 
 function saveAuthData(user, token) {
   localStorage.setItem(STORAGE_TOKEN, token);

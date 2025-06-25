@@ -11,11 +11,13 @@ export function initForm() {
   if (!form) return;
   const textarea = document.getElementById('ucme-text');
   const counter = document.getElementById(counterId);
+  const submitBtn = document.getElementById('submit-button');
 
   textarea?.addEventListener('input', () => {
     const len = textarea.value.length;
     counter.textContent = len;
     counter.style.color = len < MIN_TEXT_LENGTH || len > MAX_TEXT_LENGTH ? '#ff6b6b' : '#4caf50';
+    validateForm();
   });
 
   form.addEventListener('submit', async (e) => {
@@ -32,6 +34,24 @@ export function initForm() {
       alert('Errore invio pensiero');
     }
   });
+
+  function validateForm() {
+    const contentLen = textarea.value.trim().length;
+    const email = form.querySelector('#email').value.trim().toLowerCase();
+    const acceptance = form.querySelector('#acceptance').checked;
+
+    const isContentValid = contentLen >= MIN_TEXT_LENGTH && contentLen <= MAX_TEXT_LENGTH;
+    const isEmailValid = isValidEmail(email);
+    const isFormValid = isContentValid && isEmailValid && acceptance;
+
+    submitBtn.disabled = !isFormValid;
+  }
+
+  // Espone la funzione globalmente per gli handler inline definiti in HTML
+  window.validateForm = validateForm;
+
+  // Inizializza stato bottone alla prima apertura pagina
+  validateForm();
 }
 
 function collectData(form) {
