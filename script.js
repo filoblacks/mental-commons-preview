@@ -174,7 +174,7 @@ function initializeApp() {
         // 2. Poi continua con l'inizializzazione normale
         continueInitialization();
     }).catch(error => {
-        error('❌ Errore durante auto-migrazione:', error);
+        console.error('❌ Errore durante auto-migrazione:', error);
         // Continua comunque l'inizializzazione anche se la migrazione fallisce
         continueInitialization();
     });
@@ -195,7 +195,7 @@ function continueInitialization() {
         window.RealTimeFrontend.init().then(() => {
             log('✅ Sistema Real-Time inizializzato');
         }).catch((error) => {
-            error('❌ Errore inizializzazione Real-Time:', error);
+            console.error('❌ Errore inizializzazione Real-Time:', error);
         });
     } else {
         warn('⚠️ Modulo Real-Time non disponibile - caricamento manuale necessario');
@@ -372,7 +372,7 @@ async function loadUCMeFromBackend(userEmail) {
         }
 
     } catch (error) {
-        error('❌ Errore caricamento UCMe da backend:', error);
+        console.error('❌ Errore caricamento UCMe da backend:', error);
         return [];
     }
 }
@@ -403,7 +403,7 @@ function initializeDashboard() {
     
     // Verifica elementi DOM
     if (!userVerification || !dashboardContent || !noAccess) {
-        error('❌ Elementi dashboard mancanti');
+        console.error('❌ Elementi dashboard mancanti');
         return;
     }
 
@@ -456,7 +456,7 @@ function initializeDashboard() {
             log('✅ Dashboard caricata con successo');
             
         } catch (error) {
-            error('❌ Errore caricamento dashboard:', error);
+            console.error('❌ Errore caricamento dashboard:', error);
             
             // Anche in caso di errore, mostra l'UI
             userVerification.style.display = 'none';
@@ -496,7 +496,7 @@ async function initializeProfile() {
     const noAccess = document.getElementById('no-access');
     
     if (!userVerification || !profileContent || !noAccess) {
-        error('❌ Elementi profilo mancanti nel DOM:', {
+        console.error('❌ Elementi profilo mancanti nel DOM:', {
             userVerification: !!userVerification,
             profileContent: !!profileContent,
             profileHeader: !!profileHeader,
@@ -570,8 +570,8 @@ async function initializeProfile() {
             log('✅ Profilo completamente caricato e visualizzato');
             
         } catch (error) {
-            error('❌ Errore durante caricamento profilo:', error);
-            error('Stack trace:', error.stack);
+            console.error('❌ Errore durante caricamento profilo:', error);
+            console.error('Stack trace:', error.stack);
             
             // Anche in caso di errore, mostra sempre l'UI base
             userVerification.style.display = 'none';
@@ -643,7 +643,7 @@ function loadProfileData(user) {
         log("🟢 Avvio funzione loadProfileData per:", user.email);
         
         if (!user || !user.email) {
-            error('❌ Dati utente non validi per profilo:', user);
+            console.error('❌ Dati utente non validi per profilo:', user);
             return null;
         }
         
@@ -666,8 +666,8 @@ function loadProfileData(user) {
         return profileData;
         
     } catch (error) {
-        error('❌ Errore nel caricamento dati profilo:', error);
-        error('Stack trace:', error.stack);
+        console.error('❌ Errore nel caricamento dati profilo:', error);
+        console.error('Stack trace:', error.stack);
         return null;
     }
 }
@@ -696,7 +696,7 @@ function showProfileErrorMessage() {
         
         log('✅ Messaggio di errore profilo mostrato');
     } catch (error) {
-        error('❌ Errore nel mostrare il messaggio di errore profilo:', error);
+        console.error('❌ Errore nel mostrare il messaggio di errore profilo:', error);
     }
 }
 
@@ -750,8 +750,8 @@ async function loadDashboardDataFromAPI(email) {
         return dashboardData;
         
     } catch (error) {
-        error('❌ Errore nel caricamento dati dashboard da API:', error);
-        error('Stack trace:', error.stack);
+        console.error('❌ Errore nel caricamento dati dashboard da API:', error);
+        console.error('Stack trace:', error.stack);
         return {
             isEmpty: true,
             ucmes: [],
@@ -815,8 +815,8 @@ function renderDashboard(data) {
         log('✅ Dashboard renderizzata con successo');
         
     } catch (error) {
-        error('❌ Errore nel rendering dashboard:', error);
-        error('Stack trace:', error.stack);
+        console.error('❌ Errore nel rendering dashboard:', error);
+        console.error('Stack trace:', error.stack);
         
         // 🔥 FIX CRITICO: SEMPRE TENTARE DI CARICARE DATI REALI
         const ucmeBlocks = document.getElementById('ucme-blocks');
@@ -851,7 +851,7 @@ function renderDashboard(data) {
         try {
             updateProfileInfo(data.user);
         } catch (profileError) {
-            error('❌ Errore anche nell\'aggiornamento profilo:', profileError);
+            console.error('❌ Errore anche nell\'aggiornamento profilo:', profileError);
         }
         
         updateDashboardStatus('Errore nella visualizzazione del tuo spazio.');
@@ -911,13 +911,13 @@ function renderEmptyDashboard() {
         log('✅ Dashboard vuota renderizzata');
         
     } catch (error) {
-        error('❌ Errore nel rendering dashboard vuota:', error);
+        console.error('❌ Errore nel rendering dashboard vuota:', error);
         
         // Fallback per le informazioni profilo
         try {
             updateProfileInfo(currentUser);
         } catch (profileError) {
-            error('❌ Errore anche nell\'aggiornamento profilo:', profileError);
+            console.error('❌ Errore anche nell\'aggiornamento profilo:', profileError);
         }
         
         // 🔥 FIX CRITICO: SEMPRE CARICARE DATI REALI, MAI PLACEHOLDER
@@ -961,7 +961,7 @@ function renderUcmeBlocks(ucmes) {
         
         const container = document.getElementById('ucme-blocks');
         if (!container) {
-            error('❌ Container ucme-blocks non trovato nel DOM');
+            console.error('❌ Container ucme-blocks non trovato nel DOM');
             return;
         }
         
@@ -1005,14 +1005,14 @@ function renderUcmeBlocks(ucmes) {
                 const ucmeBlock = createDashboardUcmeBlock(ucme, index);
                 container.appendChild(ucmeBlock);
             } catch (blockError) {
-                error(`❌ Errore nella creazione blocco UCMe ${index + 1}:`, blockError);
+                console.error(`❌ Errore nella creazione blocco UCMe ${index + 1}:`, blockError);
             }
         });
         
         log('✅ Rendering blocchi UCMe completato');
         
     } catch (error) {
-        error('❌ Errore durante rendering blocchi UCMe:', error);
+        console.error('❌ Errore durante rendering blocchi UCMe:', error);
         
         // 🔥 FIX CRITICO: MAI PLACEHOLDER - SEMPRE DATI REALI
         const container = document.getElementById('ucme-blocks');
@@ -1155,7 +1155,7 @@ function updateProfileInfo(user) {
                 profileCreated.textContent = createdDate;
                 log('✅ Data creazione profilo aggiornata:', createdDate, 'da:', createdAtValue);
             } catch (dateError) {
-                error('❌ Errore nella formattazione data creazione:', dateError);
+                console.error('❌ Errore nella formattazione data creazione:', dateError);
                 profileCreated.textContent = 'Data non disponibile';
             }
         }
@@ -1182,7 +1182,7 @@ function updateProfileInfo(user) {
                 profileLastLogin.textContent = lastLoginDate;
                 log('✅ Data ultimo accesso aggiornata:', lastLoginDate, 'da:', lastLoginValue);
             } catch (dateError) {
-                error('❌ Errore nella formattazione data ultimo accesso:', dateError);
+                console.error('❌ Errore nella formattazione data ultimo accesso:', dateError);
                 profileLastLogin.textContent = 'Data non disponibile';
             }
         }
@@ -1190,8 +1190,8 @@ function updateProfileInfo(user) {
         log('✅ Profilo completamente aggiornato con dati REALI');
         
     } catch (error) {
-        error('❌ Errore durante aggiornamento profilo:', error);
-        error('Stack trace:', error.stack);
+        console.error('❌ Errore durante aggiornamento profilo:', error);
+        console.error('Stack trace:', error.stack);
         
         // Fallback: tenta di aggiornare almeno l'email se possibile
         try {
@@ -1200,7 +1200,7 @@ function updateProfileInfo(user) {
                 profileEmail.textContent = user.email;
             }
         } catch (fallbackError) {
-            error('❌ Errore anche nel fallback email:', fallbackError);
+            console.error('❌ Errore anche nel fallback email:', fallbackError);
         }
     }
 }
@@ -1262,7 +1262,7 @@ function checkExistingUser() {
                 updateUIForLoggedUser();
                 updateNavigation(currentScreen);
             } catch (error) {
-                error('❌ Errore nel parsing dei dati utente:', error);
+                console.error('❌ Errore nel parsing dei dati utente:', error);
                 sessionStorage.removeItem('mental_commons_user');
                 sessionStorage.removeItem('mental_commons_token');
                 updateUIForGuestUser();
@@ -1764,7 +1764,7 @@ function loadPortatoreData() {
             portatoreData = JSON.parse(savedPortatori);
             log(`✅ Caricate ${portatoreData.length} candidature Portatore dal localStorage`);
         } catch (error) {
-            error('Errore nel caricamento candidature Portatore:', error);
+            console.error('Errore nel caricamento candidature Portatore:', error);
             portatoreData = [];
         }
     } else {
@@ -1790,7 +1790,7 @@ function savePortatoreData(email) {
             localStorage.setItem('mentalCommons_portatori', JSON.stringify(portatoreData));
             log('Candidatura Portatore salvata');
         } catch (error) {
-            error('Errore nel salvataggio candidatura Portatore:', error);
+            console.error('Errore nel salvataggio candidatura Portatore:', error);
         }
     }
 }
@@ -1878,7 +1878,7 @@ function setupAuthFormListeners() {
         
         log('🎉 All event listeners added successfully');
     } else {
-        error('❌ Missing elements:', {
+        console.error('❌ Missing elements:', {
             tabLogin: !tabLogin ? 'MISSING' : 'OK',
             tabRegister: !tabRegister ? 'MISSING' : 'OK',
             loginForm: !loginForm ? 'MISSING' : 'OK', 
@@ -2074,8 +2074,8 @@ async function handleLoginSubmit(event) {
         }
         
     } catch (error) {
-        error('❌ Errore CRITICO durante login Supabase:', error);
-        error('Stack trace:', error.stack);
+        console.console.error('❌ Errore CRITICO durante login Supabase:', error);
+        console.console.error('Stack trace:', error.stack);
         
         // 🚨 NESSUN FALLBACK - SOLO SUPABASE
         log('🚨 NESSUN FALLBACK - LOGIN FALLITO');
@@ -2221,8 +2221,8 @@ async function handleRegisterSubmit(event) {
         }
         
     } catch (error) {
-        error('❌ Errore CRITICO durante registrazione Supabase:', error);
-        error('Stack trace:', error.stack);
+        console.console.error('❌ Errore CRITICO durante registrazione Supabase:', error);
+        console.console.error('Stack trace:', error.stack);
         
         // 🚨 NESSUN FALLBACK - SOLO SUPABASE
         log('🚨 NESSUN FALLBACK - REGISTRAZIONE FALLITA');
@@ -2354,7 +2354,7 @@ function exportUserData() {
         log('✅ Esportazione completata');
         
     } catch (error) {
-        error('❌ Errore durante esportazione:', error);
+        console.console.error('❌ Errore durante esportazione:', error);
         showMobileFriendlyAlert('❌ Errore durante l\'esportazione');
     }
 }
@@ -2404,7 +2404,7 @@ function deleteAccount() {
             }, 2000);
             
         } catch (error) {
-            error('❌ Errore durante eliminazione account:', error);
+            console.console.error('❌ Errore durante eliminazione account:', error);
             showMobileFriendlyAlert('❌ Errore durante l\'eliminazione dell\'account');
         }
     } else if (confirmation !== null) {
@@ -2613,7 +2613,7 @@ async function handleFormSubmission(event) {
             return;
             
         } catch (error) {
-            console.error('❌ Errore gestione offline:', error);
+            console.console.error('❌ Errore gestione offline:', error);
             // Continua con il flusso normale in caso di errore
         }
     }
@@ -2681,7 +2681,7 @@ async function handleFormSubmission(event) {
             formData = collectFormData();
             console.log('✅ Dati form raccolti con successo');
         } catch (error) {
-            console.error('❌ Errore durante raccolta dati form:', error.message);
+            console.console.error('❌ Errore durante raccolta dati form:', error.message);
             throw new Error(`Errore nella preparazione dati: ${error.message}`);
         }
         
@@ -2778,13 +2778,13 @@ async function handleFormSubmission(event) {
         });
         
     } catch (error) {
-        console.error('💥 ============================================');
-        console.error('💥 ERRORE DURANTE INVIO FORM UCME');
-        console.error('💥 ============================================');
-        console.error('💥 Messaggio:', error.message);
-        console.error('💥 Stack:', error.stack);
-        console.error('💥 Timestamp:', new Date().toISOString());
-        console.error('💥 ============================================');
+        console.console.error('💥 ============================================');
+        console.console.error('💥 ERRORE DURANTE INVIO FORM UCME');
+        console.console.error('💥 ============================================');
+        console.console.error('💥 Messaggio:', error.message);
+        console.console.error('💥 Stack:', error.stack);
+        console.console.error('💥 Timestamp:', new Date().toISOString());
+        console.console.error('💥 ============================================');
         
         showErrorMessage(error.message);
         hideLoadingState();
@@ -2930,7 +2930,7 @@ async function getValidAuthToken() {
     try {
         // Controlla se il sistema auth è disponibile
         if (typeof window.PersistentAuth === 'undefined') {
-            error('❌ Sistema PersistentAuth non disponibile');
+            console.error('❌ Sistema PersistentAuth non disponibile');
             return null;
         }
         
@@ -2980,7 +2980,7 @@ async function getValidAuthToken() {
         return token;
         
     } catch (error) {
-        error('💥 Errore durante recupero token:', error);
+        console.error('💥 Errore durante recupero token:', error);
         return null;
     }
 }
@@ -3231,7 +3231,7 @@ async function submitUCMeToVercel(formData) {
         
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('❌ Errore HTTP generico:', {
+            console.console.error('❌ Errore HTTP generico:', {
                 status: response.status,
                 statusText: response.statusText,
                 errorData: errorData
@@ -3250,7 +3250,7 @@ async function submitUCMeToVercel(formData) {
         });
         
         if (!result.success) {
-            console.error('❌ Operazione fallita secondo il server:', result.message);
+            console.console.error('❌ Operazione fallita secondo il server:', result.message);
             throw new Error(result.message || 'Errore sconosciuto dal server');
         }
         
@@ -3266,13 +3266,13 @@ async function submitUCMeToVercel(formData) {
         return result;
         
     } catch (error) {
-        console.error('💥 ============================================');
-        console.error('💥 ERRORE CRITICO DURANTE INVIO UCME');
-        console.error('💥 ============================================');
-        console.error('💥 Messaggio:', error.message);
-        console.error('💥 Stack:', error.stack);
-        console.error('💥 Endpoint:', UCME_ENDPOINT);
-        console.error('💥 Form Data originali:', JSON.stringify(formData, null, 2));
+        console.console.error('💥 ============================================');
+        console.console.error('💥 ERRORE CRITICO DURANTE INVIO UCME');
+        console.console.error('💥 ============================================');
+        console.console.error('💥 Messaggio:', error.message);
+        console.console.error('💥 Stack:', error.stack);
+        console.console.error('💥 Endpoint:', UCME_ENDPOINT);
+        console.console.error('💥 Form Data originali:', JSON.stringify(formData, null, 2));
         
         // Sistema di export per debug come richiesto dall'utente
         const debugExport = {
@@ -3292,7 +3292,7 @@ async function submitUCMeToVercel(formData) {
         localStorage.setItem('mc-debug-export', JSON.stringify(debugExport, null, 2));
         console.log('💾 Debug export salvato in localStorage come "mc-debug-export"');
         console.log('🔧 Per esportare: copy(localStorage.getItem("mc-debug-export"))');
-        console.error('💥 ============================================');
+        console.console.error('💥 ============================================');
         
         // Re-throw con messaggi user-friendly
         if (error.message.includes('Token') || error.message.includes('Sessione')) {
@@ -3594,13 +3594,13 @@ async function submitAnonymousUCMe(formData) {
         return result;
         
     } catch (error) {
-        console.error('💥 ============================================');
-        console.error('💥 ERRORE DURANTE INVIO UCME ANONIMA');
-        console.error('💥 ============================================');
-        console.error('💥 Messaggio:', error.message);
-        console.error('💥 Stack:', error.stack);
-        console.error('💥 Timestamp:', new Date().toISOString());
-        console.error('💥 ============================================');
+        console.console.error('💥 ============================================');
+        console.console.error('💥 ERRORE DURANTE INVIO UCME ANONIMA');
+        console.console.error('💥 ============================================');
+        console.console.error('💥 Messaggio:', error.message);
+        console.console.error('💥 Stack:', error.stack);
+        console.console.error('💥 Timestamp:', new Date().toISOString());
+        console.console.error('💥 ============================================');
         
         throw error; // Rilancia l'errore per gestione upstream
     }
@@ -3730,7 +3730,7 @@ async function loginWithBackend(email, password) {
         return result;
         
     } catch (error) {
-        error('❌ Errore fetch principale:', error);
+        console.error('❌ Errore fetch principale:', error);
         log('🟣 FASE 3 - Errore nella chiamata API Vercel:', error.message);
         
         // Log eventuali chiamate esterne sospette
@@ -3806,7 +3806,7 @@ async function registerWithBackend(email, password, name, surname = null) {
         }
         
         if (!response.ok) {
-            error('❌ Errore registrazione:', response.status, result.message);
+            console.error('❌ Errore registrazione:', response.status, result.message);
             return {
                 success: false,
                 message: result.message || `Errore HTTP ${response.status}`,
@@ -3825,7 +3825,7 @@ async function registerWithBackend(email, password, name, surname = null) {
         };
         
     } catch (error) {
-        error('💥 Errore di rete o parsing durante registrazione:', error);
+        console.error('💥 Errore di rete o parsing durante registrazione:', error);
         return {
             success: false,
             message: 'Errore di connessione durante la registrazione',
@@ -4230,7 +4230,7 @@ async function loadRitualStats() {
         log('✅ Caricamento statistiche completato');
         
     } catch (error) {
-        error('❌ Errore critico nel caricamento statistiche:', error);
+        console.error('❌ Errore critico nel caricamento statistiche:', error);
         // Fallback finale sempre funzionante
         updateStickyStats();
     }
@@ -4318,7 +4318,7 @@ function resetUser(email) {
         return { success: true, message: `Utente ${email} rimosso` };
         
     } catch (error) {
-        error('Errore nel reset utente:', error);
+        console.error('Errore nel reset utente:', error);
         return { success: false, error: error.message };
     }
 }
@@ -4353,7 +4353,7 @@ function showUsers() {
         return { users, currentUser };
         
     } catch (error) {
-        error('Errore nel recuperare utenti:', error);
+        console.error('Errore nel recuperare utenti:', error);
         return { error: error.message };
     }
 }
@@ -4382,7 +4382,7 @@ function findUser(email) {
         }
         
     } catch (error) {
-        error('Errore nella ricerca utente:', error);
+        console.error('Errore nella ricerca utente:', error);
         return { error: error.message };
     }
 }
@@ -4413,7 +4413,7 @@ function resetAllData() {
         return { success: true };
         
     } catch (error) {
-        error('Errore nel reset dati:', error);
+        console.error('Errore nel reset dati:', error);
         return { success: false, error: error.message };
     }
 }
@@ -4496,7 +4496,7 @@ function debugDashboard() {
             const userData = loadDashboardData(currentUser.email);
             log('✅ Dati utente caricati:', userData);
         } catch (error) {
-            error('❌ Errore nel caricamento dati utente:', error);
+            console.error('❌ Errore nel caricamento dati utente:', error);
         }
     }
     
@@ -4543,7 +4543,7 @@ function debugProfile() {
             const profileData = loadProfileData(currentUser);
             log('✅ Dati profilo caricati:', profileData);
         } catch (error) {
-            error('❌ Errore nel caricamento dati profilo:', error);
+            console.error('❌ Errore nel caricamento dati profilo:', error);
         }
     }
     
@@ -4726,7 +4726,7 @@ function setupProfileEventListeners() {
         log('🔍 Pulsante edit-profile-btn trovato - usando onclick inline');
         // RIMOSSO: addEventListener per evitare conflitti con onclick inline
     } else {
-        error('❌ Pulsante edit-profile-btn NON trovato!');
+        console.error('❌ Pulsante edit-profile-btn NON trovato!');
     }
     
     // Bottone esporta dati
@@ -4954,7 +4954,7 @@ window.forceSaveProfile = function(event) {
         console.log('✅ Profilo salvato: [REDACTED]');
         
     } catch (error) {
-        console.error('❌ Errore nel salvataggio:', error);
+        console.console.error('❌ Errore nel salvataggio:', error);
         alert('❌ Errore nel salvataggio. Riprova.');
     }
 };
@@ -4973,7 +4973,7 @@ function toggleEditProfileForm() {
     });
     
     if (!editForm || !editBtn) {
-        error('❌ Elementi form modifica profilo non trovati');
+        console.error('❌ Elementi form modifica profilo non trovati');
         showMobileFriendlyAlert('Errore: Elementi form non trovati');
         return;
     }
@@ -5002,13 +5002,13 @@ function showEditProfileForm() {
     const editBtn = document.getElementById('edit-profile-btn');
     
     if (!editForm || !editBtn) {
-        error('❌ Elementi form non trovati:', { editForm: !!editForm, editBtn: !!editBtn });
+        console.error('❌ Elementi form non trovati:', { editForm: !!editForm, editBtn: !!editBtn });
         showMobileFriendlyAlert('Errore: Form di modifica non trovato');
         return;
     }
     
     if (!currentUser) {
-        error('❌ currentUser è null o undefined');
+        console.error('❌ currentUser è null o undefined');
         // Prova a recuperare l'utente dal localStorage
         try {
             const savedUser = localStorage.getItem('mental_commons_user');
@@ -5016,12 +5016,12 @@ function showEditProfileForm() {
                 window.currentUser = JSON.parse(savedUser);
                 log('✅ Utente recuperato dal localStorage');
             } else {
-                error('❌ Nessun utente salvato in localStorage');
+                console.error('❌ Nessun utente salvato in localStorage');
                 showMobileFriendlyAlert('Errore: Utente non autenticato. Ricarica la pagina.');
                 return;
             }
         } catch (e) {
-            error('❌ Errore recupero utente:', e);
+            console.error('❌ Errore recupero utente:', e);
             showMobileFriendlyAlert('Errore: Impossibile caricare i dati utente. Ricarica la pagina.');
             return;
         }
@@ -5125,7 +5125,7 @@ function saveProfileChanges() {
         log('✅ Profilo salvato con successo');
         
     } catch (error) {
-        error('❌ Errore nel salvataggio profilo:', error);
+        console.error('❌ Errore nel salvataggio profilo:', error);
         showMobileFriendlyAlert('Errore nel salvataggio. Riprova.');
     }
 }
