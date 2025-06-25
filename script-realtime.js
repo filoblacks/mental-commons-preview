@@ -1,0 +1,81 @@
+// ================================================================
+// MENTAL COMMONS - REAL-TIME SYNC (v1.0.0)
+// ================================================================
+// Questo modulo opzionale si collega a Supabase Realtime e aggiorna
+// in tempo reale alcuni contatori visibili nell'interfaccia (es.
+// ucme-count, risposte-count, portatori-count). Se Supabase non è
+// disponibile o le variabili ambiente non sono ancora presenti, il
+// modulo fallirà in modo silenzioso.
+// ================================================================
+
+;(async () => {
+  try {
+    // Verifica presenza delle variabili di ambiente caricate da /api/env.js
+    const supabaseUrl = window?.SUPABASE_URL;
+    const supabaseAnonKey = window?.SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.warn('[Realtime] Variabili Supabase mancanti: sincronizzazione in tempo reale disabilitata.');
+      return;
+    }
+
+    // Verifica che la libreria Supabase (@supabase/supabase-js) sia caricata
+    const globalCreateClient = window?.supabase?.createClient || window?.Supabase?.createClient || window.createClient;
+
+    if (typeof globalCreateClient !== 'function') {
+      console.warn('[Realtime] Libreria Supabase non trovata: assicurati di includere https://unpkg.com/@supabase/supabase-js prima di questo file.');
+      return;
+    }
+
+    // Crea/riutilizza client condiviso
+    const supabase = window.supabase || globalCreateClient(supabaseUrl, supabaseAnonKey, {
+      realtime: {
+        // Evitiamo di ricevere i nostri stessi eventi
+        broadcast: { self: false }
+      }
+    });
+
+    // Mantieni riferimento globale per eventuali altri script
+    window.supabase = supabase;
+
+    // Sottoscrizione a modifiche della tabella 'stats' che contiene i contatori aggregati
+    const channel = supabase.channel('mc_public_stats');
+
+    channel
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'stats'
+      }, (payload) => {
+        const data = payload?.new || {};
+        if (!data) return;
+
+        const { ucme_count, risposte_count, portatori_count } = data;
+
+        if (typeof ucme_count !== 'undefined') {
+          const el = document.querySelector('#ucme-count');
+          if (el) el.textContent = ucme_count;
+        }
+
+        if (typeof risposte_count !== 'undefined') {
+          const el = document.querySelector('#risposte-count');
+          if (el) el.textContent = risposte_count;
+        }
+
+        if (typeof portatori_count !== 'undefined') {
+          const el = document.querySelector('#portatori-count');
+          if (el) el.textContent = portatori_count;
+        }
+      })
+      .subscribe((status, err) => {
+        if (err) {
+          console.error('[Realtime] Errore sottoscrizione:', err.message || err);
+        } else {
+          console.log('[Realtime] Stato canale:', status);
+        }
+      });
+
+  } catch (err) {
+    console.error('[Realtime] Errore inizializzazione realtime:', err.message || err);
+  }
+})(); 
