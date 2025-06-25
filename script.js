@@ -1438,9 +1438,10 @@ function updateUIForLoggedUser() {
     const emailInput = document.getElementById('email');
     if (emailInput) {
         emailInput.value = currentUser.email;
-        emailInput.readOnly = true;
-        emailInput.style.backgroundColor = '#1a1a1a';
-        emailInput.style.opacity = '0.7';
+        emailInput.readOnly = false;
+        emailInput.style.backgroundColor = '';
+        emailInput.style.opacity = '';
+        if (typeof validateForm === 'function') validateForm();
     }
     
     log('UI aggiornata per utente loggato:', currentUser.email);
@@ -2448,8 +2449,16 @@ function validateForm() {
         return false;
     }
     
+    // ✨ Pulizia e normalizzazione valori -----------------------------------
+    const emailValue = email.value.trim().toLowerCase();
+    // Aggiorno il campo input solo se l'utente ha inserito spazi extra
+    if (email.value !== emailValue) {
+        email.value = emailValue;
+    }
+    // -----------------------------------------------------------------------
+    
     const textValid = textarea.value.length >= 20 && textarea.value.length <= 600;
-    const emailValid = email.value && isValidEmail(email.value);
+    const emailValid = emailValue && isValidEmail(emailValue);
     const toneValid = tone.value !== '';
     const checkboxValid = checkbox.checked;
     
@@ -2458,7 +2467,7 @@ function validateForm() {
     debug('🧪 validateForm()', {
         textLength: textarea.value.length,
         textValid,
-        email: email.value,
+        email: emailValue,
         emailValid,
         tone: tone.value,
         toneValid,
