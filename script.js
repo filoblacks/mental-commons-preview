@@ -417,6 +417,9 @@ function initializeDashboard() {
     
     log('✅ Utente autenticato:', currentUser.email);
     
+    // Assicurati che l'email sia pre-compilata in tutti i form
+    prefillEmailIfAvailable();
+    
     // CARICAMENTO DIRETTO E IMMEDIATO delle UCMe reali
     setTimeout(async () => {
         try {
@@ -519,6 +522,9 @@ async function initializeProfile() {
             }
             
             log('✅ Utente loggato per profilo:', currentUser.email);
+            
+            // Assicurati che l'email sia pre-compilata in tutti i form
+            prefillEmailIfAvailable();
             
             // 🔥 FIX: Carica dati profilo REALI mantenendo compatibilità
             log('🔄 Tentativo caricamento dati profilo REALI dal database...');
@@ -1367,6 +1373,9 @@ function syncUIWithCurrentState() {
         }
         
         log('✅ Variabili interne sincronizzate per utente:', currentUser.email);
+        
+        // Assicurati che l'email sia pre-compilata in tutti i form
+        prefillEmailIfAvailable();
     } else {
         // Stato guest - reset variabili interne
         const emailInput = document.getElementById('email');
@@ -1443,6 +1452,9 @@ function updateUIForLoggedUser() {
         emailInput.style.opacity = '';
         if (typeof validateForm === 'function') validateForm();
     }
+    
+    // Assicurati che l'email sia pre-compilata in tutti i form
+    prefillEmailIfAvailable();
     
     log('UI aggiornata per utente loggato:', currentUser.email);
 }
