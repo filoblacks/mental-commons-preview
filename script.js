@@ -2434,20 +2434,48 @@ function setupFormValidation() {
         toneSelect.addEventListener('change', revalidate);
     }
 
-    // Pre-compila l'email se utente già loggato
-    prefillEmailIfLogged();
+    // Pre-compila l'email se disponibile
+    prefillEmailIfAvailable();
 
     // Prima validazione immediata
     validateForm();
 }
 
-function prefillEmailIfLogged() {
-    if (!currentUser) return;
+function prefillEmailIfAvailable() {
     const emailInput = document.getElementById('email');
-    if (emailInput && emailInput.value.trim() === '') {
-        emailInput.value = currentUser.email;
+    if (!emailInput || emailInput.value.trim() !== '') return;
+
+    // Fonti possibili dell'email
+    let detectedEmail = null;
+
+    // 1. currentUser se presente
+    if (currentUser && currentUser.email) detectedEmail = currentUser.email;
+
+    // 2. window.immediateAuthState
+    if (!detectedEmail && window.immediateAuthState && window.immediateAuthState.user) {
+        detectedEmail = window.immediateAuthState.user.email;
+    }
+
+    // 3. localStorage mc-email
+    if (!detectedEmail) {
+        detectedEmail = localStorage.getItem('mc-email');
+    }
+
+    // 4. mental_commons_user json
+    if (!detectedEmail) {
+        try {
+            const saved = localStorage.getItem('mental_commons_user');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed && parsed.email) detectedEmail = parsed.email;
+            }
+        } catch (e) {}
+    }
+
+    if (detectedEmail) {
+        emailInput.value = detectedEmail;
         if (typeof validateForm === 'function') validateForm();
-        log('📧 Email precompilata automaticamente');
+        log('📧 Email precompilata automaticamente da fonte rilevata');
     }
 }
 
