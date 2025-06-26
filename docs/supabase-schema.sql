@@ -7,6 +7,10 @@
 ALTER TABLE users
     ADD COLUMN IF NOT EXISTS is_portatore BOOLEAN DEFAULT FALSE;
 
+-- Aggiunta colonna is_admin in users
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
+
 -- Tabella portatori
 CREATE TABLE portatori (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

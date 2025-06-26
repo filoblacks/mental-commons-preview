@@ -173,6 +173,10 @@ WHERE expires_at > NOW();
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ucmes_complex_search 
 ON ucmes (user_id, tone, anonymous, created_at DESC);
 
+-- Colonna admin (per ruoli elevati)
+ALTER TABLE IF EXISTS users
+    ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
+
 -- ================================================================
 -- CONSTRAINTS E TRIGGERS OTTIMIZZATI
 -- ================================================================
