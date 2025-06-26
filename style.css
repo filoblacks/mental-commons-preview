@@ -258,12 +258,12 @@ body {
 
 /* Sezioni Role moderne */
 .role-section {
-    background: linear-gradient(135deg, #111111 0%, #0a0a0a 100%);
-    border: 1px solid #222;
+    background-color: #F5F5F5 !important;
+    border: 1px solid #E0E0E0 !important;
+    color: var(--color-text-body) !important;
+    box-shadow: none !important;
     border-radius: 16px;
     padding: 2rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(10px);
     position: relative;
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -282,9 +282,8 @@ body {
 }
 
 .role-section:hover {
-    transform: translateY(-4px);
-    border-color: #333;
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+    transform: translateY(-2px);
 }
 
 /* Section Headers */
@@ -311,8 +310,8 @@ body {
     align-items: center;
     justify-content: center;
     position: relative;
-    background: linear-gradient(135deg, #222 0%, #111 100%);
-    border: 1px solid #333;
+    background-color: var(--color-primary) !important;
+    border: none !important;
 }
 
 .depositor-icon {
@@ -328,7 +327,7 @@ body {
 .section-header h2 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--color-primary) !important;
+    color: var(--color-text-heading) !important;
     margin: 0;
 }
 
@@ -5603,5 +5602,21 @@ input::placeholder, textarea::placeholder {
 }
 
 .detail-value {
+  color: var(--color-text-heading) !important;
+}
+
+/* === FINAL OVERRIDE 2025-06-26 – UCMe Dashboard Sections === */
+.role-section,
+.depositor-section,
+.portatore-section {
+  background-color: #F5F5F5 !important;
+  border: 1px solid #E0E0E0 !important;
+  color: var(--color-text-body) !important;
+  box-shadow: none !important;
+}
+
+.role-section .section-header h2,
+.role-section .section-count .count-number,
+.role-section .section-count .count-label {
   color: var(--color-text-heading) !important;
 }
