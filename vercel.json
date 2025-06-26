@@ -115,6 +115,10 @@
     {
       "source": "/api/ucme-list",
       "destination": "/api/ucme?action=list"
+    },
+    {
+      "source": "/api/ucme/mark-as-read",
+      "destination": "/api/ucme?action=mark-read"
     }
   ]
 } 

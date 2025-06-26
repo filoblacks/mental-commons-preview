@@ -8,6 +8,7 @@
 const {
   saveUCMe,
   getUserUCMesWithResponses,
+  markUcmeResponseAsRead,
   verifyJWT
 } = require('../lib/supabase.js');
 const {
@@ -26,6 +27,13 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    // Supporto azioni via query (?action=...)
+    const action = req.query?.action;
+
+    if (action === 'mark-read') {
+      return await handleMarkAsRead(req, res);
+    }
+
     switch (req.method) {
       case 'GET':
         return await handleGet(req, res);
@@ -90,4 +98,24 @@ async function handlePost(req, res) {
 
   const saved = await saveUCMe(payload.userId, content, title);
   return res.status(201).json({ success: true, data: saved });
+}
+
+// Gestione marca come letta
+async function handleMarkAsRead(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, message: 'Usa POST per mark-read' });
+  }
+
+  const payload = authenticate(req);
+  if (!payload) {
+    return res.status(401).json({ success: false, message: 'Token mancante o non valido' });
+  }
+
+  const { ucme_id } = req.body || {};
+  if (!ucme_id) {
+    return res.status(400).json({ success: false, message: 'ucme_id mancante' });
+  }
+
+  await markUcmeResponseAsRead(ucme_id, payload.userId);
+  return res.status(200).json({ success: true });
 } 
