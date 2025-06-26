@@ -5750,3 +5750,17 @@ input::placeholder, textarea::placeholder {
     padding: 2.5rem 3rem !important;
   }
 }
+
+/* === CENTER GRID & REMOVE DECORATIVE LINES 2025-06-27 === */
+.dashboard-content.two-columns {
+  display: grid !important;
+  justify-content: center !important;
+}
+
+/* Rimuove linee interne nelle card UCMe */
+.ucme-block hr,
+.ucme-card hr,
+.ucme-block .ucme-content,
+.ucme-card .ucme-content {
+  border-top: none !important;
+}
