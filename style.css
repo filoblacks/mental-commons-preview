@@ -466,8 +466,8 @@ body {
 }
 
 .ucme-response {
-    background: #FFFFFF !important;
-    border: 1px solid #DDDDDD !important;
+    background-color: #F5F5F5 !important;
+    border: 1px solid #E0E0E0 !important;
     color: var(--color-text-body) !important;
     border-radius: 6px;
     padding: 1.25rem;
@@ -475,9 +475,9 @@ body {
 }
 
 .ucme-response h4 {
+    color: var(--color-primary) !important;
     font-size: 0.95rem;
     font-weight: 500;
-    color: #a8d568;
     margin-bottom: 0.75rem;
 }
 
@@ -1065,8 +1065,8 @@ body {
 }
 
 .ucme-response {
-    background: #FFFFFF !important;
-    border: 1px solid #DDDDDD !important;
+    background-color: #F5F5F5 !important;
+    border: 1px solid #E0E0E0 !important;
     color: var(--color-text-body) !important;
     border-radius: 6px;
     padding: 1.25rem;
