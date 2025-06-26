@@ -151,11 +151,10 @@ body {
     font-size: clamp(2.5rem, 5vw, 3.5rem);
     font-weight: 600;
     margin-bottom: 1rem;
-    color: var(--color-primary) !important;
-    background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #2C5F47 !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    -webkit-text-fill-color: #2C5F47 !important;
     animation: titleFadeIn 1s ease-out forwards;
 }
 
@@ -366,8 +365,8 @@ body {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    background: linear-gradient(135deg, #1a1a1a 0%, #111 100%);
-    border: 1px solid #2a2a2a;
+    background: #F5F5F5 !important;
+    border: 1px solid #E0E0E0 !important;
     border-radius: 12px;
     padding: 1.5rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -390,8 +389,8 @@ body {
 }
 
 .ucme-block:hover {
-    border-color: #404040;
-    background: linear-gradient(135deg, #1f1f1f 0%, #151515 100%);
+    border-color: #DADADA !important;
+    background: #EFEFEF !important;
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
@@ -453,7 +452,7 @@ body {
 
 .ucme-text p {
     line-height: 1.7;
-    color: #fff;
+    color: var(--color-text-body) !important;
     font-size: 1rem;
 }
 
@@ -468,8 +467,9 @@ body {
 }
 
 .ucme-response {
-    background: #1a1a1a;
-    border: 1px solid #444;
+    background: #FFFFFF !important;
+    border: 1px solid #DDDDDD !important;
+    color: var(--color-text-body) !important;
     border-radius: 6px;
     padding: 1.25rem;
     margin-top: 1rem;
@@ -484,7 +484,7 @@ body {
 
 .response-text {
     line-height: 1.7;
-    color: #fff;
+    color: var(--color-text-body) !important;
     font-size: 1rem;
     margin-bottom: 0.75rem;
 }
@@ -1066,13 +1066,12 @@ body {
 }
 
 .ucme-response {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 4px;
-    padding: 16px;
-    margin-top: 12px;
-    font-style: italic;
-    color: #ccc;
+    background: #FFFFFF !important;
+    border: 1px solid #DDDDDD !important;
+    color: var(--color-text-body) !important;
+    border-radius: 6px;
+    padding: 1.25rem;
+    margin-top: 1rem;
 }
 
 .user-settings {
