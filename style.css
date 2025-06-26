@@ -5684,3 +5684,34 @@ input::placeholder, textarea::placeholder {
   border-color: #D0D0D0 !important;
   background: transparent !important;
 }
+
+/* === UNIFIED UCME CARD STYLE 2025-06-26 === */
+.ucme-block,
+.ucme-card {
+  background-color: #FFFFFF !important;
+  border: 1px solid #E0E0E0 !important;
+  border-radius: 12px !important;
+  padding: 1.5rem !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
+  transition: transform .25s ease, box-shadow .25s ease !important;
+}
+
+.ucme-block::before {
+  display: none !important;
+}
+
+.ucme-block:hover,
+.ucme-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+  border-color: #DADADA !important;
+}
+
+/* Testi interni coerenti */
+.ucme-block .ucme-text p,
+.ucme-card .ucme-preview,
+.ucme-card .ucme-preview-text,
+.ucme-card .ucme-details,
+.ucme-card .ucme-status {
+  color: var(--color-text-body) !important;
+}
