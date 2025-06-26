@@ -4090,7 +4090,7 @@ body {
 .profile-main {
     min-height: 100vh;
     padding: 6rem 0 4rem 0;
-    background-color: #000;
+    background-color: var(--color-page-bg);
 }
 
 .profile-page-header {
@@ -4102,13 +4102,13 @@ body {
     font-size: 2.5rem;
     font-weight: 400;
     margin-bottom: 1rem;
-    color: #fff;
+    color: var(--color-text-heading);
 }
 
 .profile-page-subtitle {
     font-size: 1.1rem;
-    color: #ccc;
-    opacity: 0.8;
+    color: var(--color-text-body);
+    opacity: 0.9;
 }
 
 .profile-content {
@@ -4122,8 +4122,8 @@ body {
 .profile-info-section,
 .profile-edit-section,
 .account-actions-section {
-    background: #111;
-    border: 1px solid #333;
+    background: var(--color-section-bg);
+    border: 1px solid rgba(44, 95, 71, 0.15);
     border-radius: 12px;
     padding: 2rem;
     transition: all 0.3s ease;
@@ -4132,8 +4132,8 @@ body {
 .profile-info-section:hover,
 .profile-edit-section:hover,
 .account-actions-section:hover {
-    border-color: #555;
-    background: #151515;
+    border-color: var(--color-primary);
+    background: var(--color-section-bg);
 }
 
 .profile-info-section h2,
@@ -4142,7 +4142,7 @@ body {
     font-size: 1.5rem;
     font-weight: 500;
     margin-bottom: 1.5rem;
-    color: #fff;
+    color: var(--color-text-heading);
 }
 
 .profile-details {
@@ -4156,7 +4156,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 0;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
 }
 
 .profile-detail:last-child {
@@ -4165,11 +4165,11 @@ body {
 
 .detail-label {
     font-weight: 500;
-    color: #ccc;
+    color: var(--color-text-body);
 }
 
 .detail-value {
-    color: #fff;
+    color: var(--color-text-heading);
     text-align: right;
 }
 
