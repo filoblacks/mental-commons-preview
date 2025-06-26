@@ -2,15 +2,15 @@
   <defs>
     <style>
       .favicon-bg {
-        fill: #000000;
+        fill: #0D4739;
       }
       .favicon-circle {
         fill: none;
-        stroke: #ffffff;
+        stroke: #D9A862;
         stroke-width: 1.2;
       }
       .favicon-dot {
-        fill: #ffffff;
+        fill: #D9A862;
       }
     </style>
   </defs>

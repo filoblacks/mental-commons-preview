@@ -3,11 +3,11 @@
     <style>
       .logo-circle {
         fill: none;
-        stroke: white;
-        stroke-width: 2;
+        stroke: #D9A862;
+        stroke-width: 3;
       }
       .logo-dot {
-        fill: white;
+        fill: #D9A862;
       }
     </style>
   </defs>
@@ -19,5 +19,5 @@
   <circle cx="130" cy="60" r="45" class="logo-circle"/>
   
   <!-- Punto centrale -->
-  <circle cx="100" cy="60" r="2" class="logo-dot"/>
+  <circle cx="100" cy="60" r="4" class="logo-dot"/>
 </svg> 
