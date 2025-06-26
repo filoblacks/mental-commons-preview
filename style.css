@@ -5715,3 +5715,27 @@ input::placeholder, textarea::placeholder {
 .ucme-card .ucme-status {
   color: var(--color-text-body) !important;
 }
+
+/* === UCME CARD BORDER & SECTION WIDTH 2025-06-27 === */
+.ucme-block,
+.ucme-card {
+  border: 1px solid #2C5F47 !important;
+}
+
+.ucme-block:hover,
+.ucme-card:hover {
+  border-color: #2C5F47 !important;
+}
+
+/* Rimuove linee decorative nelle card Affidati */
+.ucme-block hr {
+  display: none !important;
+}
+
+/* Allarga le sezioni dashboard (desktop) */
+@media (min-width: 1024px) {
+  .dashboard-content.two-columns {
+    max-width: 1500px !important;
+    gap: 3rem !important;
+  }
+}
