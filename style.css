@@ -5468,3 +5468,76 @@ html.auth-ready #main-cta {
   font-size: 0.8rem;
   color: #aaa;
 }
+
+/* =====================================================
+   🌱 OVERRIDE FINALE PALETTE – precedenza assoluta
+   ===================================================== */
+body,
+.hero,
+.user-screen,
+.dashboard-main,
+.form-section,
+.info-section,
+.how-it-works-section,
+.login-container,
+footer,
+.how-it-works-section,
+.demo-section,
+.how-it-works-steps::before {
+    background-color: var(--color-page-bg) !important;
+    background-image: none !important;
+}
+
+.login-form-wrapper,
+.modal-content,
+.ucme-card,
+.ucme-block,
+.admin-table tr td,
+.admin-table tr th {
+    background-color: var(--color-section-bg) !important;
+    border-color: rgba(0,0,0,0.05) !important;
+}
+
+/* Testo scuro di default */
+body, p, li, label, .subtitle, .copy-section p, .login-description, .tab-btn, .auth-form input, .auth-form input::placeholder, .auth-error, .error-message {
+    color: var(--color-text-body) !important;
+}
+
+/* Titoli e link */
+h1, h2, h3, h4, h5, h6, a, strong, .section-header h2, .dashboard-title {
+    color: var(--color-text-heading) !important;
+}
+
+/* Footer testo */
+footer p, .footer-social, .instagram-link, .footer-social svg {
+    color: var(--color-text-body) !important;
+}
+
+/* Gradient e background scuri rimossi */
+.user-screen,
+.form-section,
+.login-container,
+.user-screen,
+.how-it-works-section,
+.demo-section {
+    background-image: none !important;
+}
+
+/* Pulsanti chiari in negativo */
+button, .cta-button, .user-action-btn, .submit-button, .auth-button, .settings-button, .profile-action-btn {
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    color: var(--color-white) !important;
+}
+
+button:hover, .cta-button:hover, .user-action-btn:hover, .submit-button:hover:not(:disabled), .auth-button:hover, .settings-button:hover, .profile-action-btn:hover {
+    background-color: #244d3a !important;
+}
+
+/* Badge di successo */
+.success-message, .status-feedback.success, .status-completed, .response-unread {
+    background-color: var(--color-accent) !important;
+    color: var(--color-white) !important;
+    border-color: var(--color-accent) !important;
+}
+/* ===================================================== */
