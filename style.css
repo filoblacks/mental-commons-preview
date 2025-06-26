@@ -378,6 +378,7 @@ body {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
     opacity: 0;
     transition: opacity 0.3s ease;
+    pointer-events: none;
 }
 
 .ucme-block:hover {
@@ -589,23 +590,6 @@ body {
     color: #ccc;
     margin-bottom: 2rem;
     opacity: 0.8;
-}
-
-.login-link {
-    display: inline-block;
-    background: #fff;
-    color: #000;
-    padding: 0.875rem 1.5rem;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 500;
-    border-radius: 6px;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.login-link:hover {
-    background: #f0f0f0;
 }
 
 /* ========================================
@@ -5044,6 +5028,7 @@ html.auth-ready #main-cta {
     background: linear-gradient(135deg, rgba(134, 239, 172, 0.05) 0%, transparent 50%);
     opacity: 0;
     transition: opacity 0.3s ease;
+    pointer-events: none;
 }
 
 .ucme-card:hover {
@@ -5409,4 +5394,24 @@ html.auth-ready #main-cta {
     color: #ccc;
     margin-bottom: 2rem;
     opacity: 0.8;
+}
+
+/* ------------------------------------------------------------------
+   RIPRISTINO LINK LOGIN (bugfix) – Garantisce coerenza stile CTA login
+--------------------------------------------------------------------- */
+.login-link {
+    display: inline-block;
+    background: #fff;
+    color: #000;
+    padding: 0.875rem 1.5rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.login-link:hover {
+    background: #f0f0f0;
 }
