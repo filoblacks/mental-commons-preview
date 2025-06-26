@@ -139,4 +139,13 @@ export function submitUcmeResponse(ucmeId, contenuto, token) {
     body: { ucme_id: ucmeId, contenuto },
     token,
   });
+}
+
+// FASE 5 – Marca risposta come letta
+export function markRispostaAsRead(ucmeId, token) {
+  return request('/api/ucme/mark-as-read', {
+    method: 'POST',
+    body: { ucme_id: ucmeId },
+    token,
+  });
 } 

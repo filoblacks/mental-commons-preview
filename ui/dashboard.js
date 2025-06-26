@@ -1,4 +1,4 @@
-import { getUCMEs, getUsers } from '../core/api.js';
+import { getUCMEs, getUsers, markRispostaAsRead } from '../core/api.js';
 import { getToken, getCurrentUser } from '../core/auth.js';
 import { log } from '../core/logger.js';
 import { updateStickyHeader } from './stats.js';
@@ -43,6 +43,8 @@ export async function initDashboard() {
     renderUcmes(container, ucmes);
     // Aggiorna header usando la funzione condivisa
     updateStickyHeader(ucmes, users);
+    // Inizializza listener dopo render
+    setupMarkAsReadListeners(container);
   } catch (err) {
     log('Errore caricamento UCMe:', err.message);
     container.innerHTML = '<p class="error-message">Impossibile caricare i tuoi pensieri.</p>';
@@ -105,12 +107,14 @@ function renderUcmes(container, ucmes = []) {
       </div>
       <div class="ucme-content">
         <p class="ucme-text">${ucme.content}</p>
-        ${ucme.response ? `
-          <div class="ucme-response">
+        ${ucme.risposta ? `
+          <div class="ucme-response ${ucme.risposta.letta ? 'response-read' : 'response-unread'}">
             <h4>Risposta del Portatore</h4>
             <div class="response-content">
-              <p class="response-text">${ucme.response}</p>
+              <p class="response-text">${ucme.risposta.contenuto}</p>
+              <small class="response-date">${new Date(ucme.risposta.timestamp).toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })}</small>
             </div>
+            ${!ucme.risposta.letta ? `<button class="btn-mark-read" data-ucme-id="${ucme.id}">Segna come letta</button>` : '<span class="read-label">Letta</span>'}
           </div>
         ` : ''}
       </div>
@@ -156,3 +160,29 @@ function removeLoadingMessage() {
 }
 
 // Rimosse funzioni duplicate: logica ora centralizzata in ui/stats.js 
+
+// Listener per i bottoni "Segna come letta"
+function setupMarkAsReadListeners(container) {
+  const buttons = container.querySelectorAll('.btn-mark-read');
+  if (!buttons.length) return;
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const ucmeId = btn.getAttribute('data-ucme-id');
+      if (!ucmeId) return;
+
+      btn.disabled = true;
+      try {
+        await markRispostaAsRead(ucmeId, getToken());
+        // Modifica UI in tempo reale
+        btn.outerHTML = '<span class="read-label">Letta</span>';
+        const parent = btn.closest('.ucme-response');
+        if (parent) parent.classList.remove('response-unread');
+        if (parent) parent.classList.add('response-read');
+      } catch (err) {
+        log('Errore segna come letta:', err.message);
+        btn.disabled = false;
+      }
+    });
+  });
+} 

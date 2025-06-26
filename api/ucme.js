@@ -7,7 +7,7 @@
 
 const {
   saveUCMe,
-  getUserUCMes,
+  getUserUCMesWithResponses,
   verifyJWT
 } = require('../lib/supabase.js');
 const {
@@ -70,7 +70,7 @@ async function handleGet(req, res) {
     return res.status(401).json({ success: false, message: 'Token mancante o non valido' });
   }
 
-  const ucmes = await getUserUCMes(payload.userId);
+  const ucmes = await getUserUCMesWithResponses(payload.userId);
   return res.status(200).json({ success: true, data: ucmes });
 }
 
