@@ -5738,3 +5738,15 @@ input::placeholder, textarea::placeholder {
     gap: 3rem !important;
   }
 }
+
+/* === DASHBOARD WIDTH TUNE 2025-06-27 === */
+@media (min-width: 1280px) {
+  .dashboard-content.two-columns {
+    max-width: 1800px !important;
+    grid-template-columns: repeat(2, minmax(600px, 1fr)) !important;
+    gap: 4rem !important;
+  }
+  .role-section {
+    padding: 2.5rem 3rem !important;
+  }
+}
