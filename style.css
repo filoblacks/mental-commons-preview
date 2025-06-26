@@ -1213,8 +1213,9 @@ body {
     .hero {
         padding: 40px 0;
         min-height: calc(100vh - 100px);
-        background-size: 250% 250%;
-        animation: gradientFlow 6s ease-in-out infinite;
+        background: linear-gradient(135deg, #E8F4F0 0%, #D4A574 30%, #2C5F47 70%, #E8F4F0 100%) !important;
+        background-size: 250% 250% !important;
+        animation: gradientFlow 6s ease-in-out infinite !important;
     }
     
     .hero::before {
@@ -2018,8 +2019,9 @@ footer p {
     .hero {
         padding: 60px 0;
         min-height: calc(100vh - 80px);
-        background-size: 300% 300%;
-        animation: gradientFlow 6s ease-in-out infinite;
+        background: linear-gradient(135deg, #E8F4F0 0%, #D4A574 30%, #2C5F47 70%, #E8F4F0 100%) !important;
+        background-size: 300% 300% !important;
+        animation: gradientFlow 6s ease-in-out infinite !important;
     }
     
     .hero::before {
@@ -2450,8 +2452,9 @@ footer p {
     .hero {
         padding: 40px 0;
         min-height: calc(100vh - 100px);
-        background-size: 250% 250%;
-        animation: gradientFlow 6s ease-in-out infinite;
+        background: linear-gradient(135deg, #E8F4F0 0%, #D4A574 30%, #2C5F47 70%, #E8F4F0 100%) !important;
+        background-size: 250% 250% !important;
+        animation: gradientFlow 6s ease-in-out infinite !important;
     }
     
     .hero::before {
