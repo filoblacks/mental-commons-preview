@@ -125,7 +125,7 @@ export function getPortatoreAssignedUCMEs(token) {
 }
 
 export function updatePortatoreUcmeStatus(ucmeId, newStatus, token) {
-  return request('/api/portatore/ucme/status', {
+  return request('/api/portatore/ucme', {
     method: 'PATCH',
     body: { ucme_id: ucmeId, new_status: newStatus },
     token,
