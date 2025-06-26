@@ -3985,8 +3985,8 @@ body {
    ======================================== */
 
 .profile-header {
-    background: #111;
-    border: 1px solid #333;
+    background: var(--color-section-bg);
+    border: 1px solid rgba(44, 95, 71, 0.15);
     border-radius: 12px;
     padding: 2rem;
     margin-bottom: 3rem;
@@ -3994,8 +3994,8 @@ body {
 }
 
 .profile-header:hover {
-    border-color: #555;
-    background: #151515;
+    border-color: var(--color-primary);
+    background: var(--color-section-bg);
 }
 
 .profile-header-content {
@@ -4013,10 +4013,8 @@ body {
 }
 
 .profile-avatar {
-    width: 64px;
-    height: 64px;
-    background: #222;
-    border: 2px solid #444;
+    background: var(--color-page-bg);
+    border: 2px solid var(--color-primary);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -4028,14 +4026,14 @@ body {
 .profile-header-details h3 {
     font-size: 1.3rem;
     font-weight: 500;
-    color: #fff;
+    color: var(--color-text-heading);
     margin-bottom: 0.25rem;
 }
 
 .profile-header-details p {
     font-size: 0.9rem;
-    color: #ccc;
-    opacity: 0.8;
+    color: var(--color-text-body);
+    opacity: 0.85;
 }
 
 .profile-header-actions {
@@ -4050,10 +4048,10 @@ body {
     align-items: center;
     gap: 0.5rem;
     padding: 0.6rem 1rem;
-    border: 1px solid #555;
+    border: 1px solid var(--color-primary);
     border-radius: 8px;
-    background: transparent;
-    color: #fff;
+    background: var(--color-primary);
+    color: var(--color-white);
     font-family: 'Inter', sans-serif;
     font-size: 0.9rem;
     font-weight: 400;
@@ -4064,19 +4062,20 @@ body {
 }
 
 .profile-header-btn:hover {
-    background: #222;
-    border-color: #666;
+    background: transparent;
+    color: var(--color-primary);
     transform: translateY(-1px);
 }
 
 .profile-header-btn.logout-btn {
-    border-color: #d32f2f;
-    color: #d32f2f;
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-white);
 }
 
 .profile-header-btn.logout-btn:hover {
-    background: #d32f2f;
-    color: #fff;
+    background: transparent;
+    color: var(--color-accent);
 }
 
 .profile-header-btn svg {
