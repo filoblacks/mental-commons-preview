@@ -1164,7 +1164,7 @@ body {
     padding: 6rem 2rem 4rem;
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #E8F4F0 0%, #F5F5F5 40%, #E8F4F0 100%) !important;
+    background: linear-gradient(135deg, #E8F4F0 0%, #2C5F47 50%, #E8F4F0 100%) !important;
     background-size: 400% 400% !important;
     animation: gradientFlow 8s ease-in-out infinite !important;
 }
