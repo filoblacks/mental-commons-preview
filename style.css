@@ -6,8 +6,8 @@
 }
 :root {
     --color-primary: #2C5F47;
-    --color-section-bg: #E8F4F0;
-    --color-page-bg: #F5F5F5;
+    --color-section-bg: #F5F5F5;
+    --color-page-bg: #E8F4F0;
     --color-accent: #D4A574;
     --color-text-body: #333333;
     --color-text-heading: #2C5F47;
@@ -1208,7 +1208,7 @@ body {
     gap: 2.5rem;
     font-family: 'Inter', sans-serif;
     font-size: 1.2rem;
-    color: var(--color-primary) !important;
+    color: var(--color-accent) !important;
     align-items: center;
     flex-wrap: nowrap;
 }
@@ -1223,14 +1223,14 @@ body {
 
 .ritual-stats strong {
     font-weight: 700; /* Strong per i numeri */
-    color: var(--color-primary) !important;
+    color: var(--color-accent) !important;
     margin-right: 0.4rem;
     font-size: 1.4rem;
 }
 
 .ritual-stats span {
     font-weight: 700; /* Manteniamo strong per i numeri */
-    color: var(--color-primary) !important;
+    color: var(--color-accent) !important;
 }
 
 /* Padding ridotto per le sezioni principali con nuovo layout compatto */
@@ -5541,3 +5541,35 @@ button:hover, .cta-button:hover, .user-action-btn:hover, .submit-button:hover:no
     border-color: var(--color-accent) !important;
 }
 /* ===================================================== */
+
+/* === Additional overrides 26-06-2025 === */
+/* Sticky header stats in accent color */
+.ritual-stats, .ritual-stats div, .ritual-stats strong, .ritual-stats span {
+    color: var(--color-accent) !important;
+}
+
+/* Campi input/textarea/select chiari */
+input, textarea, select {
+    background-color: var(--color-white) !important;
+    color: var(--color-text-body) !important;
+    border: 1px solid #cccccc !important;
+}
+input::placeholder, textarea::placeholder {
+    color: #888 !important;
+}
+
+/* Demo boxes & cards */
+.demo-box, .info-block, .ucme-card, .ucme-block {
+    background-color: var(--color-section-bg) !important;
+    color: var(--color-text-body) !important;
+    border-color: rgba(0,0,0,0.05) !important;
+}
+.demo-label, .demo-text, .info-block p {
+    color: var(--color-text-body) !important;
+}
+
+/* Step icon stroke */
+.step-icon svg {
+    stroke: var(--color-primary) !important;
+}
+/* === Fine override 26-06-2025 === */
