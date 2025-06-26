@@ -56,16 +56,28 @@ function renderUcmes(container, ucmes = []) {
   }
 
   ucmes.forEach((ucme) => {
-    const div = document.createElement('div');
-    div.className = 'ucme-block';
-    div.innerHTML = `
-      <p>${ucme.content}</p>
-      <small>${new Date(ucme.created_at).toLocaleDateString('it-IT')}</small>
-    `;
-    container.appendChild(div);
-  });
+    const div = document.createElement('div')
+    const status = ucme.status || 'in attesa'
+    div.className = `ucme-block ${status === 'risposto' ? 'risposto' : status === 'in attesa' ? 'in-attesa' : ''}`
 
-  removeLoadingMessage();
+    const dateIT = new Date(ucme.created_at).toLocaleDateString('it-IT', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    })
+
+    div.innerHTML = `
+      <div class="ucme-header">
+        <span class="ucme-status">${status}</span>
+        <small class="ucme-date">${dateIT}</small>
+      </div>
+      <div class="ucme-content">
+        <p class="ucme-text">${ucme.content}</p>
+        ${ucme.response ? `<div class="ucme-response"><h4>Risposta</h4><p class="response-text">${ucme.response}</p></div>` : ''}
+      </div>
+    `
+    container.appendChild(div)
+  })
+
+  removeLoadingMessage()
 }
 
 function removeLoadingMessage() {

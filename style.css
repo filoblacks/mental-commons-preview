@@ -4409,3 +4409,130 @@ html.auth-ready #main-cta {
         padding: 12px 20px;
     }
 }
+
+/* ============================
+   DASHBOARD - Layout a due colonne
+   ============================ */
+.dashboard-content.two-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+}
+
+.dashboard-content.two-columns .dashboard-actions {
+    grid-column: 1 / -1; /* span su tutta la larghezza */
+}
+
+.depositor-section h2,
+.portatore-section h2 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+/* Migliora leggibilità delle liste in colonne */
+.depositor-section,
+.portatore-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .dashboard-content.two-columns {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Stili UCMe Portatore */
+.assigned-ucme-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.ucme-card {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.ucme-card:hover {
+    border-color: #555;
+    background: #151515;
+}
+
+.ucme-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.ucme-preview {
+    font-weight: 500;
+    color: #fff;
+}
+
+.ucme-open-btn {
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.ucme-open-btn:hover {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+}
+
+.ucme-details {
+    border-top: 1px solid #333;
+    padding-top: 1rem;
+}
+
+.ucme-status-area {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ucme-status-area select {
+    background: #000;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 0.4rem 0.6rem;
+}
+
+/* =================================================
+   OVERRIDE ESTETICO – CARD UCME (Maggio 2025)
+   ================================================= */
+.ucme-block,
+.ucme-card {
+    background: linear-gradient(135deg, #111 0%, #0a0a0a 100%);
+    border: 1px solid #222;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.ucme-block:hover,
+.ucme-card:hover {
+    border-color: #555;
+    background: linear-gradient(135deg, #151515 0%, #0e0e0e 100%);
+}
+
+/* Badge status colori migliorati */
+.ucme-status {
+    text-transform: capitalize;
+    letter-spacing: 0.3px;
+}
