@@ -224,18 +224,22 @@ function renderAssigned(container, ucmes, token) {
 // Genera area risposta (textarea + btn o risposta salvata)
 function renderResponseArea(ucme) {
   const responseRows = ucme.risposte_ucme || [];
-  const alreadyResponded = responseRows.length > 0;
+  const alreadyResponded = responseRows.length > 0 || ucme.status === 'risposta inviata';
 
   if (alreadyResponded) {
-    const risposta = responseRows[0];
-    const respDate = new Date(risposta.created_at).toLocaleString('it-IT', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    return `
-      <div class="ucme-response-display">
-        <h4>La tua risposta</h4>
-        <p class="ucme-response-text">${sanitizeHTML(risposta.contenuto)}</p>
-        <small class="ucme-response-date">${respDate}</small>
-      </div>
-    `;
+    if (responseRows.length) {
+      const risposta = responseRows[0];
+      const respDate = new Date(risposta.created_at).toLocaleString('it-IT', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      return `
+        <div class="ucme-response-display">
+          <h4>La tua risposta</h4>
+          <p class="ucme-response-text">${sanitizeHTML(risposta.contenuto)}</p>
+          <small class="ucme-response-date">${respDate}</small>
+        </div>
+      `;
+    }
+    // Nessun dettaglio disponibile, ma status indica che risposta esiste
+    return `<div class="ucme-response-display"><em>Hai già inviato la risposta.</em></div>`;
   }
 
   // Area di composizione
