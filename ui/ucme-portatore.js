@@ -3,7 +3,7 @@
 // Mostra elenco UCMe assegnate al portatore e permette gestione stato
 // ===============================================================
 
-import { getPortatoreStatus, getPortatoreAssignedUCMEs, updatePortatoreUcmeStatus } from '../core/api.js';
+import { getPortatoreStatus, getPortatoreAssignedUCMEs, updatePortatoreUcmeStatus, submitUcmeResponse } from '../core/api.js';
 import { getToken } from '../core/auth.js';
 import { log } from '../core/logger.js';
 
@@ -166,6 +166,7 @@ function renderAssigned(container, ucmes, token) {
               <option value="richiesta supporto" ${ucme.status === 'richiesta supporto' ? 'selected' : ''}>Richiesta supporto</option>
             </select>
           </div>
+          ${renderResponseArea(ucme)}
         </div>
       </div>
     `;
@@ -220,13 +221,98 @@ function renderAssigned(container, ucmes, token) {
   });
 }
 
+// Genera area risposta (textarea + btn o risposta salvata)
+function renderResponseArea(ucme) {
+  const responseRows = ucme.risposte_ucme || [];
+  const alreadyResponded = responseRows.length > 0;
+
+  if (alreadyResponded) {
+    const risposta = responseRows[0];
+    const respDate = new Date(risposta.created_at).toLocaleString('it-IT', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return `
+      <div class="ucme-response-display">
+        <h4>La tua risposta</h4>
+        <p class="ucme-response-text">${sanitizeHTML(risposta.contenuto)}</p>
+        <small class="ucme-response-date">${respDate}</small>
+      </div>
+    `;
+  }
+
+  // Area di composizione
+  return `
+    <div class="ucme-response-compose" data-ucme-id="${ucme.id}">
+      <h4>Rispondi</h4>
+      <textarea id="response-text-${ucme.id}" maxlength="3000" rows="5" placeholder="Scrivi qui la tua risposta (max 3000 caratteri)"></textarea>
+      <div class="response-controls">
+        <span class="char-count" id="char-count-${ucme.id}">0/3000</span>
+        <button class="btn-primary send-response-btn" id="send-btn-${ucme.id}" disabled data-ucme-id="${ucme.id}">Invia Risposta</button>
+      </div>
+    </div>
+  `;
+}
+
+// Simple sanitization to avoid simple XSS via content injection from response
+function sanitizeHTML(str) {
+  const temp = document.createElement('div');
+  temp.textContent = str;
+  return temp.innerHTML.replace(/\n/g, '<br/>');
+}
+
+// Event delegation to handle textarea input and invio risposta
+document.addEventListener('input', (e) => {
+  if (e.target.matches('[id^="response-text-"]')) {
+    const textarea = e.target;
+    const ucmeId = textarea.id.replace('response-text-', '');
+    const charCountEl = document.getElementById(`char-count-${ucmeId}`);
+    if (charCountEl) charCountEl.textContent = `${textarea.value.length}/3000`;
+
+    const sendBtn = document.getElementById(`send-btn-${ucmeId}`);
+    if (sendBtn) {
+      sendBtn.disabled = textarea.value.trim().length === 0 || textarea.value.length > 3000;
+    }
+  }
+});
+
+document.addEventListener('click', async (e) => {
+  if (e.target.matches('.send-response-btn')) {
+    const btn = e.target;
+    const ucmeId = btn.dataset.ucmeId;
+    const textarea = document.getElementById(`response-text-${ucmeId}`);
+    if (!textarea) return;
+    const content = textarea.value.trim();
+    if (!content) return;
+
+    const token = getToken();
+    if (!token) return;
+
+    try {
+      btn.disabled = true;
+      btn.textContent = 'Invio…';
+      await submitUcmeResponse(ucmeId, content, token);
+
+      // Refresh list or update card directly
+      const sectionList = document.getElementById(LIST_ID);
+      if (sectionList) {
+        // ricarica UCMe per riflettere stato
+        await loadAssigned(token);
+      }
+    } catch (err) {
+      log('Errore invio risposta', err);
+      btn.disabled = false;
+      btn.textContent = 'Invia Risposta';
+      alert(err.message || 'Errore invio risposta');
+    }
+  }
+});
+
 // Utility functions for status styling
 function getStatusClass(status) {
   const statusMap = {
     'ricevuta': 'status-received',
     'in lavorazione': 'status-processing',
     'completata': 'status-completed',
-    'richiesta supporto': 'status-support'
+    'richiesta supporto': 'status-support',
+    'risposta inviata': 'status-answered'
   };
   return statusMap[status] || 'status-default';
 }
@@ -236,7 +322,8 @@ function getStatusLabel(status) {
     'ricevuta': 'Ricevuta',
     'in lavorazione': 'In lavorazione',
     'completata': 'Completata',
-    'richiesta supporto': 'Supporto'
+    'richiesta supporto': 'Supporto',
+    'risposta inviata': 'Risposta inviata'
   };
   return labelMap[status] || status;
 }

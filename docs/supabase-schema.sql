@@ -39,4 +39,21 @@ CREATE POLICY portatori_select_own ON portatori FOR SELECT USING (user_id = auth
 
 ALTER TABLE risposte ENABLE ROW LEVEL SECURITY;
 CREATE POLICY risposte_select_by_portatore ON risposte FOR SELECT USING (portatore_id IN (SELECT id FROM portatori p WHERE p.user_id = auth.uid()));
--- ... ulteriori policy ... 
+-- ... ulteriori policy ...
+
+-- Nuova tabella FASE 4 --------------------------------------------------
+CREATE TABLE IF NOT EXISTS risposte_ucme (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  ucme_id UUID REFERENCES ucmes(id) ON DELETE CASCADE,
+  portatore_id UUID REFERENCES portatori(id) ON DELETE CASCADE,
+  contenuto TEXT NOT NULL CHECK (char_length(contenuto) <= 3000),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+-- Abilita RLS e policy base: solo il portatore autore può accedere
+ALTER TABLE risposte_ucme ENABLE ROW LEVEL SECURITY;
+CREATE POLICY select_own_risposte_ucme ON risposte_ucme FOR SELECT USING (
+  portatore_id IN (SELECT id FROM portatori p WHERE p.user_id = auth.uid())
+);
+CREATE POLICY insert_own_risposte_ucme ON risposte_ucme FOR INSERT WITH CHECK (
+  portatore_id IN (SELECT id FROM portatori p WHERE p.user_id = auth.uid())
+); 

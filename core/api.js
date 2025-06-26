@@ -130,4 +130,13 @@ export function updatePortatoreUcmeStatus(ucmeId, newStatus, token) {
     body: { ucme_id: ucmeId, new_status: newStatus },
     token,
   });
+}
+
+// FASE 4 – Risposta UCMe
+export function submitUcmeResponse(ucmeId, contenuto, token) {
+  return request('/api/portatore/rispondi', {
+    method: 'POST',
+    body: { ucme_id: ucmeId, contenuto },
+    token,
+  });
 } 
