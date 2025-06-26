@@ -4578,3 +4578,82 @@ html.auth-ready #main-cta {
         max-width: 100%;
     }
 }
+
+/* =================================================
+   ADMIN PAGE - Tabelle e layout
+   ================================================= */
+.admin-page {
+    padding: 3rem 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .admin-page { padding: 2rem 1rem; }
+}
+@media (max-width: 480px) {
+    .admin-page { padding: 1.5rem 0.75rem; }
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 3rem;
+    font-size: 0.95rem;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 0.75rem 1rem;
+    border: 1px solid #333;
+}
+
+.admin-table th {
+    background: #111;
+    color: #a8d568;
+    text-align: left;
+    font-weight: 500;
+}
+
+.admin-table tr:nth-child(even) td { background: #101010; }
+.admin-table tr:hover td { background: #151515; }
+
+/* Combo e pulsante assegnazione */
+.admin-table select {
+    background: #000;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.9rem;
+}
+
+.admin-table .assign-btn {
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 0.4rem 0.9rem;
+    cursor: pointer;
+    transition: background 0.3s ease, border-color 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.admin-table .assign-btn:hover:not(:disabled) {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+}
+
+.admin-table .assign-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .admin-table th,
+    .admin-table td { padding: 0.6rem 0.75rem; font-size: 0.85rem; }
+}
+@media (max-width: 480px) {
+    .admin-table { font-size: 0.8rem; }
+    .admin-table th,
+    .admin-table td { padding: 0.5rem 0.6rem; }
+}
