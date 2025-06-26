@@ -37,47 +37,112 @@ export async function initDashboard() {
         ? usersRaw
         : [];
 
+    // Aggiorna contatore sezione depositor
+    updateDepositorCount(ucmes.length);
+
     renderUcmes(container, ucmes);
     // Aggiorna header usando la funzione condivisa
     updateStickyHeader(ucmes, users);
   } catch (err) {
     log('Errore caricamento UCMe:', err.message);
-    container.innerHTML = '<p>Impossibile caricare i tuoi pensieri.</p>';
+    container.innerHTML = '<p class="error-message">Impossibile caricare i tuoi pensieri.</p>';
   } finally {
     removeLoadingMessage();
   }
 }
 
+function updateDepositorCount(count) {
+  const countEl = document.querySelector('#depositor-count .count-number');
+  if (countEl) {
+    countEl.textContent = count;
+  }
+}
+
 function renderUcmes(container, ucmes = []) {
   container.innerHTML = '';
+  
   if (ucmes.length === 0) {
-    container.innerHTML = '<p>Non hai ancora condiviso pensieri.</p>';
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+            <line x1="9" y1="9" x2="9.01" y2="9"></line>
+            <line x1="15" y1="9" x2="15.01" y2="9"></line>
+          </svg>
+        </div>
+        <h3>Nessun pensiero condiviso</h3>
+        <p>Non hai ancora affidato pensieri. Inizia condividendo il tuo primo pensiero.</p>
+      </div>
+    `;
     return;
   }
 
-  ucmes.forEach((ucme) => {
-    const div = document.createElement('div')
-    const status = ucme.status || 'in attesa'
-    div.className = `ucme-block ${status === 'risposto' ? 'risposto' : status === 'in attesa' ? 'in-attesa' : ''}`
+  ucmes.forEach((ucme, index) => {
+    const div = document.createElement('div');
+    const status = ucme.status || 'in attesa';
+    div.className = `ucme-block ${status === 'risposto' ? 'risposto' : status === 'in attesa' ? 'in-attesa' : ''}`;
+    div.style.animationDelay = `${index * 0.1}s`;
 
+    // Data formattata per l'Italia
     const dateIT = new Date(ucme.created_at).toLocaleDateString('it-IT', {
-      day: '2-digit', month: 'short', year: 'numeric'
-    })
+      day: '2-digit', 
+      month: 'short', 
+      year: 'numeric'
+    });
+
+    // Badge status styling
+    const statusClass = getStatusClass(status);
+    const statusLabel = getStatusLabel(status);
 
     div.innerHTML = `
       <div class="ucme-header">
-        <span class="ucme-status">${status}</span>
-        <small class="ucme-date">${dateIT}</small>
+        <div class="ucme-meta">
+          <span class="ucme-status-badge ${statusClass}">${statusLabel}</span>
+          <small class="ucme-date">${dateIT}</small>
+        </div>
       </div>
       <div class="ucme-content">
         <p class="ucme-text">${ucme.content}</p>
-        ${ucme.response ? `<div class="ucme-response"><h4>Risposta</h4><p class="response-text">${ucme.response}</p></div>` : ''}
+        ${ucme.response ? `
+          <div class="ucme-response">
+            <h4>Risposta del Portatore</h4>
+            <div class="response-content">
+              <p class="response-text">${ucme.response}</p>
+            </div>
+          </div>
+        ` : ''}
       </div>
-    `
-    container.appendChild(div)
-  })
+    `;
+    
+    container.appendChild(div);
+  });
 
-  removeLoadingMessage()
+  removeLoadingMessage();
+}
+
+// Utility functions for status styling
+function getStatusClass(status) {
+  const statusMap = {
+    'in attesa': 'status-pending',
+    'assegnato': 'status-assigned',
+    'in lavorazione': 'status-processing',
+    'risposto': 'status-completed',
+    'completato': 'status-completed'
+  };
+  return statusMap[status] || 'status-default';
+}
+
+function getStatusLabel(status) {
+  const labelMap = {
+    'in attesa': 'In attesa',
+    'assegnato': 'Assegnato',
+    'in lavorazione': 'In lavorazione', 
+    'risposto': 'Risposto',
+    'completato': 'Completato'
+  };
+  return labelMap[status] || status;
 }
 
 function removeLoadingMessage() {

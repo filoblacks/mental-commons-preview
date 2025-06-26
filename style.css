@@ -104,96 +104,291 @@ body {
 }
 
 /* ========================================
-   DASHBOARD
+   DASHBOARD MODERNA - DESIGN SYSTEM 2025
    ======================================== */
 
 .dashboard-main {
     min-height: 100vh;
-    padding: 6rem 0 4rem 0;
-    background-color: #000;
+    padding: 3rem 0 4rem 0;
+    background: linear-gradient(180deg, #000000 0%, #111111 100%);
+    position: relative;
+    overflow: hidden;
 }
 
-/* 🔥 FIX CRITICO MOBILE - FORZA VISIBILITÀ UCME */
-.ucme-blocks {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 2rem;
-    margin-bottom: 3rem;
-    visibility: visible !important;
-    opacity: 1 !important;
+.dashboard-main::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 300px;
+    background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.02) 0%, transparent 60%);
+    pointer-events: none;
 }
 
-.ucme-block {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    background: #111;
-    border: 1px solid #333;
-    border-radius: 8px;
-    padding: 1.5rem;
-    transition: all 0.3s ease;
-}
-
-.dashboard-content {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
+/* Dashboard Header con decorazioni animate */
 .dashboard-header {
     text-align: center;
     margin-bottom: 4rem;
+    position: relative;
+    padding: 2rem 0;
 }
 
-.dashboard-header h1 {
-    font-size: 2.5rem;
-    font-weight: 400;
+.dashboard-header-content {
+    position: relative;
+    z-index: 2;
+}
+
+.dashboard-title {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 600;
     margin-bottom: 1rem;
     color: #fff;
+    background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: titleFadeIn 1s ease-out forwards;
 }
 
 .dashboard-subtitle {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     color: #ccc;
-    opacity: 0.8;
+    opacity: 0.85;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+    animation: subtitleFadeIn 1s ease-out 0.2s forwards;
+    opacity: 0;
 }
 
+.dashboard-header-decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.floating-orb {
+    position: absolute;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.orb-1 {
+    width: 120px;
+    height: 120px;
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.orb-2 {
+    width: 80px;
+    height: 80px;
+    top: 60%;
+    right: 15%;
+    animation-delay: 2s;
+}
+
+.orb-3 {
+    width: 100px;
+    height: 100px;
+    top: 40%;
+    left: 70%;
+    animation-delay: 4s;
+}
+
+/* Loading State migliorato */
 .user-verification {
     text-align: center;
     padding: 4rem 0;
 }
 
-.user-verification p {
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid #333;
+    border-top: 3px solid #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-container p {
     font-size: 1.1rem;
     color: #ccc;
     opacity: 0.8;
 }
 
+/* Dashboard Content con layout intelligente */
 .dashboard-content {
-    max-width: 800px;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-width: 1400px;
     margin: 0 auto;
+    animation: contentFadeIn 1s ease-out 0.4s forwards;
+    opacity: 0;
 }
 
-.ucme-blocks {
+.dashboard-content.two-columns {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    max-width: 1400px;
+}
+
+/* Sezioni Role moderne */
+.role-section {
+    background: linear-gradient(135deg, #111111 0%, #0a0a0a 100%);
+    border: 1px solid #222;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.role-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
+    transform: translateX(-100%);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+.role-section:hover {
+    transform: translateY(-4px);
+    border-color: #333;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+/* Section Headers */
+.section-header {
     display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    margin-bottom: 3rem;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #222;
+}
+
+.section-title-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.section-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: linear-gradient(135deg, #222 0%, #111 100%);
+    border: 1px solid #333;
+}
+
+.depositor-icon {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    color: #93c5fd;
+}
+
+.portatore-icon {
+    background: linear-gradient(135deg, #166534 0%, #16a34a 100%);
+    color: #86efac;
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+.section-count {
+    text-align: right;
+}
+
+.count-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+}
+
+.count-label {
+    font-size: 0.875rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Grid UCMe moderno */
+.ucme-blocks.modern-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .ucme-block {
-    background: #111;
-    border: 1px solid #333;
-    border-radius: 8px;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: linear-gradient(135deg, #1a1a1a 0%, #111 100%);
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
     padding: 1.5rem;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    animation: cardSlideIn 0.6s ease-out forwards;
+}
+
+.ucme-block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .ucme-block:hover {
-    border-color: #555;
-    background: #151515;
+    border-color: #404040;
+    background: linear-gradient(135deg, #1f1f1f 0%, #151515 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.ucme-block:hover::before {
+    opacity: 1;
 }
 
 .ucme-block.risposto {
@@ -295,28 +490,65 @@ body {
     color: #888;
 }
 
+/* Azioni Dashboard ridisegnate */
 .dashboard-actions {
     text-align: center;
-    padding: 2rem 0;
+    margin: 4rem auto;
+    max-width: 800px;
+    grid-column: 1 / -1;
 }
 
-.new-ucme-button {
-    display: inline-block;
-    background: transparent;
-    color: #fff;
-    border: 1px solid #fff;
-    padding: 0.875rem 1.5rem;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 500;
-    border-radius: 6px;
-    text-decoration: none;
-    transition: all 0.2s ease;
+.dashboard-content.two-columns .dashboard-actions {
+    margin: 3rem auto;
 }
 
-.new-ucme-button:hover {
-    background: #fff;
+.new-ucme-button.primary-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
     color: #000;
+    padding: 1.25rem 2.5rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.new-ucme-button.primary-action::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.new-ucme-button.primary-action:hover {
+    background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.new-ucme-button.primary-action:hover::before {
+    left: 100%;
+}
+
+.new-ucme-button.primary-action svg {
+    transition: transform 0.3s ease;
+}
+
+.new-ucme-button.primary-action:hover svg {
+    transform: rotate(90deg);
 }
 
 .empty-dashboard {
@@ -4656,4 +4888,525 @@ html.auth-ready #main-cta {
     .admin-table { font-size: 0.8rem; }
     .admin-table th,
     .admin-table td { padding: 0.5rem 0.6rem; }
+}
+
+/* ========================================
+   ANIMAZIONI MODERNE
+   ======================================== */
+@keyframes titleFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes subtitleFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 0.85;
+        transform: translateY(0);
+    }
+}
+
+@keyframes contentFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes cardSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* ========================================
+   SEZIONE PORTATORE MIGLIORATA
+   ======================================== */
+.portatore-section {
+    background: linear-gradient(135deg, #111111 0%, #0a0a0a 100%);
+    border: 1px solid #222;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.portatore-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(134, 239, 172, 0.3) 50%, transparent 100%);
+    transform: translateX(-100%);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+.portatore-section:hover {
+    transform: translateY(-4px);
+    border-color: #333;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+.portatore-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #222;
+}
+
+.portatore-section .section-title-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.portatore-section .section-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #166534 0%, #16a34a 100%);
+    color: #86efac;
+    border: 1px solid #333;
+}
+
+.portatore-section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+/* ========================================
+   MIGLIORAMENTI UCMe CARDS PORTATORE
+   ======================================== */
+.assigned-ucme-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.ucme-card {
+    background: linear-gradient(135deg, #1a1a1a 0%, #111 100%);
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    animation: cardSlideIn 0.6s ease-out forwards;
+}
+
+.ucme-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(134, 239, 172, 0.05) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.ucme-card:hover {
+    border-color: #404040;
+    background: linear-gradient(135deg, #1f1f1f 0%, #151515 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.ucme-card:hover::before {
+    opacity: 1;
+}
+
+/* ========================================
+   RESPONSIVE MIGLIORATO
+   ======================================== */
+@media (max-width: 768px) {
+    .dashboard-content.two-columns {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .role-section {
+        padding: 1.5rem;
+    }
+    
+    .section-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .count-number {
+        font-size: 1.5rem;
+    }
+    
+    .dashboard-title {
+        font-size: 2rem;
+    }
+    
+    .floating-orb {
+        display: none; /* Nascondi orbs su mobile per performance */
+    }
+}
+
+@media (max-width: 480px) {
+    .role-section {
+        padding: 1rem;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .section-count {
+        text-align: left;
+    }
+    
+    .ucme-blocks.modern-grid,
+    .assigned-ucme-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .new-ucme-button.primary-action {
+        padding: 1rem 2rem;
+        font-size: 1rem;
+    }
+}
+
+/* ========================================
+   NUOVI COMPONENTI UI
+   ======================================== */
+
+/* Empty States */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #ccc;
+}
+
+.empty-state-icon {
+    margin-bottom: 1.5rem;
+    opacity: 0.6;
+}
+
+.empty-state-icon svg {
+    color: #666;
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+    color: #fff;
+}
+
+.empty-state p {
+    font-size: 1rem;
+    opacity: 0.8;
+    max-width: 400px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+/* Status Badges */
+.ucme-status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-pending {
+    background: rgba(156, 163, 175, 0.2);
+    color: #9ca3af;
+    border: 1px solid rgba(156, 163, 175, 0.3);
+}
+
+.status-assigned {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.status-processing {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-completed {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-received {
+    background: rgba(99, 102, 241, 0.2);
+    color: #a5b4fc;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.status-support {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* UCMe Card Improvements */
+.ucme-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #333;
+}
+
+.ucme-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.ucme-date {
+    color: #888;
+    font-size: 0.875rem;
+}
+
+.ucme-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #e5e5e5;
+    margin-bottom: 1rem;
+}
+
+.ucme-response {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(34, 197, 94, 0.05);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 8px;
+}
+
+.ucme-response h4 {
+    color: #4ade80;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.response-text {
+    color: #e5e5e5;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Portatore Card Styles */
+.ucme-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.ucme-card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ucme-expand-btn {
+    background: transparent;
+    border: 1px solid #333;
+    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #ccc;
+}
+
+.ucme-expand-btn:hover {
+    border-color: #555;
+    background: #222;
+    color: #fff;
+}
+
+.ucme-expand-btn.expanded {
+    transform: rotate(180deg);
+}
+
+.ucme-preview-text {
+    color: #e5e5e5;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.ucme-details {
+    padding-top: 1rem;
+    border-top: 1px solid #333;
+    margin-top: 1rem;
+}
+
+.ucme-full-content h4 {
+    color: #ccc;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ucme-full-text {
+    color: #e5e5e5;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.ucme-actions {
+    padding-top: 1rem;
+    border-top: 1px solid #333;
+}
+
+.ucme-status-control {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.ucme-status-control label {
+    color: #ccc;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.modern-select {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #fff;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modern-select:hover {
+    border-color: #555;
+}
+
+.modern-select:focus {
+    outline: none;
+    border-color: #666;
+    box-shadow: 0 0 0 2px rgba(102, 102, 102, 0.1);
+}
+
+/* Status Feedback */
+.status-feedback {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    animation: feedbackSlideIn 0.3s ease-out;
+}
+
+.status-feedback.success {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-feedback.error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+@keyframes feedbackSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* No Access migliorato */
+.no-access-content {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.no-access-content h2 {
+    font-size: 1.8rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.no-access-content p {
+    font-size: 1.1rem;
+    color: #ccc;
+    margin-bottom: 2rem;
+    opacity: 0.8;
 }

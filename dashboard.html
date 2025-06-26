@@ -13,8 +13,8 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css?v=202506251624">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css?v=202506251625">
     
     <!-- Variabili ambiente pubbliche (Supabase) -->
     <script src="/api/env"></script>
@@ -158,32 +158,74 @@
 
     <main class="dashboard-main">
         <div class="container">
+            <!-- Dashboard Header con animazione di entrada -->
             <div class="dashboard-header">
-                <h1>Il tuo spazio mentale</h1>
-                <p class="dashboard-subtitle">Pensieri affidati e pensieri ricevuti: il tuo spazio mentale completo.</p>
+                <div class="dashboard-header-content">
+                    <h1 class="dashboard-title">Il tuo spazio mentale</h1>
+                    <p class="dashboard-subtitle">Pensieri affidati e pensieri ricevuti: il tuo spazio mentale completo.</p>
+                </div>
+                <div class="dashboard-header-decoration">
+                    <div class="floating-orb orb-1"></div>
+                    <div class="floating-orb orb-2"></div>
+                    <div class="floating-orb orb-3"></div>
+                </div>
             </div>
 
+            <!-- Loading State -->
             <div id="user-verification" class="user-verification">
-                <p>Caricamento del tuo spazio...</p>
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p>Caricamento del tuo spazio...</p>
+                </div>
             </div>
 
+            <!-- Dashboard Content -->
             <div id="dashboard-content" class="dashboard-content">
-                <section id="depositor-section" class="depositor-section">
-                    <h2>UCMe affidate</h2>
-                    <div id="ucme-blocks" class="ucme-blocks">
+                <!-- Sezione Depositor (sempre presente) -->
+                <section id="depositor-section" class="depositor-section role-section">
+                    <div class="section-header">
+                        <div class="section-title-group">
+                            <div class="section-icon depositor-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14,2 14,8 20,8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10,9 9,9 8,9"></polyline>
+                                </svg>
+                            </div>
+                            <h2>Pensieri Affidati</h2>
+                        </div>
+                        <div class="section-count" id="depositor-count">
+                            <span class="count-number">0</span>
+                            <span class="count-label">UCMe</span>
+                        </div>
+                    </div>
+                    <div id="ucme-blocks" class="ucme-blocks modern-grid">
                         <!-- Le UCMe verranno inserite qui via JavaScript -->
                     </div>
                 </section>
 
+                <!-- Azioni Dashboard (centrate) -->
                 <div class="dashboard-actions">
-                    <a href="index.html#form-section" class="new-ucme-button">Affida un nuovo pensiero</a>
+                    <a href="index.html#form-section" class="new-ucme-button primary-action">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                        Affida un nuovo pensiero
+                    </a>
                 </div>
             </div>
 
+            <!-- No Access State -->
             <div id="no-access" class="no-access" style="display: none;">
-                <h2>Accesso richiesto</h2>
-                <p>Per visualizzare il tuo spazio mentale è necessario accedere con la tua email.</p>
-                <a href="login.html" class="login-link">Accedi al tuo spazio</a>
+                <div class="no-access-content">
+                    <h2>Accesso richiesto</h2>
+                    <p>Per visualizzare il tuo spazio mentale è necessario accedere con la tua email.</p>
+                    <a href="login.html" class="login-link">Accedi al tuo spazio</a>
+                </div>
             </div>
         </div>
     </main>
@@ -198,24 +240,14 @@
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                         <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                        <circle cx="17.5" cy="6.5" r="1.5"></circle>
                     </svg>
-                    <span>@mental_commons</span>
+                    <span>mental_commons</span>
                 </a>
             </div>
         </div>
     </footer>
 
-    <!-- 🚀 DASHBOARD OTTIMIZZATA - CARICAMENTO PERFORMANTE -->
-    <!-- auth.js legacy rimosso -->
-    
-    <!-- Libreria Supabase (UMD) -->
-    <script src="https://unpkg.com/@supabase/supabase-js"></script>
-
-    <!-- Aggiorna contatori in tempo reale (Supabase) -->
-    <script src="/script-realtime.js"></script>
-
-    <!-- Modulo principale per Vite (dev) -->
     <script type="module" src="/src/main.js"></script>
 </body>
 </html> 
