@@ -1163,6 +1163,44 @@ body {
     justify-content: center;
     text-align: center;
     padding: 6rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #E8F4F0 0%, #F5F5F5 40%, #E8F4F0 100%);
+    background-size: 400% 400%;
+    animation: gradientFlow 8s ease-in-out infinite;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(212, 165, 116, 0.08) 0%, transparent 50%), 
+                radial-gradient(circle at 80% 70%, rgba(212, 165, 116, 0.06) 0%, transparent 50%);
+    animation: accentPulse 12s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes gradientFlow {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+@keyframes accentPulse {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
 }
 
 .title {
@@ -1766,6 +1804,8 @@ footer p {
 
 .hero > .container {
     animation: fadeIn 1s ease-out;
+    position: relative;
+    z-index: 2;
 }
 
 .form-section {
@@ -1945,6 +1985,12 @@ footer p {
     .hero {
         padding: 60px 0;
         min-height: calc(100vh - 80px);
+        background-size: 300% 300%;
+        animation: gradientFlow 6s ease-in-out infinite;
+    }
+    
+    .hero::before {
+        animation: accentPulse 8s ease-in-out infinite;
     }
     
     .title {
@@ -2371,6 +2417,12 @@ footer p {
     .hero {
         padding: 40px 0;
         min-height: calc(100vh - 100px);
+        background-size: 250% 250%;
+        animation: gradientFlow 6s ease-in-out infinite;
+    }
+    
+    .hero::before {
+        animation: accentPulse 8s ease-in-out infinite;
     }
     
     .title {
@@ -2665,6 +2717,17 @@ footer p {
     .nav-buttons {
         animation: none !important;
         opacity: 1 !important;
+    }
+    
+    .hero {
+        animation: none !important;
+        background: #E8F4F0 !important;
+    }
+    
+    .hero::before {
+        animation: none !important;
+        opacity: 0.3 !important;
+        transform: none !important;
     }
 }
 
@@ -5763,4 +5826,16 @@ input::placeholder, textarea::placeholder {
 .ucme-block .ucme-content,
 .ucme-card .ucme-content {
   border-top: none !important;
+}
+
+/* === UCME RESPONSE COLOR OVERRIDE 2025-06-27 === */
+.ucme-response,
+.ucme-response.response-unread {
+  background-color: #F5F5F5 !important;
+  border: 1px solid #E0E0E0 !important;
+  color: var(--color-text-body) !important;
+}
+
+.ucme-response h4 {
+  color: var(--color-primary) !important;
 }
