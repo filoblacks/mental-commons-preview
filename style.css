@@ -5,10 +5,10 @@
     box-sizing: border-box;
 }
 :root {
-    --color-primary: #2C5F47;
+    --color-primary: #0D4739;
     --color-section-bg: #F5F5F5;
     --color-page-bg: #E8F4F0;
-    --color-accent: #D4A574;
+    --color-accent: #D9A862;
     --color-text-body: #333333;
     --color-text-heading: #2C5F47;
     --color-white: #FFFFFF;
@@ -5573,3 +5573,36 @@ input::placeholder, textarea::placeholder {
     stroke: var(--color-primary) !important;
 }
 /* === Fine override 26-06-2025 === */
+
+/* === BRAND REFRESH 2025-06-26 === */
+:root {
+  --color-primary: #0D4739;
+  --color-accent: #D9A862;
+}
+
+/* PROFILO – palette chiara */
+.profile-info,
+.edit-profile-form,
+.account-actions {
+  background: var(--color-white) !important;
+  border: 1px solid #DDE5E2 !important;
+  color: var(--color-text-body) !important;
+}
+
+.profile-info h3,
+.edit-profile-form h3,
+.account-actions h3 {
+  color: var(--color-text-heading) !important;
+}
+
+.profile-detail {
+  border-bottom: 1px solid #E6E6E6 !important;
+}
+
+.detail-label {
+  color: var(--color-text-body) !important;
+}
+
+.detail-value {
+  color: var(--color-text-heading) !important;
+}
