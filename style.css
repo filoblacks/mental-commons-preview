@@ -1168,6 +1168,7 @@ body {
     background: linear-gradient(135deg, #E8F4F0 0%, #D4A574 30%, #2C5F47 70%, #E8F4F0 100%) !important;
     background-size: 400% 400% !important;
     animation: gradientFlow 8s ease-in-out infinite !important;
+    padding-top: 0 !important; /* sovrascrive il padding-top imposto globalmente */
 }
 
 .hero::before {
