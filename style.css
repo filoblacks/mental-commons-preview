@@ -3469,9 +3469,9 @@ html {
         position: sticky;
         top: 0;
         z-index: 1200; /* Sopra al top-navigation-container */
-        background: rgba(0, 0, 0, 0.85);
+        background: var(--color-primary) !important;
         padding: 6px 8px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(0,0,0,0.05) !important;
         font-size: 13px;
         min-height: 36px;
     }
@@ -3524,8 +3524,8 @@ html {
         z-index: 1100; /* Sotto l'header mobile */
         min-height: 45px; /* Ridotto per mobile */
         padding: 6px 8px;
-        background: rgba(0, 0, 0, 0.85);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: var(--color-primary) !important;
+        border-bottom: 1px solid rgba(0,0,0,0.05) !important;
     }
     
     /* Nascondi i ritual-actions su mobile (ora sono nell'header) */
