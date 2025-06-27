@@ -1226,6 +1226,8 @@ body {
     .hero {
         animation: none !important;
         background: #E8F4F0 !important;
+        /* Mantieni il gradiente ma senza animazione per rispettare la preferenza */
+        background: linear-gradient(135deg, #E8F4F0 0%, #D4A574 30%, #2C5F47 70%, #E8F4F0 100%) !important;
     }
     
     .hero::before {
@@ -2756,6 +2758,8 @@ footer p {
     .hero {
         animation: none !important;
         background: #E8F4F0 !important;
+        /* Mantieni il gradiente ma senza animazione per rispettare la preferenza */
+        background: linear-gradient(135deg, #E8F4F0 0%, #D4A574 30%, #2C5F47 70%, #E8F4F0 100%) !important;
     }
     
     .hero::before {
