@@ -5883,3 +5883,17 @@ input::placeholder, textarea::placeholder {
     border: 1px solid var(--color-primary) !important;
     border-radius: 12px !important;
 }
+
+/* === FOOTER PRIMARY COLOR 2025-06-27 === */
+footer {
+    background-color: var(--color-primary) !important;
+    border-top: 1px solid var(--color-primary) !important;
+    color: var(--color-white) !important;
+}
+footer p,
+footer a,
+.footer-social,
+.instagram-link,
+.footer-social svg {
+    color: var(--color-white) !important;
+}
