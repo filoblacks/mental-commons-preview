@@ -7,6 +7,7 @@ import { initPortatoreSection } from '../ui/portatore.js';
 import { initAdmin } from '../ui/admin.js';
 import { initPortatoreUcmeSection } from '../ui/ucme-portatore.js';
 import { log } from '../core/logger.js';
+import { initHeroBackground } from '../ui/hero-bg.js';
 
 function domReady(cb) {
   if (document.readyState === 'loading') {
@@ -39,4 +40,6 @@ domReady(() => {
   }
 
   if (path.includes('admin.html')) initAdmin();
+
+  if (document.getElementById('hero')) initHeroBackground();
 }); 
