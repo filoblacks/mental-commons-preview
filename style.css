@@ -5930,3 +5930,13 @@ footer a,
 footer, footer .container {
     background-color: var(--color-primary) !important;
 }
+
+/* =====================
+   LATE OVERRIDE: HERO PADDING
+   Assicura che la sezione hero inizi subito sotto la barra sticky
+   ===================== */
+@media (min-width: 0px) {
+  .hero {
+    padding-top: 0 !important;
+  }
+}
