@@ -10,6 +10,9 @@
     --color-section-bg: #E8F4F0;
     --color-page-bg: #F5F5F5;
     --color-white: #FFFFFF;
+    /* Nuove variabili per testo leggibile */
+    --color-text-heading: #2C5F47;
+    --color-text-body: #333333;
 }
 
 body {
@@ -5873,4 +5876,10 @@ input::placeholder, textarea::placeholder {
 
 .ucme-response h4 {
   color: var(--color-primary) !important;
+}
+
+/* === MICRO SECTIONS INFO BLOCK BORDER 2025-06-27 === */
+.info-block {
+    border: 1px solid var(--color-primary) !important;
+    border-radius: 12px !important;
 }
