@@ -5936,7 +5936,8 @@ footer, footer .container {
    Assicura che la sezione hero inizi subito sotto la barra sticky
    ===================== */
 @media (min-width: 0px) {
-  .hero {
+  .hero,
+  .home-screen {
     padding-top: 0 !important;
   }
 }
