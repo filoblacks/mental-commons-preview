@@ -5941,3 +5941,10 @@ footer, footer .container {
     padding-top: 0 !important;
   }
 }
+
+/* === MOBILE FIX 2025-06-29: Nascondi logo duplicato nello sticky header su mobile === */
+@media (max-width: 768px) {
+  .nav-logo {
+    display: none !important;
+  }
+}
