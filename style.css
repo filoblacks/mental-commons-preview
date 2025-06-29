@@ -5948,3 +5948,14 @@ footer, footer .container {
     display: none !important;
   }
 }
+
+/* === INFO BLOCK PADDING FIX 2025-06-29 === */
+.info-block {
+    padding: 1.5rem !important;
+}
+
+@media (max-width: 480px) {
+  .info-block {
+     padding: 1.25rem !important;
+  }
+}
