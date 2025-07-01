@@ -5,9 +5,10 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       output: {
-        entryFileNames: 'script.js',
+        // Nomina file con fingerprint per evitare cache stantia
+        entryFileNames: 'assets/[name].[hash].js',
         assetFileNames: 'assets/[name].[hash].[ext]',
-        chunkFileNames: 'chunks/[name].[hash].js',
+        chunkFileNames: 'assets/[name].[hash].js',
       },
     },
   },
