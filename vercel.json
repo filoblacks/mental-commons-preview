@@ -125,6 +125,14 @@
     {
       "source": "/api/ucme/mark-as-read",
       "destination": "/api/ucme?action=mark-read"
+    },
+    {
+      "source": "/api/env",
+      "destination": "/api/env.js"
+    },
+    {
+      "source": "/env.js",
+      "destination": "/env.js"
     }
   ]
 } 
