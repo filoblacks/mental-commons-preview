@@ -53,14 +53,14 @@ async function request(endpoint, { method = 'GET', token, body, retries = 1 } = 
 
 // Endpoints specifici --------------------------------------------------
 export function login(email, password) {
-  return request('/api/login', {
+  return request('/api/auth?action=login', {
     method: 'POST',
     body: { email, password },
   });
 }
 
 export function register(email, password, name, surname) {
-  return request('/api/register', {
+  return request('/api/auth?action=register', {
     method: 'POST',
     body: { email, password, name, surname },
   });
