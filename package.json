@@ -44,7 +44,7 @@
   },
   "homepage": "https://mental-commons.vercel.app",
   "devDependencies": {
-    "vite": "^5.0.0",
-    "eslint": "^8.57.0"
+    "eslint": "^8.57.0",
+    "vite": "^7.0.2"
   }
 }
