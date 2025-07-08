@@ -94,6 +94,7 @@ function collectData(form) {
     content,
     email,
     tone, // verrà ignorato dal backend ma utile per eventuali log
+    anonymous: !getToken(),
   };
 
   return payload;

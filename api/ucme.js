@@ -7,9 +7,10 @@
 
 const {
   saveUCMe,
+  saveAnonymousUCMe,
   getUserUCMesWithResponses,
   markUcmeResponseAsRead,
-  verifyJWT
+  verifyJWT,
 } = require('../lib/supabase.js');
 const {
   validateAndSanitize,
@@ -83,21 +84,36 @@ async function handleGet(req, res) {
 }
 
 async function handlePost(req, res) {
-  const payload = authenticate(req);
-  if (!payload) {
-    return res.status(401).json({ success: false, message: 'Token mancante o non valido' });
-  }
-
-  // Validazione input UCMe
+  // 1. Valida input prima di qualsiasi operazione
   const validation = await validateAndSanitize(req.body, createUcmeSchema);
   if (!validation.valid) {
     return res.status(400).json({ success: false, message: 'Dati UCMe non validi', errors: validation.errors });
   }
 
-  const { content, title } = validation.data;
+  const { content, title, email } = validation.data;
 
-  const saved = await saveUCMe(payload.userId, content, title);
-  return res.status(201).json({ success: true, data: saved });
+  // 2. Prova ad autenticare l'utente (JWT opzionale)
+  const jwtPayload = authenticate(req);
+
+  try {
+    let saved;
+
+    if (jwtPayload) {
+      // Utente autenticato → UCMe associata all'account
+      saved = await saveUCMe(jwtPayload.userId, content, title);
+    } else {
+      // Utente guest → salva come UCMe anonima (richiede email)
+      if (!email) {
+        return res.status(400).json({ success: false, message: 'Email richiesta per invio anonimo' });
+      }
+      saved = await saveAnonymousUCMe(email, content, title);
+    }
+
+    return res.status(201).json({ success: true, data: saved });
+  } catch (err) {
+    console.error('❌ UCME POST error:', err);
+    return res.status(500).json({ success: false, message: 'Errore interno del server' });
+  }
 }
 
 // Gestione marca come letta
