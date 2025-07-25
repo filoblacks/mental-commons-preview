@@ -76,7 +76,7 @@ export function getUsers(token) {
 
 // --> NEW: recupera scuole disponibili
 export function getSchools(token) {
-  return request('/api/schools', { token });
+  return request('/api/users?schools=1', { token });
 }
 
 export function postUCME(payload, token) {
@@ -123,9 +123,9 @@ export function assignUCMe(ucmeId, portatoreId, token) {
 
 // --> NEW: assegna manualmente school_code a un utente
 export function assignUserSchoolCode(userId, school_code, token) {
-  return request('/api/admin/users/assign-school', {
-    method: 'POST',
-    body: { user_id: userId, school_code },
+  return request('/api/users', {
+    method: 'PUT',
+    body: { userId, school_code },
     token,
   });
 }

@@ -5,7 +5,7 @@ const { log, debug, info, warn, error } = require("../logger.js");
 // ================================================================
 // Endpoint per recuperare tutti gli utenti dal database e aggiornare profili
 
-const { getAllUsers, updateUserProfile } = require('../lib/supabase.js');
+const { getAllUsers, updateUserProfile, updateUserSchoolCode, getSupabaseClient } = require('../lib/supabase.js');
 
 module.exports = async function handler(req, res) {
   // Configurazione CORS
@@ -26,6 +26,18 @@ module.exports = async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
+      // 🏫 Nuova modalità: ?schools=1 restituisce elenco scuole
+      if (req.query.schools !== undefined) {
+        debug('🏫 Recupero elenco scuole');
+        const { data: schools, error: schoolErr } = await getSupabaseClient()
+          .from('schools')
+          .select('code, name')
+          .order('name', { ascending: true });
+        if (schoolErr) throw schoolErr;
+
+        return res.status(200).json({ success: true, data: schools });
+      }
+
       debug('📋 Recuperando tutti gli utenti...');
       
       // Recupera tutti gli utenti
@@ -45,9 +57,23 @@ module.exports = async function handler(req, res) {
       
     } else if (req.method === 'PUT') {
       debug('🔄 Aggiornamento profilo utente...');
-      
-      const { userId, name, surname } = req.body;
-      
+      const { userId, name, surname, school_code } = req.body;
+
+      // 🔄 Se viene passato school_code, aggiorniamo solo quello
+      if (school_code !== undefined) {
+        if (!userId) {
+          return res.status(400).json({ success: false, message: 'ID utente richiesto per aggiornare school_code' });
+        }
+
+        try {
+          const updated = await updateUserSchoolCode(userId, school_code || null);
+          return res.status(200).json({ success: true, message: 'School code aggiornato', data: { user: updated } });
+        } catch (err) {
+          error('❌ ERRORE AGGIORNAMENTO SCHOOL_CODE:', err);
+          return res.status(500).json({ success: false, message: err.message || 'Errore interno' });
+        }
+      }
+
       // Validazione
       if (!userId) {
         return res.status(400).json({
