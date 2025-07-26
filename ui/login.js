@@ -1,5 +1,5 @@
 import { login, register } from '../core/auth.js';
-import { isValidEmail } from '../utils/helpers.js';
+import { isValidEmail, isValidPassword } from '../utils/helpers.js';
 import { log } from '../core/logger.js';
 
 export function initLogin() {
@@ -65,7 +65,9 @@ export function initLogin() {
 
     if (name.length < 2) return showError('Il nome deve essere di almeno 2 caratteri');
     if (!isValidEmail(email)) return showError('Email non valida');
-    if (password.length < 6) return showError('La password deve essere di almeno 6 caratteri');
+    if (!isValidPassword(password)) {
+      return showError('La password deve essere di almeno 12 caratteri e contenere maiuscola, minuscola, numero e simbolo');
+    }
     if (password !== confirm) return showError('Le password non coincidono');
 
     try {

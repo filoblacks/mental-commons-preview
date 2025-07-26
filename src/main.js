@@ -21,6 +21,44 @@ function showDocenteNav() {
   }
 }
 
+// NUOVO: Mostra (o crea) il link Admin se l'utente è admin
+function showAdminNav() {
+  const user = getCurrentUser();
+  if (!user || (!user.is_admin && user.role !== 'admin')) return;
+
+  // Helper per aggiungere il link se non esiste
+  const addLink = (parentSelector, templateId, linkId, classes = '') => {
+    const parentEl = document.querySelector(parentSelector);
+    if (!parentEl) return;
+
+    // Se il link esiste già, basta mostrarlo
+    let link = document.getElementById(linkId);
+    if (link) {
+      link.style.display = 'inline-block';
+      return;
+    }
+
+    // Altrimenti crealo clonando parzialmente il bottone dashboard (se disponibile)
+    const ref = document.getElementById(templateId);
+    link = document.createElement('a');
+    link.href = 'admin.html';
+    link.id = linkId;
+    link.textContent = 'Admin';
+    if (ref) {
+      link.className = ref.className;
+    } else if (classes) {
+      link.className = classes;
+    }
+    link.style.display = 'inline-block';
+    parentEl.appendChild(link);
+  };
+
+  // Desktop nav
+  addLink('.ritual-actions', 'nav-dashboard', 'nav-admin');
+  // Mobile nav
+  addLink('.mobile-header-right', 'mobile-nav-dashboard', 'mobile-nav-admin', 'mobile-nav-btn');
+}
+
 function domReady(cb) {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', cb);
@@ -34,6 +72,8 @@ domReady(() => {
 
   // Mostra il pulsante Dashboard Docente se l'utente è un docente
   showDocenteNav();
+  // Mostra il pulsante Admin se l'utente è admin
+  showAdminNav();
 
   const path = window.location.pathname.toLowerCase();
   const isDashboardDocente = path.includes('dashboard-docente');

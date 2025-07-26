@@ -11,6 +11,12 @@ export function isValidEmail(email) {
   return EMAIL_REGEX.test(email.trim().toLowerCase());
 }
 
+// NEW: Validazione password coerente con il backend (≥12 caratteri, 1 maiuscola, 1 minuscola, 1 numero, 1 simbolo)
+export function isValidPassword(password) {
+  const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]).{12,128}$/;
+  return PASSWORD_REGEX.test(password);
+}
+
 export function generateUniqueId() {
   return (
     Date.now().toString(36) + Math.random().toString(36).substring(2, 9)
