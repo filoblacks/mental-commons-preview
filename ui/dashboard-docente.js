@@ -1,6 +1,6 @@
 import { getSchoolUCMEs, getSchoolUCMeStatsRange } from '../core/api.js';
 import { getToken } from '../core/auth.js';
-import { log } from '../core/logger.js';
+import { log, error } from '../core/logger.js';
 
 function domReady(cb) {
   if (document.readyState === 'loading') {
@@ -78,7 +78,7 @@ export async function initDashboardDocente() {
     customFrom?.addEventListener('change', handleCustomChange);
     customTo?.addEventListener('change', handleCustomChange);
   } catch (err) {
-    log('Errore dashboard docente:', err.message);
+    error('Errore dashboard docente:', err);
     listContainer.innerHTML = '<p class="error-message">Impossibile caricare i dati.</p>';
   }
 }
