@@ -162,4 +162,12 @@ export function markRispostaAsRead(ucmeId, token) {
     body: { ucme_id: ucmeId },
     token,
   });
+}
+
+export function getSchoolUCMEs(token) {
+  return request('/api/docente/ucme', { token });
+}
+
+export function getSchoolUCMeStats(token) {
+  return request('/api/docente/ucme?action=stats', { token });
 } 

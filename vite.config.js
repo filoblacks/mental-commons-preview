@@ -10,7 +10,8 @@ export default defineConfig({
         login: resolve(__dirname, 'login.html'),
         dashboard: resolve(__dirname, 'dashboard.html'),
         profile: resolve(__dirname, 'profile.html'),
-        admin: resolve(__dirname, 'admin.html')
+        admin: resolve(__dirname, 'admin.html'),
+        dashboardDocente: resolve(__dirname, 'dashboard-docente.html'),
       },
       output: {
         // Nomina file con fingerprint per evitare cache stantia

@@ -8,6 +8,7 @@ import { initAdmin } from '../ui/admin.js';
 import { initPortatoreUcmeSection } from '../ui/ucme-portatore.js';
 import { log } from '../core/logger.js';
 import { initHeroBackground } from '../ui/hero-bg.js';
+import { initDashboardDocente } from '../ui/dashboard-docente.js';
 
 function domReady(cb) {
   if (document.readyState === 'loading') {
@@ -21,7 +22,8 @@ domReady(() => {
   log('App Mental Commons inizializzata (modulare)');
 
   const path = window.location.pathname.toLowerCase();
-  const isDashboard = path.includes('dashboard');
+  const isDashboardDocente = path.includes('dashboard-docente');
+  const isDashboard = path.includes('dashboard') && !isDashboardDocente;
   const isProfile = path.includes('profile');
 
   if (path.includes('login.html')) initLogin();
@@ -37,6 +39,9 @@ domReady(() => {
   if (isProfile) {
     initProfile();
     initPortatoreSection();
+  }
+  if (isDashboardDocente) {
+    initDashboardDocente();
   }
 
   if (path.includes('admin.html')) initAdmin();
