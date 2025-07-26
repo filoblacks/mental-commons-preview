@@ -9,6 +9,17 @@ import { initPortatoreUcmeSection } from '../ui/ucme-portatore.js';
 import { log } from '../core/logger.js';
 import { initHeroBackground } from '../ui/hero-bg.js';
 import { initDashboardDocente } from '../ui/dashboard-docente.js';
+import { getCurrentUser } from '../core/auth.js';
+
+function showDocenteNav() {
+  const user = getCurrentUser();
+  if (user && user.role === 'docente') {
+    ['nav-dashboard-docente', 'mobile-nav-dashboard-docente'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'inline-block';
+    });
+  }
+}
 
 function domReady(cb) {
   if (document.readyState === 'loading') {
@@ -20,6 +31,9 @@ function domReady(cb) {
 
 domReady(() => {
   log('App Mental Commons inizializzata (modulare)');
+
+  // Mostra il pulsante Dashboard Docente se l'utente è un docente
+  showDocenteNav();
 
   const path = window.location.pathname.toLowerCase();
   const isDashboardDocente = path.includes('dashboard-docente');
