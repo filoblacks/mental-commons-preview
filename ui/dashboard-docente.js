@@ -14,7 +14,7 @@ function domReady(cb) {
 async function ensureChartLoaded() {
   if (window.Chart) return;
   try {
-    await import('https://unpkg.com/chart.js@4.4.0/dist/chart.esm.js');
+    await import('https://unpkg.com/chart.js@4.5.0/dist/chart.esm.js');
   } catch (e) {
     error('Impossibile caricare Chart.js', e);
   }
