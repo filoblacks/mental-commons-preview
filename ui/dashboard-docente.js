@@ -114,7 +114,8 @@ let toneChart;
 
 function renderWeeklyChart(data = []) {
   const ctx = document.getElementById('weekly-chart');
-  if (!ctx) return;
+  const ChartJS = window.Chart;
+  if (!ctx || !ChartJS) return;
 
   const labels = data.map((d) => new Date(d.week).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }));
   const counts = data.map((d) => d.count);
@@ -126,7 +127,7 @@ function renderWeeklyChart(data = []) {
     return;
   }
 
-  weeklyChart = new Chart(ctx, {
+  weeklyChart = new ChartJS(ctx, {
     type: 'line',
     data: {
       labels,
@@ -155,7 +156,8 @@ function renderWeeklyChart(data = []) {
 
 function renderToneChart(data = []) {
   const ctx = document.getElementById('tone-chart');
-  if (!ctx) return;
+  const ChartJS = window.Chart;
+  if (!ctx || !ChartJS) return;
 
   const labels = data.map((d) => d.tone);
   const counts = data.map((d) => d.count);
@@ -169,7 +171,7 @@ function renderToneChart(data = []) {
 
   const palette = ['#2C5F47', '#D4A574', '#8FB9A8', '#F5F5F5', '#B0735C'];
 
-  toneChart = new Chart(ctx, {
+  toneChart = new ChartJS(ctx, {
     type: 'bar',
     data: {
       labels,
