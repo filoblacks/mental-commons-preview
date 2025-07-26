@@ -132,7 +132,7 @@
     },
     {
       "source": "/env.js",
-      "destination": "/env.js"
+      "destination": "/api/env.js"
     }
   ]
 } 
