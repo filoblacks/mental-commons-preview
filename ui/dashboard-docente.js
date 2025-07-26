@@ -75,6 +75,8 @@ function renderUCMEs(container, ucmes = []) {
       day: '2-digit', month: 'short', year: 'numeric'
     });
 
+    const risposta = ucme.risposta;
+
     div.innerHTML = `
       <div class="ucme-header">
         <small class="ucme-date">${dateIT}</small>
@@ -82,6 +84,9 @@ function renderUCMEs(container, ucmes = []) {
       </div>
       <div class="ucme-content">
         <p class="ucme-text">${ucme.content}</p>
+      </div>
+      <div class="ucme-response">
+        ${risposta ? `<h4>Risposta</h4><p class="ucme-text risposta">${risposta.contenuto}</p>` : '<p class="ucme-text risposta-empty">Nessuna risposta al momento.</p>'}
       </div>
     `;
 
