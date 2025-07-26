@@ -110,11 +110,11 @@ export function revokePortatore(token) {
 }
 
 export function getPendingUCMEs(token) {
-  return request('/api/admin/ucme/pending', { token });
+  return request('/api/admin?action=ucme-pending', { token });
 }
 
 export function assignUCMe(ucmeId, portatoreId, token) {
-  return request('/api/admin/ucme/assign', {
+  return request('/api/admin?action=ucme-assign', {
     method: 'POST',
     body: { ucme_id: ucmeId, portatore_id: portatoreId },
     token,
@@ -131,7 +131,7 @@ export function assignUserSchoolCode(userId, school_code, token) {
 }
 
 export function getActivePortatori(token) {
-  return request('/api/admin/portatori/active', { token });
+  return request('/api/admin?action=portatori-active', { token });
 }
 
 export function getPortatoreAssignedUCMEs(token) {
