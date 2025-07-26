@@ -10,6 +10,16 @@ function domReady(cb) {
   }
 }
 
+// === Chart.js loader (fallback se CDN bloccato) ===
+async function ensureChartLoaded() {
+  if (window.Chart) return;
+  try {
+    await import('https://unpkg.com/chart.js@4.4.0/dist/chart.esm.js');
+  } catch (e) {
+    error('Impossibile caricare Chart.js', e);
+  }
+}
+
 export async function initDashboardDocente() {
   const token = getToken();
   if (!token) return;
@@ -34,6 +44,7 @@ export async function initDashboardDocente() {
         toDate.toISOString()
       );
       const stats = statsRes?.data ?? {};
+      await ensureChartLoaded();
       renderStats(stats, fromDate, toDate);
       renderWeeklyChart(stats.weeklyCount || []);
       renderToneChart(stats.toneDist || []);
