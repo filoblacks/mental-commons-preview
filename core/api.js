@@ -170,4 +170,10 @@ export function getSchoolUCMEs(token) {
 
 export function getSchoolUCMeStats(token) {
   return request('/api/docente/ucme?action=stats', { token });
+}
+
+// Stats docente con range personalizzato
+export function getSchoolUCMeStatsRange(token, fromISO, toISO) {
+  const qs = new URLSearchParams({ action: 'stats', from: fromISO, to: toISO });
+  return request(`/api/docente/ucme?${qs.toString()}`, { token });
 } 

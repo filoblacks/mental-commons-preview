@@ -76,6 +76,19 @@
         <p class="dashboard-subtitle">Uno sguardo sui pensieri condivisi (anonimi) nella tua comunità scolastica.</p>
       </header>
 
+      <!-- Selettore intervallo date -->
+      <section class="date-range-section">
+        <label for="date-range">Periodo:</label>
+        <select id="date-range">
+          <option value="7">Ultimi 7 giorni</option>
+          <option value="30" selected>Ultimi 30 giorni</option>
+          <option value="90">Ultimi 90 giorni</option>
+          <option value="custom">Personalizzato…</option>
+        </select>
+        <input type="date" id="custom-from" style="display:none" />
+        <input type="date" id="custom-to" style="display:none" />
+      </section>
+
       <!-- Statistiche aggregate -->
       <section id="stats-section" class="stats-section">
         <div class="stats-grid">
@@ -84,8 +97,8 @@
             <p id="stat-total" class="stat-value">–</p>
           </div>
           <div class="stat-box">
-            <h3>Ultimi 30 giorni</h3>
-            <p id="stat-30days" class="stat-value">–</p>
+            <h3>Intervallo selezionato</h3>
+            <p id="stat-range" class="stat-value">–</p>
           </div>
           <div class="stat-box">
             <h3>Tono più frequente</h3>
@@ -96,6 +109,15 @@
             <p id="stat-weekly" class="stat-value">–</p>
           </div>
         </div>
+      </section>
+
+      <!-- Grafici -->
+      <section id="analytics-section" class="analytics-section">
+        <h2>Andamento UCMe</h2>
+        <canvas id="weekly-chart" height="160"></canvas>
+
+        <h2 style="margin-top:2rem">Distribuzione Toni</h2>
+        <canvas id="tone-chart" height="160"></canvas>
       </section>
 
       <!-- Lista UCMe -->
@@ -112,6 +134,8 @@
     </div>
   </footer>
 
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <!-- Script principale -->
   <script type="module" src="/ui/dashboard-docente.js"></script>
 </body>

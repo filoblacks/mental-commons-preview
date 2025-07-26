@@ -90,7 +90,7 @@ async function handlePost(req, res) {
     return res.status(400).json({ success: false, message: 'Dati UCMe non validi', errors: validation.errors });
   }
 
-  const { content, title, email } = validation.data;
+  const { content, title, email, tone } = validation.data;
 
   // 2. Prova ad autenticare l'utente (JWT opzionale)
   const jwtPayload = authenticate(req);
@@ -100,13 +100,13 @@ async function handlePost(req, res) {
 
     if (jwtPayload) {
       // Utente autenticato → UCMe associata all'account
-      saved = await saveUCMe(jwtPayload.userId, content, title);
+      saved = await saveUCMe(jwtPayload.userId, content, title, tone);
     } else {
       // Utente guest → salva come UCMe anonima (richiede email)
       if (!email) {
         return res.status(400).json({ success: false, message: 'Email richiesta per invio anonimo' });
       }
-      saved = await saveAnonymousUCMe(email, content, title);
+      saved = await saveAnonymousUCMe(email, content, title, tone);
     }
 
     return res.status(201).json({ success: true, data: saved });

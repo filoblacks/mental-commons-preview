@@ -14,6 +14,7 @@ const {
   verifyJWT,
   getUCMesBySchool,
   getUCMeStats,
+  getUCMeStatsByRange,
   getSupabaseClient
 } = require('../../lib/supabase.js');
 
@@ -68,7 +69,16 @@ module.exports = async function handler(req, res) {
     const action = (req.query.action || 'list').toLowerCase();
 
     if (action === 'stats') {
-      const stats = await getUCMeStats(school_code);
+      // Supporta parametri ?from=YYYY-MM-DD&to=YYYY-MM-DD per filtro periodo
+      const { from, to } = req.query;
+
+      let stats;
+      if (from && to) {
+        stats = await getUCMeStatsByRange(school_code, from, to);
+      } else {
+        stats = await getUCMeStats(school_code);
+      }
+
       return res.status(200).json({ success: true, data: stats });
     }
 

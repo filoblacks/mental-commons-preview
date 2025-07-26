@@ -1,4 +1,4 @@
-import { getSchoolUCMEs, getSchoolUCMeStats } from '../core/api.js';
+import { getSchoolUCMEs, getSchoolUCMeStatsRange } from '../core/api.js';
 import { getToken } from '../core/auth.js';
 import { log } from '../core/logger.js';
 
@@ -15,46 +15,181 @@ export async function initDashboardDocente() {
   if (!token) return;
 
   const listContainer = document.getElementById('ucme-docente-container');
+  const rangeSelect = document.getElementById('date-range');
+  const customFrom = document.getElementById('custom-from');
+  const customTo = document.getElementById('custom-to');
   if (!listContainer) return;
 
   try {
-    // Recupero parallelo dati e statistiche
-    const [listRes, statsRes] = await Promise.all([
-      getSchoolUCMEs(token),
-      getSchoolUCMeStats(token)
+    // Default: ultimi 30 giorni
+    let toDate = new Date();
+    let fromDate = new Date();
+    fromDate.setDate(toDate.getDate() - 30);
+
+    // Funzione per refresh analytics
+    async function refreshAnalytics() {
+      const statsRes = await getSchoolUCMeStatsRange(
+        token,
+        fromDate.toISOString(),
+        toDate.toISOString()
+      );
+      const stats = statsRes?.data ?? {};
+      renderStats(stats, fromDate, toDate);
+      renderWeeklyChart(stats.weeklyCount || []);
+      renderToneChart(stats.toneDist || []);
+    }
+
+    // Recupero parallelo lista + stats iniziali
+    const [listRes] = await Promise.all([
+      getSchoolUCMEs(token)
     ]);
 
     const ucmes = listRes?.data ?? [];
-    const stats = statsRes?.data ?? {};
-
-    renderStats(stats);
     renderUCMEs(listContainer, ucmes);
+
+    await refreshAnalytics();
+
+    // Set up range selector eventi
+    function handleRangeChange() {
+      const val = rangeSelect.value;
+      if (val === 'custom') {
+        customFrom.style.display = 'inline-block';
+        customTo.style.display = 'inline-block';
+        return;
+      }
+      customFrom.style.display = 'none';
+      customTo.style.display = 'none';
+      const days = parseInt(val, 10);
+      toDate = new Date();
+      fromDate = new Date();
+      fromDate.setDate(toDate.getDate() - days);
+      refreshAnalytics();
+    }
+
+    function handleCustomChange() {
+      if (customFrom.value && customTo.value) {
+        fromDate = new Date(customFrom.value);
+        toDate = new Date(customTo.value);
+        refreshAnalytics();
+      }
+    }
+
+    rangeSelect?.addEventListener('change', handleRangeChange);
+    customFrom?.addEventListener('change', handleCustomChange);
+    customTo?.addEventListener('change', handleCustomChange);
   } catch (err) {
     log('Errore dashboard docente:', err.message);
     listContainer.innerHTML = '<p class="error-message">Impossibile caricare i dati.</p>';
   }
 }
 
-function renderStats(stats) {
+// Render KPI dinamici in base al range selezionato
+function renderStats(stats, fromDate, toDate) {
   const {
-    total_ucme = 0,
-    last_30_days = 0,
-    tone_counts = {},
-    weekly_average = 0
+    total = 0,
+    mostUsedTone = '–',
+    weeklyCount = []
   } = stats;
 
-  const topTone = Object.entries(tone_counts).sort((a, b) => b[1] - a[1])[0]?.[0] || '–';
+  // Media settimanale calcolata sul range
+  const weeks = weeklyCount.length || 1;
+  const weeklyAvg = weeks ? Number((total / weeks).toFixed(2)) : 0;
 
   const ids = {
-    'stat-total': total_ucme,
-    'stat-30days': last_30_days,
-    'stat-weekly': weekly_average,
-    'stat-top-tone': topTone
+    'stat-total': total,
+    'stat-range': `${fromDate.toLocaleDateString('it-IT')} – ${toDate.toLocaleDateString('it-IT')}`,
+    'stat-weekly': weeklyAvg,
+    'stat-top-tone': mostUsedTone || '–'
   };
 
   Object.entries(ids).forEach(([id, value]) => {
     const el = document.getElementById(id);
     if (el) el.textContent = value;
+  });
+}
+
+// === Grafici ================================================
+let weeklyChart;
+let toneChart;
+
+function renderWeeklyChart(data = []) {
+  const ctx = document.getElementById('weekly-chart');
+  if (!ctx) return;
+
+  const labels = data.map((d) => new Date(d.week).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }));
+  const counts = data.map((d) => d.count);
+
+  if (weeklyChart) {
+    weeklyChart.data.labels = labels;
+    weeklyChart.data.datasets[0].data = counts;
+    weeklyChart.update();
+    return;
+  }
+
+  weeklyChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'UCMe / settimana',
+          data: counts,
+          borderColor: '#2C5F47',
+          backgroundColor: 'rgba(44,95,71,0.1)',
+          tension: 0.3,
+          fill: true,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+      },
+      scales: {
+        y: { beginAtZero: true },
+      },
+    },
+  });
+}
+
+function renderToneChart(data = []) {
+  const ctx = document.getElementById('tone-chart');
+  if (!ctx) return;
+
+  const labels = data.map((d) => d.tone);
+  const counts = data.map((d) => d.count);
+
+  if (toneChart) {
+    toneChart.data.labels = labels;
+    toneChart.data.datasets[0].data = counts;
+    toneChart.update();
+    return;
+  }
+
+  const palette = ['#2C5F47', '#D4A574', '#8FB9A8', '#F5F5F5', '#B0735C'];
+
+  toneChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Distribuzione Toni',
+          data: counts,
+          backgroundColor: labels.map((_, i) => palette[i % palette.length]),
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+      },
+      scales: {
+        y: { beginAtZero: true },
+      },
+    },
   });
 }
 
