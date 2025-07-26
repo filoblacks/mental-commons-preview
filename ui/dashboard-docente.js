@@ -106,11 +106,14 @@ function renderStats(stats, fromDate, toDate) {
   const weeks = weeklyCount.length || 1;
   const weeklyAvg = weeks ? Number((total / weeks).toFixed(2)) : 0;
 
+  // Nasconde il placeholder "non_definito" mostrando un trattino
+  const toneLabel = mostUsedTone && mostUsedTone !== 'non_definito' ? mostUsedTone : '–';
+
   const ids = {
     'stat-total': total,
     'stat-range': `${fromDate.toLocaleDateString('it-IT')} – ${toDate.toLocaleDateString('it-IT')}`,
     'stat-weekly': weeklyAvg,
-    'stat-top-tone': mostUsedTone || '–'
+    'stat-top-tone': toneLabel
   };
 
   Object.entries(ids).forEach(([id, value]) => {
@@ -166,6 +169,9 @@ function renderWeeklyChart(data = []) {
 }
 
 function renderToneChart(data = []) {
+  // Rimuove il placeholder 'non_definito' se presenti altri toni
+  data = data.filter((d) => d.tone && d.tone !== 'non_definito');
+
   const ctx = document.getElementById('tone-chart');
   const ChartJS = window.Chart;
   if (!ctx || !ChartJS) return;
@@ -225,10 +231,12 @@ function renderUCMEs(container, ucmes = []) {
 
     const risposta = ucme.risposta;
 
+    const toneLabel = ucme.tone && ucme.tone !== 'non_definito' ? ucme.tone : '–';
+
     div.innerHTML = `
       <div class="ucme-header">
         <small class="ucme-date">${dateIT}</small>
-        <span class="ucme-tone">${ucme.tone || '–'}</span>
+        <span class="ucme-tone">${toneLabel}</span>
       </div>
       <div class="ucme-content">
         <p class="ucme-text">${ucme.content}</p>
