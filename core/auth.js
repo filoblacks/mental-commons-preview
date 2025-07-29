@@ -21,16 +21,20 @@ export function getCurrentUser() {
 
 export async function login(email, password) {
   const res = await apiLogin(email, password);
-  if (res.success && res.user && res.token) {
-    saveAuthData(res.user, res.token);
+  const token = res.token || res.data?.token;
+  const user = res.user || res.data?.user;
+  if (res.success && user && token) {
+    saveAuthData(user, token);
   }
   return res;
 }
 
 export async function register(email, password, name, surname) {
   const res = await apiRegister(email, password, name, surname);
-  if (res.success && res.user && res.token) {
-    saveAuthData(res.user, res.token);
+  const token = res.token || res.data?.token;
+  const user = res.user || res.data?.user;
+  if (res.success && user && token) {
+    saveAuthData(user, token);
   }
   return res;
 }
