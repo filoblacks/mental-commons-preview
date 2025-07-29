@@ -6,13 +6,10 @@
 // restituisce l'URL per il redirect.
 // ================================================================
 
-const Stripe = require('stripe');
+const { stripe, getPriceId } = require('../../lib/stripeConfig');
 const { verifyJWT } = require('../../lib/supabase.js');
 
-// Inizializza client Stripe (chiave segreta da env)
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-04-10',
-});
+// Istanza Stripe già configurata
 
 module.exports = async function handler(req, res) {
   // CORS base
@@ -45,10 +42,12 @@ module.exports = async function handler(req, res) {
 
     // === 2. Determina piano richiesto ===
     const plan = (req.query.plan || 'monthly').toLowerCase();
-    // Supportiamo anche eventuali variabili nominate *_PRICE_ID_* per compatibilità
-    let priceId = plan === 'annual' ?
-      (process.env.STRIPE_PRICE_ANNUAL || process.env.STRIPE_PRICE_ID_ANNUAL) :
-      (process.env.STRIPE_PRICE_MONTHLY || process.env.STRIPE_PRICE_ID_MONTHLY);
+    let priceId;
+    try {
+      priceId = getPriceId(plan);
+    } catch (err) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
 
     if (!priceId) {
       try {
@@ -95,7 +94,7 @@ module.exports = async function handler(req, res) {
       },
     });
 
-    return res.status(200).json({ success: true, url: session.url });
+    return res.status(200).json({ success: true, id: session.id, url: session.url });
   } catch (err) {
     console.error('❌ Stripe Checkout error:', err);
     return res.status(500).json({ success: false, message: 'Errore creazione sessione di pagamento' });

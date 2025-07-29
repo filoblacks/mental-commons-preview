@@ -16,6 +16,26 @@
     return localStorage.getItem('mental_commons_token');
   }
 
+  // ================================================================
+  // Stripe.js: caricamento lazy e inizializzazione con chiave corretta
+  // ================================================================
+  let stripePromise;
+  function getStripe() {
+    if (stripePromise) return stripePromise;
+    stripePromise = new Promise((resolve, reject) => {
+      const init = () => resolve(window.Stripe(window.STRIPE_PUBLISHABLE_KEY));
+      if (window.Stripe) {
+        return init();
+      }
+      const script = document.createElement('script');
+      script.src = 'https://js.stripe.com/v3/';
+      script.onload = init;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+    return stripePromise;
+  }
+
   async function startCheckout(plan) {
     try {
       const token = getAuthToken();
@@ -34,7 +54,19 @@
       });
 
       const data = await response.json();
-      if (data.success && data.url) {
+      if (data.success && data.id) {
+        try {
+          const stripe = await getStripe();
+          const { error } = await stripe.redirectToCheckout({ sessionId: data.id });
+          if (error) {
+            console.error('Stripe redirect error:', error);
+            window.location.href = data.url; // Fallback
+          }
+        } catch (stripeErr) {
+          console.error('Stripe init error:', stripeErr);
+          window.location.href = data.url; // Fallback
+        }
+      } else if (data.success && data.url) {
         window.location.href = data.url;
       } else {
         console.error('Checkout error:', data);

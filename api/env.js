@@ -29,6 +29,15 @@
     const nodeEnv = process.env.NODE_ENV || 'development';
     const isProduction = nodeEnv === 'production';
 
+    // Ottieni chiave pubblica tramite stripeConfig (rispetta STRIPE_USE_TEST)
+    const { getPublicKey, isTest } = require('../lib/stripeConfig');
+    const stripePublishableKey = getPublicKey();
+
+    // Log debug modalità test
+    if (!isProduction || isTest) {
+      console.info(`[env.js] Modalità Stripe TEST attiva (${isTest}) - chiave publishable fornita`);
+    }
+
     if (!supabaseUrl || !supabaseAnonKey) {
       // Risponde con messaggio di errore lato client per debug
       return res.status(200).send(
@@ -36,9 +45,10 @@
       );
     }
 
-    // Esporta le variabili su window
+    // Esporta le variabili su window (inclusa chiave Stripe corretta)
     const script = `window.SUPABASE_URL = "${supabaseUrl}";
 window.SUPABASE_ANON_KEY = "${supabaseAnonKey}";
+window.STRIPE_PUBLISHABLE_KEY = "${stripePublishableKey}";
 window.isProduction = ${isProduction};`;
 
     return res.status(200).send(script);

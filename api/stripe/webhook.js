@@ -5,12 +5,10 @@
 // Gestisce eventi Stripe.  Aggiorna Supabase al completamento checkout.
 // ================================================================
 
-const Stripe = require('stripe');
+const { stripe, getWebhookSecret } = require('../../lib/stripeConfig');
 const { getSupabaseClient } = require('../../lib/supabase.js');
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-04-10',
-});
+// Istanza Stripe già configurata
 
 // Disabilita il bodyParser di Vercel per poter verificare la firma
 module.exports.config = {
@@ -26,7 +24,7 @@ module.exports = async function handler(req, res) {
   }
 
   const sig = req.headers['stripe-signature'];
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const webhookSecret = getWebhookSecret();
 
   let rawBody = '';
   try {
