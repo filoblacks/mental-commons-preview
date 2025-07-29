@@ -91,11 +91,11 @@ export function postUCME(payload, token) {
 // PORTATORE (SPRINT-4)
 // --------------------------------------------------------------
 export function getPortatoreStatus(token) {
-  return request('/api/portatore/status', { token });
+  return request('/api/portatore?action=status', { token });
 }
 
 export function registerPortatore(bio, token) {
-  return request('/api/portatore/register', {
+  return request('/api/portatore?action=register', {
     method: 'POST',
     body: { bio },
     token,
@@ -103,7 +103,7 @@ export function registerPortatore(bio, token) {
 }
 
 export function revokePortatore(token) {
-  return request('/api/portatore/revoke', {
+  return request('/api/portatore?action=revoke', {
     method: 'DELETE',
     token,
   });
@@ -135,11 +135,11 @@ export function getActivePortatori(token) {
 }
 
 export function getPortatoreAssignedUCMEs(token) {
-  return request('/api/portatore/ucme', { token });
+  return request('/api/portatore?action=ucme', { token });
 }
 
 export function updatePortatoreUcmeStatus(ucmeId, newStatus, token) {
-  return request('/api/portatore/ucme', {
+  return request('/api/portatore?action=ucme', {
     method: 'PATCH',
     body: { ucme_id: ucmeId, new_status: newStatus },
     token,
@@ -148,7 +148,7 @@ export function updatePortatoreUcmeStatus(ucmeId, newStatus, token) {
 
 // FASE 4 – Risposta UCMe
 export function submitUcmeResponse(ucmeId, contenuto, token) {
-  return request('/api/portatore/rispondi', {
+  return request('/api/portatore?action=rispondi', {
     method: 'POST',
     body: { ucme_id: ucmeId, contenuto },
     token,
