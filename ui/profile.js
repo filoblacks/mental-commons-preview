@@ -93,10 +93,7 @@ export async function initProfile() {
   if (headerEmailEl) headerEmailEl.textContent = realUser.email;
   emailEl.textContent = realUser.email;
   
-  // Debug temporaneo per verificare has_subscription
-  console.log('🔍 Profile - User object:', realUser);
-  console.log('🔍 Profile - has_subscription:', realUser.has_subscription);
-  console.log('🔍 Profile - typeof has_subscription:', typeof realUser.has_subscription);
+
   
   // Mostra nome con badge premium se applicabile
   const userName = realUser.name || 'Non specificato';
