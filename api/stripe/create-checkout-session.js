@@ -45,11 +45,33 @@ module.exports = async function handler(req, res) {
 
     // === 2. Determina piano richiesto ===
     const plan = (req.query.plan || 'monthly').toLowerCase();
-    const priceId = plan === 'annual' ? process.env.STRIPE_PRICE_ANNUAL : process.env.STRIPE_PRICE_MONTHLY;
+    // Supportiamo anche eventuali variabili nominate *_PRICE_ID_* per compatibilità
+    let priceId = plan === 'annual' ?
+      (process.env.STRIPE_PRICE_ANNUAL || process.env.STRIPE_PRICE_ID_ANNUAL) :
+      (process.env.STRIPE_PRICE_MONTHLY || process.env.STRIPE_PRICE_ID_MONTHLY);
 
     if (!priceId) {
-      console.error('❌ STRIPE_PRICE_ID mancante per piano', plan);
-      return res.status(500).json({ success: false, message: 'Configurazione Stripe mancante per il piano selezionato' });
+      try {
+        const lookupKey = plan === 'annual' ? 'premium_annual' : 'premium_monthly';
+        const prices = await stripe.prices.list({
+          lookup_keys: [lookupKey],
+          limit: 1,
+          expand: ['data.product'],
+        });
+
+        if (prices.data.length) {
+          priceId = prices.data[0].id;
+          console.info(`✅ Prezzo recuperato da Stripe tramite lookup_key ${lookupKey}: ${priceId}`);
+        } else {
+          console.error(`❌ Nessun prezzo trovato con lookup_key ${lookupKey}`);
+        }
+      } catch (stripeErr) {
+        console.error('❌ Errore ricerca prezzo Stripe:', stripeErr);
+      }
+    }
+
+    if (!priceId) {
+      return res.status(500).json({ success: false, message: 'Configurazione Stripe mancante: definisci STRIPE_PRICE_MONTHLY / STRIPE_PRICE_ANNUAL o imposta le lookup_key premium_monthly / premium_annual' });
     }
 
     // === 3. Crea sessione Checkout ===
