@@ -179,7 +179,7 @@ export function getSchoolUCMeStatsRange(token, fromISO, toISO) {
 }
 
 export function requestChat(ucmeId, token) {
-  return request('/api/chats/request', {
+  return request('/api/chats', {
     method: 'POST',
     body: { ucme_id: ucmeId },
     token,
