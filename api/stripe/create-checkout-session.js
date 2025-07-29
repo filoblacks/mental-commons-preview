@@ -49,6 +49,27 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ success: false, message: err.message });
     }
 
+    // Se priceId è definito ma sembra una lookup_key, risolviamo via API
+    if (priceId && !priceId.startsWith('price_')) {
+      try {
+        const prices = await stripe.prices.list({
+          lookup_keys: [priceId],
+          limit: 1,
+          expand: ['data.product'],
+        });
+        if (prices.data.length) {
+          console.info(`✅ Prezzo risolto da lookup_key ${priceId}: ${prices.data[0].id}`);
+          priceId = prices.data[0].id;
+        } else {
+          console.error(`❌ Nessun prezzo trovato con lookup_key ${priceId}`);
+          priceId = undefined;
+        }
+      } catch (e) {
+        console.error('❌ Lookup price error:', e);
+        priceId = undefined;
+      }
+    }
+
     if (!priceId) {
       try {
         const lookupKey = plan === 'annual' ? 'premium_annual' : 'premium_monthly';
