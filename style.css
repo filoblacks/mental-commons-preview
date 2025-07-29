@@ -6002,6 +6002,93 @@ footer, footer .container {
   flex-wrap: wrap;
 }
 
+/* Stili per la sezione "Continua a parlarne" */
+.continue-chat-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(212, 165, 116, 0.2);
+}
+
+.btn-continue-chat {
+  background: linear-gradient(135deg, var(--color-accent), #c19a6b);
+  color: var(--color-white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(212, 165, 116, 0.3);
+}
+
+.btn-continue-chat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.4);
+}
+
+.premium-prompt {
+  background: rgba(212, 165, 116, 0.1);
+  border: 1px solid rgba(212, 165, 116, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.premium-prompt p {
+  margin: 0 0 0.75rem 0;
+  color: var(--color-text-body);
+  font-size: 0.9rem;
+}
+
+.btn-premium-upgrade {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--color-accent), #c19a6b);
+  color: var(--color-white);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-premium-upgrade:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(212, 165, 116, 0.3);
+}
+
+.login-prompt {
+  background: rgba(44, 95, 71, 0.1);
+  border: 1px solid rgba(44, 95, 71, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.login-prompt p {
+  margin: 0 0 0.75rem 0;
+  color: var(--color-text-body);
+  font-size: 0.9rem;
+}
+
+.btn-login {
+  display: inline-block;
+  background: var(--color-primary);
+  color: var(--color-white);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+  background: #1e4a3a;
+  transform: translateY(-1px);
+}
+
 /* ========================================
    RESPONSIVE DESIGN
    ======================================== */

@@ -1,5 +1,5 @@
 import { getUCMEs, getUsers, markRispostaAsRead } from '../core/api.js';
-import { getToken, getCurrentUser } from '../core/auth.js';
+import { getToken, getCurrentUser, refreshUserInfo } from '../core/auth.js';
 import { log } from '../core/logger.js';
 import { updateStickyHeader } from './stats.js';
 
@@ -8,6 +8,10 @@ const containerId = 'ucme-blocks';
 export async function initDashboard() {
   const user = getCurrentUser();
   if (!user) return;
+
+  // Aggiorna le informazioni utente per avere has_subscription aggiornato
+  const updatedUser = await refreshUserInfo();
+  const currentUser = updatedUser || user;
 
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -40,11 +44,12 @@ export async function initDashboard() {
     // Aggiorna contatore sezione depositor
     updateDepositorCount(ucmes.length);
 
-    renderUcmes(container, ucmes);
+    renderUcmes(container, ucmes, currentUser);
     // Aggiorna header usando la funzione condivisa
     updateStickyHeader(ucmes, users);
     // Inizializza listener dopo render
     setupMarkAsReadListeners(container);
+    setupContinueChatListeners(container, currentUser);
   } catch (err) {
     log('Errore caricamento UCMe:', err.message);
     container.innerHTML = '<p class="error-message">Impossibile caricare i tuoi pensieri.</p>';
@@ -60,7 +65,7 @@ function updateDepositorCount(count) {
   }
 }
 
-function renderUcmes(container, ucmes = []) {
+function renderUcmes(container, ucmes = [], user = null) {
   container.innerHTML = '';
   
   if (ucmes.length === 0) {
@@ -115,6 +120,22 @@ function renderUcmes(container, ucmes = []) {
               <small class="response-date">${new Date(ucme.risposta.timestamp).toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })}</small>
             </div>
             ${!ucme.risposta.letta ? `<button class="btn-mark-read" data-ucme-id="${ucme.id}">Segna come letta</button>` : '<span class="read-label">Letta</span>'}
+          </div>
+          
+          <!-- Sezione Continua a parlarne -->
+          <div class="continue-chat-section">
+            ${user && (user.has_subscription === true || user.has_subscription === "true") ?
+              `<button class="btn-continue-chat" data-ucme-id="${ucme.id}">Continua a parlarne</button>` :
+              user ?
+                `<div class="premium-prompt">
+                  <p>Attiva MC Premium per continuare il dialogo.</p>
+                  <a href="/premium.html" class="btn-premium-upgrade">Attiva Premium</a>
+                </div>` :
+                `<div class="login-prompt">
+                  <p>Accedi per continuare il dialogo.</p>
+                  <a href="/login.html" class="btn-login">Accedi</a>
+                </div>`
+            }
           </div>
         ` : ''}
       </div>
@@ -185,4 +206,30 @@ function setupMarkAsReadListeners(container) {
       }
     });
   });
-} 
+}
+
+// Listener per i bottoni "Continua a parlarne"
+function setupContinueChatListeners(container, user) {
+  const buttons = container.querySelectorAll('.btn-continue-chat');
+  if (!buttons.length) return;
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const ucmeId = btn.getAttribute('data-ucme-id');
+      if (!ucmeId) return;
+
+      // Verifica se l'utente ha l'abbonamento
+      const canContinueChat = user && (user.has_subscription === true || user.has_subscription === "true");
+      
+      if (canContinueChat) {
+        // TODO: Implementare la logica per aprire la chat di follow-up
+        log('Apertura chat follow-up per UCMe:', ucmeId);
+        // Per ora reindirizza alla pagina UCMe
+        window.location.href = `/ucme/${ucmeId}`;
+      } else {
+        // Reindirizza alla pagina premium
+        window.location.href = '/premium.html';
+      }
+    });
+  });
+}
