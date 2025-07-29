@@ -107,6 +107,14 @@
       "destination": "/profile.html"
     },
     {
+      "source": "/premium",
+      "destination": "/premium.html"
+    },
+    {
+      "source": "/premium/success",
+      "destination": "/premium-success.html"
+    },
+    {
       "source": "/api/login",
       "destination": "/api/auth?action=login"
     },

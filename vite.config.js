@@ -12,6 +12,8 @@ export default defineConfig({
         profile: resolve(__dirname, 'profile.html'),
         admin: resolve(__dirname, 'admin.html'),
         dashboardDocente: resolve(__dirname, 'dashboard-docente.html'),
+        premium: resolve(__dirname, 'premium.html'),
+        premiumSuccess: resolve(__dirname, 'premium-success.html'),
       },
       output: {
         // Nomina file con fingerprint per evitare cache stantia
