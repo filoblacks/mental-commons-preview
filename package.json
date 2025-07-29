@@ -38,8 +38,8 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "resend": "^4.6.0",
-    "zod": "^3.25.67",
-    "stripe": "^12.19.0"
+    "stripe": "^14.25.0",
+    "zod": "^3.25.67"
   },
   "repository": {
     "type": "git",
