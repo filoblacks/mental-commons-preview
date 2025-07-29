@@ -1,4 +1,4 @@
-import { getUCMEs, getUsers, markRispostaAsRead } from '../core/api.js';
+import { getUCMEs, getUsers, markRispostaAsRead, requestChat } from '../core/api.js';
 import { getToken, getCurrentUser, refreshUserInfo } from '../core/auth.js';
 import { log } from '../core/logger.js';
 import { updateStickyHeader } from './stats.js';
@@ -123,8 +123,8 @@ function renderUcmes(container, ucmes = [], user = null) {
           </div>
           
           <!-- Sezione Continua a parlarne -->
-          <div class="continue-chat-section">
-            ${user && (user.has_subscription === true || user.has_subscription === "true") ?
+          ${ucme.chat && ucme.chat.status ? `<span class="chat-requested-label">Hai già chiesto di continuare</span>` :
+            (user && (user.has_subscription === true || user.has_subscription === "true") ?
               `<button class="btn-continue-chat" data-ucme-id="${ucme.id}">Continua a parlarne</button>` :
               user ?
                 `<div class="premium-prompt">
@@ -135,8 +135,7 @@ function renderUcmes(container, ucmes = [], user = null) {
                   <p>Accedi per continuare il dialogo.</p>
                   <a href="/login.html" class="btn-login">Accedi</a>
                 </div>`
-            }
-          </div>
+            )}
         ` : ''}
       </div>
     `;
@@ -214,21 +213,28 @@ function setupContinueChatListeners(container, user) {
   if (!buttons.length) return;
 
   buttons.forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const ucmeId = btn.getAttribute('data-ucme-id');
       if (!ucmeId) return;
 
-      // Verifica se l'utente ha l'abbonamento
+      // Controllo abbonamento (il bottone appare solo se premium, ma ricontrollo)
       const canContinueChat = user && (user.has_subscription === true || user.has_subscription === "true");
-      
-      if (canContinueChat) {
-        // TODO: Implementare la logica per aprire la chat di follow-up
-        log('Apertura chat follow-up per UCMe:', ucmeId);
-        // Per ora reindirizza alla pagina UCMe
-        window.location.href = `/ucme/${ucmeId}`;
-      } else {
-        // Reindirizza alla pagina premium
+      if (!canContinueChat) {
         window.location.href = '/premium.html';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Invio...';
+      try {
+        const res = await requestChat(ucmeId, getToken());
+        // Sostituisci il bottone con etichetta di conferma
+        btn.outerHTML = '<span class="chat-requested-label">Richiesta inviata</span>';
+      } catch (err) {
+        log('Errore richiesta chat:', err.message);
+        alert(err.message);
+        btn.disabled = false;
+        btn.textContent = 'Continua a parlarne';
       }
     });
   });

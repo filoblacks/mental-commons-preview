@@ -176,4 +176,12 @@ export function getSchoolUCMeStats(token) {
 export function getSchoolUCMeStatsRange(token, fromISO, toISO) {
   const qs = new URLSearchParams({ action: 'stats', from: fromISO, to: toISO });
   return request(`/api/docente/ucme?${qs.toString()}`, { token });
+}
+
+export function requestChat(ucmeId, token) {
+  return request('/api/chats/request', {
+    method: 'POST',
+    body: { ucme_id: ucmeId },
+    token,
+  });
 } 
