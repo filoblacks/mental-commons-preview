@@ -13,9 +13,16 @@ create table if not exists public.chats (
   updated_at timestamp without time zone not null default now()
 );
 
--- Garantisce una sola chat per UCMe
-alter table public.chats
-  add constraint if not exists chats_unique_ucme unique (ucme_id);
+-- Vincolo di unicità su ucme_id (una sola chat per UCMe)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'chats_unique_ucme'
+  ) THEN
+    ALTER TABLE public.chats
+      ADD CONSTRAINT chats_unique_ucme UNIQUE (ucme_id);
+  END IF;
+END $$;
 
 -- Trigger per aggiornare updated_at
 create or replace function public.set_chats_updated_at()

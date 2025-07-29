@@ -184,4 +184,29 @@ export function requestChat(ucmeId, token) {
     body: { ucme_id: ucmeId },
     token,
   });
+}
+
+export function getChatRequests(token) {
+  return request('/api/chats?status=requested', { token });
+}
+
+export function updateChatRequestStatus(chatId, newStatus, token) {
+  return request(`/api/chats/${chatId}`, {
+    method: 'PATCH',
+    body: { status: newStatus },
+    token,
+  });
+}
+
+export function sendChatMessage(chatId, text, token) {
+  return request('/api/messages/send', {
+    method: 'POST',
+    body: { chat_id: chatId, text },
+    token,
+  });
+}
+
+export function getChatMessages(chatId, token) {
+  const qs = new URLSearchParams({ chat_id: chatId });
+  return request(`/api/messages/list?${qs.toString()}`, { token });
 } 

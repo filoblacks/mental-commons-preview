@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat 1:1 | Mental Commons</title>
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="stylesheet" href="/style.css?v=2025072901" />
+  <script type="module" src="/api/env.js"></script>
+</head>
+<body class="chat-page">
+  <header class="top-navigation-container">
+    <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="MC" /></a>
+    <nav class="ritual-actions">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="profile.html">Profilo</a>
+    </nav>
+  </header>
+
+  <main class="chat-container" style="max-width: 720px; margin: 0 auto; padding-top: 1rem;">
+    <h1 class="chat-title">Dialogo Anonimo</h1>
+    <div id="messages-box" class="messages-box"></div>
+    <form id="message-form" class="message-form">
+      <textarea id="message-input" placeholder="Scrivi un messaggio…" maxlength="4000" required></textarea>
+      <button type="submit">Invia</button>
+    </form>
+  </main>
+
+  <script type="module" src="/ui/chat.js"></script>
+</body>
+</html> 
