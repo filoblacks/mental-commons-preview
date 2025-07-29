@@ -199,7 +199,7 @@ export function updateChatRequestStatus(chatId, newStatus, token) {
 }
 
 export function sendChatMessage(chatId, text, token) {
-  return request('/api/messages/send', {
+  return request('/api/messages', {
     method: 'POST',
     body: { chat_id: chatId, text },
     token,
@@ -208,5 +208,5 @@ export function sendChatMessage(chatId, text, token) {
 
 export function getChatMessages(chatId, token) {
   const qs = new URLSearchParams({ chat_id: chatId });
-  return request(`/api/messages/list?${qs.toString()}`, { token });
+  return request(`/api/messages?${qs.toString()}`, { token });
 } 
