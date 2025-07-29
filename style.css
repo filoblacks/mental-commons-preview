@@ -5959,3 +5959,49 @@ footer, footer .container {
      padding: 1.25rem !important;
   }
 }
+
+/* ========================================
+   BADGE MC PREMIUM
+   ======================================== */
+
+.premium-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: linear-gradient(135deg, var(--color-accent), #c19a6b);
+  color: var(--color-white) !important;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(212, 165, 116, 0.3);
+  animation: premiumGlow 2s ease-in-out infinite alternate;
+}
+
+.premium-badge::before {
+  content: '🌿';
+  font-size: 0.8rem;
+}
+
+@keyframes premiumGlow {
+  0% {
+    box-shadow: 0 2px 8px rgba(212, 165, 116, 0.3);
+  }
+  100% {
+    box-shadow: 0 4px 16px rgba(212, 165, 116, 0.5);
+  }
+}
+
+/* Badge nel profilo utente */
+.user-name-with-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */

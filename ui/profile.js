@@ -92,7 +92,25 @@ export async function initProfile() {
   // Popola UI
   if (headerEmailEl) headerEmailEl.textContent = realUser.email;
   emailEl.textContent = realUser.email;
-  nameEl.textContent = realUser.name || 'Non specificato';
+  
+  // Debug temporaneo per verificare has_subscription
+  console.log('🔍 Profile - User object:', realUser);
+  console.log('🔍 Profile - has_subscription:', realUser.has_subscription);
+  console.log('🔍 Profile - typeof has_subscription:', typeof realUser.has_subscription);
+  
+  // Mostra nome con badge premium se applicabile
+  const userName = realUser.name || 'Non specificato';
+  if (realUser.has_subscription === true || realUser.has_subscription === "true") {
+    nameEl.innerHTML = `
+      <div class="user-name-with-badge">
+        <span>${userName}</span>
+        <span class="premium-badge">MC Premium</span>
+      </div>
+    `;
+  } else {
+    nameEl.textContent = userName;
+  }
+  
   createdEl.textContent = new Date(realUser.created_at || Date.now()).toLocaleDateString('it-IT');
   lastEl.textContent = new Date(realUser.last_login || Date.now()).toLocaleDateString('it-IT');
 
