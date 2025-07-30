@@ -24,7 +24,8 @@ function showDocenteNav() {
 // NUOVO: Mostra (o crea) il link Admin se l'utente è admin
 function showAdminNav() {
   const user = getCurrentUser();
-  if (!user || (!user.is_admin && user.role !== 'admin')) return;
+  const isAdmin = user && (user.is_admin === true || user.is_admin === 'true' || user.role === 'admin');
+  if (!isAdmin) return;
 
   // Helper per aggiungere il link se non esiste
   const addLink = (parentSelector, templateId, linkId, classes = '') => {
