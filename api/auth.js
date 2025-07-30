@@ -73,6 +73,15 @@ async function handleLogin(req, res) {
     return res.status(401).json({ success: false, message: 'Credenziali non valide' });
   }
 
+  // DEBUG: Log del campo is_admin dal DB
+  console.log('🔍 DEBUG LOGIN - user dal DB:', {
+    id: user.id,
+    email: user.email,
+    role: user.role,
+    is_admin: user.is_admin,
+    is_admin_type: typeof user.is_admin
+  });
+
   const passwordOk = await verifyPassword(password, user.password_hash);
   if (!passwordOk) {
     return res.status(401).json({ success: false, message: 'Credenziali non valide' });
