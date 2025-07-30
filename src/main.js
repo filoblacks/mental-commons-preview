@@ -9,7 +9,7 @@ import { initPortatoreUcmeSection } from '../ui/ucme-portatore.js';
 import { log } from '../core/logger.js';
 import { initHeroBackground } from '../ui/hero-bg.js';
 import { initDashboardDocente } from '../ui/dashboard-docente.js';
-import { getCurrentUser } from '../core/auth.js';
+import { getCurrentUser, refreshUserInfo } from '../core/auth.js';
 
 function showDocenteNav() {
   const user = getCurrentUser();
@@ -67,8 +67,11 @@ function domReady(cb) {
   }
 }
 
-domReady(() => {
+domReady(async () => {
   log('App Mental Commons inizializzata (modulare)');
+
+  // Aggiorna dati utente dal backend (token valido)
+  await refreshUserInfo();
 
   // Mostra il pulsante Dashboard Docente se l'utente è un docente
   showDocenteNav();
