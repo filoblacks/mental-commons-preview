@@ -20,11 +20,18 @@ async function request(endpoint, { method = 'GET', token, body, retries = 1 } = 
   };
   if (token) headers.Authorization = `Bearer ${token}`;
 
+  // Cache busting per evitare 304 su POST
+  let url = `${BASE_URL}${endpoint}`;
+  if (method === 'POST') {
+    const ts = Date.now();
+    url += url.includes('?') ? `&__ts=${ts}` : `?__ts=${ts}`;
+  }
+
   const cfg = {
     method,
     headers,
     mode: 'cors',
-    cache: 'no-cache',
+    cache: 'no-store',
   };
   if (body) cfg.body = JSON.stringify(body);
 
@@ -33,7 +40,7 @@ async function request(endpoint, { method = 'GET', token, body, retries = 1 } = 
   while (true) {
     attempt += 1;
     try {
-      const res = await withTimeout(fetch(`${BASE_URL}${endpoint}`, cfg));
+      const res = await withTimeout(fetch(url, cfg));
       const data = await res.json();
       if (!res.ok) {
         const msg = data?.message || `${res.status} ${res.statusText}`;
