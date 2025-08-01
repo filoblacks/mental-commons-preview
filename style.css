@@ -6093,6 +6093,21 @@ footer, footer .container {
    RESPONSIVE DESIGN
    ======================================== */
 
+/* Personalizzazione Header / Stats 2025 */
+.top-navigation-container .ritual-stats {
+    display: none;
+}
+
+.stats-section {
+    background-color: var(--color-section-bg);
+    padding: 1rem 0;
+}
+
+.stats-section .ritual-stats {
+    justify-content: center;
+    gap: 3rem;
+}
+
 /* === SPRINT 6 – Chat & Requests === */
 .request-row {
   display: flex;
