@@ -14,6 +14,8 @@ export default defineConfig({
         dashboardDocente: resolve(__dirname, 'dashboard-docente.html'),
         premium: resolve(__dirname, 'premium.html'),
         premiumSuccess: resolve(__dirname, 'premium-success.html'),
+        portatoreRequests: resolve(__dirname, 'portatore-requests.html'),
+        chat: resolve(__dirname, 'chat.html'),
       },
       output: {
         // Nomina file con fingerprint per evitare cache stantia
