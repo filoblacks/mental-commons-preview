@@ -9,8 +9,18 @@ const textarea = document.getElementById('message-input');
 const urlParams = new URLSearchParams(window.location.search);
 // Supporta sia ?chat_id=... sia ?id=...
 const chatId = urlParams.get('chat_id') || urlParams.get('id');
+
+console.log('🔍 DEBUG Chat URL params:', {
+  url: window.location.href,
+  search: window.location.search,
+  chat_id: urlParams.get('chat_id'),
+  id: urlParams.get('id'),
+  finalChatId: chatId
+});
+
 if (!chatId) {
-  alert('Chat non trovata');
+  console.error('❌ Chat ID mancante!');
+  alert('Chat non trovata - parametro mancante');
   window.location.href = '/dashboard.html';
 }
 
@@ -18,14 +28,28 @@ let pollingInterval;
 
 async function fetchMessages() {
   const token = getToken();
-  if (!token) return;
+  if (!token) {
+    console.error('❌ Token mancante per fetchMessages');
+    return;
+  }
+
+  console.log('🔍 DEBUG fetchMessages:', { chatId, token: token ? 'presente' : 'mancante' });
 
   try {
     const res = await getChatMessages(chatId, token);
+    console.log('🔍 DEBUG getChatMessages response:', res);
+    
     if (res.status !== 'success') throw new Error(res.message || 'Errore');
     renderMessages(res.data);
   } catch (err) {
+    console.error('❌ Errore recupero messaggi:', err);
     log('Errore recupero messaggi', err);
+    
+    // Se è un errore di autorizzazione o chat non trovata, mostra dettagli
+    if (err.message.includes('Non autorizzato') || err.message.includes('Chat non trovata')) {
+      alert(`Errore chat: ${err.message}\nChat ID: ${chatId}`);
+      window.location.href = '/dashboard.html';
+    }
   }
 }
 
