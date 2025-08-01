@@ -216,4 +216,9 @@ export function sendChatMessage(chatId, text, token) {
 export function getChatMessages(chatId, token) {
   const qs = new URLSearchParams({ chat_id: chatId });
   return request(`/api/messages?${qs.toString()}`, { token });
+}
+
+// Chat accettate dall'utente (Depositor o Portatore)
+export function getMyChats(token) {
+  return request('/api/chats/my-chats', { token });
 } 

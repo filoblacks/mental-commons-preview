@@ -1,5 +1,5 @@
 import { getToken } from '../core/auth.js';
-import { getChatMessages, sendChatMessage } from '../core/api.js';
+import { getChatMessages, sendChatMessage, getMyChats } from '../core/api.js';
 import { log } from '../core/logger.js';
 
 const messagesBox = document.getElementById('messages-box');
@@ -99,19 +99,41 @@ async function showChatsList() {
   document.querySelector('.chat-title').textContent = 'Le Tue Chat';
   
   try {
-    // Qui dovresti chiamare un'API per ottenere le chat dell'utente
-    // Per ora mostro un messaggio placeholder
-    messagesBox.innerHTML = `
-      <div style="text-align: center; padding: 2rem;">
-        <h3>Chat in Corso</h3>
-        <p>Per ora vai su <a href="/dashboard.html">Dashboard</a> e clicca "Continua a parlarne" su una UCMe con risposta.</p>
-        <p>Oppure visita una chat specifica aggiungendo <code>?chat_id=...</code> all'URL.</p>
-      </div>
-    `;
+    const res = await getMyChats(token);
+    if (res.status !== 'success') throw new Error(res.message || 'Errore');
+
+    const chats = res.data || [];
+
+    if (chats.length === 0) {
+      messagesBox.innerHTML = '<p style="text-align:center; padding:1rem;">Nessuna chat attiva</p>';
+      return;
+    }
+
+    messagesBox.innerHTML = '';
+    chats.forEach((chat) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'chat-preview';
+      wrapper.innerHTML = `
+        <p><strong>UCMe:</strong> ${escapeHtml(chat.ucme_excerpt)}…</p>
+        <p><small>${new Date(chat.updated_at).toLocaleString('it-IT')}</small></p>
+        <p><a href="/chat.html?chat_id=${chat.chat_id}">Apri la chat</a></p>
+      `;
+      messagesBox.appendChild(wrapper);
+    });
   } catch (err) {
     console.error('❌ Errore caricamento chat:', err);
-    messagesBox.innerHTML = '<p>Errore caricamento chat</p>';
+    messagesBox.innerHTML = '<p>Errore nel caricamento delle chat</p>';
   }
+}
+
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function initializeChat() {
