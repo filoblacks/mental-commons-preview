@@ -8,6 +8,7 @@ const Joi = require('joi');
 const {
   verifyJWT,
   updateChatStatus,
+  getSupabaseClient,
 } = require('../../lib/supabase.js');
 
 // Schema di validazione corpo PATCH
@@ -39,9 +40,21 @@ module.exports = async function handler(req, res) {
   const chatId = req.query.id;
   if (!chatId) return res.status(400).json({ status: 'error', message: 'ID chat mancante' });
 
-  try {
-    const updated = await updateChatStatus(chatId, payload.userId, value.status);
-    return res.status(200).json({ status: 'success', data: updated });
+      try {
+      // Ricava l'id del portatore associato all'utente loggato
+      const { data: portatoreRow, error: portatoreErr } = await getSupabaseClient()
+        .from('portatori')
+        .select('id')
+        .eq('user_id', payload.userId)
+        .single();
+
+      if (portatoreErr) throw portatoreErr;
+      if (!portatoreRow) {
+        return res.status(403).json({ status: 'error', message: 'Utente non è un Portatore' });
+      }
+
+      const updated = await updateChatStatus(chatId, portatoreRow.id, value.status);
+      return res.status(200).json({ status: 'success', data: updated });
   } catch (err) {
     const safeMessage = err.message || 'Errore interno';
     const statusCode = safeMessage === 'Non autorizzato' ? 403 : 400;

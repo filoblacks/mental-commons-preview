@@ -9,6 +9,7 @@ const {
   verifyJWT,
   getPendingChatRequests,
   requestChatOnUcme,
+  getSupabaseClient,
 } = require('../../lib/supabase.js');
 
 module.exports = async function handler(req, res) {
@@ -31,7 +32,19 @@ module.exports = async function handler(req, res) {
     }
 
     try {
-      const list = await getPendingChatRequests(payload.userId);
+      // Ricava l'id del portatore associato all'utente loggato
+      const { data: portatoreRow, error: portatoreErr } = await getSupabaseClient()
+        .from('portatori')
+        .select('id')
+        .eq('user_id', payload.userId)
+        .single();
+
+      if (portatoreErr) throw portatoreErr;
+      if (!portatoreRow) {
+        return res.status(403).json({ status: 'error', message: 'Utente non è un Portatore' });
+      }
+
+      const list = await getPendingChatRequests(portatoreRow.id);
       return res.status(200).json({ status: 'success', data: list });
     } catch (err) {
       const safeMessage = err.message || 'Errore interno';
