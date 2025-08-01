@@ -6101,7 +6101,7 @@ footer, footer .container {
 .nav-main{
     display:flex;
     gap:1.25rem;
-    margin-left:1rem;
+    margin-left:4rem;
 }
 
 .nav-main a{
@@ -6150,7 +6150,7 @@ footer, footer .container {
 
 .stats-section {
     background-color: var(--color-primary) !important;    
-    padding: 1rem 0;
+    padding: 1.5rem 0;
 }
 
 .stats-section .ritual-stats {
