@@ -19,9 +19,12 @@ console.log('🔍 DEBUG Chat URL params:', {
 });
 
 if (!chatId) {
-  console.error('❌ Chat ID mancante!');
-  alert('Chat non trovata - parametro mancante');
-  window.location.href = '/dashboard.html';
+  console.log('📝 Nessun chat_id - mostro lista chat');
+  // Se non c'è chat_id, mostra lista chat
+  showChatsList();
+} else {
+  // Chat specifica
+  initializeChat();
 }
 
 let pollingInterval;
@@ -82,12 +85,43 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-// Avvio primo fetch
-fetchMessages();
-// Poll ogni 5 secondi (versione semi-sincrona)
-pollingInterval = setInterval(fetchMessages, 5000);
+async function showChatsList() {
+  const token = getToken();
+  if (!token) {
+    window.location.href = '/login.html';
+    return;
+  }
 
-// Auto-scroll su focus textarea
-textarea.addEventListener('focus', () => {
-  messagesBox.scrollTop = messagesBox.scrollHeight;
-}); 
+  // Nascondi interfaccia chat singola
+  form.style.display = 'none';
+  
+  // Cambia titolo
+  document.querySelector('.chat-title').textContent = 'Le Tue Chat';
+  
+  try {
+    // Qui dovresti chiamare un'API per ottenere le chat dell'utente
+    // Per ora mostro un messaggio placeholder
+    messagesBox.innerHTML = `
+      <div style="text-align: center; padding: 2rem;">
+        <h3>Chat in Corso</h3>
+        <p>Per ora vai su <a href="/dashboard.html">Dashboard</a> e clicca "Continua a parlarne" su una UCMe con risposta.</p>
+        <p>Oppure visita una chat specifica aggiungendo <code>?chat_id=...</code> all'URL.</p>
+      </div>
+    `;
+  } catch (err) {
+    console.error('❌ Errore caricamento chat:', err);
+    messagesBox.innerHTML = '<p>Errore caricamento chat</p>';
+  }
+}
+
+function initializeChat() {
+  // Avvio primo fetch
+  fetchMessages();
+  // Poll ogni 5 secondi (versione semi-sincrona)
+  pollingInterval = setInterval(fetchMessages, 5000);
+
+  // Auto-scroll su focus textarea
+  textarea.addEventListener('focus', () => {
+    messagesBox.scrollTop = messagesBox.scrollHeight;
+  });
+} 
