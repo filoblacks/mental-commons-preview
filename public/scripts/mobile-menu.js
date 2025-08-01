@@ -2,11 +2,13 @@
   const css = `/* HAMBURGER button */
 .hamburger {
   display: none;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   background: none;
   border: none;
   color: white;
   cursor: pointer;
+  padding: 0.25rem 0.75rem;
+  line-height: 1;
 }
 
 /* MOBILE MENU */
@@ -60,13 +62,13 @@
     if(document.querySelector('.hamburger')) return; // già creato
 
     // Crea pulsante hamburger
-    const logo = header.querySelector('.nav-logo');
     const btn = document.createElement('button');
     btn.className = 'hamburger';
+    btn.setAttribute('aria-label', 'Apri menu di navigazione');
     btn.textContent = '☰';
     btn.addEventListener('click', toggleMenu);
-    if(logo){ logo.insertAdjacentElement('afterend', btn); }
-    else { header.prepend(btn); }
+    // Inseriamo il burger come ultimo elemento dell'header per allinearlo a destra
+    header.appendChild(btn);
 
     // Crea menu verticale
     const mobileNav = document.createElement('nav');
