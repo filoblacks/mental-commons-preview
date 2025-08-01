@@ -40,7 +40,7 @@
   .mobile-nav.show {
     display: flex;
   }
-  /* Nasconde l\'header mobile legacy */
+  /* Nasconde l'header mobile legacy */
   .mobile-header { display: none !important; }
 }`;
 
