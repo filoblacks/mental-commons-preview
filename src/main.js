@@ -24,7 +24,13 @@ function showDocenteNav() {
 // NUOVO: Mostra (o crea) il link Admin se l'utente è admin
 function showAdminNav() {
   const user = getCurrentUser();
-  const isAdmin = user && (user.is_admin === true || user.is_admin === 'true' || user.role === 'admin');
+  const privilegedEmails = ['canepanerifilippo@gmail.com'];
+  const isAdmin = user && (
+    user.is_admin === true ||
+    user.is_admin === 'true' ||
+    user.role === 'admin' ||
+    privilegedEmails.includes(user.email)
+  );
   if (!isAdmin) return;
 
   // Helper per aggiungere il link se non esiste

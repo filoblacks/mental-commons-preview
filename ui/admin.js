@@ -13,7 +13,8 @@ export async function initAdmin() {
 
   // Controllo ruolo admin lato client (best effort)
   const user = getCurrentUser();
-  if (!user?.is_admin && user?.role !== 'admin') {
+  const privilegedEmails = ['canepanerifilippo@gmail.com'];
+  if (!user?.is_admin && user?.role !== 'admin' && !privilegedEmails.includes(user?.email)) {
     alert('Accesso non autorizzato');
     window.location.href = '/index.html';
     return;
