@@ -5,6 +5,16 @@ import { log } from '../core/logger.js';
 const messagesBox = document.getElementById('messages-box');
 const form = document.getElementById('message-form');
 const textarea = document.getElementById('message-input');
+const sendBtn = form.querySelector('button');
+const chatStatusEl = document.getElementById('chat-status');
+let lastSentText = '';
+
+function updateSendButtonState() {
+  const value = textarea.value.trim();
+  sendBtn.disabled = !value || value === lastSentText;
+}
+textarea.addEventListener('input', updateSendButtonState);
+updateSendButtonState();
 
 const urlParams = new URLSearchParams(window.location.search);
 // Supporta sia ?chat_id=... sia ?id=...
@@ -57,27 +67,60 @@ async function fetchMessages() {
 }
 
 function renderMessages(list) {
+  // Se la chat è vuota, aggiungi messaggio di sistema introduttivo
+  const msgs = list && list.length ? list : [{
+    sender_type: 'system',
+    text: 'Questo spazio è per voi. Non serve avere le parole giuste.',
+    created_at: new Date().toISOString()
+  }];
+
   messagesBox.innerHTML = '';
-  list.forEach((msg) => {
+
+  msgs.forEach((msg) => {
     const bubble = document.createElement('div');
     bubble.className = `message-bubble ${msg.sender_type}`;
-    bubble.textContent = msg.text;
+
+    const textEl = document.createElement('div');
+    textEl.className = 'message-text';
+    textEl.textContent = msg.text;
+    bubble.appendChild(textEl);
+
+    const timeEl = document.createElement('span');
+    timeEl.className = 'message-time';
+    const date = new Date(msg.created_at);
+    timeEl.textContent = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    bubble.appendChild(timeEl);
+
     messagesBox.appendChild(bubble);
   });
+
+  // Aggiorna stato chat
+  if (chatStatusEl) {
+    if (!list || list.length === 0) {
+      chatStatusEl.textContent = 'Chat attiva con un Portatore';
+    } else {
+      const lastMsg = list[list.length - 1];
+      const lastDate = new Date(lastMsg.created_at);
+      chatStatusEl.textContent = 'Ultima risposta: ' + lastDate.toLocaleString('it-IT', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+    }
+  }
+
   messagesBox.scrollTop = messagesBox.scrollHeight;
 }
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const text = textarea.value.trim();
-  if (!text) return;
+  if (!text || text === lastSentText) return;
 
   const token = getToken();
   if (!token) return;
 
   try {
     await sendChatMessage(chatId, text, token);
+    lastSentText = text;
     textarea.value = '';
+    updateSendButtonState();
     await fetchMessages();
   } catch (err) {
     log('Errore invio messaggio', err);
