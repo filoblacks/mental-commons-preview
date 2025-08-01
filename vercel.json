@@ -141,6 +141,14 @@
     {
       "source": "/env.js",
       "destination": "/api/env.js"
+    },
+    {
+      "source": "/come-funziona",
+      "destination": "/come-funziona.html"
+    },
+    {
+      "source": "/mc-per-le-scuole",
+      "destination": "/mc-per-le-scuole.html"
     }
   ]
 } 
