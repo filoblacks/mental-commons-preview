@@ -7,7 +7,8 @@ const form = document.getElementById('message-form');
 const textarea = document.getElementById('message-input');
 
 const urlParams = new URLSearchParams(window.location.search);
-const chatId = urlParams.get('chat_id');
+// Supporta sia ?chat_id=... sia ?id=...
+const chatId = urlParams.get('chat_id') || urlParams.get('id');
 if (!chatId) {
   alert('Chat non trovata');
   window.location.href = '/dashboard.html';

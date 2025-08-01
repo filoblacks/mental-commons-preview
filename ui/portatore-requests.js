@@ -68,6 +68,14 @@ async function handleAction(chatId, newStatus, rowEl) {
     await updateChatRequestStatus(chatId, newStatus, token);
     rowEl.classList.add('done');
     rowEl.querySelector('.request-actions').innerHTML = `<span class="status-label">${newStatus === 'accepted' ? 'Accettata' : 'Rifiutata'}</span>`;
+
+    // Se la richiesta è stata accettata, apri immediatamente la chat
+    if (newStatus === 'accepted') {
+      // Piccola pausa per far percepire l'aggiornamento UI
+      setTimeout(() => {
+        window.location.href = `/chat.html?chat_id=${chatId}`;
+      }, 600);
+    }
   } catch (err) {
     log('Errore aggiornamento stato chat', err);
     alert(err.message || 'Errore aggiornamento richiesta');
