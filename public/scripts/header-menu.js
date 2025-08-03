@@ -4,6 +4,24 @@
 (function(){
   'use strict';
 
+  // Inietta stile mobile header se non già presente
+  if(!document.getElementById('mc-mobile-header-style')){
+    const style=document.createElement('style');
+    style.id='mc-mobile-header-style';
+    style.textContent=`
+      @media (max-width:768px){
+        .top-navigation-container{height:60px;}
+        .hamburger{position:absolute;right:1rem;top:50%;transform:translateY(-50%);display:block;font-size:1.75rem;background:none;border:none;color:#fff;cursor:pointer;padding:0.5rem;line-height:1;z-index:1200;border-radius:4px;transition:background-color .2s ease;}
+        .hamburger:hover{background-color:rgba(255,255,255,0.1);}
+        .mobile-nav{position:absolute;top:100%;right:0;width:220px;background:var(--color-primary);padding:0.5rem 0;border-radius:0 0 8px 8px;box-shadow:0 6px 12px rgba(0,0,0,0.3);display:none;flex-direction:column;}
+        .mobile-nav.show{display:flex;animation:slideDown .25s ease-out;}
+        .mobile-nav a{padding:0.75rem 1rem;}
+      }
+      @keyframes slideDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+    `;
+    document.head.appendChild(style);
+  }
+
   // Configurazione link menu
   const LINKS = [
     { href: 'index.html', text: 'Home' },
