@@ -1,4 +1,8 @@
 (function(){
+  'use strict';
+  
+  console.log('🔧 Mobile menu script starting...');
+  
   const css = `/* HAMBURGER button */
 .hamburger {
   display: none;
@@ -7,9 +11,19 @@
   border: none;
   color: white;
   cursor: pointer;
-  padding: 0.25rem 0.75rem;
+  padding: 0.5rem;
   line-height: 1;
   z-index: 100;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.hamburger:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.hamburger:focus {
+  outline: 2px solid rgba(255,255,255,0.5);
 }
 
 /* MOBILE MENU */
@@ -19,23 +33,42 @@
   position: absolute;
   top: 100%;
   left: 0;
-  width: 100%;
+  right: 0;
   background: #1f2d1f;
   padding: 1rem;
   z-index: 1000;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.mobile-nav.show {
+  display: flex !important;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .mobile-nav a {
   color: white;
   text-decoration: none;
   margin: 0.5rem 0;
-  padding: 0.5rem;
+  padding: 0.75rem;
   border-radius: 4px;
   transition: background-color 0.2s ease;
+  font-weight: 400;
 }
 
-.mobile-nav a:hover {
+.mobile-nav a:hover,
+.mobile-nav a:focus {
   background-color: rgba(255,255,255,0.1);
 }
 
@@ -43,15 +76,12 @@
 @media (max-width: 768px) {
   /* Show burger, hide desktop nav */
   .hamburger { 
-    display: block; 
+    display: block !important; 
     margin-left: auto; 
   }
   .nav-main,
   .nav-actions { 
     display: none !important; 
-  }
-  .mobile-nav.show { 
-    display: flex; 
   }
   
   /* IMPORTANTE: Mostra il logo su mobile nell'header principale */
@@ -62,6 +92,7 @@
     top: 50%;
     transform: translateY(-50%);
     align-items: center;
+    z-index: 10;
   }
   
   /* Nasconde l'header mobile legacy COMPLETAMENTE */
@@ -79,54 +110,82 @@
 }
 `;
 
+  // Inject CSS
   const styleTag = document.createElement('style');
   styleTag.textContent = css;
   document.head.appendChild(styleTag);
+  console.log('✅ CSS injected');
+
+  let isMenuOpen = false;
 
   function toggleMenu(){
+    console.log('🍔 toggleMenu called, current state:', isMenuOpen);
     const menu = document.getElementById('mobileMenu');
-    if(menu){ 
-      menu.classList.toggle('show');
-      console.log('Menu toggled, current state:', menu.classList.contains('show'));
-    } else {
-      console.error('Mobile menu not found!');
-    }
-  }
-  window.toggleMenu = toggleMenu;
-
-  function initMobileMenu(){
-    const header = document.querySelector('.top-navigation-container');
-    if(!header) {
-      console.error('Header not found!');
+    if(!menu) {
+      console.error('❌ Mobile menu element not found!');
       return;
     }
+    
+    isMenuOpen = !isMenuOpen;
+    
+    if(isMenuOpen) {
+      menu.classList.add('show');
+      console.log('📱 Menu opened');
+    } else {
+      menu.classList.remove('show');
+      console.log('📱 Menu closed');
+    }
+  }
+
+  function initMobileMenu(){
+    console.log('🚀 Initializing mobile menu...');
+    
+    const header = document.querySelector('.top-navigation-container');
+    if(!header) {
+      console.error('❌ Header not found!');
+      return;
+    }
+    
+    // Check if already initialized
     if(document.querySelector('.hamburger')) {
-      console.log('Hamburger already exists');
-      return; // già creato
+      console.log('⚠️ Hamburger already exists, skipping initialization');
+      return;
     }
 
-    console.log('Initializing mobile menu...');
-
-    // Crea pulsante hamburger
+    // Create hamburger button
     const btn = document.createElement('button');
     btn.className = 'hamburger';
     btn.setAttribute('aria-label', 'Apri menu di navigazione');
+    btn.setAttribute('aria-expanded', 'false');
     btn.innerHTML = '☰';
-    btn.addEventListener('click', function(e) {
+    
+    // Add click event with multiple fallbacks
+    btn.onclick = function(e) {
+      console.log('🖱️ Hamburger clicked (onclick)');
       e.preventDefault();
       e.stopPropagation();
-      console.log('Hamburger clicked!');
       toggleMenu();
+      
+      // Update aria-expanded
+      const isExpanded = document.getElementById('mobileMenu')?.classList.contains('show');
+      btn.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+    };
+    
+    btn.addEventListener('click', function(e) {
+      console.log('🖱️ Hamburger clicked (addEventListener)');
+      e.preventDefault();
+      e.stopPropagation();
     });
     
-    // Inseriamo il burger come ultimo elemento dell'header per allinearlo a destra
+    // Append to header
     header.appendChild(btn);
-    console.log('Hamburger button added');
+    console.log('✅ Hamburger button created and added');
 
-    // Crea menu verticale
+    // Create mobile nav menu
     const mobileNav = document.createElement('nav');
     mobileNav.id = 'mobileMenu';
     mobileNav.className = 'mobile-nav';
+    mobileNav.setAttribute('aria-hidden', 'true');
 
     const links = [
       { href: 'index.html', text: 'Home' },
@@ -136,31 +195,58 @@
       { href: 'profile.html', text: 'Profilo' }
     ];
 
-    links.forEach(({href,text})=>{
+    links.forEach(({href, text}) => {
       const a = document.createElement('a');
       a.href = href;
       a.textContent = text;
-      a.addEventListener('click', function() {
-        console.log('Menu link clicked:', text);
+      a.onclick = function() {
+        console.log('🔗 Menu link clicked:', text);
+        isMenuOpen = false;
         mobileNav.classList.remove('show');
-      });
+        mobileNav.setAttribute('aria-hidden', 'true');
+        btn.setAttribute('aria-expanded', 'false');
+      };
       mobileNav.appendChild(a);
     });
 
-    header.insertAdjacentElement('afterend', mobileNav);
-    console.log('Mobile menu created and inserted');
+    // Insert menu after header
+    header.parentNode.insertBefore(mobileNav, header.nextSibling);
+    console.log('✅ Mobile menu created and inserted');
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+      if(!header.contains(e.target) && !mobileNav.contains(e.target) && isMenuOpen) {
+        console.log('🖱️ Clicked outside, closing menu');
+        isMenuOpen = false;
+        mobileNav.classList.remove('show');
+        mobileNav.setAttribute('aria-hidden', 'true');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+    
+    console.log('🎉 Mobile menu initialization complete!');
   }
 
-  // Debug: log when script runs
-  console.log('Mobile menu script loading...');
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM loaded, initializing mobile menu');
-      initMobileMenu();
-    });
-  } else {
-    console.log('DOM already loaded, initializing mobile menu immediately');
+  // Initialize when DOM is ready
+  function init() {
+    console.log('📋 DOM ready, initializing mobile menu');
     initMobileMenu();
   }
+
+  if(document.readyState === 'loading'){
+    console.log('⏳ DOM still loading, waiting for DOMContentLoaded');
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    console.log('✅ DOM already loaded, initializing immediately');
+    init();
+  }
+  
+  // Fallback initialization after a short delay
+  setTimeout(() => {
+    if(!document.querySelector('.hamburger')) {
+      console.log('🔄 Fallback initialization triggered');
+      init();
+    }
+  }, 1000);
+  
 })();
