@@ -72,35 +72,6 @@
     <script type="module" src="/api/env.js"></script>
 </head>
 <body>
-    <!-- Mobile Header (solo per mobile) -->
-    <div class="mobile-header">
-        <div class="mobile-header-left">
-            <a href="index.html" class="mobile-logo-link"><img src="/logo.svg" alt="Mental Commons" class="mobile-logo" /></a>
-            <button class="hamburger" aria-label="Menu di navigazione" aria-expanded="false">☰</button>
-        </div>
-        <div class="mobile-header-right">
-            <a href="index.html" class="mobile-nav-btn" style="display: none;">Home</a>
-            <a href="dashboard.html" id="mobile-nav-dashboard" class="mobile-nav-btn" style="display: none;">Dashboard</a>
-            <a href="dashboard-docente.html" id="mobile-nav-dashboard-docente" class="mobile-nav-btn" style="display: none;">Dashboard Docente</a>
-            <a href="login.html" id="mobile-nav-login" class="mobile-nav-btn">Accedi</a>
-            <a href="profile.html" id="mobile-nav-profile" class="mobile-nav-btn mobile-profile-btn" style="display: none;" title="Gestione Profilo" aria-label="Gestione Profilo">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-            </a>
-        </div>
-    </div>
-    
-    <!-- Menu mobile -->
-    <nav id="mobileMenu" class="mobile-nav" aria-hidden="true">
-        <a href="index.html">Home</a>
-        <a href="come-funziona.html">Come funziona</a>
-        <a href="mc-per-le-scuole.html">MC per le scuole</a>
-        <a href="dashboard.html" id="mobile-menu-dashboard" style="display: none;">Dashboard</a>
-        <a href="profile.html" id="mobile-menu-profile" style="display: none;">Profilo</a>
-    </nav>
-
     <!-- Top Navigation Container -->
     <header class="top-navigation-container">
         <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="Mental Commons" /></a>
@@ -399,6 +370,6 @@
 
     <!-- Modulo principale per Vite (dev) -->
     <script type="module" src="/src/main.js"></script>
-<script defer src="/scripts/mobile-menu.js"></script>
+<script defer src="/public/scripts/mobile-menu.js"></script>
 </body>
 </html> 
