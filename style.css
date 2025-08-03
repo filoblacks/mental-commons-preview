@@ -6057,7 +6057,7 @@ footer, footer .container {
 /* === MOBILE FIX 2025-06-29: Nascondi logo duplicato nello sticky header su mobile === */
 @media (max-width: 768px) {
   .nav-logo {
-    display: none !important;
+    display: flex !important;
   }
 }
 
