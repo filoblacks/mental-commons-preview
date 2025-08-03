@@ -30,21 +30,23 @@
   margin: 0.5rem 0;
 }
 
-/* VISIBILITY ON MOBILE */
+/* VISIBILITY + LAYOUT ON MOBILE */
 @media (max-width: 768px) {
-  .hamburger {
-    display: block;
-  }
+  /* Show burger, hide desktop nav */
+  .hamburger { display: block; margin-left: auto; }
   .nav-main,
-  .nav-actions {
-    display: none !important;
-  }
-  .mobile-nav.show {
-    display: flex;
-  }
+  .nav-actions { display: none !important; }
+  .mobile-nav.show { display: flex; }
   /* Nasconde l'header mobile legacy */
   .mobile-header { display: none !important; }
-}`;
+  /* Header layout fix: logo a sinistra, burger a destra */
+  .top-navigation-container {
+    justify-content: space-between;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+`;
 
   const styleTag = document.createElement('style');
   styleTag.textContent = css;
@@ -83,10 +85,12 @@
       { href: 'profile.html', text: 'Profilo' },
       { href: 'admin.html', text: 'Admin' }
     ];
+
     links.forEach(({href,text})=>{
       const a = document.createElement('a');
       a.href = href;
       a.textContent = text;
+      a.addEventListener('click', ()=> mobileNav.classList.remove('show'));
       mobileNav.appendChild(a);
     });
 
