@@ -13,7 +13,7 @@
         .top-navigation-container{display:flex;justify-content:space-between;align-items:center;height:60px;padding:0 1rem;background:var(--color-primary);}
         .nav-logo{position:static;transform:none;display:flex;align-items:center;}
         .nav-main,.nav-actions{display:none !important;}
-        .hamburger{display:block;font-size:1.75rem;background:none;border:none;color:#fff;cursor:pointer;padding:0.5rem;line-height:1;border-radius:4px;transition:background-color .2s ease;z-index:1200;}
+        .hamburger{display:block;position:static;margin-left:auto;font-size:1.75rem;background:none;border:none;color:#fff;cursor:pointer;padding:0.5rem;line-height:1;border-radius:4px;transition:background-color .2s ease;}
         .hamburger:hover{background-color:rgba(255,255,255,0.1);}
         .mobile-nav{position:absolute;top:60px;right:0;min-width:200px;background:var(--color-primary);padding:0.5rem 0;border-radius:0 0 8px 8px;box-shadow:0 6px 12px rgba(0,0,0,0.3);display:none;flex-direction:column;z-index:1100;}
         .mobile-nav.show{display:flex;animation:slideDown .25s ease-out;}
@@ -103,6 +103,7 @@
     function toggleMenu(){
       const isOpen = mobileNav.classList.toggle('show');
       burger.setAttribute('aria-expanded', isOpen);
+      burger.innerHTML = isOpen ? '\u2715' /* ✕ */ : '\u2630';
       mobileNav.setAttribute('aria-hidden', !isOpen);
     }
 
@@ -110,6 +111,7 @@
       if(mobileNav.classList.contains('show')){
         mobileNav.classList.remove('show');
         burger.setAttribute('aria-expanded', 'false');
+        burger.innerHTML='\u2630';
         mobileNav.setAttribute('aria-hidden', 'true');
       }
     }
