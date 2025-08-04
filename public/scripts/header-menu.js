@@ -78,11 +78,14 @@
 
         /* Link menu */
         .mobile-menu a {
-          color: #ffffff;
+          color: #e8f4f0;
           text-decoration: none;
           padding: 18px 0;
+          font-size: 18px;
+          font-weight: 600;
+          opacity: 1 !important;
         }
-        .mobile-menu a:hover { opacity: 0.85; }
+        .mobile-menu a:hover { opacity: 0.9; }
       }
     `;
     document.head.appendChild(style);
