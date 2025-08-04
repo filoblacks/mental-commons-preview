@@ -78,7 +78,7 @@
 
         /* Link menu */
         .mobile-menu a {
-          color: #e8f4f0;
+          color: #ffffff;
           text-decoration: none;
           padding: 18px 0;
           font-size: 18px;
