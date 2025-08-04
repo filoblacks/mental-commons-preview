@@ -49,9 +49,9 @@
           margin-left: auto;
           background: none;
           border: none;
-          font-size: 28px;
+          font-size: 24px;
           color: #ffffff;
-          padding: 8px;
+          padding: 6px;
           cursor: pointer;
           z-index: 1001;
         }
@@ -78,9 +78,9 @@
 
         /* Link menu */
         .mobile-menu a {
-          color: #ffffff;
+          color: #e8f4f0;
           text-decoration: none;
-          padding: 12px 0;
+          padding: 18px 0;
         }
         .mobile-menu a:hover { opacity: 0.85; }
       }
