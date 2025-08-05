@@ -88,19 +88,11 @@ function renderMessages(list) {
     let bubbleType;
     if (msg.sender_type === 'system') {
       bubbleType = 'system';
-    } else {
-      const currentUser = getCurrentUser();
-      let isSelf = false;
-      if (currentUser) {
-        if (msg.sender_id) {
-          isSelf = msg.sender_id === currentUser.id;
-        } else {
-          const isPortatore = !!currentUser.is_portatore;
-          isSelf = isPortatore ? msg.sender_type === 'portatore' : msg.sender_type === 'user';
-        }
+          } else {
+        const currentUser = getCurrentUser();
+        const isSelf = currentUser && msg.sender_id === currentUser.id;
+        bubbleType = isSelf ? 'user' : 'portatore';
       }
-      bubbleType = isSelf ? 'user' : 'portatore';
-    }
     bubble.className = `message-bubble ${bubbleType}`;
 
     const textEl = document.createElement('div');
