@@ -6312,7 +6312,7 @@ footer, footer .container {
 .chat-list-container {
   max-height: 70vh;
   overflow-y: auto;
-  padding: 0;
+  padding: 0 0.5rem;
 }
 
 .chat-card {
