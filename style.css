@@ -6805,3 +6805,158 @@ body.come-funziona-page {
         background-color: var(--color-white) !important;
     }
 }
+
+/* Stili per le nuove sezioni della pagina come-funziona.html */
+
+/* Sezione "Chi è un Portatore" */
+.portatore-info-section {
+    background: var(--color-white) !important;
+    padding: 4rem 1rem !important;
+    margin-top: 0 !important;
+}
+
+.portatore-info-container {
+    max-width: 720px !important;
+    margin: 0 auto !important;
+}
+
+.portatore-info-title {
+    font-size: 2rem !important;
+    font-weight: 600 !important;
+    color: var(--color-primary) !important;
+    text-align: center !important;
+    margin-bottom: 2rem !important;
+}
+
+.portatore-info-content {
+    font-size: 1.125rem !important;
+    color: var(--color-text-body) !important;
+    line-height: 1.7 !important;
+    margin-bottom: 2.5rem !important;
+    text-align: center !important;
+}
+
+.portatore-testimonial {
+    background: rgba(212, 165, 116, 0.08) !important;
+    border: 1px solid rgba(212, 165, 116, 0.2) !important;
+    border-radius: 16px !important;
+    padding: 2rem !important;
+    margin: 2rem 0 !important;
+    position: relative !important;
+}
+
+.portatore-testimonial::before {
+    content: '"' !important;
+    font-size: 4rem !important;
+    color: var(--color-accent) !important;
+    position: absolute !important;
+    top: -1rem !important;
+    left: 1rem !important;
+    font-family: serif !important;
+    opacity: 0.3 !important;
+}
+
+.portatore-testimonial-text {
+    font-style: italic !important;
+    font-size: 1.1rem !important;
+    color: var(--color-text-body) !important;
+    line-height: 1.6 !important;
+    margin: 0 !important;
+    padding-left: 1rem !important;
+}
+
+/* Sezione "Diventare Portatore" */
+.become-portatore-section {
+    background: var(--color-section-bg) !important;
+    padding: 4rem 1rem !important;
+    margin-top: 0 !important;
+    position: relative !important;
+}
+
+.become-portatore-section::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100px !important;
+    height: 2px !important;
+    background: linear-gradient(90deg, transparent, var(--color-accent), transparent) !important;
+}
+
+.become-portatore-container {
+    max-width: 720px !important;
+    margin: 0 auto !important;
+}
+
+.become-portatore-title {
+    font-size: 2rem !important;
+    font-weight: 600 !important;
+    color: var(--color-primary) !important;
+    text-align: center !important;
+    margin-bottom: 2rem !important;
+}
+
+.become-portatore-content {
+    font-size: 1.125rem !important;
+    color: var(--color-text-body) !important;
+    line-height: 1.7 !important;
+    text-align: center !important;
+}
+
+/* Responsive Design per le nuove sezioni */
+@media (min-width: 768px) {
+    .portatore-info-title,
+    .become-portatore-title {
+        font-size: 2.25rem !important;
+    }
+
+    .portatore-info-content,
+    .become-portatore-content {
+        font-size: 1.25rem !important;
+    }
+
+    .portatore-testimonial {
+        padding: 2.5rem !important;
+        margin: 2.5rem 0 !important;
+    }
+
+    .portatore-testimonial-text {
+        font-size: 1.2rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .portatore-info-section,
+    .become-portatore-section {
+        padding: 3rem 1rem !important;
+    }
+
+    .portatore-info-title,
+    .become-portatore-title {
+        font-size: 1.75rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+
+    .portatore-info-content,
+    .become-portatore-content {
+        font-size: 1rem !important;
+        margin-bottom: 2rem !important;
+    }
+
+    .portatore-testimonial {
+        padding: 1.5rem !important;
+        margin: 1.5rem 0 !important;
+    }
+
+    .portatore-testimonial-text {
+        font-size: 1rem !important;
+        padding-left: 0.5rem !important;
+    }
+
+    .portatore-testimonial::before {
+        font-size: 3rem !important;
+        top: -0.5rem !important;
+        left: 0.5rem !important;
+    }
+}
