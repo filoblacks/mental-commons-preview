@@ -89,7 +89,7 @@
     /* Cards */
     .plans {
       display: flex;
-      gap: 2rem;
+      gap: 2.5rem;
       justify-content: space-between;
       flex-wrap: nowrap;
       margin-bottom: 4rem;
@@ -99,8 +99,8 @@
       border: 1px solid #222;
       border-radius: 1rem;
       padding: 2rem;
-      flex: 1 1 30%;
-      max-width: none;
+      flex: 1 1 calc(33.333% - 1.5rem);
+      max-width: 420px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -202,6 +202,7 @@
     }
 
     @media (max-width: 768px) {
+      .plans { gap: 1.5rem; }
       .plans { flex-direction: column; }
       .plan-card { flex: 1 1 100%; width: 100%; margin-bottom: 2rem; }
       .plans {
