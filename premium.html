@@ -90,20 +90,21 @@
     .plans {
       display: flex;
       gap: 2rem;
-      justify-content: center;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      flex-wrap: nowrap;
       margin-bottom: 4rem;
     }
     .plan-card {
       background: #111;
       border: 1px solid #222;
       border-radius: 1rem;
-      padding: 2.5rem 2rem;
-      flex: 1 1 32%;
+      padding: 2rem;
+      flex: 1 1 30%;
       max-width: none;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: space-between;
       text-align: center;
       transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
@@ -200,8 +201,9 @@
       line-height: 1.6;
     }
 
-    @media (max-width: 600px) {
-      .plan-card { flex: 1 1 100%; }
+    @media (max-width: 768px) {
+      .plans { flex-direction: column; }
+      .plan-card { flex: 1 1 100%; width: 100%; margin-bottom: 2rem; }
       .plans {
         flex-direction: column;
         gap: 1.5rem;
@@ -211,7 +213,7 @@
        Override stile brand Mental Commons
     --------------------------------------- */
     :root {
-      --premium-card-bg: #E8F4F0;
+      --premium-card-bg: #F1F8F4;
       --premium-card-border: rgba(44, 95, 71, 0.12);
       --premium-card-shadow: 0 4px 10px rgba(44, 95, 71, 0.08);
       --premium-toggle-track: #CDE2D9;
