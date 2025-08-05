@@ -225,12 +225,15 @@ function createChatCard(chat, token) {
 async function loadLastMessagePreview(chatId, token) {
   try {
     const res = await getChatMessages(chatId, token);
+    const previewEl = document.getElementById(`chat-preview-${chatId}`);
+    if (!previewEl) return;
+
     if (res.status === 'success' && Array.isArray(res.data) && res.data.length) {
       const lastMsg = res.data[res.data.length - 1];
-      const previewEl = document.getElementById(`chat-preview-${chatId}`);
-      if (previewEl) {
-        previewEl.textContent = lastMsg.text.length > 160 ? lastMsg.text.slice(0, 157) + '…' : lastMsg.text;
-      }
+      previewEl.textContent = lastMsg.text.length > 160 ? lastMsg.text.slice(0, 157) + '…' : lastMsg.text;
+    } else {
+      previewEl.textContent = 'Ancora nessun messaggio';
+      previewEl.classList.add('chat-message-empty');
     }
   } catch (err) {
     console.error('Errore caricamento anteprima messaggio:', err);
