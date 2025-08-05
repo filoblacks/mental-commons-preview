@@ -151,6 +151,7 @@
       color: #666;
     }
     .cta-button {
+      display: block;
       width: 100%;
       padding: 0.85rem 1.25rem;
       background: var(--color-primary, #2c5f47);
@@ -159,6 +160,8 @@
       border-radius: 8px;
       font-size: 1rem;
       font-weight: 600;
+      text-align: center;
+      text-decoration: none;
       cursor: pointer;
       transition: background 0.2s ease, transform 0.2s ease;
     }
@@ -250,6 +253,14 @@
     .accordion p {
       color: var(--color-text-body);
     }
+
+    /* Sottotitolo card */
+    .plan-card .subtitle {
+      font-size: 0.9rem;
+      color: var(--premium-muted);
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
     /* -------------------------------------- */
   </style>
 
@@ -305,6 +316,23 @@
         </ul>
         <button id="btn-premium-monthly" class="cta-button">Attiva Premium – 4,99€/mese</button>
         <button id="btn-premium-annual" class="cta-button" style="display: none;">Attiva Premium – 39€/anno</button>
+      </div>
+
+      <!-- MC@School -->
+      <div class="plan-card school">
+        <h2>MC@School <span style="font-size: 0.9rem; font-weight:400;">(su richiesta)</span></h2>
+        <p class="price">Su richiesta</p>
+        <p class="subtitle">Per classi, istituti, educatori.<br/>Uno spazio protetto dove pensare insieme.</p>
+        <ul class="features">
+          <li>Tutte le funzionalità di MC Premium</li>
+          <li>Dashboard per UCMe scolastiche</li>
+          <li>Statistiche anonime sul benessere mentale</li>
+          <li>Percorsi guidati per l’ascolto in aula</li>
+          <li>Supporto diretto con il team MC</li>
+          <li>Attivazione flessibile per gruppi o scuole</li>
+          <li>Offerta personalizzata in base agli utenti</li>
+        </ul>
+        <a href="mailto:school@mentalcommons.xyz?subject=Richiesta%20MC@School" class="cta-button">Richiedi contatto</a>
       </div>
     </div>
 
