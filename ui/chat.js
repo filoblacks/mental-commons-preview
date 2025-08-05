@@ -90,7 +90,15 @@ function renderMessages(list) {
       bubbleType = 'system';
     } else {
       const currentUser = getCurrentUser();
-      const isSelf = currentUser && msg.sender_id === currentUser.id;
+      let isSelf = false;
+      if (currentUser) {
+        if (msg.sender_id) {
+          isSelf = msg.sender_id === currentUser.id;
+        } else {
+          const isPortatore = !!currentUser.is_portatore;
+          isSelf = isPortatore ? msg.sender_type === 'portatore' : msg.sender_type === 'user';
+        }
+      }
       bubbleType = isSelf ? 'user' : 'portatore';
     }
     bubble.className = `message-bubble ${bubbleType}`;
