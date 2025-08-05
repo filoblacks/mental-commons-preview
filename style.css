@@ -1806,6 +1806,41 @@ footer p {
     font-weight: 500;
 }
 
+.tiktok-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #999;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid #333;
+    background: rgba(255, 255, 255, 0.02);
+    margin-left: 12px;
+}
+
+.tiktok-link:hover {
+    color: #ff0050;
+    border-color: #ff0050;
+    background: rgba(255, 0, 80, 0.05);
+    transform: translateY(-1px);
+}
+
+.tiktok-link svg {
+    transition: all 0.3s ease;
+}
+
+.tiktok-link:hover svg {
+    stroke: #ff0050;
+    transform: scale(1.1);
+}
+
+.tiktok-link span {
+    font-weight: 500;
+}
+
 /* Fade-in animations */
 @keyframes fadeIn {
     from {
@@ -2628,6 +2663,17 @@ footer p {
     }
     
     .instagram-link svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .tiktok-link {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+        margin-left: 8px;
+    }
+    
+    .tiktok-link svg {
         width: 20px;
         height: 20px;
     }
@@ -6808,100 +6854,120 @@ body.come-funziona-page {
 
 /* Stili per le nuove sezioni della pagina come-funziona.html */
 
-/* Sezione "Chi è un Portatore" */
-.portatore-info-section {
-    background: var(--color-white) !important;
-    padding: 4rem 1rem !important;
-    margin-top: 0 !important;
-}
-
-.portatore-info-container {
+/* Stili comuni per le sezioni informative */
+.info-section {
     max-width: 720px !important;
-    margin: 0 auto !important;
+    margin: 4rem auto !important;
+    padding: 0 1rem !important;
 }
 
-.portatore-info-title {
-    font-size: 2rem !important;
-    font-weight: 600 !important;
+.info-section h2 {
     color: var(--color-primary) !important;
+    font-size: 1.8rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 1.5rem !important;
     text-align: center !important;
-    margin-bottom: 2rem !important;
 }
 
-.portatore-info-content {
-    font-size: 1.125rem !important;
-    color: var(--color-text-body) !important;
+.info-section p {
+    font-size: 1.1rem !important;
     line-height: 1.7 !important;
-    margin-bottom: 2.5rem !important;
+    color: var(--color-text-body) !important;
+    margin-bottom: 1.5rem !important;
     text-align: center !important;
 }
 
-.portatore-testimonial {
-    background: rgba(212, 165, 116, 0.08) !important;
-    border: 1px solid rgba(212, 165, 116, 0.2) !important;
-    border-radius: 16px !important;
-    padding: 2rem !important;
+.quote-box {
+    background-color: #f8f8f8 !important;
+    padding: 1.5rem 2rem !important;
     margin: 2rem 0 !important;
+    border-radius: 8px !important;
     position: relative !important;
+    border-left: 4px solid var(--color-accent) !important;
 }
 
-.portatore-testimonial::before {
+.quote-box::before {
     content: '"' !important;
     font-size: 4rem !important;
     color: var(--color-accent) !important;
     position: absolute !important;
     top: -1rem !important;
     left: 1rem !important;
-    font-family: serif !important;
-    opacity: 0.3 !important;
+    font-family: "Georgia", serif !important;
+    opacity: 0.2 !important;
 }
 
-.portatore-testimonial-text {
+.quote-box p {
+    font-family: "Georgia", serif !important;
     font-style: italic !important;
     font-size: 1.1rem !important;
-    color: var(--color-text-body) !important;
+    color: var(--color-accent) !important;
     line-height: 1.6 !important;
     margin: 0 !important;
-    padding-left: 1rem !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Sezione "Chi è un Portatore" */
+.portatore-info-section {
+    background: var(--color-white) !important;
+    border-bottom: 1px solid #eee !important;
 }
 
 /* Sezione "Diventare Portatore" */
 .become-portatore-section {
     background: var(--color-section-bg) !important;
-    padding: 4rem 1rem !important;
-    margin-top: 0 !important;
     position: relative !important;
 }
 
-.become-portatore-section::before {
-    content: '' !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 100px !important;
-    height: 2px !important;
-    background: linear-gradient(90deg, transparent, var(--color-accent), transparent) !important;
+/* Responsive Design */
+@media (max-width: 768px) {
+    .info-section {
+        margin: 3rem auto !important;
+    }
+
+    .info-section h2 {
+        font-size: 1.6rem !important;
+    }
+
+    .info-section p {
+        font-size: 1rem !important;
+    }
+
+    .quote-box {
+        padding: 1.25rem 1.5rem !important;
+        margin: 1.5rem 0 !important;
+    }
+
+    .quote-box::before {
+        font-size: 3rem !important;
+        top: -0.75rem !important;
+    }
+
+    .quote-box p {
+        font-size: 1rem !important;
+    }
 }
 
-.become-portatore-container {
-    max-width: 720px !important;
-    margin: 0 auto !important;
-}
+@media (max-width: 480px) {
+    .info-section {
+        margin: 2rem auto !important;
+        padding: 0 0.75rem !important;
+    }
 
-.become-portatore-title {
-    font-size: 2rem !important;
-    font-weight: 600 !important;
-    color: var(--color-primary) !important;
-    text-align: center !important;
-    margin-bottom: 2rem !important;
-}
+    .info-section h2 {
+        font-size: 1.4rem !important;
+    }
 
-.become-portatore-content {
-    font-size: 1.125rem !important;
-    color: var(--color-text-body) !important;
-    line-height: 1.7 !important;
-    text-align: center !important;
+    .quote-box {
+        padding: 1rem 1.25rem !important;
+        margin: 1.25rem 0 !important;
+    }
+
+    .quote-box::before {
+        font-size: 2.5rem !important;
+        top: -0.5rem !important;
+    }
 }
 
 /* Responsive Design per le nuove sezioni */
