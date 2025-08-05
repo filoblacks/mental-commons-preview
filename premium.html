@@ -1,36 +1,308 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#2C5F47">
-    <title>MC Premium – Mental Commons</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css?v=2025072701">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0d0d0d" />
+  <title>MC Premium – Mental Commons</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <!-- Styles principali del sito -->
+  <link rel="stylesheet" href="/style.css?v=2025072702" />
+  
+  <!-- Override minimal dark per Premium -->
+  <style>
+    body.premium-page {
+      background: #0d0d0d;
+      color: #eee;
+    }
+    .premium-container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 4rem 1rem 6rem;
+      text-align: center;
+    }
+    .premium-container h1 {
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 600;
+      margin-bottom: 2rem;
+      color: #fff;
+    }
+    /* Toggle fatturazione */
+    .billing-toggle-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 3rem;
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: #ccc;
+    }
+    .billing-toggle-wrapper .discount {
+      color: var(--color-accent, #d4a574);
+      font-size: 0.8rem;
+      margin-left: 0.25rem;
+    }
+    /* Custom switch */
+    .switch {
+      position: relative;
+      width: 56px;
+      height: 28px;
+      display: inline-block;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #444;
+      border-radius: 34px;
+      transition: background 0.2s ease;
+    }
+    .slider::before {
+      content: "";
+      position: absolute;
+      height: 22px;
+      width: 22px;
+      left: 4px;
+      bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+    }
+    .switch input:checked + .slider {
+      background: var(--color-primary, #2c5f47);
+    }
+    .switch input:checked + .slider::before {
+      transform: translateX(26px);
+    }
 
-    <!-- Variabili pubbliche -->
-    <script type="module" src="/api/env.js"></script>
+    /* Cards */
+    .plans {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 4rem;
+    }
+    .plan-card {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 1rem;
+      padding: 2.5rem 2rem;
+      flex: 1 1 280px;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .plan-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    .plan-card h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .plan-card .price {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0.75rem 0 1.5rem;
+      color: #fff;
+    }
+    .features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 2rem;
+      width: 100%;
+      text-align: left;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+    .features li {
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .features li::before {
+      content: "✔";
+      color: var(--color-primary, #2c5f47);
+      font-weight: 600;
+    }
+    .features li.not-included::before {
+      content: "✖";
+      color: #666;
+    }
+    .features li.not-included {
+      color: #666;
+    }
+    .cta-button {
+      width: 100%;
+      padding: 0.85rem 1.25rem;
+      background: var(--color-primary, #2c5f47);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .cta-button:hover:not(:disabled) {
+      background: #1e4635;
+      transform: translateY(-2px);
+    }
+    .cta-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* FAQ */
+    .faq h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #fff;
+    }
+    .accordion details {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 0.75rem;
+      margin-bottom: 1rem;
+      padding: 1rem 1.25rem;
+    }
+    .accordion summary {
+      cursor: pointer;
+      font-weight: 500;
+      color: #eee;
+      outline: none;
+    }
+    .accordion p {
+      margin-top: 0.75rem;
+      color: #ccc;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 600px) {
+      .plans {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+    }
+  </style>
+
+  <!-- Variabili pubbliche -->
+  <script type="module" src="/api/env.js"></script>
 </head>
-<body>
-    <!-- Header semplificato -->
-    <header class="top-navigation-container">
-        <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="Mental Commons" /></a>
-    </header>
+<body class="premium-page">
+  <!-- Header semplificato -->
+  <header class="top-navigation-container">
+    <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="Mental Commons" /></a>
+  </header>
 
-    <main class="container" style="padding-top: 4rem; padding-bottom: 4rem; max-width: 600px;">
-        <h1 style="text-align: center; margin-bottom: 1rem;">Sblocca il tuo spazio continuo di ascolto</h1>
-        <p style="text-align: center; margin-bottom: 2rem;">Con MC Premium hai dialoghi illimitati con i Portatori, accesso prioritario e uno storico completo delle tue UCMe.</p>
+  <main class="premium-container">
+    <h1>Scegli il tuo spazio di ascolto</h1>
 
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-            <button id="btn-premium-monthly" class="cta-button" style="width: 100%;">Attiva MC Premium Mensile – 4,99€ / mese</button>
-            <button id="btn-premium-annual" class="secondary-button" style="width: 100%;">Attiva MC Premium Annuale – 39€ / anno</button>
-        </div>
-    </main>
+    <!-- Toggle fatturazione -->
+    <div class="billing-toggle-wrapper">
+      <span>Mensile</span>
+      <label class="switch">
+        <input type="checkbox" id="billing-toggle" aria-label="Passa a fatturazione annuale" />
+        <span class="slider"></span>
+      </label>
+      <span>Annuale <span class="discount">(-35%)</span></span>
+    </div>
 
-    <script type="module" src="/ui/premium.js"></script>
-<script defer src="/scripts/header-menu.js"></script>
+    <!-- Cards -->
+    <div class="plans">
+      <!-- Piano Hobby -->
+      <div class="plan-card hobby">
+        <h2>Hobby</h2>
+        <p class="price">Gratis</p>
+        <ul class="features">
+          <li>Invio limitato UCMe</li>
+          <li>Accesso base ai Portatori</li>
+          <li class="not-included">Storico non disponibile</li>
+        </ul>
+        <button class="cta-button" disabled>Incluso</button>
+      </div>
+
+      <!-- Piano Premium -->
+      <div class="plan-card premium">
+        <h2>MC Premium</h2>
+        <p class="price"><span id="premium-price">4,99€</span> <span id="premium-price-period">/mese</span></p>
+        <ul class="features">
+          <li>Dialoghi illimitati con i Portatori</li>
+          <li>Accesso prioritario alle risposte</li>
+          <li>Storico completo UCMe</li>
+          <li>Accesso a funzionalità future riservate</li>
+        </ul>
+        <button id="btn-premium-monthly" class="cta-button">Attiva Premium – 4,99€/mese</button>
+        <button id="btn-premium-annual" class="cta-button" style="display: none;">Attiva Premium – 39€/anno</button>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <section class="faq">
+      <h2>Domande frequenti</h2>
+      <div class="accordion">
+        <details>
+          <summary>Cos'è incluso in MC Premium?</summary>
+          <p>MC Premium include dialoghi illimitati, accesso prioritario, storico completo delle tue UCMe e funzionalità esclusive in anteprima.</p>
+        </details>
+        <details>
+          <summary>Posso passare da mensile ad annuale?</summary>
+          <p>Sì, potrai cambiare piano in qualsiasi momento dal tuo profilo senza interruzioni del servizio.</p>
+        </details>
+        <details>
+          <summary>Come funziona il supporto?</summary>
+          <p>Il nostro team risponde alle richieste via email entro 24&nbsp;ore. Gli utenti Premium hanno canale prioritario.</p>
+        </details>
+        <details>
+          <summary>Posso usare MC Premium anche per la scuola?</summary>
+          <p>Certo. Offriamo pacchetti <strong>MC@School</strong> con funzionalità dedicate a classi e istituti. Contattaci per un'offerta su misura.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <!-- Stripe & interazioni -->
+  <script type="module" src="/ui/premium.js"></script>
+  <script defer src="/scripts/header-menu.js"></script>
+  <script>
+    /* Gestione toggle mensile/annuale */
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggle = document.getElementById('billing-toggle');
+      const priceEl = document.getElementById('premium-price');
+      const periodEl = document.getElementById('premium-price-period');
+      const btnMonthly = document.getElementById('btn-premium-monthly');
+      const btnAnnual = document.getElementById('btn-premium-annual');
+
+      function updateUI() {
+        const annual = toggle.checked;
+        priceEl.textContent = annual ? '39€' : '4,99€';
+        periodEl.textContent = annual ? '/anno' : '/mese';
+        btnMonthly.style.display = annual ? 'none' : 'block';
+        btnAnnual.style.display = annual ? 'block' : 'none';
+      }
+
+      toggle.addEventListener('change', updateUI);
+      updateUI(); // iniziale
+    });
+  </script>
 </body>
-</html> 
+</html>
