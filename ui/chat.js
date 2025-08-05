@@ -1,4 +1,4 @@
-import { getToken } from '../core/auth.js';
+import { getToken, getCurrentUser } from '../core/auth.js';
 import { getChatMessages, sendChatMessage, getMyChats } from '../core/api.js';
 import { log } from '../core/logger.js';
 
@@ -66,6 +66,13 @@ async function fetchMessages() {
   }
 }
 
+function parseDateString(str) {
+  if (!str) return new Date();
+  // Se la stringa non contiene indicazione di timezone, assumiamo UTC
+  const hasTZ = /[Z+-]/.test(str.slice(-6));
+  return hasTZ ? new Date(str) : new Date(str + 'Z');
+}
+
 function renderMessages(list) {
   // Se la chat è vuota, aggiungi messaggio di sistema introduttivo
   const msgs = list && list.length ? list : [{
@@ -78,7 +85,15 @@ function renderMessages(list) {
 
   msgs.forEach((msg) => {
     const bubble = document.createElement('div');
-    bubble.className = `message-bubble ${msg.sender_type}`;
+    let bubbleType;
+    if (msg.sender_type === 'system') {
+      bubbleType = 'system';
+    } else {
+      const currentUser = getCurrentUser();
+      const isSelf = currentUser && msg.sender_id === currentUser.id;
+      bubbleType = isSelf ? 'user' : 'portatore';
+    }
+    bubble.className = `message-bubble ${bubbleType}`;
 
     const textEl = document.createElement('div');
     textEl.className = 'message-text';
@@ -87,7 +102,7 @@ function renderMessages(list) {
 
     const timeEl = document.createElement('span');
     timeEl.className = 'message-time';
-    const date = new Date(msg.created_at);
+    const date = parseDateString(msg.created_at);
     timeEl.textContent = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
     bubble.appendChild(timeEl);
 
@@ -100,7 +115,7 @@ function renderMessages(list) {
       chatStatusEl.textContent = 'Chat attiva con un Portatore';
     } else {
       const lastMsg = list[list.length - 1];
-      const lastDate = new Date(lastMsg.created_at);
+      const lastDate = parseDateString(lastMsg.created_at);
       chatStatusEl.textContent = 'Ultima risposta: ' + lastDate.toLocaleString('it-IT', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
     }
   }
@@ -241,7 +256,7 @@ async function loadLastMessagePreview(chatId, token) {
 }
 
 function isRecentChat(updatedAt) {
-  const chatDate = new Date(updatedAt);
+  const chatDate = parseDateString(updatedAt);
   const now = new Date();
   const diffHours = (now - chatDate) / (1000 * 60 * 60);
   return diffHours <= 24;
@@ -249,7 +264,7 @@ function isRecentChat(updatedAt) {
 
 function getChatStatus(chat) {
   // Logica semplificata per determinare lo stato
-  const lastUpdate = new Date(chat.updated_at);
+  const lastUpdate = parseDateString(chat.updated_at);
   const diffDays = Math.floor((new Date() - lastUpdate) / (1000 * 60 * 60 * 24));
   
   if (diffDays === 0) {
@@ -262,7 +277,7 @@ function getChatStatus(chat) {
 }
 
 function formatChatDate(dateString) {
-  const date = new Date(dateString);
+  const date = parseDateString(dateString);
   const now = new Date();
   const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
   
