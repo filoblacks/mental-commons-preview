@@ -23,7 +23,7 @@
     style.id = 'mc-mobile-header-style';
     style.textContent = `
       /* Nasconde il menu mobile di default su viewport desktop */
-      .mobile-menu { display:none !important; }
+      .mobile-menu { display:none; }
 
       /* === Mobile Header & Menu (side-nav) === */
       @media (max-width: 768px) {
