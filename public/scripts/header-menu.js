@@ -11,6 +11,7 @@
     { href: 'index.html', text: 'Home' },
     { href: 'come-funziona.html', text: 'Come funziona' },
     { href: 'mc-per-le-scuole.html', text: 'MC per le scuole' },
+    { href: 'premium.html', text: 'Premium' },
     { href: 'dashboard.html', text: 'Dashboard' },
     { href: 'profile.html', text: 'Profilo' }
   ];
