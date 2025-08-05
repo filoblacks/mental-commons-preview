@@ -6578,8 +6578,9 @@ footer, footer .container {
     background-image: url('/logo.svg') !important;
     background-repeat: no-repeat !important;
     background-position: center !important;
-    background-size: 400px !important;
-    background-blend-mode: overlay !important;
+    background-size: 500px !important;
+    background-blend-mode: soft-light !important;
+    opacity: 0.95 !important;
     position: relative !important;
     padding: 0 1rem 3rem !important;
     text-align: center !important;
@@ -6597,6 +6598,11 @@ footer, footer .container {
     pointer-events: none !important;
 }
 
+/* Stile specifico per la pagina come-funziona.html */
+body.come-funziona-page {
+    background-color: var(--color-white) !important;
+}
+
 .hero-container {
     max-width: 720px !important;
     margin: 0 auto !important;
@@ -6611,6 +6617,7 @@ footer, footer .container {
     color: var(--color-primary) !important;
     margin-bottom: 1.5rem !important;
     line-height: 1.2 !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
 }
 
 .hero-subtitle {
@@ -6618,6 +6625,7 @@ footer, footer .container {
     color: var(--color-text-body) !important;
     line-height: 1.6 !important;
     font-weight: 400 !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
 }
 
 /* Depositor Flow Section */
@@ -6790,5 +6798,10 @@ footer, footer .container {
 
     .hero-section {
         background-size: 300px !important;
+    }
+    
+    /* Stile specifico per la pagina come-funziona.html su mobile */
+    body.come-funziona-page {
+        background-color: var(--color-white) !important;
     }
 }
