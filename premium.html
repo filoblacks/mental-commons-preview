@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0d0d0d" />
+  <meta name="theme-color" content="#2C5F47" />
   <title>MC Premium – Mental Commons</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -203,6 +203,54 @@
         gap: 1.5rem;
       }
     }
+    /* --------------------------------------
+       Override stile brand Mental Commons
+    --------------------------------------- */
+    :root {
+      --premium-card-bg: #E8F4F0;
+      --premium-card-border: rgba(44, 95, 71, 0.12);
+      --premium-card-shadow: 0 4px 10px rgba(44, 95, 71, 0.08);
+      --premium-toggle-track: #CDE2D9;
+      --premium-toggle-knob: #FFFFFF;
+      --premium-muted: #6B7A75;
+    }
+    body.premium-page {
+      background: var(--color-page-bg);
+      color: var(--color-text-body);
+    }
+    .plan-card {
+      background: var(--premium-card-bg);
+      border: 1px solid var(--premium-card-border);
+      box-shadow: var(--premium-card-shadow);
+    }
+    .plan-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--premium-card-shadow);
+    }
+    .plan-card h2,
+    .plan-card .price {
+      color: var(--color-text-heading);
+    }
+    .billing-toggle-wrapper {
+      color: var(--premium-muted);
+    }
+    .slider {
+      background: var(--premium-toggle-track);
+    }
+    .switch input:checked + .slider {
+      background: var(--color-primary);
+    }
+    .accordion details {
+      background: var(--premium-card-bg);
+      border: 1px solid var(--premium-card-border);
+    }
+    .accordion summary {
+      color: var(--color-text-heading);
+    }
+    .accordion p {
+      color: var(--color-text-body);
+    }
+    /* -------------------------------------- */
   </style>
 
   <!-- Variabili pubbliche -->
