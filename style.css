@@ -6359,6 +6359,16 @@ footer, footer .container {
   margin-bottom: 0.5rem;
 }
 
+/* Anteprima ultimo messaggio */
+.chat-last-message {
+  font-size: 0.875rem;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
 .chat-card-meta {
   display: flex;
   justify-content: space-between;
@@ -6390,9 +6400,9 @@ footer, footer .container {
 }
 
 .chat-open-link:hover {
-  background: #2C5F47;
-  color: white;
-  text-decoration: none;
+  color: #1F452E;
+  text-decoration: underline;
+  background: transparent;
 }
 
 .chat-dashboard-link {

@@ -157,7 +157,7 @@ async function showChatsList() {
     messagesBox.innerHTML = '';
     
     chats.forEach((chat) => {
-      const chatCard = createChatCard(chat);
+      const chatCard = createChatCard(chat, token);
       messagesBox.appendChild(chatCard);
     });
   } catch (err) {
@@ -177,33 +177,34 @@ function renderEmptyState() {
   `;
 }
 
-function createChatCard(chat) {
+function createChatCard(chat, token) {
   const chatCard = document.createElement('div');
   chatCard.className = 'chat-card';
-  
+
   // Calcola se la chat è "nuova" (updated_at nelle ultime 24 ore)
   const isNew = isRecentChat(chat.updated_at);
-  
+
   // Determina lo stato della chat per il tooltip
   const chatStatus = getChatStatus(chat);
-  
+
   // Formatta la data in modo leggibile
   const formattedDate = formatChatDate(chat.updated_at);
-  
+
   chatCard.innerHTML = `
     ${isNew ? '<div class="chat-new-badge">Nuovo</div>' : ''}
-    
+
     <div class="chat-card-header">
       <div class="chat-card-icon">🗨️</div>
       <div class="chat-ucme-content">
         ${escapeHtml(chat.ucme_excerpt)}
       </div>
     </div>
-    
+
+    <div class="chat-last-message" id="chat-preview-${chat.chat_id}">Caricamento…</div>
+
     <div class="chat-card-meta">
       <div class="chat-date">${formattedDate}</div>
       <div class="chat-actions">
-        <a href="/dashboard.html" class="chat-dashboard-link">→ Dashboard</a>
         <div class="chat-tooltip">
           <a href="/chat.html?chat_id=${chat.chat_id}" class="chat-open-link">Apri la chat</a>
           <span class="tooltip-text">${chatStatus}</span>
@@ -211,8 +212,29 @@ function createChatCard(chat) {
       </div>
     </div>
   `;
-  
+
+  // Carica anteprima dell'ultimo messaggio
+  loadLastMessagePreview(chat.chat_id, token);
+
   return chatCard;
+}
+
+/**
+ * Carica e mostra l'anteprima dell'ultimo messaggio di una chat
+ */
+async function loadLastMessagePreview(chatId, token) {
+  try {
+    const res = await getChatMessages(chatId, token);
+    if (res.status === 'success' && Array.isArray(res.data) && res.data.length) {
+      const lastMsg = res.data[res.data.length - 1];
+      const previewEl = document.getElementById(`chat-preview-${chatId}`);
+      if (previewEl) {
+        previewEl.textContent = lastMsg.text.length > 160 ? lastMsg.text.slice(0, 157) + '…' : lastMsg.text;
+      }
+    }
+  } catch (err) {
+    console.error('Errore caricamento anteprima messaggio:', err);
+  }
 }
 
 function isRecentChat(updatedAt) {
