@@ -2715,6 +2715,26 @@ footer p {
         font-size: 0.7rem;
     }
     
+    .footer-social {
+        margin-top: 12px;
+    }
+    
+    .instagram-link,
+    .tiktok-link {
+        font-size: 0.75rem;
+        padding: 5px 8px;
+    }
+    
+    .tiktok-link {
+        margin-left: 6px;
+    }
+    
+    .instagram-link svg,
+    .tiktok-link svg {
+        width: 18px;
+        height: 18px;
+    }
+    
     /* 🔧 FIX CRITICO: Forza visibilità UCMe su tutti i dispositivi mobile */
     .ucme-block {
         display: block !important;
@@ -5766,7 +5786,7 @@ h1, h2, h3, h4, h5, h6, a, strong, .section-header h2, .dashboard-title {
 }
 
 /* Footer testo */
-footer p, .footer-social, .instagram-link, .footer-social svg {
+footer p, .footer-social, .instagram-link, .tiktok-link, .footer-social svg {
     color: var(--color-text-body) !important;
 }
 
@@ -6053,6 +6073,7 @@ footer p,
 footer a,
 .footer-social,
 .instagram-link,
+.tiktok-link,
 .footer-social svg {
     color: var(--color-white) !important;
 }
