@@ -90,7 +90,7 @@ function renderMessages(list) {
       bubbleType = 'system';
           } else {
         const currentUser = getCurrentUser();
-        const isSelf = currentUser && msg.sender_id === currentUser.id;
+        const isSelf = currentUser && msg.sender_id && String(msg.sender_id) === String(currentUser.id);
         bubbleType = isSelf ? 'user' : 'portatore';
       }
     bubble.className = `message-bubble ${bubbleType}`;
