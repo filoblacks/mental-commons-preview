@@ -4591,7 +4591,7 @@ html.user-authenticated #user-welcome {
 }
 
 html.user-authenticated #main-cta {
-    display: none !important;
+    display: block !important;
 }
 
 /* STATO GUEST: Mostra elementi guest */
