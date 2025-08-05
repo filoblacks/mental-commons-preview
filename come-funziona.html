@@ -84,13 +84,34 @@
         /* Hero Section */
         .hero-section {
             background: var(--color-white);
-            padding: 5rem 1rem 3rem;
+            background-image: url('/logo.svg');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 400px;
+            background-blend-mode: overlay;
+            position: relative;
+            padding: 0 1rem 3rem;
             text-align: center;
+            margin-top: 0;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(44, 95, 71, 0.03) 0%, rgba(212, 165, 116, 0.02) 100%);
+            pointer-events: none;
         }
 
         .hero-container {
             max-width: 720px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            padding-top: 5rem;
         }
 
         .hero-title {
@@ -112,6 +133,7 @@
         .depositor-flow-section {
             background: var(--color-section-bg);
             padding: 4rem 1rem;
+            margin-top: 0;
         }
 
         .flow-container {
@@ -206,11 +228,19 @@
             .flow-step {
                 padding: 2.5rem;
             }
+
+            .hero-section {
+                background-size: 500px;
+            }
         }
 
         @media (min-width: 1024px) {
             .hero-section {
-                padding: 6rem 1rem 4rem;
+                padding: 0 1rem 4rem;
+            }
+
+            .hero-container {
+                padding-top: 6rem;
             }
 
             .depositor-flow-section {
@@ -220,11 +250,19 @@
             .hero-title {
                 font-size: 3.5rem;
             }
+
+            .hero-section {
+                background-size: 600px;
+            }
         }
 
         @media (max-width: 480px) {
             .hero-section {
-                padding: 3rem 1rem 2rem;
+                padding: 0 1rem 2rem;
+            }
+
+            .hero-container {
+                padding-top: 3rem;
             }
 
             .hero-title {
@@ -257,6 +295,10 @@
 
             .step-title {
                 font-size: 1.125rem;
+            }
+
+            .hero-section {
+                background-size: 300px;
             }
         }
     </style>
