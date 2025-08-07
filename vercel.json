@@ -157,6 +157,10 @@
     {
       "source": "/termini-di-servizio",
       "destination": "/termini-di-servizio.html"
+    },
+    {
+      "source": "/cookie-policy",
+      "destination": "/cookie-policy.html"
     }
   ]
 } 
