@@ -161,6 +161,10 @@
     {
       "source": "/cookie-policy",
       "destination": "/cookie-policy.html"
+    },
+    {
+      "source": "/disclaimer-legale",
+      "destination": "/disclaimer-legale.html"
     }
   ]
 } 
