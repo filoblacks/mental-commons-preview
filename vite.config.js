@@ -17,6 +17,7 @@ export default defineConfig({
         portatoreRequests: resolve(__dirname, 'portatore-requests.html'),
         chat: resolve(__dirname, 'chat.html'),
         privacyPolicy: resolve(__dirname, 'privacy-policy.html'),
+        cookiePolicy: resolve(__dirname, 'cookie-policy.html'),
         terminiDiServizio: resolve(__dirname, 'termini-di-servizio.html'),
         comeFunziona: resolve(__dirname, 'come-funziona.html'),
         mcPerLeScuole: resolve(__dirname, 'mc-per-le-scuole.html'),
