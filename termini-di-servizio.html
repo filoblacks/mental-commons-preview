@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#2C5F47">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Termini di Servizio - Mental Commons</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.svg">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css?v=2025062701">
+    
+    <script>
+        window.isProduction = location.hostname !== 'localhost' && !location.hostname.includes('local');
+        const log = (...args) => { if (!window.isProduction) console.log(...args); };
+        
+        try {
+            const token = localStorage.getItem('mental_commons_token');
+            const userJson = localStorage.getItem('mental_commons_user');
+            const html = document.documentElement;
+            
+            if (token && userJson) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const now = Math.floor(Date.now() / 1000);
+                    
+                    if (now < payload.exp - 300) {
+                        html.className = 'auth-ready user-authenticated';
+                        window.immediateAuthState = {
+                            isAuthenticated: true,
+                            user: JSON.parse(userJson),
+                            verified: true
+                        };
+                        log('✅ Auth: utente autenticato');
+                    } else {
+                        localStorage.removeItem('mental_commons_token');
+                        localStorage.removeItem('mental_commons_user');
+                        html.className = 'auth-ready user-guest';
+                        window.immediateAuthState = { isAuthenticated: false, user: null, verified: true };
+                        log('⏰ Auth: token scaduto');
+                    }
+                } catch (e) {
+                    localStorage.removeItem('mental_commons_token');
+                    localStorage.removeItem('mental_commons_user');
+                    html.className = 'auth-ready user-guest';
+                    window.immediateAuthState = { isAuthenticated: false, user: null, verified: true };
+                    log('⚠️ Auth: parsing error');
+                }
+            } else {
+                html.className = 'auth-ready user-guest';
+                window.immediateAuthState = { isAuthenticated: false, user: null, verified: true };
+                log('👤 Auth: guest user');
+            }
+        } catch (error) {
+            document.documentElement.className = 'auth-ready user-guest';
+            window.immediateAuthState = { isAuthenticated: false, user: null, verified: true, error: error.message };
+            console.error('❌ Auth error:', error);
+        }
+    </script>
+    <script type="module" src="/api/env.js"></script>
+</head>
+<body class="termini-di-servizio-page">
+    <!-- Top Navigation Container -->
+    <header class="top-navigation-container">
+        <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="Mental Commons" /></a>
+        
+        <!-- Navigazione principale -->
+        <nav class="nav-main">
+            <a href="index.html">Home</a>
+            <a href="come-funziona.html">Come funziona</a>
+            <a href="mc-per-le-scuole.html">MC per le scuole</a>
+            <a href="premium.html">Premium</a>
+        </nav>
+
+        <!-- Azioni utente -->
+        <div class="nav-actions">
+            <a href="dashboard.html" id="nav-dashboard" style="display: none;">Dashboard</a>
+            <a href="admin.html" id="nav-admin" style="display: none;">Admin</a>
+            <a href="login.html" id="nav-login">Accedi</a>
+            <a href="profile.html" id="nav-profile" class="nav-profile-btn" style="display: none;" title="Gestione Profilo" aria-label="Gestione Profilo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-container">
+                <h1 class="hero-title">Termini di Servizio</h1>
+                <p class="hero-subtitle">Le condizioni che regolano l'uso di Mental Commons</p>
+            </div>
+        </section>
+
+        <!-- Contenuto Termini -->
+        <section class="termini-content">
+            <div class="container">
+                <div class="termini-section">
+                    <h2>Termini di Servizio di Mental Commons</h2>
+                    <p class="termini-date">Ultimo aggiornamento: 7 Agosto 2025</p>
+                </div>
+
+                <div class="termini-section">
+                    <h3>1. Oggetto del servizio</h3>
+                    <p>Mental Commons offre uno spazio digitale in cui gli utenti possono inviare un pensiero personale (UCMe) e ricevere una risposta unica da un altro utente (Portatore), nel rispetto di anonimato, umanità e ascolto.</p>
+                </div>
+
+                <div class="termini-section">
+                    <h3>2. Accesso e uso della piattaforma</h3>
+                    <ul>
+                        <li>L'uso della piattaforma è destinato a persone in grado di comprendere e accettare le presenti condizioni in modo consapevole e responsabile.</li>
+                        <li>È vietato inviare contenuti offensivi, illegali, diffamatori o che violino diritti di terzi.</li>
+                    </ul>
+                </div>
+
+                <div class="termini-section">
+                    <h3>3. Ruolo dei Portatori</h3>
+                    <ul>
+                        <li>I Portatori sono volontari formati, ma <strong>non sono terapeuti né professionisti della salute mentale</strong>.</li>
+                        <li>La loro risposta è un atto umano, non un intervento clinico né una diagnosi.</li>
+                    </ul>
+                </div>
+
+                <div class="termini-section">
+                    <h3>4. Limitazioni di responsabilità</h3>
+                    <ul>
+                        <li>Mental Commons non è responsabile per l'uso che l'utente fa delle risposte ricevute.</li>
+                        <li>In caso di emergenza psicologica o rischio per la propria incolumità, l'utente è invitato a rivolgersi a servizi professionali o numeri di emergenza.</li>
+                    </ul>
+                </div>
+
+                <div class="termini-section">
+                    <h3>5. Contenuti generati dagli utenti</h3>
+                    <ul>
+                        <li>Gli utenti sono responsabili dei contenuti che inviano.</li>
+                        <li>Mental Commons si riserva il diritto di rimuovere contenuti inappropriati, a suo insindacabile giudizio.</li>
+                    </ul>
+                </div>
+
+                <div class="termini-section">
+                    <h3>6. Modifiche al servizio</h3>
+                    <ul>
+                        <li>Mental Commons può modificare, sospendere o interrompere il servizio in qualsiasi momento, informandone gli utenti quando possibile.</li>
+                    </ul>
+                </div>
+
+                <div class="termini-section">
+                    <h3>7. Proprietà intellettuale</h3>
+                    <ul>
+                        <li>Tutti i contenuti grafici, testuali e tecnici della piattaforma sono proprietà di Mental Commons, salvo diversamente indicato.</li>
+                    </ul>
+                </div>
+
+                <div class="termini-section">
+                    <h3>8. Accettazione dei termini</h3>
+                    <p>Utilizzando Mental Commons, l'utente accetta i presenti Termini di Servizio.</p>
+                </div>
+
+                <div class="termini-note">
+                    <p>Promettiamo di leggere anche noi tutto con attenzione. Nessuna risposta automatica, nemmeno qui.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>© 2025 — Mental Commons<br/>
+            Il contrario di un social. Il prototipo di una mente comune.</p>
+            
+            <div class="footer-links">
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="termini-di-servizio.html">Termini di Servizio</a>
+            </div>
+            
+            <div class="footer-social">
+                <a href="https://www.instagram.com/mental_commons/" target="_blank" rel="noopener noreferrer" class="instagram-link" title="Seguici su Instagram" aria-label="Profilo Instagram di Mental Commons">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                    <span>@mental_commons</span>
+                </a>
+                <a href="https://www.tiktok.com/@mental_commons" target="_blank" rel="noopener noreferrer" class="tiktok-link" title="Seguici su TikTok" aria-label="Profilo TikTok di Mental Commons">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path>
+                    </svg>
+                    <span>@mental_commons</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Libreria Supabase (UMD) -->
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+
+    <!-- Aggiorna contatori in tempo reale (Supabase) -->
+    <script type="module" src="/script-realtime.js"></script>
+
+    <!-- Modulo principale per Vite (dev) -->
+    <script type="module" src="/src/main.js"></script>
+    <script defer src="/scripts/header-menu.js"></script>
+</body>
+</html> 

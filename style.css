@@ -1760,6 +1760,24 @@ footer {
     background: #111;
 }
 
+.footer-links {
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.footer-links a {
+    color: #999;
+    text-decoration: none;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    transition: opacity 0.2s ease;
+}
+
+.footer-links a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
 footer p {
     color: #999;
     font-size: 0.9rem;
@@ -7045,5 +7063,274 @@ body.come-funziona-page {
         font-size: 3rem !important;
         top: -0.5rem !important;
         left: 0.5rem !important;
+    }
+}
+
+/* ========================================
+   PRIVACY POLICY PAGE STYLES
+   ======================================== */
+
+body.privacy-policy-page {
+    background-color: var(--color-page-bg);
+}
+
+.privacy-content {
+    padding: 3rem 0;
+    background-color: var(--color-white);
+}
+
+.privacy-section {
+    margin-bottom: 2.5rem;
+    padding: 0;
+}
+
+.privacy-section:last-child {
+    margin-bottom: 0;
+}
+
+.privacy-section h2 {
+    color: var(--color-text-heading);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+}
+
+.privacy-section p {
+    color: var(--color-text-body);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.privacy-section ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.privacy-section li {
+    color: var(--color-text-body);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+}
+
+.privacy-section a {
+    color: var(--color-primary);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-bottom-color 0.2s ease;
+}
+
+.privacy-section a:hover {
+    border-bottom-color: var(--color-primary);
+}
+
+.privacy-note {
+    background-color: var(--color-section-bg);
+    padding: 2rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--color-accent);
+    margin-top: 3rem;
+}
+
+.privacy-note p {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--color-text-heading);
+}
+
+@media (max-width: 768px) {
+    .privacy-content {
+        padding: 2rem 0;
+    }
+
+    .privacy-section {
+        margin-bottom: 2rem;
+    }
+
+    .privacy-section h2 {
+        font-size: 1.3rem;
+    }
+
+    .privacy-note {
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .privacy-note p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .privacy-content {
+        padding: 1.5rem 0;
+    }
+
+    .privacy-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .privacy-section h2 {
+        font-size: 1.2rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .privacy-section p,
+    .privacy-section li {
+        font-size: 0.95rem;
+    }
+
+    .privacy-section ul {
+        padding-left: 1.2rem;
+    }
+
+    .privacy-note {
+        padding: 1.2rem;
+        margin-top: 1.5rem;
+    }
+
+    .privacy-note p {
+        font-size: 0.95rem;
+    }
+}
+
+/* ========================================
+   TERMINI DI SERVIZIO PAGE STYLES
+   ======================================== */
+
+body.termini-di-servizio-page {
+    background-color: var(--color-page-bg);
+    color: var(--color-text-body);
+}
+
+.termini-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem 0;
+}
+
+.termini-section {
+    margin-bottom: 2.5rem;
+}
+
+.termini-section:last-child {
+    margin-bottom: 0;
+}
+
+.termini-section h2 {
+    color: var(--color-text-heading);
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.termini-section h3 {
+    color: var(--color-text-heading);
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.termini-date {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    font-style: italic;
+}
+
+.termini-section p {
+    margin-bottom: 1rem;
+    line-height: 1.7;
+}
+
+.termini-section ul {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.termini-section li {
+    margin-bottom: 0.8rem;
+    line-height: 1.7;
+}
+
+.termini-section strong {
+    color: var(--color-text-heading);
+    font-weight: 600;
+}
+
+.termini-note {
+    background-color: var(--color-section-bg);
+    border-left: 4px solid var(--color-accent);
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border-radius: 0 8px 8px 0;
+}
+
+.termini-note p {
+    margin: 0;
+    font-style: italic;
+    color: var(--color-text-body);
+}
+
+@media (max-width: 768px) {
+    .termini-content {
+        padding: 2rem 0;
+    }
+
+    .termini-section {
+        margin-bottom: 2rem;
+    }
+
+    .termini-section h2 {
+        font-size: 1.5rem;
+    }
+
+    .termini-section h3 {
+        font-size: 1.2rem;
+    }
+
+    .termini-note {
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .termini-content {
+        padding: 1.5rem 0;
+    }
+
+    .termini-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .termini-section h2 {
+        font-size: 1.3rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .termini-section h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .termini-section p,
+    .termini-section li {
+        font-size: 0.95rem;
+    }
+
+    .termini-section ul {
+        padding-left: 1.2rem;
+    }
+
+    .termini-note {
+        padding: 1.2rem;
+        margin-top: 1.5rem;
+    }
+
+    .termini-note p {
+        font-size: 0.95rem;
     }
 }
