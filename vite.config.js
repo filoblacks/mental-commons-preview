@@ -19,6 +19,7 @@ export default defineConfig({
         privacyPolicy: resolve(__dirname, 'privacy-policy.html'),
         cookiePolicy: resolve(__dirname, 'cookie-policy.html'),
         terminiDiServizio: resolve(__dirname, 'termini-di-servizio.html'),
+        disclaimerLegale: resolve(__dirname, 'disclaimer-legale.html'),
         comeFunziona: resolve(__dirname, 'come-funziona.html'),
         mcPerLeScuole: resolve(__dirname, 'mc-per-le-scuole.html'),
       },
