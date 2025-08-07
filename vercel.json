@@ -149,6 +149,14 @@
     {
       "source": "/mc-per-le-scuole",
       "destination": "/mc-per-le-scuole.html"
+    },
+    {
+      "source": "/privacy-policy",
+      "destination": "/privacy-policy.html"
+    },
+    {
+      "source": "/termini-di-servizio",
+      "destination": "/termini-di-servizio.html"
     }
   ]
 } 
