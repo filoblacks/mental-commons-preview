@@ -7528,3 +7528,160 @@ body.cookie-policy-page {
         font-size: 0.95rem;
     }
 }
+
+/* ========================================
+   DISCLAIMER LEGALE PAGE STYLES
+   ======================================== */
+
+body.disclaimer-legale-page {
+    background-color: var(--color-page-bg);
+    color: var(--color-text-body);
+}
+
+.disclaimer-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem 0;
+}
+
+.disclaimer-content h1 {
+    color: var(--color-text-heading);
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.disclaimer-date {
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 3rem;
+    font-style: italic;
+}
+
+.disclaimer-section {
+    margin-bottom: 2.5rem;
+    padding: 2rem;
+    background: var(--color-white);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid rgba(44, 95, 71, 0.1);
+}
+
+.disclaimer-section:last-child {
+    margin-bottom: 0;
+}
+
+.disclaimer-section h2 {
+    color: var(--color-text-heading);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--color-accent);
+    padding-bottom: 0.5rem;
+}
+
+.disclaimer-section p {
+    color: var(--color-text-body);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.disclaimer-section a {
+    color: var(--color-primary);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-bottom-color 0.2s ease;
+}
+
+.disclaimer-section a:hover {
+    border-bottom-color: var(--color-primary);
+}
+
+.disclaimer-note {
+    background: linear-gradient(135deg, var(--color-section-bg) 0%, #f0f8f5 100%);
+    border: 2px solid var(--color-accent);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 3rem;
+    text-align: center;
+    position: relative;
+}
+
+.disclaimer-note::before {
+    content: '💭';
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.disclaimer-note p {
+    color: var(--color-text-body);
+    font-style: italic;
+    margin: 0;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .disclaimer-content {
+        padding: 2rem 1rem;
+    }
+    
+    .disclaimer-content h1 {
+        font-size: 2rem;
+    }
+    
+    .disclaimer-section {
+        padding: 1.5rem;
+    }
+    
+    .disclaimer-section h2 {
+        font-size: 1.3rem;
+    }
+    
+    .disclaimer-note {
+        padding: 1.5rem;
+    }
+    
+    .disclaimer-note p {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .disclaimer-content {
+        padding: 1.5rem 0.75rem;
+    }
+    
+    .disclaimer-content h1 {
+        font-size: 1.8rem;
+    }
+    
+    .disclaimer-date {
+        font-size: 0.85rem;
+    }
+    
+    .disclaimer-section {
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .disclaimer-section h2 {
+        font-size: 1.2rem;
+    }
+    
+    .disclaimer-section p,
+    .disclaimer-section ul {
+        font-size: 0.95rem;
+    }
+    
+    .disclaimer-note {
+        padding: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .disclaimer-note p {
+        font-size: 0.9rem;
+    }
+}
