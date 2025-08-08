@@ -19,8 +19,9 @@ const {
 } = require('../lib/validation.js');
 
 module.exports = async function handler(req, res) {
-  // CORS & Security headers (semplici per MVP)
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // CORS & Security headers (allineati a vercel.json)
+  const ORIGIN = process.env.PUBLIC_BASE_URL || 'https://mental-commons.vercel.app';
+  res.setHeader('Access-Control-Allow-Origin', ORIGIN);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   // Evita risposte 304 su chiamate POST di login/registrazione

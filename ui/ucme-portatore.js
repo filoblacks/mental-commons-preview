@@ -125,7 +125,15 @@ function renderAssigned(container, ucmes, token) {
     card.className = 'ucme-card';
     card.style.animationDelay = `${index * 0.1}s`;
     
-    const preview = ucme.content.length > 120 ? `${ucme.content.slice(0, 117)}…` : ucme.content;
+    const escapeHtml = (str = '') => String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+    const rawPreview = ucme.content.length > 120 ? `${ucme.content.slice(0, 117)}…` : ucme.content;
+    const preview = escapeHtml(rawPreview);
     const createdDate = new Date(ucme.created_at).toLocaleDateString('it-IT', {
       day: '2-digit',
       month: 'short',
@@ -154,7 +162,7 @@ function renderAssigned(container, ucmes, token) {
       <div class="ucme-details" style="display:none;">
         <div class="ucme-full-content">
           <h4>Contenuto completo</h4>
-          <p class="ucme-full-text">${ucme.content}</p>
+          <p class="ucme-full-text">${escapeHtml(ucme.content)}</p>
         </div>
         <div class="ucme-actions">
           <div class="ucme-status-control">

@@ -86,8 +86,24 @@ module.exports = async function handler(req, res) {
 
     if (action === 'users') {
       if (req.method !== 'GET') return res.status(405).json({ success: false, message: 'Usa GET per users' });
-      const users = await getAllUsers();
-      return res.status(200).json({ success: true, data: { users, count: users.length } });
+
+      // Controlla se l'utente corrente è admin
+      const { data: me, error: meErr } = await getSupabaseClient()
+        .from('users')
+        .select('id, email, name, surname, role, is_active, created_at, last_login, school_code, has_subscription, is_admin')
+        .eq('id', payload.userId)
+        .single();
+      if (meErr) throw meErr;
+
+      const isAdmin = !!(me && (me.is_admin === true || me.role === 'admin'));
+
+      if (isAdmin) {
+        const users = await getAllUsers();
+        return res.status(200).json({ success: true, data: { users, count: users.length } });
+      }
+
+      // Non admin → restituisci solo il profilo corrente
+      return res.status(200).json({ success: true, data: { users: [me], count: 1 } });
     }
 
     if (action === 'schools') {

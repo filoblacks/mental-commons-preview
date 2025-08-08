@@ -14,6 +14,14 @@ function updateSendButtonState() {
   sendBtn.disabled = !value || value === lastSentText;
 }
 textarea.addEventListener('input', updateSendButtonState);
+textarea.addEventListener('keydown', (e) => {
+  const isEnter = e.key === 'Enter';
+  const withMeta = e.metaKey || e.ctrlKey;
+  if (isEnter && withMeta) {
+    e.preventDefault();
+    form.requestSubmit();
+  }
+});
 updateSendButtonState();
 
 const urlParams = new URLSearchParams(window.location.search);

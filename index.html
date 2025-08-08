@@ -163,7 +163,12 @@
                 <h1 class="title">Mental Commons</h1>
                 <p class="subtitle">Non siamo fatti per pensare da soli.</p>
 
-                <button id="main-cta" class="cta-button" onclick="scrollToForm()">Scrivi la tua UCMe</button>
+                <button id="main-cta" class="cta-button" onclick="scrollToForm()">Affida ora il tuo pensiero</button>
+                <div class="trust-signals" aria-label="Motivi per fidarti" role="list">
+                    <div class="trust-item" role="listitem">⏱️ Risposta entro 48h</div>
+                    <div class="trust-item" role="listitem">🛡️ Anonimo e privato</div>
+                    <div class="trust-item" role="listitem">🤝 Persone reali, non bot</div>
+                </div>
             </div>
                 </section>
 
@@ -279,7 +284,7 @@
                             oninput="document.getElementById('char-count').textContent=this.value.length; if(window.validateForm){validateForm();}"
                         ></textarea>
                         <div class="char-counter">
-                            <span id="char-count">0</span>/600 caratteri (minimo 20)
+                            <span id="char-count" aria-live="polite">0</span>/600 caratteri (minimo 20)
                         </div>
                     </div>
 

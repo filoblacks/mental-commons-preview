@@ -10,8 +10,9 @@ const { verifyJWT, getMyChats } = require('../../lib/supabase.js');
 
 
 module.exports = async function handler(req, res) {
-  // CORS base
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // CORS coerente
+  const ORIGIN = process.env.PUBLIC_BASE_URL || 'https://mental-commons.vercel.app';
+  res.setHeader('Access-Control-Allow-Origin', ORIGIN);
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();

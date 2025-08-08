@@ -18,8 +18,9 @@ const {
 } = require('../lib/validation.js');
 
 module.exports = async function handler(req, res) {
-  // CORS di base per l'MVP
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // CORS coerente con configurazione vercel
+  const ORIGIN = process.env.PUBLIC_BASE_URL || 'https://mental-commons.vercel.app';
+  res.setHeader('Access-Control-Allow-Origin', ORIGIN);
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 

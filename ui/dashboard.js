@@ -4,6 +4,8 @@ import { log } from '../core/logger.js';
 import { updateStickyHeader } from './stats.js';
 
 const containerId = 'ucme-blocks';
+let allUCMEs = [];
+let activeFilter = 'all';
 
 export async function initDashboard() {
   const user = getCurrentUser();
@@ -32,6 +34,7 @@ export async function initDashboard() {
     ]);
 
     const ucmes = ucmesRes?.data ?? [];
+    allUCMEs = ucmes;
     // L'endpoint /api/users ritorna { success, data: { users: [], count } }
     // per compatibilità gestiamo varianti diverse.
     const usersRaw = usersRes?.data;
@@ -44,7 +47,9 @@ export async function initDashboard() {
     // Aggiorna contatore sezione depositor
     updateDepositorCount(ucmes.length);
 
-    renderUcmes(container, ucmes, currentUser);
+    updateFilterCounts(allUCMEs);
+    renderUcmes(container, filterByStatus(allUCMEs, activeFilter), currentUser);
+    setupFilters(container, currentUser);
     // Aggiorna header usando la funzione condivisa
     updateStickyHeader(ucmes, users);
     // Inizializza listener dopo render
@@ -86,6 +91,14 @@ function renderUcmes(container, ucmes = [], user = null) {
     return;
   }
 
+  // escaping semplice per difesa XSS lato client
+  const escapeHtml = (str = '') => String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
   ucmes.forEach((ucme, index) => {
     const div = document.createElement('div');
     const status = ucme.status || 'in attesa';
@@ -111,12 +124,12 @@ function renderUcmes(container, ucmes = [], user = null) {
         </div>
       </div>
       <div class="ucme-content">
-        <p class="ucme-text">${ucme.content}</p>
+        <p class="ucme-text">${escapeHtml(ucme.content)}</p>
         ${ucme.risposta ? `
           <div class="ucme-response ${ucme.risposta.letta ? 'response-read' : 'response-unread'}">
             <h4>Risposta del Portatore</h4>
             <div class="response-content">
-              <p class="response-text">${ucme.risposta.contenuto}</p>
+              <p class="response-text">${escapeHtml(ucme.risposta.contenuto)}</p>
               <small class="response-date">${new Date(ucme.risposta.timestamp).toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })}</small>
             </div>
             ${!ucme.risposta.letta ? `<button class="btn-mark-read" data-ucme-id="${ucme.id}">Segna come letta</button>` : '<span class="read-label">Letta</span>'}
@@ -144,6 +157,51 @@ function renderUcmes(container, ucmes = [], user = null) {
   });
 
   removeLoadingMessage();
+}
+
+function setupFilters(container, user) {
+  const filterBar = document.querySelector('.ucme-filters');
+  if (!filterBar) return;
+  filterBar.addEventListener('click', (e) => {
+    const btn = e.target.closest('.ucme-filter');
+    if (!btn) return;
+    document.querySelectorAll('.ucme-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.status || 'all';
+    const list = document.getElementById(containerId);
+    if (!list) return;
+    renderUcmes(list, filterByStatus(allUCMEs, activeFilter), user);
+  });
+}
+
+function filterByStatus(list = [], status = 'all') {
+  if (!list.length || status === 'all') return list;
+  // mappa alcune varianti di stato per robustezza
+  const normalize = (s = '') => s.toLowerCase();
+  const wanted = normalize(status);
+  return list.filter((u) => normalize(u.status || '') === wanted);
+}
+
+function updateFilterCounts(list = []) {
+  const counters = {
+    all: list.length,
+    'in attesa': 0,
+    'assegnato': 0,
+    'in lavorazione': 0,
+    'risposto': 0,
+    'completato': 0,
+  };
+  list.forEach((u) => {
+    const s = (u.status || '').toLowerCase();
+    if (counters[s] !== undefined) counters[s] += 1;
+  });
+  const byId = (id) => document.getElementById(id);
+  byId('count-all') && (byId('count-all').textContent = counters.all);
+  byId('count-in-attesa') && (byId('count-in-attesa').textContent = counters['in attesa']);
+  byId('count-assegnato') && (byId('count-assegnato').textContent = counters['assegnato']);
+  byId('count-in-lavorazione') && (byId('count-in-lavorazione').textContent = counters['in lavorazione']);
+  byId('count-risposto') && (byId('count-risposto').textContent = counters['risposto']);
+  byId('count-completato') && (byId('count-completato').textContent = counters['completato']);
 }
 
 // Utility functions for status styling

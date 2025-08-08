@@ -1604,7 +1604,7 @@ main,
     text-align: right;
     margin-top: 8px;
     font-size: 0.9rem;
-    color: #999;
+    color: var(--color-muted, #6b7a75);
 }
 
 .form-group small {
@@ -1725,6 +1725,7 @@ main,
     background: var(--color-accent) !important;
     border-radius: 8px;
     border: 1px solid #4caf50;
+    outline: none;
 }
 
 .success-message h3 {
@@ -5413,6 +5414,40 @@ html.auth-ready #main-cta {
     color: #ccc;
 }
 
+/* UCMe Filters */
+.ucme-filters {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    margin: .75rem 0 1rem;
+}
+.ucme-filter {
+    background: #f5f7f6;
+    border: 1px solid rgba(44,95,71,.15);
+    color: var(--color-text-body, #2c2c2c);
+    padding: .4rem .7rem;
+    border-radius: 999px;
+    font-size: .85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.ucme-filter:hover { background: #eef3f0; }
+.ucme-filter.active {
+    background: var(--color-primary, #2c5f47);
+    color: #fff;
+    border-color: var(--color-primary, #2c5f47);
+}
+.ucme-filter .pill-badge {
+    display: inline-block;
+    margin-left: .4rem;
+    background: rgba(0,0,0,.08);
+    color: inherit;
+    padding: .05rem .45rem;
+    border-radius: .75rem;
+    font-weight: 700;
+}
+
 .empty-state-icon {
     margin-bottom: 1.5rem;
     opacity: 0.6;
@@ -5446,6 +5481,7 @@ html.auth-ready #main-cta {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    line-height: 1.2;
 }
 
 .status-pending {

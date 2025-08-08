@@ -29,7 +29,17 @@ export function initForm() {
       await postUCME(payload, getToken());
       form.reset();
       counter.textContent = '0';
-      alert('Pensiero inviato con successo!');
+      // UI in-page: nasconde il form e mostra il messaggio di successo
+      const formSection = document.getElementById('ucme-form');
+      const success = document.getElementById('success-message');
+      if (formSection && success) {
+        formSection.style.display = 'none';
+        success.style.display = 'block';
+        // Focus per accessibilità
+        const h3 = success.querySelector('h3');
+        if (h3) h3.setAttribute('tabindex', '-1');
+        if (h3) h3.focus?.();
+      }
     } catch (err) {
       log('Errore invio UCMe', err.message);
       alert('Errore invio pensiero');
