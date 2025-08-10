@@ -1,6 +1,7 @@
 import { login, register } from '../core/auth.js';
 import { isValidEmail, isValidPassword } from '../utils/helpers.js';
 import { log } from '../core/logger.js';
+import { t } from '../core/i18n.js';
 
 export function initLogin() {
   const tabLogin = document.getElementById('tab-login');
@@ -37,7 +38,7 @@ export function initLogin() {
     const email = loginForm.querySelector('#login-email').value.trim().toLowerCase();
     const password = loginForm.querySelector('#login-password').value.trim();
     if (!isValidEmail(email) || password.length === 0) {
-      showError('Email o password non validi');
+      showError(t('errors.auth.invalid_credentials'));
       return;
     }
     try {
@@ -45,11 +46,11 @@ export function initLogin() {
       if (res.success) {
         window.location.href = 'dashboard.html';
       } else {
-        showError(res.message || 'Credenziali non valide');
+        showError(res.message || t('errors.auth.invalid_credentials'));
       }
     } catch (err) {
       log(err);
-      showError(err.message || 'Errore durante il login');
+      showError(err.message || t('errors.auth.login_generic'));
     }
   });
 
@@ -63,23 +64,23 @@ export function initLogin() {
     const password = registerForm.querySelector('#register-password').value.trim();
     const confirm = registerForm.querySelector('#register-confirm').value.trim();
 
-    if (name.length < 2) return showError('Il nome deve essere di almeno 2 caratteri');
-    if (!isValidEmail(email)) return showError('Email non valida');
+    if (name.length < 2) return showError(t('errors.auth.name_short'));
+    if (!isValidEmail(email)) return showError(t('errors.auth.email_invalid'));
     if (!isValidPassword(password)) {
-      return showError('La password deve essere di almeno 12 caratteri e contenere maiuscola, minuscola, numero e simbolo');
+      return showError(t('errors.auth.password_policy'));
     }
-    if (password !== confirm) return showError('Le password non coincidono');
+    if (password !== confirm) return showError(t('errors.auth.password_mismatch'));
 
     try {
       const res = await register(email, password, name, surname);
       if (res.success) {
         window.location.href = 'dashboard.html';
       } else {
-        showError(res.message || 'Errore in registrazione');
+        showError(res.message || t('errors.unexpected'));
       }
     } catch (err) {
       log(err);
-      showError(err.message || 'Errore durante la registrazione');
+      showError(err.message || t('errors.unexpected'));
     }
   });
 

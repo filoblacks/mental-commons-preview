@@ -1,4 +1,5 @@
 import { log } from '../core/logger.js';
+import { t, currentLocale, formatDate } from '../core/i18n.js';
 
 // ▸ VISIBILITÀ ELEMENTI ----------------------------------------------------------------------------------------------------------------
 function toggleDisplay(id, show = true, displayType = 'block') {
@@ -35,7 +36,7 @@ function toggleProfileForm(forceHide = null) {
 
   const shouldShow = forceHide === null ? form.style.display === 'none' : !forceHide;
   form.style.display = shouldShow ? 'block' : 'none';
-  btn.textContent = shouldShow ? 'Chiudi Modifica' : 'Modifica le tue informazioni';
+  btn.textContent = shouldShow ? t('profile.edit.toggle_close') : t('profile.edit.toggle_open');
 }
 
 function wireProfileForm(user) {
@@ -58,7 +59,7 @@ export async function initProfile() {
   const { getToken, getCurrentUser } = await import('../core/auth.js');
   const user = getCurrentUser();
   if (!user) {
-    log('Nessun utente autenticato, impossibile inizializzare profilo');
+    log(t('errors.profile.dom_missing'));
     return;
   }
 
@@ -96,20 +97,20 @@ export async function initProfile() {
 
   
   // Mostra nome con badge premium se applicabile
-  const userName = realUser.name || 'Non specificato';
+  const userName = realUser.name || '-';
   if (realUser.has_subscription === true || realUser.has_subscription === "true") {
     nameEl.innerHTML = `
       <div class="user-name-with-badge">
         <span>${userName}</span>
-        <span class="premium-badge">MC Premium</span>
+        <span class="premium-badge">${t('profile.badge.premium')}</span>
       </div>
     `;
   } else {
     nameEl.textContent = userName;
   }
   
-  createdEl.textContent = new Date(realUser.created_at || Date.now()).toLocaleDateString('it-IT');
-  lastEl.textContent = new Date(realUser.last_login || Date.now()).toLocaleDateString('it-IT');
+  createdEl.textContent = formatDate(new Date(realUser.created_at || Date.now()));
+  lastEl.textContent = formatDate(new Date(realUser.last_login || Date.now()));
 
   // Visualizza sezione profilo
   toggleDisplay('user-verification', false);

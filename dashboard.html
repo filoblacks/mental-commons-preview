@@ -119,24 +119,24 @@
     <div class="top-navigation-container">
         <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="Mental Commons" /></a>
         <nav class="nav-main">
-            <a href="index.html">Home</a>
-            <a href="come-funziona.html">Come funziona</a>
-            <a href="mc-per-le-scuole.html">MC per le scuole</a>
-            <a href="premium.html">Premium</a>
+            <a href="index.html" data-i18n="nav.home"></a>
+            <a href="come-funziona.html" data-i18n="nav.how_it_works"></a>
+            <a href="mc-per-le-scuole.html" data-i18n="nav.schools"></a>
+            <a href="premium.html" data-i18n="nav.premium"></a>
         </nav>
         <!-- Ritual Stats - Sticky Header -->
         <header class="ritual-stats">
-            <div><strong><span id="ucme-count">–</span></strong> pensieri accolti</div>
-            <div><strong><span id="risposte-count">–</span></strong> risposte inviate</div>
-            <div><strong><span id="portatori-count">–</span></strong> Portatori attivi</div>
+            <div><strong><span id="ucme-count">–</span></strong> <span data-i18n="home.stats.ucme_label"></span></div>
+            <div><strong><span id="risposte-count">–</span></strong> <span data-i18n="home.stats.replies_label"></span></div>
+            <div><strong><span id="portatori-count">–</span></strong> <span data-i18n="home.stats.portatori_label"></span></div>
         </header>
         
         <!-- Navigazione semplificata -->
         <div class="ritual-actions">
-            <a href="index.html" style="display: none;">Home</a>
-            <a href="dashboard.html" id="nav-dashboard" style="display: none;">Dashboard</a>
+            <a href="index.html" style="display: none;" data-i18n="nav.home"></a>
+            <a href="dashboard.html" id="nav-dashboard" style="display: none;" data-i18n="nav.dashboard"></a>
             <a href="dashboard-docente.html" id="nav-dashboard-docente" style="display: none;">Dashboard Docente</a>
-            <a href="login.html" id="nav-login">Accedi</a>
+            <a href="login.html" id="nav-login" data-i18n="nav.login"></a>
             <a href="profile.html" id="nav-profile" class="nav-profile-btn" style="display: none;" title="Gestione Profilo" aria-label="Gestione Profilo">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -144,6 +144,11 @@
                 </svg>
             </a>
         </div>
+        <nav class="nav-lang" style="margin-left:auto; display:flex; align-items:center; gap:.25rem;">
+          <button type="button" id="lang-it" aria-label="Italiano">IT</button>
+          <span class="divider">/</span>
+          <button type="button" id="lang-en" aria-label="English">EN</button>
+        </nav>
     </div>
 
     <main class="dashboard-main">
@@ -151,8 +156,8 @@
             <!-- Dashboard Header con animazione di entrada -->
             <div class="dashboard-header">
                 <div class="dashboard-header-content">
-                    <h1 class="dashboard-title">Il tuo spazio mentale</h1>
-                    <p class="dashboard-subtitle">Pensieri affidati e pensieri ricevuti: il tuo spazio mentale completo.</p>
+                    <h1 class="dashboard-title" data-i18n="dashboard.header.title"></h1>
+                    <p class="dashboard-subtitle" data-i18n="dashboard.header.subtitle"></p>
                 </div>
                 <div class="dashboard-header-decoration">
                     <div class="floating-orb orb-1"></div>
@@ -165,7 +170,7 @@
             <div id="user-verification" class="user-verification">
                 <div class="loading-container">
                     <div class="loading-spinner"></div>
-                    <p>Caricamento del tuo spazio...</p>
+                    <p data-i18n="dashboard.loading"></p>
                 </div>
             </div>
 
@@ -184,7 +189,7 @@
                                     <polyline points="10,9 9,9 8,9"></polyline>
                                 </svg>
                             </div>
-                            <h2>Pensieri Affidati</h2>
+                            <h2 data-i18n="dashboard.depositor.reply.title"></h2>
                         </div>
                         <div class="section-count" id="depositor-count">
                             <span class="count-number">0</span>
@@ -193,12 +198,12 @@
                     </div>
                     <!-- Barra filtri UCMe -->
                     <nav class="ucme-filters" aria-label="Filtra pensieri per stato">
-                        <button class="ucme-filter active" data-status="all">Tutte <span class="pill-badge" id="count-all">0</span></button>
-                        <button class="ucme-filter" data-status="in attesa">In attesa <span class="pill-badge" id="count-in-attesa">0</span></button>
-                        <button class="ucme-filter" data-status="assegnato">Assegnato <span class="pill-badge" id="count-assegnato">0</span></button>
-                        <button class="ucme-filter" data-status="in lavorazione">In lavorazione <span class="pill-badge" id="count-in-lavorazione">0</span></button>
-                        <button class="ucme-filter" data-status="risposto">Risposto <span class="pill-badge" id="count-risposto">0</span></button>
-                        <button class="ucme-filter" data-status="completato">Completato <span class="pill-badge" id="count-completato">0</span></button>
+                        <button class="ucme-filter active" data-status="all" data-i18n="dashboard.filters.all"></button> <span class="pill-badge" id="count-all">0</span>
+                        <button class="ucme-filter" data-status="in attesa" data-i18n="dashboard.filters.pending"></button> <span class="pill-badge" id="count-in-attesa">0</span>
+                        <button class="ucme-filter" data-status="assegnato" data-i18n="dashboard.filters.assigned"></button> <span class="pill-badge" id="count-assegnato">0</span>
+                        <button class="ucme-filter" data-status="in lavorazione" data-i18n="dashboard.filters.processing"></button> <span class="pill-badge" id="count-in-lavorazione">0</span>
+                        <button class="ucme-filter" data-status="risposto" data-i18n="dashboard.filters.answered"></button> <span class="pill-badge" id="count-risposto">0</span>
+                        <button class="ucme-filter" data-status="completato" data-i18n="dashboard.filters.completed"></button> <span class="pill-badge" id="count-completato">0</span>
                     </nav>
                     <div id="ucme-blocks" class="ucme-blocks modern-grid">
                         <!-- Le UCMe verranno inserite qui via JavaScript -->
@@ -207,23 +212,23 @@
 
                 <!-- Azioni Dashboard (centrate) -->
                 <div class="dashboard-actions">
-                    <a href="index.html#form-section" class="new-ucme-button primary-action">
+                        <a href="index.html#form-section" class="new-ucme-button primary-action" data-i18n="dashboard.actions.new_ucme">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
                             <line x1="12" y1="8" x2="12" y2="16"></line>
                             <line x1="8" y1="12" x2="16" y2="12"></line>
                         </svg>
-                        Affida un nuovo pensiero
+                        
                     </a>
                 </div>
             </div>
 
             <!-- No Access State -->
-            <div id="no-access" class="no-access" style="display: none;">
+                <div id="no-access" class="no-access" style="display: none;">
                 <div class="no-access-content">
-                    <h2>Accesso richiesto</h2>
-                    <p>Per visualizzare il tuo spazio mentale è necessario accedere con la tua email.</p>
-                    <a href="login.html" class="login-link">Accedi al tuo spazio</a>
+                    <h2 data-i18n="dashboard.no_access.title"></h2>
+                    <p data-i18n="dashboard.no_access.body"></p>
+                    <a href="login.html" class="login-link" data-i18n="dashboard.no_access.cta"></a>
                 </div>
             </div>
         </div>
@@ -235,10 +240,10 @@
                 Il contrario di un social. Il prototipo di una mente comune.</p>
             
             <div class="footer-links">
-                <a href="/privacy-policy">Privacy Policy</a>
-                <a href="/cookie-policy">Cookie Policy</a>
-                <a href="/termini-di-servizio">Termini di Servizio</a>
-                <a href="/disclaimer-legale">Disclaimer Legale</a>
+                <a href="/privacy-policy" data-i18n="footer.links.privacy"></a>
+                <a href="/cookie-policy" data-i18n="footer.links.cookie"></a>
+                <a href="/termini-di-servizio" data-i18n="footer.links.terms"></a>
+                <a href="/disclaimer-legale" data-i18n="footer.links.disclaimer"></a>
             </div>
             
             <div class="footer-social">
@@ -262,5 +267,11 @@
 
     <script type="module" src="/src/main.js"></script>
 <script defer src="/scripts/header-menu.js"></script>
+<script type="module">
+  import { initI18n, setLocale } from '/src/core/i18n.js';
+  initI18n();
+  document.getElementById('lang-it')?.addEventListener('click', () => setLocale('it'));
+  document.getElementById('lang-en')?.addEventListener('click', () => setLocale('en'));
+</script>
 </body>
 </html> 

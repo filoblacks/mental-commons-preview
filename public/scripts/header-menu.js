@@ -8,12 +8,12 @@
    * Configurazione link di navigazione primaria
    * -------------------------------------------- */
   const MENU_LINKS = [
-    { href: 'index.html', text: 'Home' },
-    { href: 'come-funziona.html', text: 'Come funziona' },
-    { href: 'mc-per-le-scuole.html', text: 'MC per le scuole' },
-    { href: 'premium.html', text: 'Premium' },
-    { href: 'dashboard.html', text: 'Dashboard' },
-    { href: 'profile.html', text: 'Profilo' }
+    { href: 'index.html', text: 'Home', key: 'nav.home' },
+    { href: 'come-funziona.html', text: 'Come funziona', key: 'nav.how_it_works' },
+    { href: 'mc-per-le-scuole.html', text: 'MC per le scuole', key: 'nav.schools' },
+    { href: 'premium.html', text: 'Premium', key: 'nav.premium' },
+    { href: 'dashboard.html', text: 'Dashboard', key: 'nav.dashboard' },
+    { href: 'profile.html', text: 'Profilo', key: 'profile.header.title' }
   ];
 
   /* --------------------------------------------
@@ -118,13 +118,42 @@
     menu.className = 'mobile-menu';
     menu.setAttribute('aria-hidden', 'true');
 
-    MENU_LINKS.forEach(({ href, text }) => {
+    MENU_LINKS.forEach(({ href, text, key }) => {
       const link = document.createElement('a');
       link.href = href;
       link.textContent = text;
+      if (key) link.setAttribute('data-i18n', key);
       link.addEventListener('click', closeMenu);
       menu.appendChild(link);
     });
+
+    // Aggiunge switch lingua in fondo al menu mobile
+    const langNav = document.createElement('div');
+    langNav.style.marginTop = 'auto';
+    langNav.innerHTML = `
+      <nav class="nav-lang">
+        <button type="button" id="lang-it-mobile" aria-label="Italiano">IT</button>
+        <span class="divider">/</span>
+        <button type="button" id="lang-en-mobile" aria-label="English">EN</button>
+      </nav>`;
+    menu.appendChild(langNav);
+
+    // Wiring cambio lingua anche sul menu mobile (usa API global esposte da i18n)
+    const itMobile = langNav.querySelector('#lang-it-mobile');
+    const enMobile = langNav.querySelector('#lang-en-mobile');
+    itMobile && itMobile.addEventListener('click', () => {
+      if (window.__mc_setLocale) window.__mc_setLocale('it');
+      closeMenu();
+    });
+    enMobile && enMobile.addEventListener('click', () => {
+      if (window.__mc_setLocale) window.__mc_setLocale('en');
+      closeMenu();
+    });
+
+    // Se i18n è già inizializzato, applica traduzioni anche agli elementi appena creati
+    if (window.__mc_applyI18n) {
+      try { window.__mc_applyI18n(); } catch (_) {}
+    }
 
     // Inserimento nel DOM
     header.appendChild(burger);

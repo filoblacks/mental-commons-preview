@@ -114,10 +114,10 @@
     <div class="top-navigation-container">
         <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="Mental Commons" /></a>
         <nav class="nav-main">
-            <a href="index.html">Home</a>
-            <a href="come-funziona.html">Come funziona</a>
-            <a href="mc-per-le-scuole.html">MC per le scuole</a>
-            <a href="premium.html">Premium</a>
+            <a href="index.html" data-i18n="nav.home"></a>
+            <a href="come-funziona.html" data-i18n="nav.how_it_works"></a>
+            <a href="mc-per-le-scuole.html" data-i18n="nav.schools"></a>
+            <a href="premium.html" data-i18n="nav.premium"></a>
         </nav>
         <!-- Ritual Stats - Sticky Header -->
         <header class="ritual-stats">
@@ -127,30 +127,35 @@
         </header>
         
         <!-- Navigazione semplificata -->
-        <div class="ritual-actions">
-            <a href="index.html">Home</a>
-            <a href="dashboard.html" id="nav-dashboard" style="display: none;">Dashboard</a>
-            <a href="dashboard-docente.html" id="nav-dashboard-docente" style="display: none;">Dashboard Docente</a>
-            <a href="login.html" id="nav-login">Accedi</a>
-            <a href="profile.html" id="nav-profile" class="nav-profile-btn" style="display: none;" title="Gestione Profilo" aria-label="Gestione Profilo">
+            <div class="ritual-actions">
+            <a href="index.html" data-i18n="nav.home"></a>
+            <a href="dashboard.html" id="nav-dashboard" style="display: none;" data-i18n="nav.dashboard"></a>
+              <a href="dashboard-docente.html" id="nav-dashboard-docente" style="display: none;" data-i18n="nav.dashboard"></a>
+            <a href="login.html" id="nav-login" data-i18n="nav.login"></a>
+              <a href="profile.html" id="nav-profile" class="nav-profile-btn" style="display: none;" data-i18n-attr="title|aria-label" data-i18n="profile.header.title">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                     <circle cx="12" cy="7" r="4"></circle>
                 </svg>
             </a>
         </div>
+        <nav class="nav-lang" style="margin-left:auto; display:flex; align-items:center; gap:.25rem;">
+          <button type="button" id="lang-it" aria-label="Italiano">IT</button>
+          <span class="divider">/</span>
+          <button type="button" id="lang-en" aria-label="English">EN</button>
+        </nav>
     </div>
 
     <!-- Contenitore login centrato -->
     <div class="login-container">
         <div class="login-form-wrapper">
-            <h2>Accedi al tuo spazio</h2>
-            <p class="login-description">Il tuo spazio personale per vedere tutti i tuoi pensieri e le risposte ricevute.</p>
+            <h2 data-i18n="auth.login.title"></h2>
+            <p class="login-description" data-i18n="auth.login.subtitle"></p>
             
             <!-- Tab switch -->
             <div class="tab-switch">
-                <button id="tab-login" class="tab-btn active">Accedi</button>
-                <button id="tab-register" class="tab-btn">Registrati</button>
+                <button id="tab-login" class="tab-btn active" data-i18n="auth.tabs.login"></button>
+                <button id="tab-register" class="tab-btn" data-i18n="auth.tabs.register"></button>
             </div>
             
             <!-- Messaggio di errore -->
@@ -159,32 +164,32 @@
             <!-- Form Login -->
             <form id="login-form" class="auth-form">
                 <div class="form-group">
-                    <input type="email" id="login-email" placeholder="Email" required>
+                    <input type="email" id="login-email" data-i18n-attr="placeholder" data-i18n="auth.login.email.placeholder" required>
                 </div>
                 <div class="form-group">
-                    <input type="password" id="login-password" placeholder="Password" required>
+                    <input type="password" id="login-password" data-i18n-attr="placeholder" data-i18n="auth.login.password.placeholder" required>
                 </div>
-                <button type="submit" class="auth-button">Accedi</button>
+                <button type="submit" class="auth-button" data-i18n="auth.login.submit"></button>
             </form>
             
             <!-- Form Registrazione -->
             <form id="register-form" class="auth-form" style="display: none;">
                 <div class="form-group">
-                    <input type="text" id="register-name" placeholder="Nome" required>
+                    <input type="text" id="register-name" data-i18n-attr="placeholder" data-i18n="auth.register.name.placeholder" required>
                 </div>
                 <div class="form-group">
-                    <input type="text" id="register-surname" placeholder="Cognome (opzionale)">
+                    <input type="text" id="register-surname" data-i18n-attr="placeholder" data-i18n="auth.register.surname.placeholder">
                 </div>
                 <div class="form-group">
-                    <input type="email" id="register-email" placeholder="Email" required>
+                    <input type="email" id="register-email" data-i18n-attr="placeholder" data-i18n="auth.register.email.placeholder" required>
                 </div>
                 <div class="form-group">
-                    <input type="password" id="register-password" placeholder="Password" required>
+                    <input type="password" id="register-password" data-i18n-attr="placeholder" data-i18n="auth.register.password.placeholder" required>
                 </div>
                 <div class="form-group">
-                    <input type="password" id="register-confirm" placeholder="Conferma password" required>
+                    <input type="password" id="register-confirm" data-i18n-attr="placeholder" data-i18n="auth.register.confirm.placeholder" required>
                 </div>
-                <button type="submit" class="auth-button">Registrati</button>
+                <button type="submit" class="auth-button" data-i18n="auth.register.submit"></button>
             </form>
         </div>
     </div>
@@ -193,13 +198,13 @@
     <footer>
         <div class="container">
             <p>© 2025 — Mental Commons<br/>
-            Il contrario di un social. Il prototipo di una mente comune.</p>
+            <span data-i18n="footer.tagline"></span></p>
             
             <div class="footer-links">
-                <a href="/privacy-policy">Privacy Policy</a>
-                <a href="/cookie-policy">Cookie Policy</a>
-                <a href="/termini-di-servizio">Termini di Servizio</a>
-                <a href="/disclaimer-legale">Disclaimer Legale</a>
+                <a href="/privacy-policy" data-i18n="footer.links.privacy"></a>
+                <a href="/cookie-policy" data-i18n="footer.links.cookie"></a>
+                <a href="/termini-di-servizio" data-i18n="footer.links.terms"></a>
+                <a href="/disclaimer-legale" data-i18n="footer.links.disclaimer"></a>
             </div>
             
             <div class="footer-social">
@@ -223,7 +228,12 @@
 
     <!-- Modulo principale per Vite (dev) -->
     <script type="module" src="/src/main.js"></script>
-    
+    <script type="module">
+      import { initI18n, setLocale } from '/src/core/i18n.js';
+      initI18n();
+      document.getElementById('lang-it')?.addEventListener('click', () => setLocale('it'));
+      document.getElementById('lang-en')?.addEventListener('click', () => setLocale('en'));
+    </script>
     <!-- realtime scripts rimossi -->
 <script defer src="/scripts/header-menu.js"></script>
 </body>

@@ -1,6 +1,7 @@
 import { getToken, getCurrentUser } from '../core/auth.js';
 import { getChatMessages, sendChatMessage, getMyChats } from '../core/api.js';
 import { log } from '../core/logger.js';
+import { t, currentLocale, initI18n, formatDate, formatRelative } from '../core/i18n.js';
 
 const messagesBox = document.getElementById('messages-box');
 const form = document.getElementById('message-form');
@@ -64,11 +65,11 @@ async function fetchMessages() {
     renderMessages(res.data);
   } catch (err) {
     console.error('❌ Errore recupero messaggi:', err);
-    log('Errore recupero messaggi', err);
+    log(t('errors.chat.fetch'), err);
     
     // Se è un errore di autorizzazione o chat non trovata, mostra dettagli
     if (err.message.includes('Non autorizzato') || err.message.includes('Chat non trovata')) {
-      alert(`Errore chat: ${err.message}\nChat ID: ${chatId}`);
+      alert(`${t('errors.chat.fetch')}: ${err.message}\nID: ${chatId}`);
       window.location.href = '/dashboard.html';
     }
   }
@@ -85,7 +86,7 @@ function renderMessages(list) {
   // Se la chat è vuota, aggiungi messaggio di sistema introduttivo
   const msgs = list && list.length ? list : [{
     sender_type: 'system',
-    text: 'Questo spazio è per voi. Non serve avere le parole giuste.',
+    text: t('chat.system.welcome'),
     created_at: new Date().toISOString()
   }];
 
@@ -111,7 +112,7 @@ function renderMessages(list) {
     const timeEl = document.createElement('span');
     timeEl.className = 'message-time';
     const date = parseDateString(msg.created_at);
-    timeEl.textContent = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    timeEl.textContent = formatDate(date, { hour: '2-digit', minute: '2-digit' });
     bubble.appendChild(timeEl);
 
     messagesBox.appendChild(bubble);
@@ -120,11 +121,11 @@ function renderMessages(list) {
   // Aggiorna stato chat
   if (chatStatusEl) {
     if (!list || list.length === 0) {
-      chatStatusEl.textContent = 'Chat attiva con un Portatore';
+      chatStatusEl.textContent = t('chat.status.active');
     } else {
       const lastMsg = list[list.length - 1];
       const lastDate = parseDateString(lastMsg.created_at);
-      chatStatusEl.textContent = 'Ultima risposta: ' + lastDate.toLocaleString('it-IT', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+      chatStatusEl.textContent = `${t('chat.status.last_reply_prefix')} ${formatDate(lastDate, { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}`;
     }
   }
 
@@ -146,8 +147,8 @@ form.addEventListener('submit', async (e) => {
     updateSendButtonState();
     await fetchMessages();
   } catch (err) {
-    log('Errore invio messaggio', err);
-    alert(err.message || 'Errore invio messaggio');
+    log(t('errors.chat.send'), err);
+    alert(err.message || t('errors.chat.send'));
   }
 });
 
@@ -162,7 +163,7 @@ async function showChatsList() {
   form.style.display = 'none';
   
   // Cambia titolo
-  document.querySelector('.chat-title').textContent = 'I Tuoi Dialoghi';
+  document.querySelector('.chat-title').textContent = t('chat.empty_state.title');
   
   try {
     const res = await getMyChats(token);
@@ -185,7 +186,7 @@ async function showChatsList() {
     });
   } catch (err) {
     console.error('❌ Errore caricamento chat:', err);
-    messagesBox.innerHTML = '<div class="chat-empty-state"><p>Errore nel caricamento delle chat</p></div>';
+    messagesBox.innerHTML = `<div class="chat-empty-state"><p>${t('errors.unexpected')}</p></div>`;
   }
 }
 
@@ -193,9 +194,9 @@ function renderEmptyState() {
   messagesBox.className = '';
   messagesBox.innerHTML = `
     <div class="chat-empty-state">
-      <h3>🌱</h3>
-      <p>Qui appariranno i tuoi dialoghi anonimi.<br>Ogni parola è un ponte.</p>
-      <a href="/dashboard.html" class="btn-outline">Torna al Dashboard</a>
+      <h3>${t('chat.empty_state.icon')}</h3>
+      <p>${t('chat.empty_state.body')}</p>
+      <a href="/dashboard.html" class="btn-outline">${t('chat.empty_state.cta')}</a>
     </div>
   `;
 }
@@ -214,7 +215,7 @@ function createChatCard(chat, token) {
   const formattedDate = formatChatDate(chat.updated_at);
 
   chatCard.innerHTML = `
-    ${isNew ? '<div class="chat-new-badge">Nuovo</div>' : ''}
+    ${isNew ? `<div class="chat-new-badge">${t('chat.list.card.new_badge')}</div>` : ''}
 
     <div class="chat-card-header">
       <div class="chat-card-icon">🗨️</div>
@@ -223,13 +224,13 @@ function createChatCard(chat, token) {
       </div>
     </div>
 
-    <div class="chat-last-message" id="chat-preview-${chat.chat_id}">Caricamento…</div>
+    <div class="chat-last-message" id="chat-preview-${chat.chat_id}">${t('chat.list.card.preview_loading')}</div>
 
-    <div class="chat-card-meta">
+      <div class="chat-card-meta">
       <div class="chat-date">${formattedDate}</div>
       <div class="chat-actions">
         <div class="chat-tooltip">
-          <a href="/chat.html?chat_id=${chat.chat_id}" class="chat-open-link">Apri la chat</a>
+          <a href="/chat.html?chat_id=${chat.chat_id}" class="chat-open-link">${t('chat.list.card.open')}</a>
           <span class="tooltip-text">${chatStatus}</span>
         </div>
       </div>
@@ -255,7 +256,7 @@ async function loadLastMessagePreview(chatId, token) {
       const lastMsg = res.data[res.data.length - 1];
       previewEl.textContent = lastMsg.text.length > 160 ? lastMsg.text.slice(0, 157) + '…' : lastMsg.text;
     } else {
-      previewEl.textContent = 'Ancora nessun messaggio';
+      previewEl.textContent = t('chat.list.card.no_messages');
       previewEl.classList.add('chat-message-empty');
     }
   } catch (err) {
@@ -276,11 +277,11 @@ function getChatStatus(chat) {
   const diffDays = Math.floor((new Date() - lastUpdate) / (1000 * 60 * 60 * 24));
   
   if (diffDays === 0) {
-    return 'Attività recente oggi';
+    return t('chat.list.card.status.today');
   } else if (diffDays === 1) {
-    return 'Ultimo messaggio ieri';
+    return t('chat.list.card.status.yesterday');
   } else {
-    return `Ultimo messaggio ${diffDays} giorni fa`;
+    return t('chat.list.card.status.days_ago', { count: diffDays });
   }
 }
 
@@ -289,15 +290,13 @@ function formatChatDate(dateString) {
   const now = new Date();
   const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
   
-  if (diffDays === 0) {
-    return 'Oggi, ' + date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-  } else if (diffDays === 1) {
-    return 'Ieri, ' + date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-  } else if (diffDays < 7) {
-    return `${diffDays} giorni fa`;
-  } else {
-    return date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
+  if (diffDays === 0 || diffDays === 1) {
+    return `${formatRelative(date)}, ${formatDate(date, { hour: '2-digit', minute: '2-digit' })}`;
   }
+  if (diffDays < 7) {
+    return t('dates.relative.days_ago', { count: diffDays });
+  }
+  return formatDate(date, { day: '2-digit', month: '2-digit' });
 }
 
 

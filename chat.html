@@ -12,24 +12,29 @@
   <header class="top-navigation-container">
     <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="Mental Commons" /></a>
     <nav class="nav-main">
-      <a href="index.html">Home</a>
-      <a href="come-funziona.html">Come funziona</a>
-      <a href="mc-per-le-scuole.html">MC per le scuole</a>
-      <a href="premium.html">Premium</a>
+      <a href="index.html" data-i18n="nav.home"></a>
+      <a href="come-funziona.html" data-i18n="nav.how_it_works"></a>
+      <a href="mc-per-le-scuole.html" data-i18n="nav.schools"></a>
+      <a href="premium.html" data-i18n="nav.premium"></a>
     </nav>
     <nav class="ritual-actions">
-      <a href="dashboard.html">Dashboard</a>
-      <a href="profile.html">Profilo</a>
+      <a href="dashboard.html" data-i18n="nav.dashboard"></a>
+      <a href="profile.html" data-i18n="profile.header.title"></a>
+    </nav>
+    <nav class="nav-lang" style="margin-left:auto; display:flex; align-items:center; gap:.25rem;">
+      <button type="button" id="lang-it" aria-label="Italiano">IT</button>
+      <span class="divider">/</span>
+      <button type="button" id="lang-en" aria-label="English">EN</button>
     </nav>
   </header>
 
   <main class="chat-container" style="max-width: 720px; margin: 0 auto; padding: 1rem;">
-    <h1 class="chat-title">Dialogo Anonimo</h1>
+    <h1 class="chat-title" data-i18n="chat.title"></h1>
     <p id="chat-status" class="chat-status" aria-live="polite"></p>
     <div id="messages-box" class="messages-box" aria-live="polite"></div>
     <form id="message-form" class="message-form">
-      <textarea id="message-input" placeholder="Scrivi un messaggio… (Invia con Ctrl/Cmd+Invio)" maxlength="4000" required></textarea>
-      <button type="submit">Invia</button>
+      <textarea id="message-input" data-i18n-attr="placeholder" data-i18n="chat.input.placeholder" maxlength="4000" required></textarea>
+      <button type="submit" data-i18n="chat.input.send"></button>
     </form>
   </main>
 
@@ -37,13 +42,13 @@
   <footer>
     <div class="container">
       <p>© 2025 — Mental Commons<br/>
-      Il contrario di un social. Il prototipo di una mente comune.</p>
+      <span data-i18n="footer.tagline"></span></p>
       
                   <div class="footer-links">
-                <a href="/privacy-policy">Privacy Policy</a>
-                <a href="/cookie-policy">Cookie Policy</a>
-                <a href="/termini-di-servizio">Termini di Servizio</a>
-                <a href="/disclaimer-legale">Disclaimer Legale</a>
+                <a href="/privacy-policy" data-i18n="footer.links.privacy"></a>
+                <a href="/cookie-policy" data-i18n="footer.links.cookie"></a>
+                <a href="/termini-di-servizio" data-i18n="footer.links.terms"></a>
+                <a href="/disclaimer-legale" data-i18n="footer.links.disclaimer"></a>
             </div>
       
       <div class="footer-social">
@@ -67,5 +72,11 @@
 
   <script type="module" src="/ui/chat.js"></script>
 <script defer src="/scripts/header-menu.js"></script>
+<script type="module">
+  import { initI18n, setLocale } from '/src/core/i18n.js';
+  initI18n();
+  document.getElementById('lang-it')?.addEventListener('click', () => setLocale('it'));
+  document.getElementById('lang-en')?.addEventListener('click', () => setLocale('en'));
+</script>
 </body>
 </html> 

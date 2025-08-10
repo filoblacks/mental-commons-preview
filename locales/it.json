@@ -13,11 +13,13 @@
     },
     "portatori": {
       "empty": "Nessun portatore attivo",
+      "table": { "bio": "Bio", "email": "Email", "id": "ID Portatore", "name": "Nome" },
       "title": "Portatori attivi"
     },
     "schools": {
       "assign_success": "School code assegnato con successo",
       "select_placeholder": "— Seleziona scuola —",
+      "table": { "current_school": "School attuale", "new_school": "Nuova scuola", "user_email": "Email utente" },
       "title": "Utenti & Scuole",
       "users_empty": "Nessun utente registrato"
     }
@@ -68,11 +70,19 @@
     "system": { "welcome": "Questo spazio è per voi. Non serve avere le parole giuste." },
     "title": "Dialogo Anonimo"
   },
+  "dates": {
+    "relative": {
+      "days_ago": "{count} giorni fa",
+      "today": "Oggi",
+      "yesterday": "Ieri"
+    }
+  },
   "common": {
     "cancel": "Annulla",
     "delete": "Elimina",
     "learn_more": "Scopri di più",
     "loading": "Caricamento…",
+    "logout": "Esci",
     "logout_done": "Logout completato",
     "ok": "OK",
     "save": "Salva",
@@ -82,10 +92,13 @@
   "dashboard": {
     "actions": { "new_ucme": "Affida un nuovo pensiero" },
     "depositor": {
+      "chat_request_sent": "Richiesta inviata",
+      "chat_requested_label": "Hai già chiesto di continuare",
       "login_cta": "Accedi",
       "login_prompt": "Accedi per continuare il dialogo.",
       "premium_cta": "Attiva Premium",
       "premium_prompt": "Attiva MC Premium per continuare il dialogo.",
+      "continue_chat": "Continua a parlarne",
       "reply": {
         "mark_read": "Segna come letta",
         "read_label": "Letta",
@@ -132,7 +145,8 @@
     "unexpected": "Errore imprevisto. Riprova più tardi."
   },
   "footer": {
-    "links": { "cookie": "Cookie Policy", "disclaimer": "Disclaimer Legale", "privacy": "Privacy Policy", "terms": "Termini di Servizio" }
+    "links": { "cookie": "Cookie Policy", "disclaimer": "Disclaimer Legale", "privacy": "Privacy Policy", "terms": "Termini di Servizio" },
+    "tagline": "Il contrario di un social. Il prototipo di una mente comune."
   },
   "home": {
     "demo": { "reply_label": "Risposta", "title": "Un esempio reale", "ucme_label": "UCMe" },
@@ -209,7 +223,13 @@
   },
   "pricing": {
     "billing": { "annual": "Annuale", "discount": "(-35%)", "monthly": "Mensile" },
-    "faq": { "title": "Domande frequenti" },
+    "faq": {
+      "q1": { "body": "MC Premium include dialoghi illimitati, accesso prioritario, storico completo delle tue UCMe e funzionalità esclusive in anteprima.", "title": "Cos'è incluso in MC Premium?" },
+      "q2": { "body": "Sì, potrai cambiare piano in qualsiasi momento dal tuo profilo senza interruzioni del servizio.", "title": "Posso passare da mensile ad annuale?" },
+      "q3": { "body": "Il nostro team risponde alle richieste via email entro 24 ore. Gli utenti Premium hanno canale prioritario.", "title": "Come funziona il supporto?" },
+      "q4": { "body": "Certo. Offriamo pacchetti MC@School con funzionalità dedicate a classi e istituti. Contattaci per un'offerta su misura.", "title": "Posso usare MC Premium anche per la scuola?" },
+      "title": "Domande frequenti"
+    },
     "hero": { "title": "Scegli il tuo spazio di ascolto" },
     "plans": {
       "hobby": {
@@ -269,6 +289,7 @@
     },
     "header": { "subtitle": "Modifica le tue informazioni e gestisci il tuo account.", "title": "Gestione Profilo" },
     "loading": "Caricamento del tuo profilo...",
+    "meta": { "last_login": "Ultimo accesso:", "member_since": "Membro dal:" },
     "portatore": {
       "loading": "Caricamento stato…",
       "revoke_confirm": "Sei sicuro di voler revocare lo stato di Portatore?",

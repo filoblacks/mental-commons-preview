@@ -2,6 +2,7 @@ import { getUCMEs, getUsers, markRispostaAsRead, requestChat } from '../core/api
 import { getToken, getCurrentUser, refreshUserInfo } from '../core/auth.js';
 import { log } from '../core/logger.js';
 import { updateStickyHeader } from './stats.js';
+import { t, currentLocale, formatDate } from '../core/i18n.js';
 
 const containerId = 'ucme-blocks';
 let allUCMEs = [];
@@ -56,8 +57,8 @@ export async function initDashboard() {
     setupMarkAsReadListeners(container);
     setupContinueChatListeners(container, currentUser);
   } catch (err) {
-    log('Errore caricamento UCMe:', err.message);
-    container.innerHTML = '<p class="error-message">Impossibile caricare i tuoi pensieri.</p>';
+    log(t('errors.unexpected'), err.message);
+    container.innerHTML = `<p class="error-message">${t('errors.unexpected')}</p>`;
   } finally {
     removeLoadingMessage();
   }
@@ -84,8 +85,8 @@ function renderUcmes(container, ucmes = [], user = null) {
             <line x1="15" y1="9" x2="15.01" y2="9"></line>
           </svg>
         </div>
-        <h3>Nessun pensiero condiviso</h3>
-        <p>Non hai ancora affidato pensieri. Inizia condividendo il tuo primo pensiero.</p>
+        <h3>${t('dashboard.depositor.reply.title')}</h3>
+        <p>${t('chat.list.card.no_messages')}</p>
       </div>
     `;
     return;
@@ -105,12 +106,8 @@ function renderUcmes(container, ucmes = [], user = null) {
     div.className = `ucme-block ${status === 'risposto' ? 'risposto' : status === 'in attesa' ? 'in-attesa' : ''}`;
     div.style.animationDelay = `${index * 0.1}s`;
 
-    // Data formattata per l'Italia
-    const dateIT = new Date(ucme.created_at).toLocaleDateString('it-IT', {
-      day: '2-digit', 
-      month: 'short', 
-      year: 'numeric'
-    });
+    // Data formattata secondo la locale corrente
+    const dateIT = formatDate(new Date(ucme.created_at), { day: '2-digit', month: 'short', year: 'numeric' });
 
     // Badge status styling
     const statusClass = getStatusClass(status);
@@ -127,26 +124,26 @@ function renderUcmes(container, ucmes = [], user = null) {
         <p class="ucme-text">${escapeHtml(ucme.content)}</p>
         ${ucme.risposta ? `
           <div class="ucme-response ${ucme.risposta.letta ? 'response-read' : 'response-unread'}">
-            <h4>Risposta del Portatore</h4>
+            <h4>${t('dashboard.depositor.reply.title')}</h4>
             <div class="response-content">
               <p class="response-text">${escapeHtml(ucme.risposta.contenuto)}</p>
-              <small class="response-date">${new Date(ucme.risposta.timestamp).toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })}</small>
+              <small class="response-date">${formatDate(new Date(ucme.risposta.timestamp), { day: '2-digit', month: 'short', year: 'numeric' })}</small>
             </div>
-            ${!ucme.risposta.letta ? `<button class="btn-mark-read" data-ucme-id="${ucme.id}">Segna come letta</button>` : '<span class="read-label">Letta</span>'}
+            ${!ucme.risposta.letta ? `<button class="btn-mark-read" data-ucme-id="${ucme.id}">${t('dashboard.depositor.reply.mark_read')}</button>` : `<span class="read-label">${t('dashboard.depositor.reply.read_label')}</span>`}
           </div>
           
           <!-- Sezione Continua a parlarne -->
-          ${ucme.chat && ucme.chat.status ? `<span class="chat-requested-label">Hai già chiesto di continuare</span>` :
+          ${ucme.chat && ucme.chat.status ? `<span class="chat-requested-label">${t('dashboard.depositor.chat_requested_label')}</span>` :
             (user && (user.has_subscription === true || user.has_subscription === "true") ?
-              `<button class="btn-continue-chat" data-ucme-id="${ucme.id}">Continua a parlarne</button>` :
+              `<button class="btn-continue-chat" data-ucme-id="${ucme.id}">${t('dashboard.depositor.continue_chat')}</button>` :
               user ?
                 `<div class="premium-prompt">
-                  <p>Attiva MC Premium per continuare il dialogo.</p>
-                  <a href="/premium.html" class="btn-premium-upgrade">Attiva Premium</a>
+                  <p>${t('dashboard.depositor.premium_prompt')}</p>
+                  <a href="/premium.html" class="btn-premium-upgrade">${t('dashboard.depositor.premium_cta')}</a>
                 </div>` :
                 `<div class="login-prompt">
-                  <p>Accedi per continuare il dialogo.</p>
-                  <a href="/login.html" class="btn-login">Accedi</a>
+                  <p>${t('dashboard.depositor.login_prompt')}</p>
+                  <a href="/login.html" class="btn-login">${t('dashboard.depositor.login_cta')}</a>
                 </div>`
             )}
         ` : ''}
@@ -283,16 +280,16 @@ function setupContinueChatListeners(container, user) {
       }
 
       btn.disabled = true;
-      btn.textContent = 'Invio...';
+      btn.textContent = t('common.loading');
       try {
         const res = await requestChat(ucmeId, getToken());
         // Sostituisci il bottone con etichetta di conferma
-        btn.outerHTML = '<span class="chat-requested-label">Richiesta inviata</span>';
+        btn.outerHTML = `<span class="chat-requested-label">${t('dashboard.depositor.chat_request_sent')}</span>`;
       } catch (err) {
-        log('Errore richiesta chat:', err.message);
+        log(t('errors.unexpected'), err.message);
         alert(err.message);
         btn.disabled = false;
-        btn.textContent = 'Continua a parlarne';
+        btn.textContent = t('dashboard.actions.new_ucme');
       }
     });
   });

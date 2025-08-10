@@ -1,290 +1,311 @@
 {
   "admin": {
     "pending": {
-      "empty": "Nessuna UCMe in attesa",
+      "empty": "No UCMe pending",
       "table": {
-        "assign": "Assegna",
-        "date": "Data",
+        "assign": "Assign",
+        "date": "Date",
         "id": "ID",
-        "preview": "Anteprima",
-        "sender": "Mittente"
+        "preview": "Preview",
+        "sender": "Sender"
       },
-      "title": "UCMe da assegnare"
+      "title": "UCMe to assign"
     },
     "portatori": {
-      "empty": "Nessun portatore attivo",
-      "title": "Portatori attivi"
+      "empty": "No active Holders",
+      "table": { "bio": "Bio", "email": "Email", "id": "Holder ID", "name": "Name" },
+      "title": "Active Holders"
     },
     "schools": {
-      "assign_success": "School code assegnato con successo",
-      "select_placeholder": "— Seleziona scuola —",
-      "title": "Utenti & Scuole",
-      "users_empty": "Nessun utente registrato"
+      "assign_success": "School code assigned successfully",
+      "select_placeholder": "— Select school —",
+      "table": { "current_school": "Current school", "new_school": "New school", "user_email": "User email" },
+      "title": "Users & Schools",
+      "users_empty": "No registered users"
     }
   },
   "auth": {
     "login": {
       "email": { "placeholder": "Email" },
       "password": { "placeholder": "Password" },
-      "submit": "Accedi",
-      "subtitle": "Il tuo spazio personale per vedere tutti i tuoi pensieri e le risposte ricevute.",
-      "title": "Accedi al tuo spazio"
+      "submit": "Sign in",
+      "subtitle": "Your personal space to see your thoughts and the replies you received.",
+      "title": "Access your space"
     },
     "register": {
-      "confirm": { "placeholder": "Conferma password" },
+      "confirm": { "placeholder": "Confirm password" },
       "email": { "placeholder": "Email" },
-      "name": { "placeholder": "Nome" },
+      "name": { "placeholder": "Name" },
       "password": { "placeholder": "Password" },
-      "submit": "Registrati",
-      "surname": { "placeholder": "Cognome (opzionale)" }
+      "submit": "Sign up",
+      "surname": { "placeholder": "Surname (optional)" }
     },
-    "tabs": { "login": "Accedi", "register": "Registrati" }
+    "tabs": { "login": "Sign in", "register": "Sign up" }
   },
   "chat": {
     "empty_state": {
-      "body": "Qui appariranno i tuoi dialoghi anonimi. Ogni parola è un ponte.",
-      "cta": "Torna al Dashboard",
+      "body": "Your anonymous dialogues will appear here. Every word is a bridge.",
+      "cta": "Back to Dashboard",
       "icon": "🌱",
-      "title": "I Tuoi Dialoghi"
+      "title": "Your Dialogues"
     },
-    "input": { "placeholder": "Scrivi un messaggio… (Invia con Ctrl/Cmd+Invio)", "send": "Invia" },
+    "input": { "placeholder": "Write a message… (Send with Ctrl/Cmd+Enter)", "send": "Send" },
     "list": {
       "card": {
-        "new_badge": "Nuovo",
-        "no_messages": "Ancora nessun messaggio",
-        "open": "Apri la chat",
-        "preview_loading": "Caricamento…",
+        "new_badge": "New",
+        "no_messages": "No messages yet",
+        "open": "Open chat",
+        "preview_loading": "Loading…",
         "status": {
-          "days_ago": "Ultimo messaggio {count} giorni fa",
-          "today": "Attività recente oggi",
-          "yesterday": "Ultimo messaggio ieri"
+          "days_ago": "Last message {count} days ago",
+          "today": "Recent activity today",
+          "yesterday": "Last message yesterday"
         }
       }
     },
     "status": {
-      "active": "Chat attiva con un Portatore",
-      "last_reply_prefix": "Ultima risposta:"
+      "active": "Active chat with a Holder",
+      "last_reply_prefix": "Last reply:"
     },
-    "system": { "welcome": "Questo spazio è per voi. Non serve avere le parole giuste." },
-    "title": "Dialogo Anonimo"
+    "system": { "welcome": "This space is for you both. You don't need the right words." },
+    "title": "Anonymous Dialogue"
   },
   "common": {
-    "cancel": "Annulla",
-    "delete": "Elimina",
-    "learn_more": "Scopri di più",
-    "loading": "Caricamento…",
-    "logout_done": "Logout completato",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "learn_more": "Learn more",
+    "loading": "Loading…",
+    "logout": "Log out",
+    "logout_done": "Logged out",
     "ok": "OK",
-    "save": "Salva",
-    "today": "Oggi",
-    "yesterday": "Ieri"
+    "save": "Save",
+    "today": "Today",
+    "yesterday": "Yesterday"
   },
   "dashboard": {
-    "actions": { "new_ucme": "Affida un nuovo pensiero" },
+    "actions": { "new_ucme": "Share a new thought" },
     "depositor": {
-      "login_cta": "Accedi",
-      "login_prompt": "Accedi per continuare il dialogo.",
-      "premium_cta": "Attiva Premium",
-      "premium_prompt": "Attiva MC Premium per continuare il dialogo.",
+      "chat_request_sent": "Request sent",
+      "chat_requested_label": "You already asked to continue",
+      "continue_chat": "Continue the dialogue",
+      "login_cta": "Sign in",
+      "login_prompt": "Sign in to keep the dialogue going.",
+      "premium_cta": "Enable Premium",
+      "premium_prompt": "Enable MC Premium to continue the dialogue.",
       "reply": {
-        "mark_read": "Segna come letta",
-        "read_label": "Letta",
-        "title": "Risposta del Portatore"
+        "mark_read": "Mark as read",
+        "read_label": "Read",
+        "title": "Holder's reply"
       }
     },
     "filters": {
-      "all": "Tutte",
-      "answered": "Risposto",
-      "assigned": "Assegnato",
-      "completed": "Completato",
-      "pending": "In attesa",
-      "processing": "In lavorazione"
+      "all": "All",
+      "answered": "Answered",
+      "assigned": "Assigned",
+      "completed": "Completed",
+      "pending": "Pending",
+      "processing": "In progress"
     },
-    "header": { "subtitle": "Pensieri affidati e pensieri ricevuti: il tuo spazio mentale completo.", "title": "Il tuo spazio mentale" },
-    "loading": "Caricamento del tuo spazio...",
+    "header": { "subtitle": "Thoughts entrusted and thoughts received: your complete mental space.", "title": "Your mental space" },
+    "loading": "Loading your space...",
     "no_access": {
-      "body": "Per visualizzare il tuo spazio mentale è necessario accedere con la tua email.",
-      "cta": "Accedi al tuo spazio",
-      "title": "Accesso richiesto"
+      "body": "To view your mental space you need to sign in with your email.",
+      "cta": "Access your space",
+      "title": "Access required"
+    }
+  },
+  "dates": {
+    "relative": {
+      "days_ago": "{count} days ago",
+      "today": "Today",
+      "yesterday": "Yesterday"
     }
   },
   "docente": {
-    "list": { "empty": "Nessun pensiero disponibile per la tua scuola." }
+    "list": { "empty": "No thoughts available for your school." }
   },
   "errors": {
-    "admin": { "assign": "Errore assegnazione", "school_assign": "Errore assegnazione" },
+    "admin": { "assign": "Assignment error", "school_assign": "Assignment error" },
     "auth": {
-      "email_invalid": "Email non valida",
-      "invalid_credentials": "Email o password non validi",
-      "login_generic": "Errore durante il login",
-      "name_short": "Il nome deve essere di almeno 2 caratteri",
-      "password_mismatch": "Le password non coincidono",
-      "password_policy": "La password deve essere di almeno 12 caratteri e contenere maiuscola, minuscola, numero e simbolo",
-      "required": "Autenticazione richiesta",
-      "token_missing": "❌ Token mancante - redirect login",
-      "unauthorized": "Accesso non autorizzato"
+      "email_invalid": "Invalid email",
+      "invalid_credentials": "Invalid email or password",
+      "login_generic": "Error during sign in",
+      "name_short": "Name must be at least 2 characters",
+      "password_mismatch": "Passwords do not match",
+      "password_policy": "Password must be at least 12 characters and include uppercase, lowercase, number and symbol",
+      "required": "Authentication required",
+      "token_missing": "❌ Missing token - redirect to login",
+      "unauthorized": "Unauthorized access"
     },
-    "chat": { "fetch": "Errore recupero messaggi", "send": "Errore invio messaggio" },
-    "docente": { "load": "Impossibile caricare i dati." },
-    "network": { "api": "API error:", "timeout": "Timeout richiesta" },
-    "portatore": { "status_load": "Errore caricamento stato", "toggle": "Errore operazione Portatore" },
-    "profile": { "dom_missing": "Elementi profilo non trovati nel DOM" },
-    "unexpected": "Errore imprevisto. Riprova più tardi."
+    "chat": { "fetch": "Error fetching messages", "send": "Error sending message" },
+    "docente": { "load": "Unable to load data." },
+    "network": { "api": "API error:", "timeout": "Request timeout" },
+    "portatore": { "status_load": "Error loading status", "toggle": "Carrier operation error" },
+    "profile": { "dom_missing": "Profile elements not found in the DOM" },
+    "unexpected": "Unexpected error. Please try again later."
   },
   "footer": {
-    "links": { "cookie": "Cookie Policy", "disclaimer": "Disclaimer Legale", "privacy": "Privacy Policy", "terms": "Termini di Servizio" }
+    "links": { "cookie": "Cookie Policy", "disclaimer": "Legal Disclaimer", "privacy": "Privacy Policy", "terms": "Terms of Service" },
+    "tagline": "The opposite of a social network. A prototype of a common mind."
   },
   "home": {
-    "demo": { "reply_label": "Risposta", "title": "Un esempio reale", "ucme_label": "UCMe" },
-    "hero": { "cta": "Affida ora il tuo pensiero", "subtitle": "Non siamo fatti per pensare da soli.", "title": "Mental Commons" },
+    "demo": { "reply_label": "Reply", "title": "A real example", "ucme_label": "UCMe" },
+    "hero": { "cta": "Entrust your thought", "subtitle": "We are not made to think alone.", "title": "Mental Commons" },
     "how_it_works": {
-      "step1": { "desc": "Condividi la tua UCMe in forma anonima", "title": "Scrivi un pensiero" },
-      "step2": { "desc": "Una persona reale legge con attenzione", "title": "Un Portatore lo riceve" },
-      "step3": { "desc": "Ricevi una risposta autentica entro 48 ore", "title": "Il pensiero trova riposo" },
-      "title": "Come funziona"
+      "step1": { "desc": "Share your UCMe anonymously", "title": "Write a thought" },
+      "step2": { "desc": "A real person reads with care", "title": "A Holder receives it" },
+      "step3": { "desc": "Receive an authentic reply within 48 hours", "title": "The thought finds rest" },
+      "title": "How it works"
     },
     "info": {
-      "depositor": { "body": "I Depositori sono chi scrive. Chi affida. Non serve spiegare. Serve fidarsi.", "title": "Chi sono i Depositori" },
-      "portatori": { "body": "I Portatori leggono con attenzione. E rispondono una volta sola. Con rispetto. Con presenza.", "title": "Chi sono i Portatori" },
-      "ucme": { "body": "Una UCMe è un pensiero difficile. Una riflessione che pesa. La puoi scrivere qui. Verrà letta da una persona, non da un algoritmo.", "title": "Cosa sono le UCMe" }
+      "depositor": { "body": "Depositors are those who write. Those who entrust. You don't need to explain. You need to trust.", "title": "Who Depositors are" },
+      "portatori": { "body": "Holders read with care. And they reply only once. With respect. With presence.", "title": "Who Holders are" },
+      "ucme": { "body": "A UCMe is a difficult thought. A heavy reflection. You can write it here. It will be read by a person, not an algorithm.", "title": "What UCMes are" }
     },
-    "onboarding": { "body": "Scrivi un pensiero difficile. Lo riceverà un Portatore, una persona reale. che risponderà con rispetto entro 48 ore. È un gesto. Non un post.", "cta": "Entrare", "title": "Mental Commons è uno spazio per affidare ciò che pesa." },
-    "stats": { "portatori_label": "Portatori attivi", "replies_label": "risposte inviate", "ucme_label": "pensieri accolti" },
-    "trust": { "humans": "Persone reali, non bot", "private": "Anonimo e privato", "response_48h": "Risposta entro 48h" },
+    "onboarding": { "body": "Write a difficult thought. A Holder — a real person — will receive it and reply with respect within 48 hours. It's a gesture. Not a post.", "cta": "Enter", "title": "Mental Commons is a space to entrust what weighs on you." },
+    "stats": { "portatori_label": "Active Holders", "replies_label": "replies sent", "ucme_label": "thoughts received" },
+    "trust": { "humans": "Real people, not bots", "private": "Anonymous and private", "response_48h": "Reply within 48h" },
     "user": {
-      "stats": { "days_present": "Giorni di presenza", "replies": "Risposte ricevute", "thoughts": "Pensieri condivisi" },
-      "welcome": "Bentornato"
+      "stats": { "days_present": "Days present", "replies": "Replies received", "thoughts": "Thoughts shared" },
+      "welcome": "Welcome back"
     },
     "form": {
-      "description": "Scrivi quello che pensi. Un altro essere umano lo leggerà e risponderà entro 48 ore.",
+      "description": "Write what you think. Another human being will read it and reply within 48 hours.",
       "field": {
-        "acceptance": { "label": "Accetto che un Portatore legga il mio pensiero e risponda con rispetto." },
-        "email": { "hint": "Serve solo per inviarti la risposta. Non sarà condivisa.", "label": "La tua email", "placeholder": "nome@email.com" },
-        "portatore": { "hint": "Chi ascolta i pensieri degli altri.", "label": "Mi piacerebbe diventare un Portatore" },
+        "acceptance": { "label": "I agree that a Holder will read my thought and reply with respect." },
+        "email": { "hint": "Only used to send you the reply. It won't be shared.", "label": "Your email", "placeholder": "name@email.com" },
+        "portatore": { "hint": "Who listens to others' thoughts.", "label": "I'd like to become a Holder" },
         "tone": {
-          "hint": "Scegli il tono che preferisci per la risposta del Portatore.",
-          "label": "Tono della risposta desiderato",
-          "option_calm": "Calmo",
-          "option_direct": "Diretto",
-          "option_neutral": "Neutro",
-          "option_poetic": "Poetico"
+          "hint": "Choose the tone you prefer for the Holder's reply.",
+          "label": "Desired reply tone",
+          "option_calm": "Calm",
+          "option_direct": "Direct",
+          "option_neutral": "Neutral",
+          "option_poetic": "Poetic"
         },
-        "ucme": { "counter_hint": "caratteri (minimo 20)", "label": "Il tuo pensiero (UCMe)", "placeholder": "Scrivi qui il tuo pensiero..." }
+        "ucme": { "counter_hint": "characters (minimum 20)", "label": "Your thought (UCMe)", "placeholder": "Write your thought here..." }
       },
-      "history": { "title": "I tuoi pensieri precedenti" },
-      "submit": "Affida il pensiero",
+      "history": { "title": "Your previous thoughts" },
+      "submit": "Entrust the thought",
       "success": {
-        "body_1": "Grazie per aver condiviso la tua UCMe. Riceverai una risposta autentica entro 48 ore.",
-        "body_2": "Un altro essere umano prenderà in carico il tuo pensiero.",
-        "title": "Pensiero affidato"
+        "body_1": "Thank you for sharing your UCMe. You will receive an authentic reply within 48 hours.",
+        "body_2": "Another human being will take charge of your thought.",
+        "title": "Thought entrusted"
       },
-      "title": "Affida il tuo pensiero"
+      "title": "Entrust your thought"
     }
   },
   "how_it_works": {
-    "become": { "title": "Diventare Portatore" },
+    "become": { "title": "Become a Holder" },
     "flow": {
-      "step1": { "desc": "Racconti ciò che senti. Può essere confuso, breve, viscerale. Non serve essere chiari: serve esserci.", "title": "Scrivi un pensiero" },
-      "step2": { "desc": "Serve solo per avvisarti quando ricevi risposta. Non verrà mai usata per altro. Scrivi. Poi chiudi. Torna quando vuoi.", "title": "Lascia la tua mail" },
-      "step3": { "desc": "Un Portatore leggerà ciò che hai scritto e ti risponderà con cura. La risposta arriverà via mail. Non ci sono orari. Non ci sono scadenze.", "title": "Ricevi una risposta anonima" },
-      "step4": { "desc": "Se sei un utente Premium puoi continuare a parlare con il Portatore. In forma scritta, uno a uno, anonimamente.", "title": "Continua il dialogo se vuoi" },
-      "title": "Il flusso del Depositore"
+      "step1": { "desc": "You tell what you feel. It can be confused, brief, visceral. You don't need to be clear: you need to be present.", "title": "Write a thought" },
+      "step2": { "desc": "Only used to notify you when you receive a reply. It will never be used for anything else. Write. Then close. Come back when you want.", "title": "Leave your email" },
+      "step3": { "desc": "A Holder will read what you wrote and reply with care. The reply will arrive by email. There are no schedules. No deadlines.", "title": "Receive an anonymous reply" },
+      "step4": { "desc": "If you are a Premium user you can continue to talk with the Holder. In writing, one-to-one, anonymously.", "title": "Continue the dialogue if you want" },
+      "title": "The Depositor's flow"
     },
-    "hero": { "subtitle": "Un processo lento, anonimo e umano per condividere e ricevere ascolto.", "title": "Come funziona Mental Commons" },
-    "portatore": { "quote": "Leggere le parole di qualcuno che soffre mi ricorda che siamo tutti fragili. Rispondere non significa risolvere, ma semplicemente esserci.", "title": "Chi è un Portatore" }
+    "hero": { "subtitle": "A slow, anonymous and human process to share and receive listening.", "title": "How Mental Commons works" },
+    "portatore": { "quote": "Reading the words of someone who suffers reminds me that we are all fragile. Replying doesn't mean fixing, but simply being there.", "title": "What a Holder is" }
   },
   "legal": {
-    "cookie": { "title": "Cookie Policy di Mental Commons", "updated": "Ultimo aggiornamento: 7 Agosto 2025" },
-    "privacy": { "title": "Privacy Policy di Mental Commons", "updated": "Ultimo aggiornamento: 7 Agosto 2025" },
-    "terms": { "subtitle": "Le condizioni che regolano l'uso di Mental Commons", "title": "Termini di Servizio" }
+    "cookie": { "title": "Mental Commons Cookie Policy", "updated": "Last updated: 7 August 2025" },
+    "privacy": { "title": "Mental Commons Privacy Policy", "updated": "Last updated: 7 August 2025" },
+    "terms": { "subtitle": "The terms that govern the use of Mental Commons", "title": "Terms of Service" }
   },
   "nav": {
     "admin": "Admin",
     "dashboard": "Dashboard",
     "home": "Home",
-    "how_it_works": "Come funziona",
-    "login": "Accedi",
+    "how_it_works": "How it works",
+    "login": "Sign in",
     "premium": "Premium",
-    "schools": "MC per le scuole"
+    "schools": "MC for schools"
   },
   "pricing": {
-    "billing": { "annual": "Annuale", "discount": "(-35%)", "monthly": "Mensile" },
-    "faq": { "title": "Domande frequenti" },
-    "hero": { "title": "Scegli il tuo spazio di ascolto" },
+    "billing": { "annual": "Annual", "discount": "(-35%)", "monthly": "Monthly" },
+    "faq": {
+      "q1": { "body": "MC Premium includes unlimited dialogues, priority access, full history of your UCMes and exclusive features in preview.", "title": "What is included in MC Premium?" },
+      "q2": { "body": "Yes, you can switch plans at any time from your profile without service interruption.", "title": "Can I switch from monthly to annual?" },
+      "q3": { "body": "Our team replies to requests via email within 24 hours. Premium users have a priority channel.", "title": "How does support work?" },
+      "q4": { "body": "Sure. We offer MC@School packages with features dedicated to classes and schools. Contact us for a tailored offer.", "title": "Can I use MC Premium for school as well?" },
+      "title": "Frequently asked questions"
+    },
+    "hero": { "title": "Choose your listening space" },
     "plans": {
       "hobby": {
-        "cta": "Incluso",
+        "cta": "Included",
         "features": {
-          "base_access": "Accesso base ai Portatori",
-          "no_chat": "Chat non disponibili",
-          "no_history": "Storico non disponibile",
-          "unlimited_ucme": "Invio illimitato UCMe"
+          "base_access": "Basic access to Holders",
+          "no_chat": "Chats not available",
+          "no_history": "History not available",
+          "unlimited_ucme": "Unlimited UCMe submissions"
         },
-        "price": "Gratis",
+        "price": "Free",
         "title": "Hobby"
       },
       "premium": {
-        "cta": { "annual": "Attiva Premium – 39€/anno", "monthly": "Attiva Premium – 4,99€/mese" },
+        "cta": { "annual": "Enable Premium – €39/year", "monthly": "Enable Premium – €4.99/month" },
         "features": {
-          "future": "Accesso a funzionalità future riservate",
-          "full_history": "Storico completo UCMe",
-          "priority": "Accesso prioritario alle risposte",
-          "tests": "Possibilità di partecipare a test riservati e spazi collettivi",
-          "unlimited_chats": "Chat illimitate con i Portatori"
+          "future": "Access to future reserved features",
+          "full_history": "Full UCMe history",
+          "priority": "Priority access to replies",
+          "tests": "Possibility to join reserved tests and collective spaces",
+          "unlimited_chats": "Unlimited chats with Holders"
         },
-        "price_period": "/mese",
-        "price_value": "4,99€",
+        "price_period": "/month",
+        "price_value": "€4.99",
         "title": "MC Premium"
       },
       "school": {
         "features": {
-          "all_premium": "Tutte le funzionalità di MC Premium",
-          "custom": "Offerta personalizzata in base agli utenti",
-          "flex": "Attivazione flessibile per gruppi o scuole",
-          "guided": "Percorsi guidati per l’ascolto in aula",
-          "school_dashboard": "Dashboard per UCMe scolastiche",
-          "stats": "Statistiche anonime sul benessere mentale",
-          "support": "Supporto diretto con il team MC"
+          "all_premium": "All MC Premium features",
+          "custom": "Tailored offer based on users",
+          "flex": "Flexible activation for groups or schools",
+          "guided": "Guided paths for listening in class",
+          "school_dashboard": "Dashboard for school UCMes",
+          "stats": "Anonymous mental wellbeing statistics",
+          "support": "Direct support with the MC team"
         },
-        "price": "Su richiesta",
-        "subtitle": "Per classi, istituti, educatori. Uno spazio protetto dove pensare insieme.",
-        "title": "MC@School (su richiesta)"
+        "price": "On request",
+        "subtitle": "For classes, institutions, educators. A protected space to think together.",
+        "title": "MC@School (on request)"
       }
     }
   },
   "profile": {
-    "actions": { "delete": "Elimina Account", "export": "Esporta i tuoi dati", "title": "Azioni Account" },
+    "actions": { "delete": "Delete Account", "export": "Export your data", "title": "Account Actions" },
     "badge": { "premium": "MC Premium" },
     "edit": {
-      "cancel": "Annulla",
-      "confirm": { "label": "Conferma Nuova Password", "placeholder": "Ripeti la nuova password" },
-      "email": { "label": "Email", "placeholder": "nuova@email.com" },
-      "name": { "label": "Nome", "placeholder": "Il tuo nome (opzionale)" },
-      "password": { "label": "Nuova Password (opzionale)", "placeholder": "Lascia vuoto per non modificare" },
-      "save": "Salva Modifiche",
-      "title": "Modifica Profilo",
-      "toggle": "Modifica le tue informazioni",
-      "toggle_close": "Chiudi Modifica",
-      "toggle_open": "Modifica le tue informazioni"
+      "cancel": "Cancel",
+      "confirm": { "label": "Confirm New Password", "placeholder": "Repeat the new password" },
+      "email": { "label": "Email", "placeholder": "new@email.com" },
+      "name": { "label": "Name", "placeholder": "Your name (optional)" },
+      "password": { "label": "New Password (optional)", "placeholder": "Leave empty to keep it unchanged" },
+      "save": "Save Changes",
+      "title": "Edit Profile",
+      "toggle": "Edit your information",
+      "toggle_close": "Close Edit",
+      "toggle_open": "Edit your information"
     },
-    "header": { "subtitle": "Modifica le tue informazioni e gestisci il tuo account.", "title": "Gestione Profilo" },
-    "loading": "Caricamento del tuo profilo...",
+    "header": { "subtitle": "Edit your information and manage your account.", "title": "Profile Management" },
+    "loading": "Loading your profile...",
+    "meta": { "last_login": "Last login:", "member_since": "Member since:" },
     "portatore": {
-      "loading": "Caricamento stato…",
-      "revoke_confirm": "Sei sicuro di voler revocare lo stato di Portatore?",
-      "status_off": "Non sei Portatore",
-      "status_on": "Sei attualmente Portatore 🟢",
-      "title": "Portatore",
-      "toggle": "Attiva",
-      "toggle_off": "Disattiva",
-      "toggle_on": "Attiva"
+      "loading": "Loading status…",
+      "revoke_confirm": "Are you sure you want to revoke Holder status?",
+      "status_off": "You are not a Holder",
+      "status_on": "You are currently a Holder 🟢",
+      "title": "Holder",
+      "toggle": "Enable",
+      "toggle_off": "Disable",
+      "toggle_on": "Enable"
     }
   },
   "schools": {
     "hero": {
-      "body": "Stiamo progettando un programma dedicato alle comunità scolastiche...",
-      "note": "Restiamo fedeli al nostro ethos: meno fretta, più presenza. Torna presto per scoprire di più.",
-      "title": "Mental Commons @ Scuole"
+      "body": "We are designing a program dedicated to school communities...",
+      "note": "We remain faithful to our ethos: less rush, more presence. Come back soon to learn more.",
+      "title": "Mental Commons @ Schools"
     }
   }
 }
