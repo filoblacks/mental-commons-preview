@@ -6377,6 +6377,31 @@ footer, footer .container {
     color: var(--color-primary) !important;
 }
 
+/* Language switcher (desktop) */
+.top-navigation-container .nav-lang{
+    margin-left:auto;
+    display:flex;
+    gap:.25rem;
+    align-items:center;
+}
+.top-navigation-container .nav-lang button{
+    background:transparent;
+    color: var(--color-white);
+    border:1px solid var(--color-white);
+    border-radius:6px;
+    padding:4px 8px;
+    font-weight:600;
+    cursor:pointer;
+}
+.top-navigation-container .nav-lang .divider{
+    color:#fff;
+    opacity:.9;
+}
+.top-navigation-container .nav-lang button.is-active{
+    background:#fff;
+    color: var(--color-primary);
+}
+
 .top-navigation-container .ritual-stats {
     display: none;
 }
