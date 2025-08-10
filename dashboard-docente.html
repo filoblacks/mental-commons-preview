@@ -61,12 +61,17 @@
   <div class="top-navigation-container">
     <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="Mental Commons" /></a>
     <div class="ritual-actions">
-      <a href="index.html">Home</a>
+      <a href="index.html" data-i18n="nav.home"></a>
       <a href="dashboard-docente.html" class="active">Dashboard Docente</a>
       <a href="profile.html" id="nav-profile" class="nav-profile-btn" title="Gestione Profilo" aria-label="Gestione Profilo">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
       </a>
     </div>
+    <nav class="nav-lang" style="margin-left:auto; display:flex; align-items:center; gap:.25rem;">
+      <button type="button" id="lang-it" aria-label="Italiano">IT</button>
+      <span class="divider">/</span>
+      <button type="button" id="lang-en" aria-label="English">EN</button>
+    </nav>
   </div>
 
   <main class="dashboard-main docente-main">
@@ -163,6 +168,7 @@
   <script src="https://unpkg.com/chart.js@4.5.0/dist/chart.umd.min.js"></script>
   <!-- Script principale -->
   <script type="module" src="/ui/dashboard-docente.js"></script>
-<script defer src="/scripts/header-menu.js"></script>
+  <script defer src="/scripts/i18n.js"></script>
+  <script defer src="/scripts/header-menu.js"></script>
 </body>
 </html> 

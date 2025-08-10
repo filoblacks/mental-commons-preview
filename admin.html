@@ -106,12 +106,8 @@
   </footer>
 
   <script type="module" src="/src/main.js"></script>
-<script defer src="/scripts/header-menu.js"></script>
-<script type="module">
-  import { initI18n, setLocale } from '/src/core/i18n.js';
-  initI18n();
-  document.getElementById('lang-it')?.addEventListener('click', () => setLocale('it'));
-  document.getElementById('lang-en')?.addEventListener('click', () => setLocale('en'));
-</script>
+  <!-- i18n runtime per pagine statiche -->
+  <script defer src="/scripts/i18n.js"></script>
+  <script defer src="/scripts/header-menu.js"></script>
 </body>
 </html> 

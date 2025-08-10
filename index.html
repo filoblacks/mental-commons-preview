@@ -385,14 +385,8 @@
 
     <!-- Modulo principale per Vite (dev) -->
     <script type="module" src="/src/main.js"></script>
-<script defer src="/scripts/header-menu.js"></script>
-<script type="module">
-  import { initI18n, setLocale } from '/core/i18n.js';
-  initI18n();
-  const it = document.getElementById('lang-it');
-  const en = document.getElementById('lang-en');
-  it?.addEventListener('click', () => setLocale('it'));
-  en?.addEventListener('click', () => setLocale('en'));
-</script>
+    <!-- i18n runtime per pagine statiche -->
+    <script defer src="/scripts/i18n.js"></script>
+    <script defer src="/scripts/header-menu.js"></script>
 </body>
 </html> 

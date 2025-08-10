@@ -7,6 +7,28 @@ const DICTS = { it, en };
 const LOCALE_KEY = 'mc_locale';
 let _locale = detectInitialLocale();
 
+// Sincronizza cambi lingua provenienti da runtime non-modulare (scripts/i18n.js)
+try {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('storage', (e) => {
+      if (!e) return;
+      const key = e.key || '';
+      if (key === 'mc_locale' || key === 'lang') {
+        const next = (e.newValue || '').trim();
+        if (next && (next in DICTS)) {
+          try { setLocale(next); } catch (_) {}
+        }
+      }
+    });
+    window.addEventListener('mc:set-locale', (e) => {
+      try {
+        const next = e && e.detail && e.detail.lang;
+        if (next && (next in DICTS)) setLocale(next);
+      } catch (_) {}
+    });
+  }
+} catch {}
+
 function detectInitialLocale() {
   try {
     const ls = localStorage.getItem(LOCALE_KEY);

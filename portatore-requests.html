@@ -12,8 +12,13 @@
   <header class="top-navigation-container">
     <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="Mental Commons" /></a>
     <nav class="ritual-actions">
-      <a href="dashboard.html">Dashboard</a>
-      <a href="profile.html">Profilo</a>
+      <a href="dashboard.html" data-i18n="nav.dashboard"></a>
+      <a href="profile.html" data-i18n="profile.header.title"></a>
+    </nav>
+    <nav class="nav-lang" style="margin-left:auto; display:flex; align-items:center; gap:.25rem;">
+      <button type="button" id="lang-it" aria-label="Italiano">IT</button>
+      <span class="divider">/</span>
+      <button type="button" id="lang-en" aria-label="English">EN</button>
     </nav>
   </header>
 
@@ -35,12 +40,12 @@
       <p>© 2025 — Mental Commons<br/>
       Il contrario di un social. Il prototipo di una mente comune.</p>
       
-                  <div class="footer-links">
-                <a href="/privacy-policy">Privacy Policy</a>
-                <a href="/cookie-policy">Cookie Policy</a>
-                <a href="/termini-di-servizio">Termini di Servizio</a>
-                <a href="/disclaimer-legale">Disclaimer Legale</a>
-            </div>
+      <div class="footer-links">
+        <a href="/privacy-policy" data-i18n="footer.links.privacy"></a>
+        <a href="/cookie-policy" data-i18n="footer.links.cookie"></a>
+        <a href="/termini-di-servizio" data-i18n="footer.links.terms"></a>
+        <a href="/disclaimer-legale" data-i18n="footer.links.disclaimer"></a>
+      </div>
       
       <div class="footer-social">
         <a href="https://www.instagram.com/mental_commons/" target="_blank" rel="noopener noreferrer" class="instagram-link" title="Seguici su Instagram" aria-label="Profilo Instagram di Mental Commons">
@@ -62,6 +67,7 @@
   </footer>
 
   <script type="module" src="/ui/portatore-requests.js"></script>
-<script defer src="/scripts/header-menu.js"></script>
+  <script defer src="/scripts/i18n.js"></script>
+  <script defer src="/scripts/header-menu.js"></script>
 </body>
 </html> 
