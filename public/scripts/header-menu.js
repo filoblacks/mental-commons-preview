@@ -175,12 +175,18 @@
       try { window.__mc_applyI18n(); } catch (_) {}
     }
 
-    // Inserimento nel DOM: su mobile mettiamo nav-lang nel cluster destro; su desktop dentro .nav-actions
+    // Inserimento nel DOM: su mobile mettiamo nav-lang nel cluster destro; su desktop dentro contenitore azioni
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+    const actionsSingular = header.querySelector('.nav-action');
     const actions = header.querySelector('.nav-actions');
     const ritualActions = header.querySelector('.ritual-actions');
     if (isMobile) {
       rightCluster.appendChild(navLang);
+      rightCluster.appendChild(burger);
+      header.appendChild(rightCluster);
+    } else if (actionsSingular) {
+      actionsSingular.appendChild(navLang);
+      // Burger resta nel cluster ma è nascosto su desktop
       rightCluster.appendChild(burger);
       header.appendChild(rightCluster);
     } else if (actions) {
