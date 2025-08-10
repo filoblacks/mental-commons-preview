@@ -166,6 +166,32 @@
     } catch (_) {}
 
     wireHeaderButtons();
+    // Ricolloca il selettore lingua dentro .ritual-actions se presente (per visibilità in header)
+    try {
+      var header = document.querySelector('.top-navigation-container');
+      var actions = header && header.querySelector('.ritual-actions');
+      var navLang = header && header.querySelector('.nav-lang');
+      if (actions && navLang && navLang.parentElement !== actions) {
+        actions.appendChild(navLang);
+        navLang.style.marginLeft = '0';
+        // Stile minimo per garantire contrasto
+        var btns = navLang.querySelectorAll('button');
+        btns.forEach(function (b) {
+          b.style.color = '#fff';
+          b.style.background = 'transparent';
+          b.style.border = '1px solid rgba(255,255,255,0.9)';
+          b.style.borderRadius = '5px';
+          b.style.padding = '4px 8px';
+          b.style.fontWeight = '600';
+        });
+        var divider = navLang.querySelector('.divider');
+        if (divider) {
+          divider.style.color = '#fff';
+          divider.style.opacity = '0.9';
+          divider.style.margin = '0 4px';
+        }
+      }
+    } catch (_) {}
     var initial = getInitialLocale();
     setLanguage(initial);
 
