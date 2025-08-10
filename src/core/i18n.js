@@ -1,6 +1,6 @@
-// Minimal i18n runtime (ESM) – no dependencies
-// Public API: initI18n, t, setLocale, applyDom, currentLocale
-// Plus helpers: formatDate, formatRelative, formatCurrency
+// DEPRECATED: spostato in /core/i18n.js per build Vite/Vercel
+// Questo file resta per compatibilità durante la migrazione ma non viene più usato.
+// Importare sempre da '/core/i18n.js'
 
 let translations = {};
 export let currentLocale = 'it';
