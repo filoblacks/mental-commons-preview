@@ -1,0 +1,181 @@
+file,selector(or line),original_text,proposed_key
+index.html,header .nav-main a:nth-child(1),Home,nav.home
+index.html,header .nav-main a:nth-child(2),Come funziona,nav.how_it_works
+index.html,header .nav-main a:nth-child(3),MC per le scuole,nav.schools
+index.html,header .nav-main a:nth-child(4),Premium,nav.premium
+index.html,#nav-dashboard,Dashboard,nav.dashboard
+index.html,#nav-admin,Admin,nav.admin
+index.html,#nav-login,Accedi,nav.login
+index.html,#onboarding-modal h2,Mental Commons è uno spazio per affidare ciò che pesa.,home.onboarding.title
+index.html,#onboarding-modal p,Scrivi un pensiero difficile. Lo riceverà un Portatore, una persona reale. che risponderà con rispetto entro 48 ore. È un gesto. Non un post.,home.onboarding.body
+index.html,#onboarding-modal .modal-button,Entrare,home.onboarding.cta
+index.html,#user-welcome,Bentornato,home.user.welcome
+index.html,.stat-label (Pensieri condivisi),Pensieri condivisi,home.user.stats.thoughts
+index.html,.stat-label (Risposte ricevute),Risposte ricevute,home.user.stats.replies
+index.html,.stat-label (Giorni di presenza),Giorni di presenza,home.user.stats.days_present
+index.html,.hero .title,Mental Commons,home.hero.title
+index.html,.hero .subtitle,Non siamo fatti per pensare da soli.,home.hero.subtitle
+index.html,#main-cta,Affida ora il tuo pensiero,home.hero.cta
+index.html,.trust-item (48h),⏱️ Risposta entro 48h,home.trust.response_48h
+index.html,.trust-item (privacy),🛡️ Anonimo e privato,home.trust.private
+index.html,.trust-item (humans),🤝 Persone reali, non bot,home.trust.humans
+index.html,.ritual-stats div:nth-child(1),pensieri accolti,home.stats.ucme_label
+index.html,.ritual-stats div:nth-child(2),risposte inviate,home.stats.replies_label
+index.html,.ritual-stats div:nth-child(3),Portatori attivi,home.stats.portatori_label
+index.html,#come-funziona h2,Come funziona,home.how_it_works.title
+index.html,.step:nth-child(1) h3,Scrivi un pensiero,home.how_it_works.step1.title
+index.html,.step:nth-child(1) p,Condividi la tua UCMe in forma anonima,home.how_it_works.step1.desc
+index.html,.step:nth-child(2) h3,Un Portatore lo riceve,home.how_it_works.step2.title
+index.html,.step:nth-child(2) p,Una persona reale legge con attenzione,home.how_it_works.step2.desc
+index.html,.step:nth-child(3) h3,Il pensiero trova riposo,home.how_it_works.step3.title
+index.html,.step:nth-child(3) p,Ricevi una risposta autentica entro 48 ore,home.how_it_works.step3.desc
+index.html,#ucme-e-portatori h2 (UCMe),Cosa sono le UCMe,home.info.ucme.title
+index.html,#ucme-e-portatori p (UCMe),Una UCMe è un pensiero difficile. Una riflessione che pesa. La puoi scrivere qui. Verrà letta da una persona, non da un algoritmo.,home.info.ucme.body
+index.html,#ucme-e-portatori h2 (Depositori),Chi sono i Depositori,home.info.depositor.title
+index.html,#ucme-e-portatori p (Depositori),I Depositori sono chi scrive. Chi affida. Non serve spiegare. Serve fidarsi.,home.info.depositor.body
+index.html,#ucme-e-portatori h2 (Portatori),Chi sono i Portatori,home.info.portatori.title
+index.html,#ucme-e-portatori p (Portatori),I Portatori leggono con attenzione. E rispondono una volta sola. Con rispetto. Con presenza.,home.info.portatori.body
+index.html,#esempio-reale h2,Un esempio reale,home.demo.title
+index.html,.demo-label:nth-child(1),UCMe,home.demo.ucme_label
+index.html,.demo-label:nth-child(2),Risposta,home.demo.reply_label
+index.html,#form-section h2,Affida il tuo pensiero,home.form.title
+index.html,.form-description,Scrivi quello che pensi. Un altro essere umano lo leggerà e risponderà entro 48 ore.,home.form.description
+index.html,#ucme-history h3,I tuoi pensieri precedenti,home.form.history.title
+index.html,label[for="ucme-text"],Il tuo pensiero (UCMe),home.form.field.ucme.label
+index.html,#ucme-text@placeholder,Scrivi qui il tuo pensiero...,home.form.field.ucme.placeholder
+index.html,.char-counter,caratteri (minimo 20),home.form.field.ucme.counter_hint
+index.html,label[for="email"],La tua email,home.form.field.email.label
+index.html,#email@placeholder,nome@email.com,home.form.field.email.placeholder
+index.html,.form-group small (email),Serve solo per inviarti la risposta. Non sarà condivisa.,home.form.field.email.hint
+index.html,label[for="tone"],Tono della risposta desiderato,home.form.field.tone.label
+index.html,#tone option[value="calmo"],Calmo,home.form.field.tone.option_calm
+index.html,#tone option[value="poetico"],Poetico,home.form.field.tone.option_poetic
+index.html,#tone option[value="neutro"],Neutro,home.form.field.tone.option_neutral
+index.html,#tone option[value="diretto"],Diretto,home.form.field.tone.option_direct
+index.html,.form-group small (tone),Scegli il tono che preferisci per la risposta del Portatore.,home.form.field.tone.hint
+index.html,label[for="acceptance"],Accetto che un Portatore legga il mio pensiero e risponda con rispetto.,home.form.field.acceptance.label
+index.html,label[for="portatore"],Mi piacerebbe diventare un Portatore,home.form.field.portatore.label
+index.html,.subtle,Chi ascolta i pensieri degli altri.,home.form.field.portatore.hint
+index.html,#submit-button,Affida il pensiero,home.form.submit
+index.html,#success-message h3,Pensiero affidato,home.form.success.title
+index.html,#success-message p:nth-child(2),Grazie per aver condiviso la tua UCMe. Riceverai una risposta autentica entro 48 ore.,home.form.success.body_1
+index.html,#success-message p:nth-child(3),Un altro essere umano prenderà in carico il tuo pensiero.,home.form.success.body_2
+index.html,footer .footer-links a:nth-child(1),Privacy Policy,footer.links.privacy
+index.html,footer .footer-links a:nth-child(2),Cookie Policy,footer.links.cookie
+index.html,footer .footer-links a:nth-child(3),Termini di Servizio,footer.links.terms
+index.html,footer .footer-links a:nth-child(4),Disclaimer Legale,footer.links.disclaimer
+come-funziona.html,.hero-title,Come funziona Mental Commons,how_it_works.hero.title
+come-funziona.html,.hero-subtitle,Un processo lento, anonimo e umano per condividere e ricevere ascolto.,how_it_works.hero.subtitle
+come-funziona.html,.flow-title,Il flusso del Depositore,how_it_works.flow.title
+come-funziona.html,.step-title (1),Scrivi un pensiero,how_it_works.flow.step1.title
+come-funziona.html,.step-description (1),Racconti ciò che senti. Può essere confuso, breve, viscerale. Non serve essere chiari: serve esserci.,how_it_works.flow.step1.desc
+come-funziona.html,.step-title (2),Lascia la tua mail,how_it_works.flow.step2.title
+come-funziona.html,.step-description (2),Serve solo per avvisarti quando ricevi risposta. Non verrà mai usata per altro. Scrivi. Poi chiudi. Torna quando vuoi.,how_it_works.flow.step2.desc
+come-funziona.html,.step-title (3),Ricevi una risposta anonima,how_it_works.flow.step3.title
+come-funziona.html,.step-description (3),Un Portatore leggerà ciò che hai scritto e ti risponderà con cura. La risposta arriverà via mail. Non ci sono orari. Non ci sono scadenze.,how_it_works.flow.step3.desc
+come-funziona.html,.step-title (4),Continua il dialogo se vuoi,how_it_works.flow.step4.title
+come-funziona.html,.step-description (4),Se sei un utente Premium puoi continuare a parlare con il Portatore. In forma scritta, uno a uno, anonimamente.,how_it_works.flow.step4.desc
+come-funziona.html,.portatore-info-section h2,Chi è un Portatore,how_it_works.portatore.title
+come-funziona.html,.portatore-info-section p (quote box),"Leggere le parole di qualcuno che soffre mi ricorda che siamo tutti fragili. Rispondere non significa risolvere, ma semplicemente esserci.",how_it_works.portatore.quote
+come-funziona.html,.become-portatore-section h2,Diventare Portatore,how_it_works.become.title
+mc-per-le-scuole.html,main h1,Mental Commons @ Scuole,schools.hero.title
+mc-per-le-scuole.html,main p:nth-child(2),Stiamo progettando un programma dedicato alle comunità scolastiche...,schools.hero.body
+mc-per-le-scuole.html,main p:nth-child(3),Restiamo fedeli al nostro ethos: meno fretta, più presenza. Torna presto per scoprire di più.,schools.hero.note
+premium.html,.premium-container h1,Scegli il tuo spazio di ascolto,pricing.hero.title
+premium.html,.billing-toggle-wrapper span:nth-child(1),Mensile,pricing.billing.monthly
+premium.html,.billing-toggle-wrapper span:nth-child(3),Annuale,pricing.billing.annual
+premium.html,.billing-toggle-wrapper .discount,(-35%),pricing.billing.discount
+premium.html,.plan-card.hobby h2,Hobby,pricing.plans.hobby.title
+premium.html,.plan-card.hobby .price,Gratis,pricing.plans.hobby.price
+premium.html,.plan-card.hobby .features li:nth-child(1),Invio illimitato UCMe,pricing.plans.hobby.features.unlimited_ucme
+premium.html,.plan-card.hobby .features li:nth-child(2),Accesso base ai Portatori,pricing.plans.hobby.features.base_access
+premium.html,.plan-card.hobby .features li:nth-child(3),Storico non disponibile,pricing.plans.hobby.features.no_history
+premium.html,.plan-card.hobby .features li:nth-child(4),Chat non disponibili,pricing.plans.hobby.features.no_chat
+premium.html,.plan-card.hobby .cta-button,Incluso,pricing.plans.hobby.cta
+premium.html,.plan-card.premium h2,MC Premium,pricing.plans.premium.title
+premium.html,#premium-price,/prezzoval,pricing.plans.premium.price_value
+premium.html,#premium-price-period,/periodo,pricing.plans.premium.price_period
+premium.html,.plan-card.premium .features li:nth-child(1),Chat illimitate con i Portatori,pricing.plans.premium.features.unlimited_chats
+premium.html,.plan-card.premium .features li:nth-child(2),Accesso prioritario alle risposte,pricing.plans.premium.features.priority
+premium.html,.plan-card.premium .features li:nth-child(3),Storico completo UCMe,pricing.plans.premium.features.full_history
+premium.html,.plan-card.premium .features li:nth-child(4),Accesso a funzionalità future riservate,pricing.plans.premium.features.future
+premium.html,.plan-card.premium .features li:nth-child(5),Possibilità di partecipare a test riservati e spazi collettivi,pricing.plans.premium.features.tests
+premium.html,#btn-premium-monthly,Attiva Premium – 4,99€/mese,pricing.plans.premium.cta.monthly
+premium.html,#btn-premium-annual,Attiva Premium – 39€/anno,pricing.plans.premium.cta.annual
+premium.html,.plan-card.school h2,MC@School (su richiesta),pricing.plans.school.title
+premium.html,.plan-card.school .price,Su richiesta,pricing.plans.school.price
+premium.html,.plan-card.school .subtitle,Per classi, istituti, educatori. Uno spazio protetto dove pensare insieme.,pricing.plans.school.subtitle
+premium.html,.plan-card.school .features li:nth-child(1),Tutte le funzionalità di MC Premium,pricing.plans.school.features.all_premium
+premium.html,.plan-card.school .features li:nth-child(2),Dashboard per UCMe scolastiche,pricing.plans.school.features.school_dashboard
+premium.html,.plan-card.school .features li:nth-child(3),Statistiche anonime sul benessere mentale,pricing.plans.school.features.stats
+premium.html,.plan-card.school .features li:nth-child(4),Percorsi guidati per l’ascolto in aula,pricing.plans.school.features.guided
+premium.html,.plan-card.school .features li:nth-child(5),Supporto diretto con il team MC,pricing.plans.school.features.support
+premium.html,.plan-card.school .features li:nth-child(6),Attivazione flessibile per gruppi o scuole,pricing.plans.school.features.flex
+premium.html,.plan-card.school .features li:nth-child(7),Offerta personalizzata in base agli utenti,pricing.plans.school.features.custom
+premium.html,.faq h2,Domande frequenti,pricing.faq.title
+chat.html,.chat-title,Dialogo Anonimo,chat.title
+chat.html,#message-input@placeholder,Scrivi un messaggio… (Invia con Ctrl/Cmd+Invio),chat.input.placeholder
+chat.html,form button,Invia,chat.input.send
+login.html,h2,Accedi al tuo spazio,auth.login.title
+login.html,.login-description,Il tuo spazio personale per vedere tutti i tuoi pensieri e le risposte ricevute.,auth.login.subtitle
+login.html,#tab-login,Accedi,auth.tabs.login
+login.html,#tab-register,Registrati,auth.tabs.register
+login.html,#login-email@placeholder,Email,auth.login.email.placeholder
+login.html,#login-password@placeholder,Password,auth.login.password.placeholder
+login.html,#login-form button,Accedi,auth.login.submit
+login.html,#register-name@placeholder,Nome,auth.register.name.placeholder
+login.html,#register-surname@placeholder,Cognome (opzionale),auth.register.surname.placeholder
+login.html,#register-email@placeholder,Email,auth.register.email.placeholder
+login.html,#register-password@placeholder,Password,auth.register.password.placeholder
+login.html,#register-confirm@placeholder,Conferma password,auth.register.confirm.placeholder
+login.html,#register-form button,Registrati,auth.register.submit
+dashboard.html,.dashboard-title,Il tuo spazio mentale,dashboard.header.title
+dashboard.html,.dashboard-subtitle,Pensieri affidati e pensieri ricevuti: il tuo spazio mentale completo.,dashboard.header.subtitle
+dashboard.html,#user-verification p,Caricamento del tuo spazio...,dashboard.loading
+dashboard.html,.section-title-group h2 (Depositor),Pensieri Affidati,dashboard.depositor.title
+dashboard.html,.ucme-filter[data-status="all"],Tutte,dashboard.filters.all
+dashboard.html,.ucme-filter[data-status="in attesa"],In attesa,dashboard.filters.pending
+dashboard.html,.ucme-filter[data-status="assegnato"],Assegnato,dashboard.filters.assigned
+dashboard.html,.ucme-filter[data-status="in lavorazione"],In lavorazione,dashboard.filters.processing
+dashboard.html,.ucme-filter[data-status="risposto"],Risposto,dashboard.filters.answered
+dashboard.html,.ucme-filter[data-status="completato"],Completato,dashboard.filters.completed
+dashboard.html,.new-ucme-button,Affida un nuovo pensiero,dashboard.actions.new_ucme
+dashboard.html,#no-access h2,Accesso richiesto,dashboard.no_access.title
+dashboard.html,#no-access p,Per visualizzare il tuo spazio mentale è necessario accedere con la tua email.,dashboard.no_access.body
+dashboard.html,#no-access .login-link,Accedi al tuo spazio,dashboard.no_access.cta
+profile.html,.profile-page-header h1,Gestione Profilo,profile.header.title
+profile.html,.profile-page-subtitle,Modifica le tue informazioni e gestisci il tuo account.,profile.header.subtitle
+profile.html,#user-verification p,Caricamento del tuo profilo...,profile.loading
+profile.html,.profile-info-section h2,Le tue informazioni,profile.info.title
+profile.html,.profile-edit-section h2,Modifica Profilo,profile.edit.title
+profile.html,#edit-profile-btn,Modifica le tue informazioni,profile.edit.toggle
+profile.html,label[for="edit-name"],Nome,profile.edit.name.label
+profile.html,#edit-name@placeholder,Il tuo nome (opzionale),profile.edit.name.placeholder
+profile.html,label[for="edit-email"],Email,profile.edit.email.label
+profile.html,#edit-email@placeholder,nuova@email.com,profile.edit.email.placeholder
+profile.html,label[for="edit-password"],Nuova Password (opzionale),profile.edit.password.label
+profile.html,#edit-password@placeholder,Lascia vuoto per non modificare,profile.edit.password.placeholder
+profile.html,label[for="edit-confirm-password"],Conferma Nuova Password,profile.edit.confirm.label
+profile.html,#edit-confirm-password@placeholder,Ripeti la nuova password,profile.edit.confirm.placeholder
+profile.html,.profile-save-btn,Salva Modifiche,profile.edit.save
+profile.html,#cancel-edit-btn,Annulla,profile.edit.cancel
+profile.html,#portatore-section h2,Portatore,profile.portatore.title
+profile.html,#portatore-status-message,Caricamento stato…,profile.portatore.loading
+profile.html,#portatore-toggle-btn,Attiva,profile.portatore.toggle
+profile.html,.account-actions-section h2,Azioni Account,profile.actions.title
+profile.html,#export-data-btn,Esporta i tuoi dati,profile.actions.export
+profile.html,#delete-account-btn,Elimina Account,profile.actions.delete
+admin.html,h1,UCMe da assegnare,admin.pending.title
+admin.html,thead th (ID),ID,admin.pending.table.id
+admin.html,thead th (Mittente),Mittente,admin.pending.table.sender
+admin.html,thead th (Data),Data,admin.pending.table.date
+admin.html,thead th (Anteprima),Anteprima,admin.pending.table.preview
+admin.html,thead th (Assegna),Assegna,admin.pending.table.assign
+admin.html,h2 (Portatori attivi),Portatori attivi,admin.portatori.title
+admin.html,users & scuole h2,Utenti & Scuole,admin.schools.title
+privacy-policy.html,.hero-title,Privacy Policy di Mental Commons,legal.privacy.title
+privacy-policy.html,.hero-subtitle,Ultimo aggiornamento: 7 Agosto 2025,legal.privacy.updated
+termini-di-servizio.html,.hero-title,Termini di Servizio,legal.terms.title
+termini-di-servizio.html,.hero-subtitle,Le condizioni che regolano l'uso di Mental Commons,legal.terms.subtitle
+cookie-policy.html,h1,Cookie Policy di Mental Commons,legal.cookie.title
+cookie-policy.html,.cookie-date,Ultimo aggiornamento: 7 Agosto 2025,legal.cookie.updated

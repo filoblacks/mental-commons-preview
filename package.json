@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "vercel": "vercel dev",
     "start": "vercel dev",
-    "test": "echo \"Tests non implementati\" && exit 0"
+    "test": "echo \"Tests non implementati\" && exit 0",
+    "i18n:check": "node scripts/i18n-check.js"
   },
   "keywords": [
     "mental-health",

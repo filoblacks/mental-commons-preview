@@ -1,0 +1,290 @@
+{
+  "admin": {
+    "pending": {
+      "empty": "Nessuna UCMe in attesa",
+      "table": {
+        "assign": "Assegna",
+        "date": "Data",
+        "id": "ID",
+        "preview": "Anteprima",
+        "sender": "Mittente"
+      },
+      "title": "UCMe da assegnare"
+    },
+    "portatori": {
+      "empty": "Nessun portatore attivo",
+      "title": "Portatori attivi"
+    },
+    "schools": {
+      "assign_success": "School code assegnato con successo",
+      "select_placeholder": "— Seleziona scuola —",
+      "title": "Utenti & Scuole",
+      "users_empty": "Nessun utente registrato"
+    }
+  },
+  "auth": {
+    "login": {
+      "email": { "placeholder": "Email" },
+      "password": { "placeholder": "Password" },
+      "submit": "Accedi",
+      "subtitle": "Il tuo spazio personale per vedere tutti i tuoi pensieri e le risposte ricevute.",
+      "title": "Accedi al tuo spazio"
+    },
+    "register": {
+      "confirm": { "placeholder": "Conferma password" },
+      "email": { "placeholder": "Email" },
+      "name": { "placeholder": "Nome" },
+      "password": { "placeholder": "Password" },
+      "submit": "Registrati",
+      "surname": { "placeholder": "Cognome (opzionale)" }
+    },
+    "tabs": { "login": "Accedi", "register": "Registrati" }
+  },
+  "chat": {
+    "empty_state": {
+      "body": "Qui appariranno i tuoi dialoghi anonimi. Ogni parola è un ponte.",
+      "cta": "Torna al Dashboard",
+      "icon": "🌱",
+      "title": "I Tuoi Dialoghi"
+    },
+    "input": { "placeholder": "Scrivi un messaggio… (Invia con Ctrl/Cmd+Invio)", "send": "Invia" },
+    "list": {
+      "card": {
+        "new_badge": "Nuovo",
+        "no_messages": "Ancora nessun messaggio",
+        "open": "Apri la chat",
+        "preview_loading": "Caricamento…",
+        "status": {
+          "days_ago": "Ultimo messaggio {count} giorni fa",
+          "today": "Attività recente oggi",
+          "yesterday": "Ultimo messaggio ieri"
+        }
+      }
+    },
+    "status": {
+      "active": "Chat attiva con un Portatore",
+      "last_reply_prefix": "Ultima risposta:"
+    },
+    "system": { "welcome": "Questo spazio è per voi. Non serve avere le parole giuste." },
+    "title": "Dialogo Anonimo"
+  },
+  "common": {
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "learn_more": "Scopri di più",
+    "loading": "Caricamento…",
+    "logout_done": "Logout completato",
+    "ok": "OK",
+    "save": "Salva",
+    "today": "Oggi",
+    "yesterday": "Ieri"
+  },
+  "dashboard": {
+    "actions": { "new_ucme": "Affida un nuovo pensiero" },
+    "depositor": {
+      "login_cta": "Accedi",
+      "login_prompt": "Accedi per continuare il dialogo.",
+      "premium_cta": "Attiva Premium",
+      "premium_prompt": "Attiva MC Premium per continuare il dialogo.",
+      "reply": {
+        "mark_read": "Segna come letta",
+        "read_label": "Letta",
+        "title": "Risposta del Portatore"
+      }
+    },
+    "filters": {
+      "all": "Tutte",
+      "answered": "Risposto",
+      "assigned": "Assegnato",
+      "completed": "Completato",
+      "pending": "In attesa",
+      "processing": "In lavorazione"
+    },
+    "header": { "subtitle": "Pensieri affidati e pensieri ricevuti: il tuo spazio mentale completo.", "title": "Il tuo spazio mentale" },
+    "loading": "Caricamento del tuo spazio...",
+    "no_access": {
+      "body": "Per visualizzare il tuo spazio mentale è necessario accedere con la tua email.",
+      "cta": "Accedi al tuo spazio",
+      "title": "Accesso richiesto"
+    }
+  },
+  "docente": {
+    "list": { "empty": "Nessun pensiero disponibile per la tua scuola." }
+  },
+  "errors": {
+    "admin": { "assign": "Errore assegnazione", "school_assign": "Errore assegnazione" },
+    "auth": {
+      "email_invalid": "Email non valida",
+      "invalid_credentials": "Email o password non validi",
+      "login_generic": "Errore durante il login",
+      "name_short": "Il nome deve essere di almeno 2 caratteri",
+      "password_mismatch": "Le password non coincidono",
+      "password_policy": "La password deve essere di almeno 12 caratteri e contenere maiuscola, minuscola, numero e simbolo",
+      "required": "Autenticazione richiesta",
+      "token_missing": "❌ Token mancante - redirect login",
+      "unauthorized": "Accesso non autorizzato"
+    },
+    "chat": { "fetch": "Errore recupero messaggi", "send": "Errore invio messaggio" },
+    "docente": { "load": "Impossibile caricare i dati." },
+    "network": { "api": "API error:", "timeout": "Timeout richiesta" },
+    "portatore": { "status_load": "Errore caricamento stato", "toggle": "Errore operazione Portatore" },
+    "profile": { "dom_missing": "Elementi profilo non trovati nel DOM" },
+    "unexpected": "Errore imprevisto. Riprova più tardi."
+  },
+  "footer": {
+    "links": { "cookie": "Cookie Policy", "disclaimer": "Disclaimer Legale", "privacy": "Privacy Policy", "terms": "Termini di Servizio" }
+  },
+  "home": {
+    "demo": { "reply_label": "Risposta", "title": "Un esempio reale", "ucme_label": "UCMe" },
+    "hero": { "cta": "Affida ora il tuo pensiero", "subtitle": "Non siamo fatti per pensare da soli.", "title": "Mental Commons" },
+    "how_it_works": {
+      "step1": { "desc": "Condividi la tua UCMe in forma anonima", "title": "Scrivi un pensiero" },
+      "step2": { "desc": "Una persona reale legge con attenzione", "title": "Un Portatore lo riceve" },
+      "step3": { "desc": "Ricevi una risposta autentica entro 48 ore", "title": "Il pensiero trova riposo" },
+      "title": "Come funziona"
+    },
+    "info": {
+      "depositor": { "body": "I Depositori sono chi scrive. Chi affida. Non serve spiegare. Serve fidarsi.", "title": "Chi sono i Depositori" },
+      "portatori": { "body": "I Portatori leggono con attenzione. E rispondono una volta sola. Con rispetto. Con presenza.", "title": "Chi sono i Portatori" },
+      "ucme": { "body": "Una UCMe è un pensiero difficile. Una riflessione che pesa. La puoi scrivere qui. Verrà letta da una persona, non da un algoritmo.", "title": "Cosa sono le UCMe" }
+    },
+    "onboarding": { "body": "Scrivi un pensiero difficile. Lo riceverà un Portatore, una persona reale. che risponderà con rispetto entro 48 ore. È un gesto. Non un post.", "cta": "Entrare", "title": "Mental Commons è uno spazio per affidare ciò che pesa." },
+    "stats": { "portatori_label": "Portatori attivi", "replies_label": "risposte inviate", "ucme_label": "pensieri accolti" },
+    "trust": { "humans": "Persone reali, non bot", "private": "Anonimo e privato", "response_48h": "Risposta entro 48h" },
+    "user": {
+      "stats": { "days_present": "Giorni di presenza", "replies": "Risposte ricevute", "thoughts": "Pensieri condivisi" },
+      "welcome": "Bentornato"
+    },
+    "form": {
+      "description": "Scrivi quello che pensi. Un altro essere umano lo leggerà e risponderà entro 48 ore.",
+      "field": {
+        "acceptance": { "label": "Accetto che un Portatore legga il mio pensiero e risponda con rispetto." },
+        "email": { "hint": "Serve solo per inviarti la risposta. Non sarà condivisa.", "label": "La tua email", "placeholder": "nome@email.com" },
+        "portatore": { "hint": "Chi ascolta i pensieri degli altri.", "label": "Mi piacerebbe diventare un Portatore" },
+        "tone": {
+          "hint": "Scegli il tono che preferisci per la risposta del Portatore.",
+          "label": "Tono della risposta desiderato",
+          "option_calm": "Calmo",
+          "option_direct": "Diretto",
+          "option_neutral": "Neutro",
+          "option_poetic": "Poetico"
+        },
+        "ucme": { "counter_hint": "caratteri (minimo 20)", "label": "Il tuo pensiero (UCMe)", "placeholder": "Scrivi qui il tuo pensiero..." }
+      },
+      "history": { "title": "I tuoi pensieri precedenti" },
+      "submit": "Affida il pensiero",
+      "success": {
+        "body_1": "Grazie per aver condiviso la tua UCMe. Riceverai una risposta autentica entro 48 ore.",
+        "body_2": "Un altro essere umano prenderà in carico il tuo pensiero.",
+        "title": "Pensiero affidato"
+      },
+      "title": "Affida il tuo pensiero"
+    }
+  },
+  "how_it_works": {
+    "become": { "title": "Diventare Portatore" },
+    "flow": {
+      "step1": { "desc": "Racconti ciò che senti. Può essere confuso, breve, viscerale. Non serve essere chiari: serve esserci.", "title": "Scrivi un pensiero" },
+      "step2": { "desc": "Serve solo per avvisarti quando ricevi risposta. Non verrà mai usata per altro. Scrivi. Poi chiudi. Torna quando vuoi.", "title": "Lascia la tua mail" },
+      "step3": { "desc": "Un Portatore leggerà ciò che hai scritto e ti risponderà con cura. La risposta arriverà via mail. Non ci sono orari. Non ci sono scadenze.", "title": "Ricevi una risposta anonima" },
+      "step4": { "desc": "Se sei un utente Premium puoi continuare a parlare con il Portatore. In forma scritta, uno a uno, anonimamente.", "title": "Continua il dialogo se vuoi" },
+      "title": "Il flusso del Depositore"
+    },
+    "hero": { "subtitle": "Un processo lento, anonimo e umano per condividere e ricevere ascolto.", "title": "Come funziona Mental Commons" },
+    "portatore": { "quote": "Leggere le parole di qualcuno che soffre mi ricorda che siamo tutti fragili. Rispondere non significa risolvere, ma semplicemente esserci.", "title": "Chi è un Portatore" }
+  },
+  "legal": {
+    "cookie": { "title": "Cookie Policy di Mental Commons", "updated": "Ultimo aggiornamento: 7 Agosto 2025" },
+    "privacy": { "title": "Privacy Policy di Mental Commons", "updated": "Ultimo aggiornamento: 7 Agosto 2025" },
+    "terms": { "subtitle": "Le condizioni che regolano l'uso di Mental Commons", "title": "Termini di Servizio" }
+  },
+  "nav": {
+    "admin": "Admin",
+    "dashboard": "Dashboard",
+    "home": "Home",
+    "how_it_works": "Come funziona",
+    "login": "Accedi",
+    "premium": "Premium",
+    "schools": "MC per le scuole"
+  },
+  "pricing": {
+    "billing": { "annual": "Annuale", "discount": "(-35%)", "monthly": "Mensile" },
+    "faq": { "title": "Domande frequenti" },
+    "hero": { "title": "Scegli il tuo spazio di ascolto" },
+    "plans": {
+      "hobby": {
+        "cta": "Incluso",
+        "features": {
+          "base_access": "Accesso base ai Portatori",
+          "no_chat": "Chat non disponibili",
+          "no_history": "Storico non disponibile",
+          "unlimited_ucme": "Invio illimitato UCMe"
+        },
+        "price": "Gratis",
+        "title": "Hobby"
+      },
+      "premium": {
+        "cta": { "annual": "Attiva Premium – 39€/anno", "monthly": "Attiva Premium – 4,99€/mese" },
+        "features": {
+          "future": "Accesso a funzionalità future riservate",
+          "full_history": "Storico completo UCMe",
+          "priority": "Accesso prioritario alle risposte",
+          "tests": "Possibilità di partecipare a test riservati e spazi collettivi",
+          "unlimited_chats": "Chat illimitate con i Portatori"
+        },
+        "price_period": "/mese",
+        "price_value": "4,99€",
+        "title": "MC Premium"
+      },
+      "school": {
+        "features": {
+          "all_premium": "Tutte le funzionalità di MC Premium",
+          "custom": "Offerta personalizzata in base agli utenti",
+          "flex": "Attivazione flessibile per gruppi o scuole",
+          "guided": "Percorsi guidati per l’ascolto in aula",
+          "school_dashboard": "Dashboard per UCMe scolastiche",
+          "stats": "Statistiche anonime sul benessere mentale",
+          "support": "Supporto diretto con il team MC"
+        },
+        "price": "Su richiesta",
+        "subtitle": "Per classi, istituti, educatori. Uno spazio protetto dove pensare insieme.",
+        "title": "MC@School (su richiesta)"
+      }
+    }
+  },
+  "profile": {
+    "actions": { "delete": "Elimina Account", "export": "Esporta i tuoi dati", "title": "Azioni Account" },
+    "badge": { "premium": "MC Premium" },
+    "edit": {
+      "cancel": "Annulla",
+      "confirm": { "label": "Conferma Nuova Password", "placeholder": "Ripeti la nuova password" },
+      "email": { "label": "Email", "placeholder": "nuova@email.com" },
+      "name": { "label": "Nome", "placeholder": "Il tuo nome (opzionale)" },
+      "password": { "label": "Nuova Password (opzionale)", "placeholder": "Lascia vuoto per non modificare" },
+      "save": "Salva Modifiche",
+      "title": "Modifica Profilo",
+      "toggle": "Modifica le tue informazioni",
+      "toggle_close": "Chiudi Modifica",
+      "toggle_open": "Modifica le tue informazioni"
+    },
+    "header": { "subtitle": "Modifica le tue informazioni e gestisci il tuo account.", "title": "Gestione Profilo" },
+    "loading": "Caricamento del tuo profilo...",
+    "portatore": {
+      "loading": "Caricamento stato…",
+      "revoke_confirm": "Sei sicuro di voler revocare lo stato di Portatore?",
+      "status_off": "Non sei Portatore",
+      "status_on": "Sei attualmente Portatore 🟢",
+      "title": "Portatore",
+      "toggle": "Attiva",
+      "toggle_off": "Disattiva",
+      "toggle_on": "Attiva"
+    }
+  },
+  "schools": {
+    "hero": {
+      "body": "Stiamo progettando un programma dedicato alle comunità scolastiche...",
+      "note": "Restiamo fedeli al nostro ethos: meno fretta, più presenza. Torna presto per scoprire di più.",
+      "title": "Mental Commons @ Scuole"
+    }
+  }
+}
