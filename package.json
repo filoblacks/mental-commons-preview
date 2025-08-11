@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build && npm run copy-assets",
-    "copy-assets": "cp favicon*.svg dist/ && cp logo.svg dist/ && cp style.css dist/ && cp script-realtime.js dist/ && cp come-funziona.html dist/ && cp mc-per-le-scuole.html dist/",
+    "copy-assets": "cp favicon*.svg dist/ && cp logo.svg dist/ && cp style.css dist/ && cp script-realtime.js dist/ && cp come-funziona.html dist/ && cp mc-per-le-scuole.html dist/ && cp -R scripts dist/ && cp -R locales dist/",
     "lint": "eslint src ui core utils --fix",
     "preview": "vite preview",
     "vercel": "vercel dev",

@@ -146,7 +146,11 @@
   },
   "footer": {
     "links": { "cookie": "Cookie Policy", "disclaimer": "Disclaimer Legale", "privacy": "Privacy Policy", "terms": "Termini di Servizio" },
-    "tagline": "Il contrario di un social. Il prototipo di una mente comune."
+    "tagline": "Il contrario di un social. Il prototipo di una mente comune.",
+    "privacy": "Privacy Policy",
+    "cookie": "Cookie Policy",
+    "terms": "Termini di Servizio",
+    "disclaimer": "Disclaimer Legale"
   },
   "home": {
     "demo": { "reply_label": "Risposta", "title": "Un esempio reale", "ucme_label": "UCMe" },

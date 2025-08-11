@@ -146,7 +146,11 @@
   },
   "footer": {
     "links": { "cookie": "Cookie Policy", "disclaimer": "Legal Disclaimer", "privacy": "Privacy Policy", "terms": "Terms of Service" },
-    "tagline": "The opposite of a social network. A prototype of a common mind."
+    "tagline": "The opposite of a social network. A prototype of a common mind.",
+    "privacy": "Privacy Policy",
+    "cookie": "Cookie Policy",
+    "terms": "Terms of Service",
+    "disclaimer": "Legal Disclaimer"
   },
   "home": {
     "demo": { "reply_label": "Reply", "title": "A real example", "ucme_label": "UCMe" },

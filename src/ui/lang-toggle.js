@@ -9,14 +9,25 @@ function markActive(locale) {
 }
 
 async function boot() {
-  try {
-    await initI18n();
-  } catch (_) {}
-  markActive(getLocale());
+  try { console.info('[lang-toggle/boot] avvio'); } catch {}
+  try { await initI18n(); } catch (_) {}
+  const localeNow = getLocale();
+  try { console.info('[lang-toggle/locale]', { localeNow }); } catch {}
+  markActive(localeNow);
   document.querySelectorAll('#lang-toggle .lang-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
       const lc = btn.dataset.lang;
-      setLocale(lc);
+      try { console.info('[lang-toggle/click]', { lc }); } catch {}
+      try {
+        if (window.__mc_setLocale) {
+          await window.__mc_setLocale(lc);
+        } else {
+          await setLocale(lc, { apply: true });
+        }
+      } catch {
+        await setLocale(lc, { apply: true });
+      }
       markActive(lc);
     });
   });

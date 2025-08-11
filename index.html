@@ -70,6 +70,11 @@
     </script>
     <!-- Variabili ambiente pubbliche (Supabase) -->
     <script type="module" src="/api/env.js"></script>
+    <!-- i18n: inizializza PRIMA di qualsiasi rendering/manipolazione DOM -->
+    <script type="module">
+      import { initI18n } from '/core/i18n.js';
+      await initI18n();
+    </script>
 </head>
 <body>
     <!-- Top Navigation Container -->
@@ -366,9 +371,9 @@
 
     <!-- Modulo principale per Vite (dev) -->
     <script type="module" src="/src/main.js"></script>
-    <!-- i18n runtime per pagine statiche -->
-    <script defer src="/scripts/i18n.js"></script>
     <script defer src="/scripts/header-menu.js"></script>
     <script type="module" src="/src/ui/lang-toggle.js"></script>
+    <script type="module" src="/public/scripts/inject-footer.js"></script>
+    <script type="module" src="/public/scripts/lang-toggle-footer.js"></script>
 </body>
 </html> 

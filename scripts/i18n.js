@@ -10,6 +10,7 @@
   var LOCALE_KEY_COMPAT = 'mc_locale';
   var currentLocale = null;
   var dict = {};
+  var isReady = false;
   var isApplying = false;
 
   function getPersistedLocale() {
@@ -43,12 +44,15 @@
   function getInitialLocale() {
     var url = getUrlLocaleOverride();
     if (url && SUPPORTED[url]) {
+      try { console.info('[i18n/boot]', { url: location.href, qs: location.search, langLS: localStorage.getItem(LOCALE_KEY_PRIMARY)||localStorage.getItem(LOCALE_KEY_COMPAT), cookie: document.cookie }); } catch (_){ }
+      try { console.info('[i18n/query]', url); } catch (_){ }
       persistLocale(url);
       return url;
     }
     var persisted = getPersistedLocale();
     if (persisted && SUPPORTED[persisted]) return persisted;
     var detected = detectBrowserLocale();
+    try { console.info('[i18n/core/init]', { override: null, persisted: persisted, detected: detected, resolved: SUPPORTED[detected]?detected:'it' }); } catch (_){ }
     return SUPPORTED[detected] ? detected : 'it';
   }
 
@@ -77,6 +81,10 @@
   }
 
   function t(key, vars) {
+    if (!isReady || !dict || !Object.keys(dict).length) {
+      // Evita spam di warning prima che il dizionario sia pronto
+      return key;
+    }
     var raw = getByPath(dict, key);
     if (raw === undefined) {
       if (!window.isProduction) console.warn('[i18n] Missing key:', key);
@@ -91,6 +99,7 @@
   }
 
   function applyDom(root) {
+    if (!isReady || !dict || !Object.keys(dict).length) return;
     if (isApplying) return; // previeni re-entrancy in mutation observer
     isApplying = true;
     try {
@@ -138,18 +147,29 @@
 
   function setLanguage(locale) {
     if (!SUPPORTED[locale]) return;
+    try { console.info('[i18n/core/setLocale]', { to: locale }); } catch (_){ }
     if (currentLocale === locale && dict && Object.keys(dict).length) {
+      isReady = true;
       persistLocale(locale);
       applyDom();
       markActiveLanguage(locale);
+      try {
+        window.__mc_applyI18n = applyDom;
+        window.__mc_setLocale = setLanguage; // compat con header-menu.js
+      } catch (_) {}
       return;
     }
     fetchDict(locale).then(function (json) {
       dict = json || {};
       currentLocale = locale;
+      isReady = true;
       persistLocale(locale);
       applyDom();
       markActiveLanguage(locale);
+      try {
+        window.__mc_applyI18n = applyDom;
+        window.__mc_setLocale = setLanguage; // compat con header-menu.js
+      } catch (_) {}
     }).catch(function (err) {
       console.error('[i18n] Impossibile caricare le traduzioni', err);
     });
@@ -175,13 +195,12 @@
 
     wireHeaderButtons();
     var initial = getInitialLocale();
+    try { console.info('[i18n/core/getLocale]', { locale: initial }); } catch(_){ }
     setLanguage(initial);
 
     // Espone API globali
     try {
       window.setLanguage = setLanguage;
-      window.__mc_setLocale = setLanguage; // compat con header-menu.js
-      window.__mc_applyI18n = applyDom;
       window.i18n = { t: t };
     } catch (_) {}
   }
