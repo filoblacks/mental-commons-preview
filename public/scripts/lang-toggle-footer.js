@@ -57,8 +57,12 @@
     // Osserva eventuale iniezione/rimpiazzo del footer per ripristinare lo stato visivo
     try {
       const mo = new MutationObserver(function(){
-        const guess = (document.documentElement.getAttribute('lang') || 'it').toLowerCase();
-        markActive(guess === 'en' ? 'en' : 'it');
+        const n1 = document.querySelectorAll('.site-footer [data-lang="it"]').length;
+        const n2 = document.querySelectorAll('.site-footer [data-lang="en"]').length;
+        if ((n1 + n2) > 0) {
+          const guess = (document.documentElement.getAttribute('lang') || 'it').toLowerCase();
+          markActive(guess === 'en' ? 'en' : 'it');
+        }
       });
       mo.observe(document.body, { childList: true, subtree: true });
     } catch {}
