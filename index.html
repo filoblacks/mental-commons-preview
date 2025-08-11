@@ -96,11 +96,7 @@
                 </svg>
             </a>
         </div>
-        <nav class="nav-lang" style="margin-left:auto; display:flex; align-items:center; gap:.25rem;">
-          <button type="button" id="lang-it" aria-label="Italiano">IT</button>
-          <span class="divider">/</span>
-          <button type="button" id="lang-en" aria-label="English">EN</button>
-        </nav>
+        
     </header>
 
     <!-- Modal di onboarding -->
@@ -338,35 +334,20 @@
     </main>
 
     <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p>© 2025 — Mental Commons<br/>
-            <span data-i18n="footer.tagline"></span></p>
-            
-            <div class="footer-links">
-                <a href="/privacy-policy" data-i18n="footer.links.privacy"></a>
-                <a href="/cookie-policy" data-i18n="footer.links.cookie"></a>
-                <a href="/termini-di-servizio" data-i18n="footer.links.terms"></a>
-                <a href="/disclaimer-legale" data-i18n="footer.links.disclaimer"></a>
-            </div>
-            
-            <div class="footer-social">
-                <a href="https://www.instagram.com/mental_commons/" target="_blank" rel="noopener noreferrer" class="instagram-link" title="Seguici su Instagram" aria-label="Profilo Instagram di Mental Commons">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                    </svg>
-                    <span>@mental_commons</span>
-                </a>
-                <a href="https://www.tiktok.com/@mental_commons" target="_blank" rel="noopener noreferrer" class="tiktok-link" title="Seguici su TikTok" aria-label="Profilo TikTok di Mental Commons">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path>
-                    </svg>
-                    <span>@mental_commons</span>
-                </a>
-            </div>
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <small class="footer-brand">© Mental Commons</small>
+        <nav class="footer-nav">
+          <a href="/come-funziona.html" data-i18n-link data-i18n="nav.how_it_works"></a>
+          <a href="/mc-per-le-scuole.html" data-i18n-link data-i18n="nav.schools"></a>
+          <a href="/premium.html" data-i18n-link data-i18n="nav.premium"></a>
+        </nav>
+        <div class="footer-lang" id="lang-toggle">
+          <button type="button" data-lang="it" class="lang-btn" aria-pressed="false">IT</button>
+          <span class="divider">/</span>
+          <button type="button" data-lang="en" class="lang-btn" aria-pressed="false">EN</button>
         </div>
+      </div>
     </footer>
 
     <!-- Fallback scrollToForm per sicurezza (definito anche in script.js) -->
@@ -388,5 +369,6 @@
     <!-- i18n runtime per pagine statiche -->
     <script defer src="/scripts/i18n.js"></script>
     <script defer src="/scripts/header-menu.js"></script>
+    <script type="module" src="/src/ui/lang-toggle.js"></script>
 </body>
 </html> 

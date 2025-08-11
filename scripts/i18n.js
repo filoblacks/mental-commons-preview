@@ -106,17 +106,11 @@
   }
 
   function markActiveLanguage(locale) {
-    var itBtn = document.getElementById('lang-it');
-    var enBtn = document.getElementById('lang-en');
-    if (itBtn) itBtn.classList.toggle('is-active', locale === 'it');
-    if (enBtn) enBtn.classList.toggle('is-active', locale === 'en');
+    // Header toggle rimosso: lo stato attivo è gestito dal footer via src/ui/lang-toggle.js
   }
 
   function wireHeaderButtons() {
-    var itBtn = document.getElementById('lang-it');
-    var enBtn = document.getElementById('lang-en');
-    if (itBtn) itBtn.addEventListener('click', function () { setLanguage('it'); });
-    if (enBtn) enBtn.addEventListener('click', function () { setLanguage('en'); });
+    // Nessun listener per header; toggle lingua è nel footer
   }
 
   function fetchDict(locale) {
