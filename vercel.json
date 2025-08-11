@@ -102,6 +102,18 @@
   ],
   "rewrites": [
     {
+      "source": "/api/chats/my-chats",
+      "destination": "/api/chats.js?action=my-chats"
+    },
+    {
+      "source": "/api/chats/:id",
+      "destination": "/api/chats.js?action=update&id=:id"
+    },
+    {
+      "source": "/api/chats",
+      "destination": "/api/chats.js"
+    },
+    {
       "source": "/dashboard",
       "destination": "/dashboard.html"
     },
