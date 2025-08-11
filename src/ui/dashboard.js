@@ -1,8 +1,8 @@
-import { getUCMEs, getUsers, markRispostaAsRead, requestChat } from '../core/api.js';
-import { getToken, getCurrentUser, refreshUserInfo } from '../core/auth.js';
-import { log } from '../core/logger.js';
+import { getUCMEs, getUsers, markRispostaAsRead, requestChat } from '@core/api.js';
+import { getToken, getCurrentUser, refreshUserInfo } from '@core/auth.js';
+import { log } from '@core/logger.js';
 import { updateStickyHeader } from './stats.js';
-import { t, currentLocale, formatDate } from '../core/i18n.js';
+import { t, formatDate } from '@core/i18n.js';
 
 const containerId = 'ucme-blocks';
 let allUCMEs = [];
@@ -234,63 +234,4 @@ function removeLoadingMessage() {
   }
 }
 
-// Rimosse funzioni duplicate: logica ora centralizzata in ui/stats.js 
 
-// Listener per i bottoni "Segna come letta"
-function setupMarkAsReadListeners(container) {
-  const buttons = container.querySelectorAll('.btn-mark-read');
-  if (!buttons.length) return;
-
-  buttons.forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const ucmeId = btn.getAttribute('data-ucme-id');
-      if (!ucmeId) return;
-
-      btn.disabled = true;
-      try {
-        await markRispostaAsRead(ucmeId, getToken());
-        // Modifica UI in tempo reale
-        btn.outerHTML = '<span class="read-label">Letta</span>';
-        const parent = btn.closest('.ucme-response');
-        if (parent) parent.classList.remove('response-unread');
-        if (parent) parent.classList.add('response-read');
-      } catch (err) {
-        log('Errore segna come letta:', err.message);
-        btn.disabled = false;
-      }
-    });
-  });
-}
-
-// Listener per i bottoni "Continua a parlarne"
-function setupContinueChatListeners(container, user) {
-  const buttons = container.querySelectorAll('.btn-continue-chat');
-  if (!buttons.length) return;
-
-  buttons.forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const ucmeId = btn.getAttribute('data-ucme-id');
-      if (!ucmeId) return;
-
-      // Controllo abbonamento (il bottone appare solo se premium, ma ricontrollo)
-      const canContinueChat = user && (user.has_subscription === true || user.has_subscription === "true");
-      if (!canContinueChat) {
-        window.location.href = '/premium.html';
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = t('common.loading');
-      try {
-        const res = await requestChat(ucmeId, getToken());
-        // Sostituisci il bottone con etichetta di conferma
-        btn.outerHTML = `<span class="chat-requested-label">${t('dashboard.depositor.chat_request_sent')}</span>`;
-      } catch (err) {
-        log(t('errors.unexpected'), err.message);
-        alert(err.message);
-        btn.disabled = false;
-        btn.textContent = t('dashboard.actions.new_ucme');
-      }
-    });
-  });
-}

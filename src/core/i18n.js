@@ -1,116 +1,50 @@
-// DEPRECATED: spostato in /core/i18n.js per build Vite/Vercel
-// Questo file resta per compatibilità durante la migrazione ma non viene più usato.
-// Importare sempre da '/core/i18n.js'
+// core/i18n.js – Runtime i18n robusto con applicazione DOM prima della pulizia URL
 
-let translations = {};
-export let currentLocale = 'it';
-
-const LOCALE_KEY = 'mc_locale';
 const SUPPORTED = new Set(['it', 'en']);
+const LOCALE_KEY = 'mc_locale';
+let CURRENT_LOCALE = 'it';
+let DICT = {};
+let IS_INITIALIZED = false;
+const FALLBACK_LOCALES_HOST = 'https://mental-commons.vercel.app';
 
-function getCookie(name) {
-  const match = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'));
-  return match ? decodeURIComponent(match[1]) : null;
-}
-
-function setCookie(name, value, days = 365, path = '/') {
-  const date = new Date();
-  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${date.toUTCString()}; path=${path}`;
-}
-
-function getPersistedLocale() {
+function persistLocale(locale) {
+  try { localStorage.setItem(LOCALE_KEY, locale); } catch {}
   try {
-    const ls = localStorage.getItem(LOCALE_KEY);
-    if (ls && SUPPORTED.has(ls)) return ls;
+    const date = new Date();
+    date.setTime(date.getTime() + 365 * 24 * 60 * 60 * 1000);
+    document.cookie = `${LOCALE_KEY}=${encodeURIComponent(locale)}; expires=${date.toUTCString()}; path=/; SameSite=Lax`;
   } catch {}
-  const cookie = getCookie(LOCALE_KEY);
-  if (cookie && SUPPORTED.has(cookie)) return cookie;
-  return null;
+  try { document.documentElement.lang = locale; } catch {}
 }
 
-function setPersistedLocale(locale) {
+export function getQueryLocale() {
   try {
-    localStorage.setItem(LOCALE_KEY, locale);
-  } catch {}
-  setCookie(LOCALE_KEY, locale, 365, '/');
+    const params = new URLSearchParams(location.search);
+    const l = params.get('lang');
+    return SUPPORTED.has(l) ? l : null;
+  } catch {
+    return null;
+  }
 }
 
 function detectBrowserLocale() {
-  const lang = (navigator.language || navigator.userLanguage || 'it').toLowerCase();
+  const lang = (typeof navigator !== 'undefined' && (navigator.language || navigator.userLanguage) || 'it').toLowerCase();
   return lang.startsWith('en') ? 'en' : 'it';
 }
 
-function getUrlLocaleOverride() {
-  const params = new URLSearchParams(window.location.search);
-  const q = (params.get('lang') || '').toLowerCase();
-  if (SUPPORTED.has(q)) return q;
-  return null;
+export function getLocale() {
+  return CURRENT_LOCALE;
 }
 
-function getByPath(obj, path) {
-  if (!obj || !path) return undefined;
-  return path.split('.').reduce((acc, k) => (acc && acc[k] !== undefined ? acc[k] : undefined), obj);
-}
-
-function interpolate(str, vars = {}) {
-  if (typeof str !== 'string') return str;
-  return str.replace(/\{(\w+)\}/g, (_, k) => (vars[k] !== undefined ? String(vars[k]) : `{${k}}`));
-}
-
-export function t(key, vars = {}) {
-  const raw = getByPath(translations, key);
-  if (raw === undefined) {
-    console.warn(`[i18n] Missing key: ${key}`);
-    return key;
+export function t(key, fallback = '') {
+  const value = key.split('.').reduce((o, k) => (o && o[k] != null ? o[k] : undefined), DICT);
+  if (value == null) {
+    console.warn('[i18n] Missing key:', key);
+    return fallback || key;
   }
-  if (typeof raw === 'string') return interpolate(raw, vars);
-  // If object provided, try common fields like label/placeholder
-  if (raw && typeof raw === 'object') {
-    const preferred = raw.label || raw.title || raw.text || raw.placeholder || raw.value;
-    if (typeof preferred === 'string') return interpolate(preferred, vars);
-  }
-  return String(raw);
-}
-
-export async function initI18n(localeOverride = null) {
-  let locale = localeOverride || getUrlLocaleOverride() || getPersistedLocale() || detectBrowserLocale();
-  if (!SUPPORTED.has(locale)) locale = 'it';
-
-  // If URL override present, persist it (one-time)
-  const urlOverride = getUrlLocaleOverride();
-  if (urlOverride && urlOverride !== getPersistedLocale()) {
-    setPersistedLocale(urlOverride);
-  }
-
-  // Load dictionary
-  try {
-    const res = await fetch(`/locales/${locale}.json`, { cache: 'no-store' });
-    translations = await res.json();
-  } catch (err) {
-    console.warn('[i18n] Failed to load locale file, falling back to empty dict', err);
-    translations = {};
-  }
-
-  currentLocale = locale;
-  try { document.documentElement.lang = locale; } catch {}
-  setPersistedLocale(locale);
-
-  applyDom();
-  markActiveLanguage(locale);
-
-  try {
-    // Expose helpers for non-module scripts (e.g., header-menu.js)
-    window.__mc_applyI18n = applyDom;
-    window.__mc_setLocale = setLocale;
-  } catch {}
-}
-
-export function setLocale(locale) {
-  if (!SUPPORTED.has(locale)) return;
-  setPersistedLocale(locale);
-  // Re-run init to reload dictionary and re-render DOM
-  initI18n(locale);
+  return value && typeof value === 'object'
+    ? String(value.label || value.title || value.text || value.placeholder || value.value || fallback || key)
+    : String(value);
 }
 
 export function applyDom() {
@@ -121,38 +55,105 @@ export function applyDom() {
     const val = t(key);
     const attrSpec = el.getAttribute('data-i18n-attr');
     if (attrSpec) {
-      attrSpec.split('|').map((s) => s.trim()).filter(Boolean).forEach((attr) => {
-        el.setAttribute(attr, val);
-      });
+      attrSpec
+        .split('|')
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .forEach((attr) => { el.setAttribute(attr, val); });
     } else {
-      el.textContent = val;
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) {
+        el.setAttribute('placeholder', val);
+      } else {
+        el.textContent = val;
+      }
     }
   });
 }
 
 function markActiveLanguage(locale) {
-  const itBtn = document.getElementById('lang-it');
-  const enBtn = document.getElementById('lang-en');
-  itBtn && itBtn.classList.toggle('is-active', locale === 'it');
-  enBtn && enBtn.classList.toggle('is-active', locale === 'en');
+  const itBtn = document.getElementById('lang-it') || document.querySelector('#lang-toggle [data-lang="it"]');
+  const enBtn = document.getElementById('lang-en') || document.querySelector('#lang-toggle [data-lang="en"]');
+  if (itBtn) itBtn.classList.toggle('is-active', locale === 'it');
+  if (enBtn) enBtn.classList.toggle('is-active', locale === 'en');
 }
 
-// -----------------------------
-// Intl Helpers (Locale-aware)
-// -----------------------------
+async function fetchLocaleDict(locale) {
+  const primaryUrl = `/locales/${locale}.json`;
+  try {
+    const res = await fetch(primaryUrl, { cache: 'no-store' });
+    if (res.ok) return await res.json();
+    if (window.__MC_DEBUG_I18N) console.warn('[i18n] primary locales 404/KO', { url: primaryUrl, status: res.status });
+  } catch (err) {
+    if (window.__MC_DEBUG_I18N) console.warn('[i18n] primary locales fetch error', err);
+  }
+  // Fallback su host Vercel noto
+  const fallbackUrl = `${FALLBACK_LOCALES_HOST}/locales/${locale}.json`;
+  const res2 = await fetch(fallbackUrl, { cache: 'no-store', mode: 'cors' }).catch(() => null);
+  if (res2 && res2.ok) return await res2.json();
+  throw new Error(`[i18n] Cannot load locale dict for ${locale}`);
+}
 
+export async function setLocale(locale, { apply = false } = {}) {
+  if (!locale || locale === CURRENT_LOCALE || !SUPPORTED.has(locale)) return CURRENT_LOCALE;
+  CURRENT_LOCALE = locale;
+  persistLocale(locale);
+
+  DICT = await fetchLocaleDict(locale);
+
+  if (apply) {
+    applyDom();
+    markActiveLanguage(locale);
+    try {
+      if (window.__MC_DEBUG_I18N) console.info('[i18n] applied', { locale });
+      window.dispatchEvent(new CustomEvent('mc:i18n:changed', { detail: { locale } }));
+    } catch {}
+  }
+
+  // Esponi API globali per script non-modulari
+  try {
+    window.__mc_applyI18n = applyDom;
+    window.__mc_setLocale = (l) => setLocale(l, { apply: true });
+  } catch {}
+
+  return CURRENT_LOCALE;
+}
+
+export async function initI18n() {
+  if (IS_INITIALIZED) return CURRENT_LOCALE;
+  const qs = getQueryLocale();
+  const persisted = (() => { try { return localStorage.getItem(LOCALE_KEY); } catch { return null; } })();
+  const detected = detectBrowserLocale();
+  const resolved = qs || (SUPPORTED.has(persisted) ? persisted : null) || detected;
+
+  try { console.info('[i18n/core/init]', { override: qs, persisted, detected, resolved }); } catch {}
+
+  await setLocale(resolved, { apply: true });
+  IS_INITIALIZED = true;
+
+  // Notifica readiness a tutti gli script interessati (footer/header toggles, ecc.)
+  try {
+    window.dispatchEvent(new CustomEvent('mc:i18n:ready', { detail: { locale: resolved } }));
+  } catch {}
+
+  // Pulizia URL SOLO dopo applicazione e SOLO se c'era ?lang
+  if (qs) {
+    try {
+      const cleanUrl = location.pathname + location.hash;
+      history.replaceState(null, '', cleanUrl);
+    } catch {}
+  }
+  return CURRENT_LOCALE;
+}
+
+// Helpers Intl -----------------------------------------------------------------
 export function formatDate(date, options = {}) {
   const d = date instanceof Date ? date : new Date(date);
-  return new Intl.DateTimeFormat(currentLocale, options).format(d);
+  return new Intl.DateTimeFormat(getLocale(), options).format(d);
 }
 
 export function formatCurrency(amount, currency = 'EUR', options = {}) {
   try {
-    return new Intl.NumberFormat(currentLocale, {
-      style: 'currency',
-      currency,
-      ...options,
-    }).format(amount);
+    return new Intl.NumberFormat(getLocale(), { style: 'currency', currency, ...options }).format(amount);
   } catch {
     return `${amount} ${currency}`;
   }
@@ -162,10 +163,10 @@ export function formatRelative(date) {
   const d = date instanceof Date ? date : new Date(date);
   const now = new Date();
   const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
-
   if (diffDays === 0) return t('dates.relative.today');
   if (diffDays === 1) return t('dates.relative.yesterday');
   return t('dates.relative.days_ago', { count: diffDays });
 }
 
-
+export const i18n = { t, setLocale, getLocale, initI18n, applyDom, formatDate, formatCurrency, formatRelative, getQueryLocale };
+export default i18n;

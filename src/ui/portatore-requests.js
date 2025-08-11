@@ -1,6 +1,6 @@
-import { getChatRequests, updateChatRequestStatus } from '../core/api.js';
-import { getToken } from '../core/auth.js';
-import { log } from '../core/logger.js';
+import { getChatRequests, updateChatRequestStatus } from '@core/api.js';
+import { getToken } from '@core/auth.js';
+import { log } from '@core/logger.js';
 
 const container = document.getElementById('requests-container');
 const loading = document.getElementById('loading-state');
@@ -125,4 +125,6 @@ function escapeHtml(str) {
 }
 
 // Avvio
-loadRequests(); 
+loadRequests();
+
+

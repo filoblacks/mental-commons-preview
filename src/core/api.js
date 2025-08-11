@@ -1,6 +1,6 @@
 // core/api.js - Wrapper centralizzato per chiamate HTTP verso backend
 import { log, warn, error } from './logger.js';
-import { sleep } from '../utils/helpers.js';
+import { sleep } from '../../utils/helpers.js';
 
 const BASE_URL = window?.location?.origin ?? '';
 const DEFAULT_TIMEOUT = 8000; // ms
@@ -14,7 +14,7 @@ function withTimeout(promise, ms = DEFAULT_TIMEOUT) {
   ]);
 }
 
-async function request(endpoint, { method = 'GET', token, body, retries = 1 } = {}) {
+export async function request(endpoint, { method = 'GET', token, body, retries = 1 } = {}) {
   const headers = {
     'Content-Type': 'application/json',
   };
@@ -221,4 +221,6 @@ export function getChatMessages(chatId, token) {
 // Chat accettate dall'utente (Depositor o Portatore)
 export function getMyChats(token) {
   return request('/api/chats/my-chats', { token });
-} 
+}
+
+

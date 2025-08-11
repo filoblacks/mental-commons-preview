@@ -1,7 +1,7 @@
-import { login, register } from '../core/auth.js';
-import { isValidEmail, isValidPassword } from '../utils/helpers.js';
-import { log } from '../core/logger.js';
-import { t } from '../core/i18n.js';
+import { login, register } from '@core/auth.js';
+import { isValidEmail, isValidPassword } from '../../utils/helpers.js';
+import { log } from '@core/logger.js';
+import { t } from '@core/i18n.js';
 
 export function initLogin() {
   const tabLogin = document.getElementById('tab-login');
@@ -96,4 +96,6 @@ export function initLogin() {
   function hideError() {
     if (errorBox) errorBox.style.display = 'none';
   }
-} 
+}
+
+

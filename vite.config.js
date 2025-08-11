@@ -1,7 +1,15 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import path from 'node:path';
 
 export default defineConfig({
+  base: '/',
+  resolve: {
+    alias: {
+      '@core': path.resolve(__dirname, 'src/core'),
+      '@ui': path.resolve(__dirname, 'src/ui'),
+    }
+  },
   build: {
     outDir: 'dist',
     rollupOptions: {

@@ -3,9 +3,9 @@
 // Mostra elenco UCMe assegnate al portatore e permette gestione stato
 // ===============================================================
 
-import { getPortatoreStatus, getPortatoreAssignedUCMEs, updatePortatoreUcmeStatus, submitUcmeResponse } from '../core/api.js';
-import { getToken } from '../core/auth.js';
-import { log } from '../core/logger.js';
+import { getPortatoreStatus, getPortatoreAssignedUCMEs, updatePortatoreUcmeStatus, submitUcmeResponse } from '@core/api.js';
+import { getToken } from '@core/auth.js';
+import { log } from '@core/logger.js';
 
 const SECTION_ID = 'portatore-ucme-section';
 const LIST_ID = 'assigned-ucme-list';
@@ -267,7 +267,7 @@ function renderResponseArea(ucme) {
 function sanitizeHTML(str) {
   const temp = document.createElement('div');
   temp.textContent = str;
-  return temp.innerHTML.replace(/\n/g, '<br/>');
+  return temp.innerHTML.replace(/\n/g, '<br/>' );
 }
 
 // Event delegation to handle textarea input and invio risposta
@@ -369,4 +369,6 @@ function showStatusUpdateError(card, message) {
   
   card.appendChild(feedback);
   setTimeout(() => feedback.remove(), 5000);
-} 
+}
+
+

@@ -1,6 +1,6 @@
-import { getSchoolUCMEs, getSchoolUCMeStatsRange } from '../core/api.js';
-import { getToken } from '../core/auth.js';
-import { log, error } from '../core/logger.js';
+import { getSchoolUCMEs, getSchoolUCMeStatsRange } from '@core/api.js';
+import { getToken } from '@core/auth.js';
+import { log, error } from '@core/logger.js';
 
 function domReady(cb) {
   if (document.readyState === 'loading') {
@@ -250,4 +250,6 @@ function renderUCMEs(container, ucmes = []) {
   });
 }
 
-domReady(initDashboardDocente); 
+domReady(initDashboardDocente);
+
+

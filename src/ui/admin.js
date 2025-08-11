@@ -1,7 +1,7 @@
 /* ui/admin.js – Gestione dashboard amministratore per assegnazione manuale UCMe e gestione scuole utenti */
-import { getPendingUCMEs, assignUCMe, getActivePortatori, getUsers, getSchools, assignUserSchoolCode } from '../core/api.js';
-import { getToken, getCurrentUser } from '../core/auth.js';
-import { log, error } from '../core/logger.js';
+import { getPendingUCMEs, assignUCMe, getActivePortatori, getUsers, getSchools, assignUserSchoolCode } from '@core/api.js';
+import { getToken, getCurrentUser } from '@core/auth.js';
+import { log, error } from '@core/logger.js';
 
 export async function initAdmin() {
   const token = getToken();
@@ -111,58 +111,52 @@ export async function initAdmin() {
     });
 
     /* Gestione tabella utenti & scuole */
-    if (usersSchoolBody) {
-      if (users.length === 0) {
-        usersSchoolBody.innerHTML = '<tr><td colspan="4">Nessun utente registrato</td></tr>';
-      } else {
-        usersSchoolBody.innerHTML = '';
-        const selected = {};
+    if (users.length && usersSchoolBody) {
+      usersSchoolBody.innerHTML = '';
+      users.forEach((u) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${u.email}</td>
+          <td class="current-school">${u.school_code || '—'}</td>
+          <td>
+            <select class="school-select">
+              <option value="">— Seleziona scuola —</option>
+              ${schools.map((s) => `<option value="${s.code}">${s.name}</option>`).join('')}
+            </select>
+          </td>
+          <td><button class="assign-school-btn">Assegna</button></td>`;
 
-        users.forEach((u) => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${u.email}</td>
-            <td class="current-school">${u.school_code || '—'}</td>
-            <td>
-              <select class="school-select">
-                <option value="">— Seleziona scuola —</option>
-                ${schools
-                  .map((s) => `<option value="${s.code}">${s.name}</option>`) // code value
-                  .join('')}
-              </select>
-            </td>
-            <td><button class="assign-school-btn">Assegna</button></td>`;
+        const selectEl = row.querySelector('.school-select');
+        const assignBtn = row.querySelector('.assign-school-btn');
+        const currentSchoolCell = row.querySelector('.current-school');
 
-          const selectEl = row.querySelector('.school-select');
-          const assignBtn = row.querySelector('.assign-school-btn');
-          const currentSchoolCell = row.querySelector('.current-school');
-
-          assignBtn.addEventListener('click', async () => {
-            const chosenCode = selectEl.value;
-            if (!chosenCode) {
-              alert('Seleziona una scuola');
-              return;
-            }
-            try {
-              assignBtn.disabled = true;
-              await assignUserSchoolCode(u.id, chosenCode, token);
-              currentSchoolCell.textContent = chosenCode;
-              alert('School code assegnato con successo');
-            } catch (err) {
-              error('Errore assegnazione school_code', err);
-              alert(err.message || 'Errore assegnazione');
-            } finally {
-              assignBtn.disabled = false;
-            }
-          });
-
-          usersSchoolBody.appendChild(row);
+        assignBtn.addEventListener('click', async () => {
+          const chosenCode = selectEl.value;
+          if (!chosenCode) {
+            alert('Seleziona una scuola');
+            return;
+          }
+          try {
+            assignBtn.disabled = true;
+            await assignUserSchoolCode(u.id, chosenCode, token);
+            currentSchoolCell.textContent = chosenCode;
+            alert('School code assegnato con successo');
+          } catch (err) {
+            error('Errore assegnazione school_code', err);
+            alert(err.message || 'Errore assegnazione');
+          } finally {
+            assignBtn.disabled = false;
+          }
         });
-      }
+
+        usersSchoolBody.appendChild(row);
+      });
     }
 
   } catch (err) {
     error('Errore inizializzazione admin', err);
     alert(err.message || 'Errore caricamento dati admin');
   }
-} 
+}
+
+

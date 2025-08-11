@@ -85,4 +85,6 @@
     if (btnMonthly) btnMonthly.addEventListener('click', () => startCheckout('monthly'));
     if (btnAnnual) btnAnnual.addEventListener('click', () => startCheckout('annual'));
   });
-})(); 
+})();
+
+

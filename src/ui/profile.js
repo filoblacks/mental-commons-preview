@@ -1,5 +1,5 @@
-import { log } from '../core/logger.js';
-import { t, currentLocale, formatDate } from '../core/i18n.js';
+import { log } from '@core/logger.js';
+import { t, formatDate } from '@core/i18n.js';
 
 // ▸ VISIBILITÀ ELEMENTI ----------------------------------------------------------------------------------------------------------------
 function toggleDisplay(id, show = true, displayType = 'block') {
@@ -94,8 +94,6 @@ export async function initProfile() {
   if (headerEmailEl) headerEmailEl.textContent = realUser.email;
   emailEl.textContent = realUser.email;
   
-
-  
   // Mostra nome con badge premium se applicabile
   const userName = realUser.name || '-';
   if (realUser.has_subscription === true || realUser.has_subscription === "true") {
@@ -120,4 +118,6 @@ export async function initProfile() {
 
   // Wiring form modifica profilo
   wireProfileForm(realUser);
-} 
+}
+
+

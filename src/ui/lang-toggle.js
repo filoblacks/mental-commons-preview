@@ -1,4 +1,4 @@
-import { initI18n, setLocale, getLocale } from '../../core/i18n.js';
+import { initI18n, setLocale, getLocale } from '@core/i18n.js';
 
 function markActive(locale) {
   document.querySelectorAll('#lang-toggle .lang-btn').forEach((btn) => {

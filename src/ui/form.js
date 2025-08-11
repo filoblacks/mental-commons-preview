@@ -1,7 +1,7 @@
-import { postUCME } from '../core/api.js';
-import { getToken, getCurrentUser } from '../core/auth.js';
-import { isValidEmail, MAX_TEXT_LENGTH, MIN_TEXT_LENGTH } from '../utils/helpers.js';
-import { log } from '../core/logger.js';
+import { postUCME } from '@core/api.js';
+import { getToken, getCurrentUser } from '@core/auth.js';
+import { isValidEmail, MAX_TEXT_LENGTH, MIN_TEXT_LENGTH } from '../../utils/helpers.js';
+import { log } from '@core/logger.js';
 
 const formId = 'ucme-form';
 const counterId = 'char-count';
@@ -108,4 +108,6 @@ function collectData(form) {
   };
 
   return payload;
-} 
+}
+
+

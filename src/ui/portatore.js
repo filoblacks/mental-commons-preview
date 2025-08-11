@@ -1,8 +1,8 @@
 // ui/portatore.js – Gestione toggle ON/OFF Portatore nel profilo
 
-import { log } from '../core/logger.js';
-import { getToken } from '../core/auth.js';
-import { getPortatoreStatus, registerPortatore, revokePortatore } from '../core/api.js';
+import { log } from '@core/logger.js';
+import { getToken } from '@core/auth.js';
+import { getPortatoreStatus, registerPortatore, revokePortatore } from '@core/api.js';
 
 export async function initPortatoreSection() {
   const section = document.getElementById('portatore-section');
@@ -82,4 +82,6 @@ export async function initPortatoreSection() {
 
   // Espone utility globali (facoltativo)
   window.__togglePortatore = () => toggleBtn.click();
-} 
+}
+
+

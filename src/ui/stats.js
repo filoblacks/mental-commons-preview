@@ -1,6 +1,6 @@
-import { getUCMEs, getUsers } from '../core/api.js';
-import { getToken } from '../core/auth.js';
-import { log } from '../core/logger.js';
+import { getUCMEs, getUsers } from '@core/api.js';
+import { getToken } from '@core/auth.js';
+import { log } from '@core/logger.js';
 
 // Inizializza il caricamento delle statistiche sticky in tutte le pagine
 export async function initStats() {
@@ -90,4 +90,6 @@ function calculateActivePortatori(users = []) {
     const isActive = u.is_active !== false; // Considera attivo se non esplicitamente disattivo
     return isPortatore && isActive;
   }).length;
-} 
+}
+
+

@@ -1,7 +1,7 @@
-import { getToken, getCurrentUser } from '../core/auth.js';
-import { getChatMessages, sendChatMessage, getMyChats } from '../core/api.js';
-import { log } from '../core/logger.js';
-import { t, currentLocale, initI18n, formatDate, formatRelative } from '../core/i18n.js';
+import { getToken, getCurrentUser } from '@core/auth.js';
+import { getChatMessages, sendChatMessage, getMyChats } from '@core/api.js';
+import { log } from '@core/logger.js';
+import { t, initI18n, formatDate, formatRelative } from '@core/i18n.js';
 
 const messagesBox = document.getElementById('messages-box');
 const form = document.getElementById('message-form');
@@ -319,4 +319,6 @@ function initializeChat() {
   textarea.addEventListener('focus', () => {
     messagesBox.scrollTop = messagesBox.scrollHeight;
   });
-} 
+}
+
+

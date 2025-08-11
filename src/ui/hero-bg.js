@@ -82,24 +82,25 @@ export function initHeroBackground() {
   });
 
   function drawShape(s, time) {
-    ctx.save();
-    ctx.translate(s.x, s.y);
+    const ctx2 = ctx;
+    ctx2.save();
+    ctx2.translate(s.x, s.y);
 
     // Pulsating scale effect
     const scale = s.baseScale + Math.sin(time / 5000 + s.scalePhase) * 0.1;
-    ctx.scale(scale, scale);
+    ctx2.scale(scale, scale);
 
-    ctx.beginPath();
-    ctx.moveTo(s.path[0].x, s.path[0].y);
+    ctx2.beginPath();
+    ctx2.moveTo(s.path[0].x, s.path[0].y);
     for (let i = 1; i < s.path.length; i++) {
-      ctx.lineTo(s.path[i].x, s.path[i].y);
+      ctx2.lineTo(s.path[i].x, s.path[i].y);
     }
-    ctx.closePath();
+    ctx2.closePath();
 
-    ctx.fillStyle = COLOR;
-    ctx.globalAlpha = s.opacity;
-    ctx.fill();
-    ctx.restore();
+    ctx2.fillStyle = COLOR;
+    ctx2.globalAlpha = s.opacity;
+    ctx2.fill();
+    ctx2.restore();
   }
 
   function updatePosition(s) {
@@ -134,4 +135,6 @@ export function initHeroBackground() {
     };
     requestAnimationFrame(loop);
   }
-} 
+}
+
+
