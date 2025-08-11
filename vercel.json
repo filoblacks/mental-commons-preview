@@ -102,6 +102,10 @@
   ],
   "rewrites": [
     {
+      "source": "/locales/(it|en).json",
+      "destination": "/api/locales?lang=$1"
+    },
+    {
       "source": "/dashboard",
       "destination": "/dashboard.html"
     },
