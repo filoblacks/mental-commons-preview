@@ -86,8 +86,18 @@ export function t(path, vars = {}) {
   return String(value);
 }
 
+function getUrlLocaleOverride() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const q = (params.get('lang') || '').toLowerCase();
+    if (q && (q in DICTS)) return q;
+  } catch {}
+  return null;
+}
+
 export function initI18n(localeOverride = null) {
-  const next = localeOverride || getLocale();
+  const override = localeOverride || getUrlLocaleOverride();
+  const next = override || getLocale();
   setLocale(next);
   applyDom();
   markActiveLanguage(currentLocale());

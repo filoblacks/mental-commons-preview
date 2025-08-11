@@ -41,10 +41,24 @@
   }
 
   function getInitialLocale() {
+    var url = getUrlLocaleOverride();
+    if (url && SUPPORTED[url]) {
+      persistLocale(url);
+      return url;
+    }
     var persisted = getPersistedLocale();
     if (persisted && SUPPORTED[persisted]) return persisted;
     var detected = detectBrowserLocale();
     return SUPPORTED[detected] ? detected : 'it';
+  }
+
+  function getUrlLocaleOverride() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var q = String(params.get('lang') || '').toLowerCase();
+      if (q && SUPPORTED[q]) return q;
+    } catch (_) {}
+    return null;
   }
 
   function getByPath(obj, path) {
