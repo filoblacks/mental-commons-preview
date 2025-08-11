@@ -270,13 +270,9 @@
 
   <!-- Variabili pubbliche -->
   <script type="module" src="/api/env.js"></script>
-  <!-- i18n: inizializza PRIMA di qualsiasi rendering/manipolazione DOM -->
-  <script type="module">
-    import { initI18n } from '/core/i18n.js';
-    await initI18n();
-  </script>
 </head>
 <body class="premium-page">
+  <script defer src="/scripts/i18n.runtime.js"></script>
   <!-- Header -->
   <header class="top-navigation-container">
     <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="Mental Commons" /></a>
@@ -409,7 +405,6 @@
   <script defer src="/scripts/header-menu.js"></script>
   <script type="module" src="/src/ui/lang-toggle.js"></script>
   <script type="module" src="/scripts/inject-footer.js"></script>
-  <script type="module" src="/scripts/lang-toggle-footer.js"></script>
   <script>
     /* Gestione toggle mensile/annuale */
     document.addEventListener('DOMContentLoaded', () => {
