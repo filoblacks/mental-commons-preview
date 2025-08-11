@@ -101,8 +101,6 @@
     }
   ],
   "rewrites": [
-    { "source": "/locales/it.json", "destination": "/api/locales?lang=it" },
-    { "source": "/locales/en.json", "destination": "/api/locales?lang=en" },
     {
       "source": "/dashboard",
       "destination": "/dashboard.html"
