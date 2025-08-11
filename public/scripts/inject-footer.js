@@ -2,7 +2,8 @@
 (async function injectFooter() {
   try {
     const existing = document.querySelector('footer.site-footer');
-    const res = await fetch('/partials/footer.html', { cache: 'no-store' });
+    // Preferisci la versione public/ per ambienti buildati (Vercel)
+    const res = await fetch('/partials/footer.html', { cache: 'no-store' }).catch(()=>null) || await fetch('/public/partials/footer.html', { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const html = await res.text();
 
