@@ -5,6 +5,7 @@ const LOCALE_KEY = 'mc_locale';
 let CURRENT_LOCALE = 'it';
 let DICT = {};
 let IS_INITIALIZED = false;
+const FALLBACK_LOCALES_HOST = 'https://mental-commons.vercel.app';
 
 function persistLocale(locale) {
   try { localStorage.setItem(LOCALE_KEY, locale); } catch {}
@@ -76,15 +77,28 @@ function markActiveLanguage(locale) {
   if (enBtn) enBtn.classList.toggle('is-active', locale === 'en');
 }
 
+async function fetchLocaleDict(locale) {
+  const primaryUrl = `/locales/${locale}.json`;
+  try {
+    const res = await fetch(primaryUrl, { cache: 'no-store' });
+    if (res.ok) return await res.json();
+    if (window.__MC_DEBUG_I18N) console.warn('[i18n] primary locales 404/KO', { url: primaryUrl, status: res.status });
+  } catch (err) {
+    if (window.__MC_DEBUG_I18N) console.warn('[i18n] primary locales fetch error', err);
+  }
+  // Fallback su host Vercel noto
+  const fallbackUrl = `${FALLBACK_LOCALES_HOST}/locales/${locale}.json`;
+  const res2 = await fetch(fallbackUrl, { cache: 'no-store', mode: 'cors' }).catch(() => null);
+  if (res2 && res2.ok) return await res2.json();
+  throw new Error(`[i18n] Cannot load locale dict for ${locale}`);
+}
+
 export async function setLocale(locale, { apply = false } = {}) {
   if (!locale || locale === CURRENT_LOCALE || !SUPPORTED.has(locale)) return CURRENT_LOCALE;
   CURRENT_LOCALE = locale;
   persistLocale(locale);
 
-  const url = `/locales/${locale}.json`;
-  const res = await fetch(url, { cache: 'no-store' });
-  if (!res.ok) throw new Error(`[i18n] Cannot load ${url} (${res.status})`);
-  DICT = await res.json();
+  DICT = await fetchLocaleDict(locale);
 
   if (apply) {
     applyDom();

@@ -138,10 +138,14 @@
 
   function fetchDict(locale) {
     var ts = Date.now();
-    var url = '/locales/' + locale + '.json?v=' + ts;
-    return fetch(url, { cache: 'no-store' }).then(function (res) {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
+    var primary = '/locales/' + locale + '.json?v=' + ts;
+    return fetch(primary, { cache: 'no-store' }).then(function (res) {
+      if (res.ok) return res.json();
+      return fetch('https://mental-commons.vercel.app/locales/' + locale + '.json?v=' + ts, { cache: 'no-store', mode: 'cors' })
+        .then(function (res2) {
+          if (!res2.ok) throw new Error('HTTP ' + res.status + ' and fallback ' + res2.status);
+          return res2.json();
+        });
     });
   }
 
