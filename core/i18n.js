@@ -89,6 +89,10 @@ export async function setLocale(locale, { apply = false } = {}) {
   if (apply) {
     applyDom();
     markActiveLanguage(locale);
+    try {
+      if (window.__MC_DEBUG_I18N) console.info('[i18n] applied', { locale });
+      window.dispatchEvent(new CustomEvent('mc:i18n:changed', { detail: { locale } }));
+    } catch {}
   }
 
   // Esponi API globali per script non-modulari
@@ -111,6 +115,11 @@ export async function initI18n() {
 
   await setLocale(resolved, { apply: true });
   IS_INITIALIZED = true;
+
+   // Notifica readiness a tutti gli script interessati (footer/header toggles, ecc.)
+   try {
+     window.dispatchEvent(new CustomEvent('mc:i18n:ready', { detail: { locale: resolved } }));
+   } catch {}
 
   // Pulizia URL SOLO dopo applicazione e SOLO se c'era ?lang
   if (qs) {
