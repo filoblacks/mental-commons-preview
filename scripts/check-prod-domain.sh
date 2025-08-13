@@ -1,10 +1,26 @@
 #!/usr/bin/env bash
 
-# Guardrail: verifica che mentalcommons.xyz serva l'ultimo deployment Production
-# Usa Vercel CLI se disponibile + VERCEL_TOKEN per mostrare l'URL dell'ultimo prod
-# ma continua anche se la CLI non è configurata (best-effort).
+# Guardrail: verifica che mentalcommons.xyz serva l'ultimo deployment Production.
+# Opzionalmente, con l'argomento --fix (-f), tenta di correggere
+# automaticamente l'alias verso l'ultimo deployment production tramite
+# Vercel CLI. Richiede che la CLI sia installata e che le variabili
+# d'ambiente VERCEL_TOKEN, VERCEL_ORG_ID e VERCEL_PROJECT_ID siano
+# configurate.
 
 set -euo pipefail
+
+# Flag di auto-riparazione (disabled by default)
+AUTO_FIX=0
+
+# Parse argomenti
+for arg in "$@"; do
+  case $arg in
+    -f|--fix)
+      AUTO_FIX=1
+      shift
+      ;;
+  esac
+done
 
 DOMAIN="https://mentalcommons.xyz"
 SENTINEL_PATHS=(
@@ -38,7 +54,31 @@ done
 
 if [[ $FAILED -eq 1 ]]; then
   echo "❌  Production NON in linea: alcune risorse non risultano disponibili."
-  exit 1
+
+  if [[ $AUTO_FIX -eq 1 ]]; then
+    echo "🔧  Tentativo di auto-riparazione dell'alias tramite Vercel CLI…"
+
+    if command -v vercel >/dev/null 2>&1 && [[ -n "${VERCEL_TOKEN:-}" ]]; then
+      # Recupera l'ultimo deployment production URL
+      LATEST_PROD=$(vercel ls --prod --json | jq -r '.[0].url') || true
+
+      if [[ -z "$LATEST_PROD" ]]; then
+        echo "⚠️  Impossibile determinare l'ultimo deployment production. Abort."
+        exit 1
+      fi
+
+      echo "🛠  Aggancio mentalcommons.xyz → $LATEST_PROD …"
+      vercel alias set --yes "$LATEST_PROD" mentalcommons.xyz
+
+      echo "🔄  Rieseguo controllo sentinelle dopo alias…"
+      exec "$0" "$@"   # riesegue lo script senza perdere flag
+    else
+      echo "⚠️  Vercel CLI non disponibile o VERCEL_TOKEN mancante. Impossibile auto-fix."
+      exit 1
+    fi
+  else
+    exit 1
+  fi
 fi
 
 echo "✅  Production domain servito correttamente. Tutto ok!"

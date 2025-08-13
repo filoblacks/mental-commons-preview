@@ -1,28 +1,24 @@
-name: Guardrail – Production domain check
+name: Domain Guard
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 * * * *' # ogni ora
 
 jobs:
-  prod-domain-check:
+  guard:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Setup Node (per Vercel CLI)
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
+        uses: actions/checkout@v4
 
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: Run guardrail script
+      - name: Esegui guardrail (con auto-fix)
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          chmod +x scripts/check-prod-domain.sh
-          scripts/check-prod-domain.sh
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: bash scripts/check-prod-domain.sh --fix
