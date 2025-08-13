@@ -27,6 +27,8 @@ body {
     overflow-x: hidden;
     position: relative;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     /* Aggiungi scroll-padding per il layout mobile */
     scroll-padding-top: 90px;
 }
@@ -1755,7 +1757,7 @@ main,
 
 /* Footer */
 .site-footer{
-  background:#245B47; color:#fff; padding:40px 16px; margin-top:80px;
+  background:#245B47; color:#fff; padding:40px 16px; margin-top:auto; flex-shrink:0;
 }
 .site-footer a{ color:#fff; text-decoration:underline; }
 .footer-inner{

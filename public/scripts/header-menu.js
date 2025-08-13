@@ -93,7 +93,19 @@
    * -------------------------------------------- */
   function initMobileHeader() {
     const header = document.querySelector('.top-navigation-container');
-    if (!header) return;
+
+    // Se l'header non è ancora presente (es. inserito dinamicamente) osserva il DOM
+    if (!header) {
+      const pendingObserver = new MutationObserver((mutations, obs) => {
+        const lateHeader = document.querySelector('.top-navigation-container');
+        if (lateHeader) {
+          obs.disconnect();
+          initMobileHeader(); // riprova ora che l'header esiste
+        }
+      });
+      pendingObserver.observe(document.body, { childList: true, subtree: true });
+      return;
+    }
 
     // Evita doppie inizializzazioni
     if (header.querySelector('.hamburger')) return;
@@ -106,6 +118,7 @@
     burger.className = 'hamburger';
     burger.setAttribute('aria-label', 'Menu');
     burger.setAttribute('aria-expanded', 'false');
+    burger.setAttribute('aria-controls', 'mobileMenu');
     burger.innerHTML = '&#9776;'; // ☰
 
     /* === Menu mobile === */
@@ -113,6 +126,7 @@
     menu.id = 'mobileMenu';
     menu.className = 'mobile-menu';
     menu.setAttribute('aria-hidden', 'true');
+    menu.setAttribute('role', 'menu');
 
     MENU_LINKS.forEach(({ href, text, key }) => {
       const link = document.createElement('a');
@@ -175,6 +189,14 @@
       burger.setAttribute('aria-expanded', isOpen);
       burger.innerHTML = isOpen ? '&#10005;' : '&#9776;'; // ✕ o ☰
       menu.setAttribute('aria-hidden', !isOpen);
+
+      // Gestione focus: porta il focus sul primo link all'apertura e restituiscilo al burger alla chiusura
+      if (isOpen) {
+        const firstLink = menu.querySelector('a');
+        if (firstLink) firstLink.focus();
+      } else {
+        burger.focus();
+      }
     }
 
     function closeMenu() {
@@ -183,6 +205,7 @@
         burger.setAttribute('aria-expanded', 'false');
         burger.innerHTML = '&#9776;';
         menu.setAttribute('aria-hidden', 'true');
+        burger.focus();
       }
     }
   }

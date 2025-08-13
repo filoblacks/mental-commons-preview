@@ -1,0 +1,9 @@
+HTTP/2 307 
+cache-control: public, max-age=0, must-revalidate
+content-type: text/plain
+date: Wed, 13 Aug 2025 15:54:42 GMT
+location: https://www.mentalcommons.xyz/partials/footer.html
+server: Vercel
+strict-transport-security: max-age=63072000
+x-vercel-id: fra1::qdkzn-1755100482833-1ed5ba20d5af
+
