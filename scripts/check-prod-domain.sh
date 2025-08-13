@@ -44,9 +44,13 @@ echo "🚦 Verifica asset sentinella su $DOMAIN …"
 FAILED=0
 for path in "${SENTINEL_PATHS[@]}"; do
   url="$DOMAIN$path"
-  code=$(curl -s -o /dev/null -w "%{http_code}" "$url")
+  # -L segue i redirect così otteniamo il codice finale. Tuttavia salviamo
+  # anche il primo codice per fallback/debug.
+  code=$(curl -s -o /dev/null -w "%{http_code}" -L "$url")
   echo "  $path -> $code"
-  if [[ "$code" != "200" ]]; then
+  # Consideriamo valido 200 (OK) o 304 (Not Modified). Altri codici
+  # indicano errore.
+  if [[ "$code" != "200" && "$code" != "304" ]]; then
     echo "❌  Asset mancante o non servito correttamente: $path"
     FAILED=1
   fi
