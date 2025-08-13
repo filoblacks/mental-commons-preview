@@ -8,12 +8,12 @@
    * Configurazione link di navigazione primaria
    * -------------------------------------------- */
   const MENU_LINKS = [
-    { href: 'index.html', text: 'Home' },
-    { href: 'come-funziona.html', text: 'Come funziona' },
-    { href: 'mc-per-le-scuole.html', text: 'MC per le scuole' },
-    { href: 'premium.html', text: 'Premium' },
-    { href: 'dashboard.html', text: 'Dashboard' },
-    { href: 'profile.html', text: 'Profilo' }
+    { href: 'index.html', text: 'Home', key: 'nav.home' },
+    { href: 'come-funziona.html', text: 'Come funziona', key: 'nav.how_it_works' },
+    { href: 'mc-per-le-scuole.html', text: 'MC per le scuole', key: 'nav.schools' },
+    { href: 'premium.html', text: 'Premium', key: 'nav.premium' },
+    { href: 'dashboard.html', text: 'Dashboard', key: 'nav.dashboard' },
+    { href: 'profile.html', text: 'Profilo', key: 'profile.header.title' }
   ];
 
   /* --------------------------------------------
@@ -23,8 +23,9 @@
     const style = document.createElement('style');
     style.id = 'mc-mobile-header-style';
     style.textContent = `
-      /* Nasconde il menu mobile di default su viewport desktop */
+      /* Desktop: hamburger e mobile-menu nascosti */
       .mobile-menu { display:none; }
+      .hamburger { display: none; }
 
       /* === Mobile Header & Menu (side-nav) === */
       @media (max-width: 768px) {
@@ -48,17 +49,9 @@
         /* Logo */
         .top-navigation-container .nav-logo img { height: 28px; width: auto; }
 
-        /* Hamburger */
-        .hamburger {
-          margin-left: auto;
-          background: none;
-          border: none;
-          font-size: 24px;
-          color: #ffffff;
-          padding: 6px;
-          cursor: pointer;
-          z-index: 1001;
-        }
+        /* Right cluster (burger only) */
+        .mobile-header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+        .hamburger { display: inline-flex; background: none; border: none; font-size: 24px; color: #ffffff; padding: 6px; cursor: pointer; z-index: 1001; }
         .hamburger:hover { opacity: 0.85; }
 
         /* Mobile menu – side drawer */
@@ -100,16 +93,32 @@
    * -------------------------------------------- */
   function initMobileHeader() {
     const header = document.querySelector('.top-navigation-container');
-    if (!header) return;
+
+    // Se l'header non è ancora presente (es. inserito dinamicamente) osserva il DOM
+    if (!header) {
+      const pendingObserver = new MutationObserver((mutations, obs) => {
+        const lateHeader = document.querySelector('.top-navigation-container');
+        if (lateHeader) {
+          obs.disconnect();
+          initMobileHeader(); // riprova ora che l'header esiste
+        }
+      });
+      pendingObserver.observe(document.body, { childList: true, subtree: true });
+      return;
+    }
 
     // Evita doppie inizializzazioni
     if (header.querySelector('.hamburger')) return;
 
-    /* === Bottone hamburger === */
+    /* === Cluster destro (burger) === */
+    const rightCluster = document.createElement('div');
+    rightCluster.className = 'mobile-header-right';
+
     const burger = document.createElement('button');
     burger.className = 'hamburger';
     burger.setAttribute('aria-label', 'Menu');
     burger.setAttribute('aria-expanded', 'false');
+    burger.setAttribute('aria-controls', 'mobileMenu');
     burger.innerHTML = '&#9776;'; // ☰
 
     /* === Menu mobile === */
@@ -117,17 +126,43 @@
     menu.id = 'mobileMenu';
     menu.className = 'mobile-menu';
     menu.setAttribute('aria-hidden', 'true');
+    menu.setAttribute('role', 'menu');
 
-    MENU_LINKS.forEach(({ href, text }) => {
+    MENU_LINKS.forEach(({ href, text, key }) => {
       const link = document.createElement('a');
       link.href = href;
       link.textContent = text;
+      if (key) link.setAttribute('data-i18n', key);
       link.addEventListener('click', closeMenu);
       menu.appendChild(link);
     });
 
-    // Inserimento nel DOM
-    header.appendChild(burger);
+    // Se i18n è già inizializzato, applica traduzioni anche agli elementi appena creati
+    if (window.__mc_applyI18n) {
+      try { window.__mc_applyI18n(); } catch (_) {}
+    }
+
+    // Inserimento nel DOM: su mobile mettiamo burger nel cluster destro
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+    const actionsSingular = header.querySelector('.nav-action');
+    const actions = header.querySelector('.nav-actions');
+    const ritualActions = header.querySelector('.ritual-actions');
+    if (isMobile) {
+      rightCluster.appendChild(burger);
+      header.appendChild(rightCluster);
+    } else if (actionsSingular) {
+      rightCluster.appendChild(burger);
+      header.appendChild(rightCluster);
+    } else if (actions) {
+      rightCluster.appendChild(burger);
+      header.appendChild(rightCluster);
+    } else if (ritualActions) {
+      rightCluster.appendChild(burger);
+      header.appendChild(rightCluster);
+    } else {
+      rightCluster.appendChild(burger);
+      header.appendChild(rightCluster);
+    }
     header.parentNode.insertBefore(menu, header.nextSibling);
 
     /* === Event Listeners === */
@@ -154,6 +189,14 @@
       burger.setAttribute('aria-expanded', isOpen);
       burger.innerHTML = isOpen ? '&#10005;' : '&#9776;'; // ✕ o ☰
       menu.setAttribute('aria-hidden', !isOpen);
+
+      // Gestione focus: porta il focus sul primo link all'apertura e restituiscilo al burger alla chiusura
+      if (isOpen) {
+        const firstLink = menu.querySelector('a');
+        if (firstLink) firstLink.focus();
+      } else {
+        burger.focus();
+      }
     }
 
     function closeMenu() {
@@ -162,6 +205,7 @@
         burger.setAttribute('aria-expanded', 'false');
         burger.innerHTML = '&#9776;';
         menu.setAttribute('aria-hidden', 'true');
+        burger.focus();
       }
     }
   }

@@ -1,0 +1,24 @@
+name: Domain Guard
+
+on:
+  push:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 * * * *' # ogni ora
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Esegui guardrail (con auto-fix)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: bash scripts/check-prod-domain.sh --fix

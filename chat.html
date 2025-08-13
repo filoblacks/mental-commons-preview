@@ -9,63 +9,51 @@
   <script type="module" src="/api/env.js"></script>
 </head>
 <body class="chat-page">
+  <script defer src="/scripts/i18n.runtime.js"></script>
+  <script defer src="/scripts/lang-toggle-footer.js"></script>
   <header class="top-navigation-container">
     <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="Mental Commons" /></a>
     <nav class="nav-main">
-      <a href="index.html">Home</a>
-      <a href="come-funziona.html">Come funziona</a>
-      <a href="mc-per-le-scuole.html">MC per le scuole</a>
-      <a href="premium.html">Premium</a>
+      <a href="index.html" data-i18n="nav.home"></a>
+      <a href="come-funziona.html" data-i18n="nav.how_it_works"></a>
+      <a href="mc-per-le-scuole.html" data-i18n="nav.schools"></a>
+      <a href="premium.html" data-i18n="nav.premium"></a>
     </nav>
     <nav class="ritual-actions">
-      <a href="dashboard.html">Dashboard</a>
-      <a href="profile.html">Profilo</a>
+      <a href="dashboard.html" data-i18n="nav.dashboard"></a>
+      <a href="profile.html" data-i18n="profile.header.title"></a>
     </nav>
+    
   </header>
 
   <main class="chat-container" style="max-width: 720px; margin: 0 auto; padding: 1rem;">
-    <h1 class="chat-title">Dialogo Anonimo</h1>
+    <h1 class="chat-title" data-i18n="chat.title"></h1>
     <p id="chat-status" class="chat-status" aria-live="polite"></p>
     <div id="messages-box" class="messages-box" aria-live="polite"></div>
     <form id="message-form" class="message-form">
-      <textarea id="message-input" placeholder="Scrivi un messaggio… (Invia con Ctrl/Cmd+Invio)" maxlength="4000" required></textarea>
-      <button type="submit">Invia</button>
+      <textarea id="message-input" data-i18n-attr="placeholder" data-i18n="chat.input.placeholder" maxlength="4000" required></textarea>
+      <button type="submit" data-i18n="chat.input.send"></button>
     </form>
   </main>
 
   <!-- Footer -->
-  <footer>
-    <div class="container">
-      <p>© 2025 — Mental Commons<br/>
-      Il contrario di un social. Il prototipo di una mente comune.</p>
-      
-                  <div class="footer-links">
-                <a href="/privacy-policy">Privacy Policy</a>
-                <a href="/cookie-policy">Cookie Policy</a>
-                <a href="/termini-di-servizio">Termini di Servizio</a>
-                <a href="/disclaimer-legale">Disclaimer Legale</a>
-            </div>
-      
-      <div class="footer-social">
-        <a href="https://www.instagram.com/mental_commons/" target="_blank" rel="noopener noreferrer" class="instagram-link" title="Seguici su Instagram" aria-label="Profilo Instagram di Mental Commons">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-          </svg>
-          <span>@mental_commons</span>
-        </a>
-        <a href="https://www.tiktok.com/@mental_commons" target="_blank" rel="noopener noreferrer" class="tiktok-link" title="Seguici su TikTok" aria-label="Profilo TikTok di Mental Commons">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path>
-          </svg>
-          <span>@mental_commons</span>
-        </a>
-      </div>
-    </div>
-  </footer>
+  
 
-  <script type="module" src="/ui/chat.js"></script>
-<script defer src="/scripts/header-menu.js"></script>
+  <script type="module" src="/src/ui/chat.js"></script>
+  <!-- i18n runtime per pagine statiche -->
+  <script defer src="/scripts/header-menu.js"></script>
+  <script type="module" src="/src/ui/lang-toggle.js"></script>
+  <script type="module" src="/scripts/inject-footer.js"></script>
+  <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      .site-footer {
+        margin-top: auto;
+        flex-shrink: 0;
+      }
+    </style>
 </body>
 </html> 

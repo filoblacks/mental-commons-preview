@@ -1,0 +1,9 @@
+HTTP/2 307 
+cache-control: public, max-age=0, must-revalidate
+content-type: text/plain
+date: Wed, 13 Aug 2025 15:54:43 GMT
+location: https://www.mentalcommons.xyz/scripts/i18n.runtime.js
+server: Vercel
+strict-transport-security: max-age=63072000
+x-vercel-id: fra1::mdb6r-1755100483218-2d780c13ec21
+

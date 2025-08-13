@@ -7,21 +7,34 @@
     <link rel="icon" href="/favicon.svg" />
     <link rel="stylesheet" href="/style.css?v=20250803" />
     <script type="module" src="/api/env.js"></script>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      .site-footer {
+        margin-top: auto;
+        flex-shrink: 0;
+      }
+    </style>
 </head>
 <body class="come-funziona-page">
+    <script defer src="/scripts/i18n.runtime.js"></script>
+    <script defer src="/scripts/lang-toggle-footer.js"></script>
     <!-- Header riutilizzato -->
     <header class="top-navigation-container">
         <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="Mental Commons" /></a>
         <nav class="nav-main">
-            <a href="index.html">Home</a>
-            <a href="come-funziona.html">Come funziona</a>
-            <a href="mc-per-le-scuole.html">MC per le scuole</a>
-            <a href="premium.html">Premium</a>
+            <a href="index.html" data-i18n="nav.home"></a>
+            <a href="come-funziona.html" data-i18n="nav.how_it_works"></a>
+            <a href="mc-per-le-scuole.html" data-i18n="nav.schools"></a>
+            <a href="premium.html" data-i18n="nav.premium"></a>
         </nav>
         <div class="nav-actions">
-            <a href="dashboard.html" id="nav-dashboard" style="display:none;">Dashboard</a>
-            <a href="admin.html" id="nav-admin" style="display:none;">Admin</a>
-            <a href="login.html" id="nav-login">Accedi</a>
+            <a href="dashboard.html" id="nav-dashboard" style="display:none;" data-i18n="nav.dashboard"></a>
+            <a href="admin.html" id="nav-admin" style="display:none;" data-i18n="nav.admin"></a>
+            <a href="login.html" id="nav-login" data-i18n="nav.login"></a>
             <a href="profile.html" id="nav-profile" class="nav-profile-btn" style="display:none;" title="Gestione Profilo" aria-label="Gestione Profilo">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -29,51 +42,52 @@
                 </svg>
             </a>
         </div>
+        
     </header>
 
     <main>
         <!-- Hero Section - Introduzione generale -->
         <section class="hero-section">
             <div class="hero-container">
-                <h1 class="hero-title">Come funziona Mental Commons</h1>
-                <p class="hero-subtitle">Un processo lento, anonimo e umano per condividere e ricevere ascolto.</p>
+                <h1 class="hero-title" data-i18n="how_it_works.hero.title"></h1>
+                <p class="hero-subtitle" data-i18n="how_it_works.hero.subtitle"></p>
             </div>
         </section>
 
         <!-- Sezione "Il flusso del Depositor" -->
         <section class="depositor-flow-section">
             <div class="flow-container">
-                <h2 class="flow-title">Il flusso del Depositore</h2>
+                <h2 class="flow-title" data-i18n="how_it_works.flow.title"></h2>
                 <div class="flow-steps">
                     <div class="flow-step">
                         <div class="step-number">①</div>
                         <div class="step-content">
-                            <h3 class="step-title">Scrivi un pensiero</h3>
-                            <p class="step-description">Racconti ciò che senti. Può essere confuso, breve, viscerale. Non serve essere chiari: serve esserci.</p>
+                            <h3 class="step-title" data-i18n="how_it_works.flow.step1.title"></h3>
+                            <p class="step-description" data-i18n="how_it_works.flow.step1.desc"></p>
                         </div>
                     </div>
 
                     <div class="flow-step">
                         <div class="step-number">②</div>
                         <div class="step-content">
-                            <h3 class="step-title">Lascia la tua mail</h3>
-                            <p class="step-description">Serve solo per avvisarti quando ricevi risposta. Non verrà mai usata per altro. Scrivi. Poi chiudi. Torna quando vuoi.</p>
+                            <h3 class="step-title" data-i18n="how_it_works.flow.step2.title"></h3>
+                            <p class="step-description" data-i18n="how_it_works.flow.step2.desc"></p>
                         </div>
                     </div>
 
                     <div class="flow-step">
                         <div class="step-number">③</div>
                         <div class="step-content">
-                            <h3 class="step-title">Ricevi una risposta anonima</h3>
-                            <p class="step-description">Un Portatore leggerà ciò che hai scritto e ti risponderà con cura. La risposta arriverà via mail. Non ci sono orari. Non ci sono scadenze.</p>
+                            <h3 class="step-title" data-i18n="how_it_works.flow.step3.title"></h3>
+                            <p class="step-description" data-i18n="how_it_works.flow.step3.desc"></p>
                         </div>
                     </div>
 
                     <div class="flow-step">
                         <div class="step-number">④</div>
                         <div class="step-content">
-                            <h3 class="step-title">Continua il dialogo se vuoi</h3>
-                            <p class="step-description">Se sei un utente Premium puoi continuare a parlare con il Portatore. In forma scritta, uno a uno, anonimamente.</p>
+                            <h3 class="step-title" data-i18n="how_it_works.flow.step4.title"></h3>
+                            <p class="step-description" data-i18n="how_it_works.flow.step4.desc"></p>
                         </div>
                     </div>
                 </div>
@@ -82,22 +96,21 @@
 
         <!-- Sezione "Chi è un Portatore" -->
         <section class="info-section portatore-info-section">
-            <h2>Chi è un Portatore</h2>
+            <h2 data-i18n="how_it_works.portatore.title"></h2>
             <p>
+                <!-- testo descrittivo lasciato in IT per ora; potrà essere mappato in sprint successivo se aggiunto al dizionario -->
                 Un Portatore è qualcuno che sceglie di esserci per te.<br>
                 Non è un terapeuta, non è un esperto: è una persona reale, formata per leggere con lentezza, rispondere con umanità e non cercare di aggiustarti.<br>
                 I Portatori non analizzano, non danno soluzioni. Offrono risonanza, ascolto, presenza. Quando scrivono, scrivono da dentro.
             </p>
             <div class="quote-box">
-                <p>
-                    "Leggere le parole di qualcuno che soffre mi ricorda che siamo tutti fragili. Rispondere non significa risolvere, ma semplicemente esserci."
-                </p>
+                <p data-i18n="how_it_works.portatore.quote"></p>
             </div>
         </section>
 
         <!-- Sezione "Diventare Portatore" -->
         <section class="info-section become-portatore-section">
-            <h2>Diventare Portatore</h2>
+            <h2 data-i18n="how_it_works.become.title"></h2>
             <p>
                 Chiunque può diventare Portatore. Serve solo il desiderio di essere presenti.<br>
                 Stiamo costruendo una comunità di ascolto distribuita: formiamo persone che sentono di voler accogliere parole difficili, in modo etico e anonimo.<br>
@@ -107,37 +120,10 @@
     </main>
 
     <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p>© 2025 — Mental Commons<br/>
-            Il contrario di un social. Il prototipo di una mente comune.</p>
-            
-            <div class="footer-links">
-                <a href="/privacy-policy">Privacy Policy</a>
-                <a href="/cookie-policy">Cookie Policy</a>
-                <a href="/termini-di-servizio">Termini di Servizio</a>
-                <a href="/disclaimer-legale">Disclaimer Legale</a>
-            </div>
-            
-            <div class="footer-social">
-                <a href="https://www.instagram.com/mental_commons/" target="_blank" rel="noopener noreferrer" class="instagram-link" title="Seguici su Instagram" aria-label="Profilo Instagram di Mental Commons">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                    </svg>
-                    <span>@mental_commons</span>
-                </a>
-                <a href="https://www.tiktok.com/@mental_commons" target="_blank" rel="noopener noreferrer" class="tiktok-link" title="Seguici su TikTok" aria-label="Profilo TikTok di Mental Commons">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path>
-                    </svg>
-                    <span>@mental_commons</span>
-                </a>
-            </div>
-        </div>
-    </footer>
+    
 
 <script defer src="/scripts/header-menu.js"></script>
+<script type="module" src="/src/ui/lang-toggle.js"></script>
+<script type="module" src="/scripts/inject-footer.js"></script>
 </body>
 </html>

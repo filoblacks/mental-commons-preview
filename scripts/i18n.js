@@ -1,0 +1,219 @@
+// scripts/i18n.js – Runtime i18n leggero per pagine statiche (no module)
+// Requisiti: /locales/it.json, /locales/en.json, data-i18n="key.path" e opzionale data-i18n-attr="title|aria-label"
+// API globali esposte: window.setLanguage(lang), window.__mc_setLocale(lang), window.__mc_applyI18n()
+
+(function () {
+  'use strict';
+
+  var SUPPORTED = { it: true, en: true };
+  var LOCALE_KEY_PRIMARY = 'lang';
+  var LOCALE_KEY_COMPAT = 'mc_locale';
+  var currentLocale = null;
+  var dict = {};
+  var isReady = false;
+  var isApplying = false;
+
+  function getPersistedLocale() {
+    try {
+      var l = localStorage.getItem(LOCALE_KEY_PRIMARY) || localStorage.getItem(LOCALE_KEY_COMPAT);
+      if (l && SUPPORTED[l]) return l;
+    } catch (_) {}
+    return null;
+  }
+
+  function persistLocale(locale) {
+    try {
+      localStorage.setItem(LOCALE_KEY_PRIMARY, locale);
+      localStorage.setItem(LOCALE_KEY_COMPAT, locale); // sync con core/i18n.js
+    } catch (_) {}
+    try { document.documentElement.lang = locale; } catch (_) {}
+  }
+
+  function detectBrowserLocale() {
+    try {
+      var list = Array.isArray(navigator.languages) && navigator.languages.length
+        ? navigator.languages
+        : [navigator.language || 'it'];
+      var lowered = list.map(function (l) { return String(l || '').toLowerCase(); });
+      if (lowered.some(function (l) { return l.startsWith('en'); })) return 'en';
+      if (lowered.some(function (l) { return l.startsWith('it'); })) return 'it';
+    } catch (_) {}
+    return 'it';
+  }
+
+  function getInitialLocale() {
+    var url = getUrlLocaleOverride();
+    if (url && SUPPORTED[url]) {
+      try { console.info('[i18n/boot]', { url: location.href, qs: location.search, langLS: localStorage.getItem(LOCALE_KEY_PRIMARY)||localStorage.getItem(LOCALE_KEY_COMPAT), cookie: document.cookie }); } catch (_){ }
+      try { console.info('[i18n/query]', url); } catch (_){ }
+      persistLocale(url);
+      return url;
+    }
+    var persisted = getPersistedLocale();
+    if (persisted && SUPPORTED[persisted]) return persisted;
+    var detected = detectBrowserLocale();
+    try { console.info('[i18n/core/init]', { override: null, persisted: persisted, detected: detected, resolved: SUPPORTED[detected]?detected:'it' }); } catch (_){ }
+    return SUPPORTED[detected] ? detected : 'it';
+  }
+
+  function getUrlLocaleOverride() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var q = String(params.get('lang') || '').toLowerCase();
+      if (q && SUPPORTED[q]) return q;
+    } catch (_) {}
+    return null;
+  }
+
+  function getByPath(obj, path) {
+    if (!obj || !path) return undefined;
+    return path.split('.').reduce(function (acc, k) {
+      return acc && (acc[k] !== undefined) ? acc[k] : undefined;
+    }, obj);
+  }
+
+  function interpolate(str, vars) {
+    if (typeof str !== 'string') return str;
+    vars = vars || {};
+    return str.replace(/\{(\w+)\}/g, function (_, k) {
+      return (k in vars) ? String(vars[k]) : '{' + k + '}';
+    });
+  }
+
+  function t(key, vars) {
+    if (!isReady || !dict || !Object.keys(dict).length) {
+      // Evita spam di warning prima che il dizionario sia pronto
+      return key;
+    }
+    var raw = getByPath(dict, key);
+    if (raw === undefined) {
+      if (!window.isProduction) console.warn('[i18n] Missing key:', key);
+      return key;
+    }
+    if (typeof raw === 'string') return interpolate(raw, vars);
+    if (raw && typeof raw === 'object') {
+      var preferred = raw.label || raw.title || raw.text || raw.placeholder || raw.value;
+      return interpolate(String(preferred != null ? preferred : key), vars);
+    }
+    return String(raw);
+  }
+
+  function applyDom(root) {
+    if (!isReady || !dict || !Object.keys(dict).length) return;
+    if (isApplying) return; // previeni re-entrancy in mutation observer
+    isApplying = true;
+    try {
+      var scope = root && root.querySelectorAll ? root : document;
+      var nodes = scope.querySelectorAll('[data-i18n]');
+      nodes.forEach(function (el) {
+        var key = el.getAttribute('data-i18n');
+        if (!key) return;
+        var val = t(key);
+        var attrSpec = el.getAttribute('data-i18n-attr');
+        if (attrSpec) {
+          attrSpec.split('|').map(function (s) { return s.trim(); }).filter(Boolean).forEach(function (attr) {
+            el.setAttribute(attr, val);
+          });
+        } else {
+          if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) {
+            // Per input/select senza attr specifico, usa placeholder come default
+            el.setAttribute('placeholder', val);
+          } else {
+            el.textContent = val;
+          }
+        }
+      });
+    } finally {
+      isApplying = false;
+    }
+  }
+
+  function markActiveLanguage(locale) {
+    // Header toggle rimosso: lo stato attivo è gestito dal footer via src/ui/lang-toggle.js
+  }
+
+  function wireHeaderButtons() {
+    // Nessun listener per header; toggle lingua è nel footer
+  }
+
+  function fetchDict(locale) {
+    var ts = Date.now();
+    var primary = '/locales/' + locale + '.json?v=' + ts;
+    return fetch(primary, { cache: 'no-store' }).then(function (res) {
+      if (res.ok) return res.json();
+      return fetch('https://mental-commons.vercel.app/locales/' + locale + '.json?v=' + ts, { cache: 'no-store', mode: 'cors' })
+        .then(function (res2) {
+          if (!res2.ok) throw new Error('HTTP ' + res.status + ' and fallback ' + res2.status);
+          return res2.json();
+        });
+    });
+  }
+
+  function setLanguage(locale) {
+    if (!SUPPORTED[locale]) return;
+    try { console.info('[i18n/core/setLocale]', { to: locale }); } catch (_){ }
+    if (currentLocale === locale && dict && Object.keys(dict).length) {
+      isReady = true;
+      persistLocale(locale);
+      applyDom();
+      markActiveLanguage(locale);
+      try {
+        window.__mc_applyI18n = applyDom;
+        window.__mc_setLocale = setLanguage; // compat con header-menu.js
+      } catch (_) {}
+      return;
+    }
+    fetchDict(locale).then(function (json) {
+      dict = json || {};
+      currentLocale = locale;
+      isReady = true;
+      persistLocale(locale);
+      applyDom();
+      markActiveLanguage(locale);
+      try {
+        window.__mc_applyI18n = applyDom;
+        window.__mc_setLocale = setLanguage; // compat con header-menu.js
+      } catch (_) {}
+    }).catch(function (err) {
+      console.error('[i18n] Impossibile caricare le traduzioni', err);
+    });
+  }
+
+  function init() {
+    // MutationObserver per tradurre nodi aggiunti dinamicamente (es. menu mobile)
+    try {
+      var observer = new MutationObserver(function (mutations) {
+        for (var i = 0; i < mutations.length; i++) {
+          var m = mutations[i];
+          if (m.type === 'childList') {
+            m.addedNodes.forEach(function (n) {
+              if (n && n.nodeType === 1) applyDom(n);
+            });
+          } else if (m.type === 'attributes' && m.target && m.target.hasAttribute && m.target.hasAttribute('data-i18n')) {
+            applyDom(m.target);
+          }
+        }
+      });
+      observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-i18n'] });
+    } catch (_) {}
+
+    wireHeaderButtons();
+    var initial = getInitialLocale();
+    try { console.info('[i18n/core/getLocale]', { locale: initial }); } catch(_){ }
+    setLanguage(initial);
+
+    // Espone API globali
+    try {
+      window.setLanguage = setLanguage;
+      window.i18n = { t: t };
+    } catch (_) {}
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
+

@@ -1,15 +1,15 @@
-import { initDashboard } from '../ui/dashboard.js';
-import { initProfile } from '../ui/profile.js';
-import { initForm } from '../ui/form.js';
-import { initLogin } from '../ui/login.js';
-import { initStats } from '../ui/stats.js';
-import { initPortatoreSection } from '../ui/portatore.js';
-import { initAdmin } from '../ui/admin.js';
-import { initPortatoreUcmeSection } from '../ui/ucme-portatore.js';
-import { log } from '../core/logger.js';
-import { initHeroBackground } from '../ui/hero-bg.js';
-import { initDashboardDocente } from '../ui/dashboard-docente.js';
-import { getCurrentUser, refreshUserInfo } from '../core/auth.js';
+import { initDashboard } from '@ui/dashboard.js';
+import { initProfile } from '@ui/profile.js';
+import { initForm } from '@ui/form.js';
+import { initLogin } from '@ui/login.js';
+import { initStats } from '@ui/stats.js';
+import { initPortatoreSection } from '@ui/portatore.js';
+import { initAdmin } from '@ui/admin.js';
+import { initPortatoreUcmeSection } from '@ui/ucme-portatore.js';
+import { log } from '@core/logger.js';
+import { initHeroBackground } from '@ui/hero-bg.js';
+import { initDashboardDocente } from '@ui/dashboard-docente.js';
+import { getCurrentUser, refreshUserInfo } from '@core/auth.js';
 
 function showDocenteNav() {
   const user = getCurrentUser();

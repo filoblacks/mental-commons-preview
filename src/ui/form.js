@@ -1,0 +1,113 @@
+import { postUCME } from '@core/api.js';
+import { getToken, getCurrentUser } from '@core/auth.js';
+import { isValidEmail, MAX_TEXT_LENGTH, MIN_TEXT_LENGTH } from '../../utils/helpers.js';
+import { log } from '@core/logger.js';
+
+const formId = 'ucme-form';
+const counterId = 'char-count';
+
+export function initForm() {
+  const form = document.getElementById(formId);
+  if (!form) return;
+  const textarea = document.getElementById('ucme-text');
+  const counter = document.getElementById(counterId);
+  const submitBtn = document.getElementById('submit-button');
+  const emailInput = document.getElementById('email');
+
+  textarea?.addEventListener('input', () => {
+    const len = textarea.value.length;
+    counter.textContent = len;
+    counter.style.color = len < MIN_TEXT_LENGTH || len > MAX_TEXT_LENGTH ? '#ff6b6b' : '#4caf50';
+    validateForm();
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = collectData(form);
+    if (!payload) return;
+    try {
+      await postUCME(payload, getToken());
+      form.reset();
+      counter.textContent = '0';
+      // UI in-page: nasconde il form e mostra il messaggio di successo
+      const formSection = document.getElementById('ucme-form');
+      const success = document.getElementById('success-message');
+      if (formSection && success) {
+        formSection.style.display = 'none';
+        success.style.display = 'block';
+        // Focus per accessibilità
+        const h3 = success.querySelector('h3');
+        if (h3) h3.setAttribute('tabindex', '-1');
+        if (h3) h3.focus?.();
+      }
+    } catch (err) {
+      log('Errore invio UCMe', err.message);
+      alert('Errore invio pensiero');
+    }
+  });
+
+  function validateForm() {
+    const contentLen = textarea.value.trim().length;
+    const email = form.querySelector('#email').value.trim().toLowerCase();
+    const acceptance = form.querySelector('#acceptance').checked;
+
+    const isContentValid = contentLen >= MIN_TEXT_LENGTH && contentLen <= MAX_TEXT_LENGTH;
+    const isEmailValid = isValidEmail(email);
+    const isFormValid = isContentValid && isEmailValid && acceptance;
+
+    submitBtn.disabled = !isFormValid;
+  }
+
+  // Espone la funzione globalmente per gli handler inline definiti in HTML
+  window.validateForm = validateForm;
+
+  // Inizializza stato bottone alla prima apertura pagina
+  validateForm();
+
+  /* Auto-precompilazione email se utente loggato */
+  try {
+    const user = getCurrentUser();
+    if (user && user.email && emailInput) {
+      emailInput.value = user.email;
+      // Forziamo una validazione iniziale in caso di prefill
+      if (typeof validateForm === 'function') {
+        validateForm();
+      }
+    }
+  } catch (err) {
+    // Non facciamo nulla: comportamento fallback se non autenticato
+    log('Prefill email non riuscito (probabile utente guest)', err?.message || err);
+  }
+}
+
+function collectData(form) {
+  const content = form.querySelector('#ucme-text').value.trim();
+  const email = form.querySelector('#email').value.trim().toLowerCase();
+  const tone = form.querySelector('#tone').value;
+  const acceptance = form.querySelector('#acceptance').checked;
+
+  if (content.length < MIN_TEXT_LENGTH || content.length > MAX_TEXT_LENGTH) {
+    alert('Il pensiero deve essere fra 20 e 600 caratteri.');
+    return null;
+  }
+  if (!isValidEmail(email)) {
+    alert('Email non valida');
+    return null;
+  }
+  if (!acceptance) {
+    alert('Devi accettare i termini.');
+    return null;
+  }
+
+  // Costruiamo il payload rispettando lo schema di validazione backend
+  const payload = {
+    content,
+    email,
+    tone, // verrà ignorato dal backend ma utile per eventuali log
+    anonymous: !getToken(),
+  };
+
+  return payload;
+}
+
+

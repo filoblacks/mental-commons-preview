@@ -110,16 +110,29 @@
             }
         })();
     </script>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      .site-footer {
+        margin-top: auto;
+        flex-shrink: 0;
+      }
+    </style>
 </head>
 <body>
+    <script defer src="/scripts/i18n.runtime.js"></script>
+    <script defer src="/scripts/lang-toggle-footer.js"></script>
     <!-- Top Navigation Container -->
     <div class="top-navigation-container">
         <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="Mental Commons" /></a>
         <nav class="nav-main">
-            <a href="index.html">Home</a>
-            <a href="come-funziona.html">Come funziona</a>
-            <a href="mc-per-le-scuole.html">MC per le scuole</a>
-            <a href="premium.html">Premium</a>
+            <a href="index.html" data-i18n="nav.home"></a>
+            <a href="come-funziona.html" data-i18n="nav.how_it_works"></a>
+            <a href="mc-per-le-scuole.html" data-i18n="nav.schools"></a>
+            <a href="premium.html" data-i18n="nav.premium"></a>
         </nav>
         <!-- Ritual Stats - Sticky Header -->
         <header class="ritual-stats">
@@ -129,18 +142,19 @@
         </header>
         
         <!-- Navigazione semplificata -->
-        <div class="ritual-actions">
-            <a href="index.html" style="display: none;">Home</a>
-            <a href="dashboard.html" id="nav-dashboard" style="display: none;">Dashboard</a>
-            <a href="dashboard-docente.html" id="nav-dashboard-docente" style="display: none;">Dashboard Docente</a>
-            <a href="login.html" id="nav-login">Accedi</a>
-            <a href="profile.html" id="nav-profile" class="nav-profile-btn" style="display: none;" title="Gestione Profilo" aria-label="Gestione Profilo">
+            <div class="ritual-actions">
+            <a href="index.html" style="display: none;" data-i18n="nav.home"></a>
+            <a href="dashboard.html" id="nav-dashboard" style="display: none;" data-i18n="nav.dashboard"></a>
+              <a href="dashboard-docente.html" id="nav-dashboard-docente" style="display: none;" data-i18n="nav.dashboard"></a>
+              <a href="login.html" id="nav-login" data-i18n="nav.login"></a>
+              <a href="profile.html" id="nav-profile" class="nav-profile-btn" style="display: none;" data-i18n-attr="title|aria-label" data-i18n="profile.header.title">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                     <circle cx="12" cy="7" r="4"></circle>
                 </svg>
             </a>
         </div>
+        
     </div>
 
     <main class="profile-main">
@@ -156,51 +170,51 @@
                             </svg>
                         </div>
                         <div class="profile-header-details">
-                            <h3 id="profile-header-email">utente@example.com</h3>
-                            <p>Gestione del tuo profilo</p>
+                <h3 id="profile-header-email">utente@example.com</h3>
+                <p data-i18n="profile.header.subtitle"></p>
                         </div>
                     </div>
                     <div class="profile-header-actions">
-                        <button id="logout-header-btn" class="profile-header-btn logout-btn">
+                        <button id="logout-header-btn" class="profile-header-btn logout-btn" data-i18n="common.logout">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                                 <polyline points="16,17 21,12 16,7"></polyline>
                                 <line x1="21" y1="12" x2="9" y2="12"></line>
                             </svg>
-                            Esci
+                          
                         </button>
                     </div>
                 </div>
             </div>
 
             <div class="profile-page-header">
-                <h1>Gestione Profilo</h1>
-                <p class="profile-page-subtitle">Modifica le tue informazioni e gestisci il tuo account.</p>
+            <h1 data-i18n="profile.header.title"></h1>
+            <p class="profile-page-subtitle" data-i18n="profile.header.subtitle"></p>
             </div>
 
             <div id="user-verification" class="user-verification">
-                <p>Caricamento del tuo profilo...</p>
+                <p data-i18n="profile.loading"></p>
             </div>
 
             <div id="profile-content" class="profile-content" style="display: none;">
                 <!-- Sezione Informazioni Profilo -->
                 <div class="profile-info-section">
-                    <h2>Le tue informazioni</h2>
+                    <h2 data-i18n="profile.edit.title"></h2>
                     <div class="profile-details">
                         <div class="profile-detail">
-                            <span class="detail-label">Email:</span>
+                            <span class="detail-label" data-i18n="profile.edit.email.label"></span>
                             <span id="profile-email" class="detail-value">-</span>
                         </div>
                         <div class="profile-detail">
-                            <span class="detail-label">Nome:</span>
+                            <span class="detail-label" data-i18n="profile.edit.name.label"></span>
                             <span id="profile-name" class="detail-value">-</span>
                         </div>
                         <div class="profile-detail">
-                            <span class="detail-label">Membro dal:</span>
+                            <span class="detail-label" data-i18n="profile.meta.member_since"></span>
                             <span id="profile-created" class="detail-value">-</span>
                         </div>
                         <div class="profile-detail">
-                            <span class="detail-label">Ultimo accesso:</span>
+                            <span class="detail-label" data-i18n="profile.meta.last_login"></span>
                             <span id="profile-last-login" class="detail-value">-</span>
                         </div>
                     </div>
@@ -208,30 +222,30 @@
 
                 <!-- Form Modifica Profilo -->
                 <div class="profile-edit-section">
-                    <h2>Modifica Profilo</h2>
-                    <button id="edit-profile-btn" class="profile-action-btn" onclick="window.forceToggleProfileForm()">Modifica le tue informazioni</button>
+                    <h2 data-i18n="profile.edit.title"></h2>
+                    <button id="edit-profile-btn" class="profile-action-btn" onclick="window.forceToggleProfileForm()" data-i18n="profile.edit.toggle"></button>
                     
                     <div id="edit-profile-form" class="edit-profile-form" style="display: none;">
                         <form id="profile-form" onsubmit="window.forceSaveProfile(event)">
                             <div class="form-group">
-                                <label for="edit-name">Nome</label>
-                                <input type="text" id="edit-name" placeholder="Il tuo nome (opzionale)">
+                                <label for="edit-name" data-i18n="profile.edit.name.label"></label>
+                                <input type="text" id="edit-name" data-i18n-attr="placeholder" data-i18n="profile.edit.name.placeholder">
                             </div>
                             <div class="form-group">
-                                <label for="edit-email">Email</label>
-                                <input type="email" id="edit-email" placeholder="nuova@email.com" required>
+                                <label for="edit-email" data-i18n="profile.edit.email.label"></label>
+                                <input type="email" id="edit-email" data-i18n-attr="placeholder" data-i18n="profile.edit.email.placeholder" required>
                             </div>
                             <div class="form-group">
-                                <label for="edit-password">Nuova Password (opzionale)</label>
-                                <input type="password" id="edit-password" placeholder="Lascia vuoto per non modificare">
+                                <label for="edit-password" data-i18n="profile.edit.password.label"></label>
+                                <input type="password" id="edit-password" data-i18n-attr="placeholder" data-i18n="profile.edit.password.placeholder">
                             </div>
                             <div class="form-group">
-                                <label for="edit-confirm-password">Conferma Nuova Password</label>
-                                <input type="password" id="edit-confirm-password" placeholder="Ripeti la nuova password">
+                                <label for="edit-confirm-password" data-i18n="profile.edit.confirm.label"></label>
+                                <input type="password" id="edit-confirm-password" data-i18n-attr="placeholder" data-i18n="profile.edit.confirm.placeholder">
                             </div>
                             <div class="form-actions">
-                                <button type="submit" class="profile-save-btn">Salva Modifiche</button>
-                                <button type="button" id="cancel-edit-btn" class="profile-cancel-btn" onclick="window.forceToggleProfileForm()">Annulla</button>
+                                <button type="submit" class="profile-save-btn" data-i18n="profile.edit.save"></button>
+                                <button type="button" id="cancel-edit-btn" class="profile-cancel-btn" onclick="window.forceToggleProfileForm()" data-i18n="profile.edit.cancel"></button>
                             </div>
                         </form>
                     </div>
@@ -239,74 +253,45 @@
 
                 <!-- Sezione "Diventa Portatore" -->
                 <section id="portatore-section" class="portatore-section" style="margin-top: 3rem;">
-                    <h2>Portatore</h2>
-                    <p id="portatore-status-message" style="margin-bottom: 1rem; opacity: 0.85;">Caricamento stato…</p>
-                    <button id="portatore-toggle-btn" class="profile-action-btn">Attiva</button>
+                    <h2 data-i18n="profile.portatore.title"></h2>
+                    <p id="portatore-status-message" style="margin-bottom: 1rem; opacity: 0.85;" data-i18n="profile.portatore.loading"></p>
+                    <button id="portatore-toggle-btn" class="profile-action-btn" data-i18n="profile.portatore.toggle"></button>
                 </section>
 
                 <!-- Azioni Account -->
                 <div class="account-actions-section">
-                    <h2>Azioni Account</h2>
+                    <h2 data-i18n="profile.actions.title"></h2>
                     <div class="action-buttons">
-                        <button id="export-data-btn" class="profile-action-btn">
+                        <button id="export-data-btn" class="profile-action-btn" data-i18n="profile.actions.export">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                 <polyline points="7,10 12,15 17,10"></polyline>
                                 <line x1="12" y1="15" x2="12" y2="3"></line>
                             </svg>
-                            Esporta i tuoi dati
+                            
                         </button>
-                        <button id="delete-account-btn" class="profile-danger-btn">
+                        <button id="delete-account-btn" class="profile-danger-btn" data-i18n="profile.actions.delete">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="3,6 5,6 21,6"></polyline>
                                 <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
                                 <line x1="10" y1="11" x2="10" y2="17"></line>
                                 <line x1="14" y1="11" x2="14" y2="17"></line>
                             </svg>
-                            Elimina Account
+                            
                         </button>
                     </div>
                 </div>
             </div>
 
             <div id="no-access" class="no-access" style="display: none;">
-                <h2>Accesso richiesto</h2>
-                <p>Per gestire il tuo profilo è necessario accedere con la tua email.</p>
-                <a href="login.html" class="login-link">Accedi al tuo spazio</a>
+                <h2 data-i18n="dashboard.no_access.title"></h2>
+                <p data-i18n="dashboard.no_access.body"></p>
+                <a href="login.html" class="login-link" data-i18n="dashboard.no_access.cta"></a>
             </div>
         </div>
     </main>
 
-    <footer>
-        <div class="container">
-            <p>© 2025 — Mental Commons<br/>
-                Il contrario di un social. Il prototipo di una mente comune.</p>
-            
-            <div class="footer-links">
-                <a href="/privacy-policy">Privacy Policy</a>
-                <a href="/cookie-policy">Cookie Policy</a>
-                <a href="/termini-di-servizio">Termini di Servizio</a>
-                <a href="/disclaimer-legale">Disclaimer Legale</a>
-            </div>
-            
-            <div class="footer-social">
-                <a href="https://www.instagram.com/mental_commons/" target="_blank" rel="noopener noreferrer" class="instagram-link" title="Seguici su Instagram" aria-label="Profilo Instagram di Mental Commons">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                    </svg>
-                    <span>@mental_commons</span>
-                </a>
-                <a href="https://www.tiktok.com/@mental_commons" target="_blank" rel="noopener noreferrer" class="tiktok-link" title="Seguici su TikTok" aria-label="Profilo TikTok di Mental Commons">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path>
-                    </svg>
-                    <span>@mental_commons</span>
-                </a>
-            </div>
-        </div>
-    </footer>
+    
 
     <!-- Libreria Supabase (UMD) -->
     <script src="https://unpkg.com/@supabase/supabase-js"></script>
@@ -316,6 +301,9 @@
 
     <!-- Modulo principale per Vite (dev) -->
     <script type="module" src="/src/main.js"></script>
-<script defer src="/scripts/header-menu.js"></script>
+    <!-- i18n runtime per pagine statiche -->
+    <script defer src="/scripts/header-menu.js"></script>
+    <script type="module" src="/src/ui/lang-toggle.js"></script>
+    <script type="module" src="/scripts/inject-footer.js"></script>
 </body>
 </html> 

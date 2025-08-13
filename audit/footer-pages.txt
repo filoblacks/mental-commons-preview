@@ -1,0 +1,17 @@
+index.html
+come-funziona.html
+mc-per-le-scuole.html
+dashboard.html
+dashboard-docente.html
+login.html
+profile.html
+premium.html
+premium-success.html
+portatore-requests.html
+chat.html
+admin.html
+cookie-policy.html
+disclaimer-legale.html
+termini-di-servizio.html
+privacy-policy.html
+test-gradient.html

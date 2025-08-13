@@ -1,0 +1,12 @@
+HTTP/2 401 
+cache-control: no-store, max-age=0
+content-type: text/html; charset=utf-8
+date: Wed, 13 Aug 2025 15:54:44 GMT
+server: Vercel
+set-cookie: _vercel_sso_nonce=zwEy1p5Ka1CnWIR00msHhx1l; Max-Age=3600; Path=/; Secure; HttpOnly; SameSite=Lax
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-frame-options: DENY
+x-robots-tag: noindex
+x-vercel-id: fra1::c6vcw-1755100484956-cc2cd4c8cc6d
+content-length: 13515
+

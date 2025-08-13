@@ -1,0 +1,9 @@
+HTTP/2 307 
+cache-control: public, max-age=0, must-revalidate
+content-type: text/plain
+date: Wed, 13 Aug 2025 15:54:43 GMT
+location: https://www.mentalcommons.xyz/mc-per-le-scuole.html
+server: Vercel
+strict-transport-security: max-age=63072000
+x-vercel-id: fra1::shvzj-1755100483760-5df066382a44
+

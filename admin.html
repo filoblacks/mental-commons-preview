@@ -9,103 +9,89 @@
       <script type="module" src="/api/env.js"></script>
 </head>
 <body>
+  <script defer src="/scripts/i18n.runtime.js"></script>
+  <script defer src="/scripts/lang-toggle-footer.js"></script>
   <header class="top-navigation-container">
     <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="Mental Commons" /></a>
         <nav class="nav-main">
-            <a href="index.html">Home</a>
-            <a href="come-funziona.html">Come funziona</a>
-            <a href="mc-per-le-scuole.html">MC per le scuole</a>
-            <a href="premium.html">Premium</a>
+            <a href="index.html" data-i18n="nav.home"></a>
+            <a href="come-funziona.html" data-i18n="nav.how_it_works"></a>
+            <a href="mc-per-le-scuole.html" data-i18n="nav.schools"></a>
+            <a href="premium.html" data-i18n="nav.premium"></a>
         </nav>
     <div class="ritual-actions">
-      <a href="index.html" style="display: none;">Home</a>
-      <a href="dashboard.html">Dashboard</a>
-      <span>Admin</span>
+      <a href="index.html" style="display: none;" data-i18n="nav.home"></a>
+      <a href="dashboard.html" data-i18n="nav.dashboard"></a>
+      <span data-i18n="nav.admin"></span>
     </div>
   </header>
 
   <main class="container admin-page">
-    <h1>UCMe da assegnare</h1>
+    <h1 data-i18n="admin.pending.title"></h1>
     <table class="admin-table" style="width:100%;border-collapse:collapse; margin-bottom:3rem;">
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Mittente</th>
-          <th>Data</th>
-          <th>Anteprima</th>
-          <th>Assegna</th>
+          <th data-i18n="admin.pending.table.id"></th>
+          <th data-i18n="admin.pending.table.sender"></th>
+          <th data-i18n="admin.pending.table.date"></th>
+          <th data-i18n="admin.pending.table.preview"></th>
+          <th data-i18n="admin.pending.table.assign"></th>
         </tr>
       </thead>
       <tbody id="pending-ucme-body">
-        <tr><td colspan="5">Caricamento…</td></tr>
+        <tr><td colspan="5" data-i18n="common.loading"></td></tr>
       </tbody>
     </table>
 
-    <h2>Portatori attivi</h2>
+    <h2 data-i18n="admin.portatori.title"></h2>
     <table class="admin-table" style="width:100%;border-collapse:collapse;">
       <thead>
         <tr>
-          <th>ID Portatore</th>
-          <th>Nome</th>
-          <th>Email</th>
-          <th>Bio</th>
+          <th data-i18n="admin.portatori.table.id"></th>
+          <th data-i18n="admin.portatori.table.name"></th>
+          <th data-i18n="admin.portatori.table.email"></th>
+          <th data-i18n="admin.portatori.table.bio"></th>
         </tr>
       </thead>
       <tbody id="active-portatori-body">
-        <tr><td colspan="4">Caricamento…</td></tr>
+        <tr><td colspan="4" data-i18n="common.loading"></td></tr>
       </tbody>
     </table>
 
     <!-- NUOVA SEZIONE: Gestione Scuole Utenti -->
-    <h2 style="margin-top:3rem;">Utenti &amp; Scuole</h2>
+    <h2 style="margin-top:3rem;" data-i18n="admin.schools.title"></h2>
     <table class="admin-table" style="width:100%;border-collapse:collapse;">
       <thead>
         <tr>
-          <th>Email utente</th>
-          <th>School attuale</th>
-          <th>Nuova scuola</th>
-          <th>Assegna</th>
+          <th data-i18n="admin.schools.table.user_email"></th>
+          <th data-i18n="admin.schools.table.current_school"></th>
+          <th data-i18n="admin.schools.table.new_school"></th>
+          <th data-i18n="admin.pending.table.assign"></th>
         </tr>
       </thead>
       <tbody id="users-school-body">
-        <tr><td colspan="4">Caricamento…</td></tr>
+        <tr><td colspan="4" data-i18n="common.loading"></td></tr>
       </tbody>
     </table>
 
   </main>
 
-  <footer>
-    <div class="container">
-      <p>© 2025 — Mental Commons<br/>
-      Il contrario di un social. Il prototipo di una mente comune.</p>
-      
-                  <div class="footer-links">
-                <a href="/privacy-policy">Privacy Policy</a>
-                <a href="/cookie-policy">Cookie Policy</a>
-                <a href="/termini-di-servizio">Termini di Servizio</a>
-                <a href="/disclaimer-legale">Disclaimer Legale</a>
-            </div>
-      
-      <div class="footer-social">
-        <a href="https://www.instagram.com/mental_commons/" target="_blank" rel="noopener noreferrer" class="instagram-link" title="Seguici su Instagram" aria-label="Profilo Instagram di Mental Commons">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-          </svg>
-          <span>@mental_commons</span>
-        </a>
-        <a href="https://www.tiktok.com/@mental_commons" target="_blank" rel="noopener noreferrer" class="tiktok-link" title="Seguici su TikTok" aria-label="Profilo TikTok di Mental Commons">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path>
-          </svg>
-          <span>@mental_commons</span>
-        </a>
-      </div>
-    </div>
-  </footer>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .site-footer {
+      margin-top: auto;
+      flex-shrink: 0;
+    }
+  </style>
 
   <script type="module" src="/src/main.js"></script>
-<script defer src="/scripts/header-menu.js"></script>
+  <!-- i18n runtime per pagine statiche -->
+  <script defer src="/scripts/header-menu.js"></script>
+  <script type="module" src="/src/ui/lang-toggle.js"></script>
+  <script type="module" src="/scripts/inject-footer.js"></script>
 </body>
 </html> 

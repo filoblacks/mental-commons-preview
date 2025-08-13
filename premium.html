@@ -266,25 +266,35 @@
       line-height: 1.4;
     }
     /* -------------------------------------- */
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .site-footer {
+      margin-top: auto;
+      flex-shrink: 0;
+    }
   </style>
 
   <!-- Variabili pubbliche -->
   <script type="module" src="/api/env.js"></script>
 </head>
 <body class="premium-page">
+  <script defer src="/scripts/i18n.runtime.js"></script>
   <!-- Header -->
   <header class="top-navigation-container">
     <a href="index.html" class="nav-logo"><img src="/logo.svg" alt="Mental Commons" /></a>
     <nav class="nav-main">
-      <a href="index.html">Home</a>
-      <a href="come-funziona.html">Come funziona</a>
-      <a href="mc-per-le-scuole.html">MC per le scuole</a>
-      <a href="premium.html">Premium</a>
+      <a href="index.html" data-i18n="nav.home"></a>
+      <a href="come-funziona.html" data-i18n="nav.how_it_works"></a>
+      <a href="mc-per-le-scuole.html" data-i18n="nav.schools"></a>
+      <a href="premium.html" data-i18n="nav.premium"></a>
     </nav>
     <div class="nav-actions">
-      <a href="dashboard.html" id="nav-dashboard" style="display: none;">Dashboard</a>
-      <a href="admin.html" id="nav-admin" style="display: none;">Admin</a>
-      <a href="login.html" id="nav-login">Accedi</a>
+      <a href="dashboard.html" id="nav-dashboard" style="display: none;" data-i18n="nav.dashboard"></a>
+      <a href="admin.html" id="nav-admin" style="display: none;" data-i18n="nav.admin"></a>
+      <a href="login.html" id="nav-login" data-i18n="nav.login"></a>
       <a href="profile.html" id="nav-profile" class="nav-profile-btn" style="display: none;" title="Gestione Profilo" aria-label="Gestione Profilo">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -292,130 +302,104 @@
         </svg>
       </a>
     </div>
+    
   </header>
 
   <main class="premium-container">
-    <h1>Scegli il tuo spazio di ascolto</h1>
+    <h1 data-i18n="pricing.hero.title"></h1>
 
     <!-- Toggle fatturazione -->
     <div class="billing-toggle-wrapper">
-      <span>Mensile</span>
+      <span data-i18n="pricing.billing.monthly"></span>
       <label class="switch">
-        <input type="checkbox" id="billing-toggle" aria-label="Passa a fatturazione annuale" />
+        <input type="checkbox" id="billing-toggle" data-i18n-attr="aria-label" data-i18n="pricing.billing.annual" />
         <span class="slider"></span>
       </label>
-      <span>Annuale <span class="discount">(-35%)</span></span>
+      <span><span data-i18n="pricing.billing.annual"></span> <span class="discount" data-i18n="pricing.billing.discount"></span></span>
     </div>
 
     <!-- Cards -->
     <div class="plans">
       <!-- Piano Hobby -->
       <div class="plan-card hobby">
-        <h2>Hobby</h2>
-        <p class="price">Gratis</p>
+        <h2 data-i18n="pricing.plans.hobby.title"></h2>
+        <p class="price" data-i18n="pricing.plans.hobby.price"></p>
         <ul class="features">
-          <li>Invio illimitato UCMe</li>
-          <li>Accesso base ai Portatori</li>
-          <li class="not-included">Storico non disponibile</li>
-          <li class="not-included">Chat non disponibili</li>
+          <li data-i18n="pricing.plans.hobby.features.unlimited_ucme"></li>
+          <li data-i18n="pricing.plans.hobby.features.base_access"></li>
+          <li class="not-included" data-i18n="pricing.plans.hobby.features.no_history"></li>
+          <li class="not-included" data-i18n="pricing.plans.hobby.features.no_chat"></li>
 
         </ul>
-        <button class="cta-button" disabled>Incluso</button>
+        <button class="cta-button" disabled data-i18n="pricing.plans.hobby.cta"></button>
       </div>
 
       <!-- Piano Premium -->
       <div class="plan-card premium">
-        <h2>MC Premium</h2>
+        <h2 data-i18n="pricing.plans.premium.title"></h2>
         <p class="price"><span id="premium-price">4,99€</span> <span id="premium-price-period">/mese</span></p>
         <ul class="features">
-          <li>Chat illimitate con i Portatori</li>
-          <li>Accesso prioritario alle risposte</li>
-          <li>Storico completo UCMe</li>
-          <li>Accesso a funzionalità future riservate</li>
-          <li>Possibilità di partecipare a test riservati e spazi collettivi  </li>
+          <li data-i18n="pricing.plans.premium.features.unlimited_chats"></li>
+          <li data-i18n="pricing.plans.premium.features.priority"></li>
+          <li data-i18n="pricing.plans.premium.features.full_history"></li>
+          <li data-i18n="pricing.plans.premium.features.future"></li>
+          <li data-i18n="pricing.plans.premium.features.tests"></li>
 
         </ul>
-        <button id="btn-premium-monthly" class="cta-button">Attiva Premium – 4,99€/mese</button>
-        <button id="btn-premium-annual" class="cta-button" style="display: none;">Attiva Premium – 39€/anno</button>
+        <button id="btn-premium-monthly" class="cta-button" data-i18n="pricing.plans.premium.cta.monthly"></button>
+        <button id="btn-premium-annual" class="cta-button" style="display: none;" data-i18n="pricing.plans.premium.cta.annual"></button>
       </div>
 
       <!-- MC@School -->
       <div class="plan-card school">
-        <h2>MC@School <span style="font-size: 0.9rem; font-weight:400;">(su richiesta)</span></h2>
-        <p class="price">Su richiesta</p>
-        <p class="subtitle">Per classi, istituti, educatori.<br/>Uno spazio protetto dove pensare insieme.</p>
+        <h2 data-i18n="pricing.plans.school.title"></h2>
+        <p class="price" data-i18n="pricing.plans.school.price"></p>
+        <p class="subtitle" data-i18n="pricing.plans.school.subtitle"></p>
         <ul class="features">
-          <li>Tutte le funzionalità di MC Premium</li>
-          <li>Dashboard per UCMe scolastiche</li>
-          <li>Statistiche anonime sul benessere mentale</li>
-          <li>Percorsi guidati per l’ascolto in aula</li>
-          <li>Supporto diretto con il team MC</li>
-          <li>Attivazione flessibile per gruppi o scuole</li>
-          <li>Offerta personalizzata in base agli utenti</li>
+          <li data-i18n="pricing.plans.school.features.all_premium"></li>
+          <li data-i18n="pricing.plans.school.features.school_dashboard"></li>
+          <li data-i18n="pricing.plans.school.features.stats"></li>
+          <li data-i18n="pricing.plans.school.features.guided"></li>
+          <li data-i18n="pricing.plans.school.features.support"></li>
+          <li data-i18n="pricing.plans.school.features.flex"></li>
+          <li data-i18n="pricing.plans.school.features.custom"></li>
         </ul>
-        <a href="mailto:school@mentalcommons.xyz?subject=Richiesta%20MC@School" class="cta-button">Richiedi contatto</a>
+        <a href="mailto:school@mentalcommons.xyz?subject=Richiesta%20MC@School" class="cta-button" data-i18n="common.learn_more"></a>
       </div>
     </div>
 
     <!-- FAQ -->
     <section class="faq">
-      <h2>Domande frequenti</h2>
+      <h2 data-i18n="pricing.faq.title"></h2>
       <div class="accordion">
         <details>
-          <summary>Cos'è incluso in MC Premium?</summary>
-          <p>MC Premium include dialoghi illimitati, accesso prioritario, storico completo delle tue UCMe e funzionalità esclusive in anteprima.</p>
+          <summary data-i18n="pricing.faq.q1.title"></summary>
+          <p data-i18n="pricing.faq.q1.body"></p>
         </details>
         <details>
-          <summary>Posso passare da mensile ad annuale?</summary>
-          <p>Sì, potrai cambiare piano in qualsiasi momento dal tuo profilo senza interruzioni del servizio.</p>
+          <summary data-i18n="pricing.faq.q2.title"></summary>
+          <p data-i18n="pricing.faq.q2.body"></p>
         </details>
         <details>
-          <summary>Come funziona il supporto?</summary>
-          <p>Il nostro team risponde alle richieste via email entro 24&nbsp;ore. Gli utenti Premium hanno canale prioritario.</p>
+          <summary data-i18n="pricing.faq.q3.title"></summary>
+          <p data-i18n="pricing.faq.q3.body"></p>
         </details>
         <details>
-          <summary>Posso usare MC Premium anche per la scuola?</summary>
-          <p>Certo. Offriamo pacchetti <strong>MC@School</strong> con funzionalità dedicate a classi e istituti. Contattaci per un'offerta su misura.</p>
+          <summary data-i18n="pricing.faq.q4.title"></summary>
+          <p data-i18n="pricing.faq.q4.body"></p>
         </details>
       </div>
     </section>
   </main>
 
   <!-- Footer -->
-  <footer>
-    <div class="container">
-      <p>© 2025 — Mental Commons<br/>
-      Il contrario di un social. Il prototipo di una mente comune.</p>
-      
-                  <div class="footer-links">
-                <a href="/privacy-policy">Privacy Policy</a>
-                <a href="/cookie-policy">Cookie Policy</a>
-                <a href="/termini-di-servizio">Termini di Servizio</a>
-                <a href="/disclaimer-legale">Disclaimer Legale</a>
-            </div>
-      
-      <div class="footer-social">
-        <a href="https://www.instagram.com/mental_commons/" target="_blank" rel="noopener noreferrer" class="instagram-link" title="Seguici su Instagram" aria-label="Profilo Instagram di Mental Commons">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-          </svg>
-          <span>@mental_commons</span>
-        </a>
-        <a href="https://www.tiktok.com/@mental_commons" target="_blank" rel="noopener noreferrer" class="tiktok-link" title="Seguici su TikTok" aria-label="Profilo TikTok di Mental Commons">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path>
-          </svg>
-          <span>@mental_commons</span>
-        </a>
-      </div>
-    </div>
-  </footer>
+  
 
   <!-- Stripe & interazioni -->
-  <script type="module" src="/ui/premium.js"></script>
+  <script type="module" src="/src/ui/premium.js"></script>
   <script defer src="/scripts/header-menu.js"></script>
+  <script type="module" src="/src/ui/lang-toggle.js"></script>
+  <script type="module" src="/scripts/inject-footer.js"></script>
   <script>
     /* Gestione toggle mensile/annuale */
     document.addEventListener('DOMContentLoaded', () => {
