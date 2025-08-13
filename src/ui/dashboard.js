@@ -234,4 +234,104 @@ function removeLoadingMessage() {
   }
 }
 
+// ================================================================
+// 📌 LISTENER MANCANTI – Fix "errors.unexpected"
+// ================================================================
+// Le funzioni di setup erano richiamate ma non erano state definite,
+// provocando ReferenceError e quindi il messaggio "errors.unexpected".
+// Implementiamo ora i due listener con delegazione eventi per evitare
+// di doverli reinizializzare dopo ogni render.
+
+/**
+ * Gestisce il click su "Segna come letta" nella risposta Portatore.
+ * Aggiorna lo stato lato server e sostituisce il bottone con un label.
+ */
+function setupMarkAsReadListeners(container) {
+  if (!container || container.dataset.__markReadSetup === '1') return;
+
+  container.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.btn-mark-read');
+    if (!btn) return;
+
+    const ucmeId = btn.dataset.ucmeId;
+    if (!ucmeId) return;
+
+    const token = getToken();
+    if (!token) {
+      alert(t('errors.auth.required'));
+      return;
+    }
+
+    try {
+      btn.disabled = true;
+      await markRispostaAsRead(ucmeId, token);
+
+      // Sostituisci il bottone con etichetta "Letta"
+      const label = document.createElement('span');
+      label.className = 'read-label';
+      label.textContent = t('dashboard.depositor.reply.read_label');
+      btn.replaceWith(label);
+    } catch (err) {
+      log(t('errors.network.api'), err.message);
+      alert(t('errors.unexpected'));
+      btn.disabled = false;
+    }
+  });
+
+  // Flag per evitare doppia inizializzazione
+  container.dataset.__markReadSetup = '1';
+}
+
+/**
+ * Gestisce il click su "Continua a parlarne".
+ * Invia la richiesta di chat e aggiorna l'interfaccia.
+ */
+function setupContinueChatListeners(container, currentUser) {
+  if (!container || container.dataset.__continueChatSetup === '1') return;
+
+  container.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.btn-continue-chat');
+    if (!btn) return;
+
+    const ucmeId = btn.dataset.ucmeId;
+    if (!ucmeId) return;
+
+    // Verifica abilitazioni utente (ha sottoscrizione attiva)
+    if (!currentUser) {
+      window.location.href = '/login.html';
+      return;
+    }
+    if (!(currentUser.has_subscription === true || currentUser.has_subscription === 'true')) {
+      window.location.href = '/premium.html';
+      return;
+    }
+
+    const token = getToken();
+    if (!token) {
+      window.location.href = '/login.html';
+      return;
+    }
+
+    try {
+      btn.disabled = true;
+      btn.textContent = t('common.loading');
+
+      await requestChat(ucmeId, token);
+
+      // Aggiorna interfaccia – sostituisci bottone con label "Richiesta inviata"
+      const label = document.createElement('span');
+      label.className = 'chat-requested-label';
+      label.textContent = t('dashboard.depositor.chat_request_sent');
+      btn.replaceWith(label);
+    } catch (err) {
+      log(t('errors.network.api'), err.message);
+      alert(t('errors.chat.send') || t('errors.unexpected'));
+      btn.disabled = false;
+      btn.textContent = t('dashboard.depositor.continue_chat');
+    }
+  });
+
+  container.dataset.__continueChatSetup = '1';
+}
+
 
