@@ -167,7 +167,7 @@
     },
     "onboarding": { "body": "Write a difficult thought. A Holder — a real person — will receive it and reply with respect within 48 hours. It's a gesture. Not a post.", "cta": "Enter", "title": "Mental Commons is a space to entrust what weighs on you." },
     "stats": { "portatori_label": "Active Holders", "replies_label": "replies sent", "ucme_label": "thoughts received" },
-    "trust": { "humans": "Real people, not bots", "private": "Anonymous and private", "response_48h": "Reply within 48h" },
+
     "user": {
       "stats": { "days_present": "Days present", "replies": "Replies received", "thoughts": "Thoughts shared" },
       "welcome": "Welcome back"

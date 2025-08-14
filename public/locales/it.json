@@ -167,7 +167,7 @@
     },
     "onboarding": { "body": "Scrivi un pensiero difficile. Lo riceverà un Portatore, una persona reale. che risponderà con rispetto entro 48 ore. È un gesto. Non un post.", "cta": "Entrare", "title": "Mental Commons è uno spazio per affidare ciò che pesa." },
     "stats": { "portatori_label": "Portatori attivi", "replies_label": "risposte inviate", "ucme_label": "pensieri accolti" },
-    "trust": { "humans": "Persone reali, non bot", "private": "Anonimo e privato", "response_48h": "Risposta entro 48h" },
+
     "user": {
       "stats": { "days_present": "Giorni di presenza", "replies": "Risposte ricevute", "thoughts": "Pensieri condivisi" },
       "welcome": "Bentornato"
