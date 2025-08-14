@@ -162,7 +162,7 @@
     "info": {
       "depositor": { "body": "Depositors are those who write. Those who entrust. You don't need to explain. You need to trust.", "title": "Who Depositors are" },
       "portatori": { "body": "Holders read with care. And they reply only once. With respect. With presence.", "title": "Who Holders are" },
-      "ucme": { "body": "A UCMe is a difficult thought. A heavy reflection. You can write it here. It will be read by a person, not an algorithm.", "title": "What UCMes are" }
+      "ucme": { "body": "A UCMe is a difficult thought. A heavy reflection. You can write it here. It will be read by a person, not an algorithm.", "title": "What UCMEs are" }
     },
     "onboarding": { "body": "Write a difficult thought. A Holder — a real person — will receive it and reply with respect within 48 hours. It's a gesture. Not a post.", "cta": "Enter", "title": "Mental Commons is a space to entrust what weighs on you." },
     "stats": { "portatori_label": "Active Holders", "replies_label": "replies sent", "ucme_label": "thoughts received" },
@@ -309,6 +309,47 @@
       "note": "We remain faithful to our ethos: less rush, more presence. Come back soon to learn more.",
       "title": "Mental Commons @ Schools"
     }
+  },
+  "DASHBOARD": {
+    "DEPOSITOR": {
+      "REPLY": {
+        "TITLE": "Holder's reply",
+        "MARK_READ": "Mark as read",
+        "READ_LABEL": "Read"
+      },
+      "CONTINUE_CHAT": "Continue the dialogue",
+      "PREMIUM_PROMPT": "Enable MC Premium to continue the dialogue.",
+      "PREMIUM_CTA": "Enable Premium",
+      "LOGIN_PROMPT": "Sign in to keep the dialogue going.",
+      "LOGIN_CTA": "Sign in",
+      "CHAT_REQUESTED_LABEL": "You already asked to continue",
+      "CHAT_REQUEST_SENT": "Request sent"
+    }
+  },
+  "CHAT": {
+    "LIST": {
+      "CARD": {
+        "NO_MESSAGES": "No messages yet",
+        "OPEN": "Open chat",
+        "NEW_BADGE": "New",
+        "PREVIEW_LOADING": "Loading…",
+        "STATUS": {
+          "DAYS_AGO": "Last message {count} days ago",
+          "TODAY": "Recent activity today",
+          "YESTERDAY": "Last message yesterday"
+        }
+      }
+    },
+    "STATUS": {
+      "ACTIVE": "Active chat with a Holder",
+      "LAST_REPLY_PREFIX": "Last reply:"
+    },
+    "SYSTEM": {
+      "WELCOME": "This space is for you both. You don't need the right words."
+    }
+  },
+  "PROFILE": {
+    "BADGE": { "PREMIUM": "MC Premium" }
   }
 }
 

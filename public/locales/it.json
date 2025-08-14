@@ -309,6 +309,47 @@
       "note": "Restiamo fedeli al nostro ethos: meno fretta, più presenza. Torna presto per scoprire di più.",
       "title": "Mental Commons @ Scuole"
     }
+  },
+  "DASHBOARD": {
+    "DEPOSITOR": {
+      "REPLY": {
+        "TITLE": "Risposta del Portatore",
+        "MARK_READ": "Segna come letta",
+        "READ_LABEL": "Letta"
+      },
+      "CONTINUE_CHAT": "Continua a parlarne",
+      "PREMIUM_PROMPT": "Attiva MC Premium per continuare il dialogo.",
+      "PREMIUM_CTA": "Attiva Premium",
+      "LOGIN_PROMPT": "Accedi per continuare il dialogo.",
+      "LOGIN_CTA": "Accedi",
+      "CHAT_REQUESTED_LABEL": "Hai già chiesto di continuare",
+      "CHAT_REQUEST_SENT": "Richiesta inviata"
+    }
+  },
+  "CHAT": {
+    "LIST": {
+      "CARD": {
+        "NO_MESSAGES": "Ancora nessun messaggio",
+        "OPEN": "Apri la chat",
+        "NEW_BADGE": "Nuovo",
+        "PREVIEW_LOADING": "Caricamento…",
+        "STATUS": {
+          "DAYS_AGO": "Ultimo messaggio {count} giorni fa",
+          "TODAY": "Attività recente oggi",
+          "YESTERDAY": "Ultimo messaggio ieri"
+        }
+      }
+    },
+    "STATUS": {
+      "ACTIVE": "Chat attiva con un Portatore",
+      "LAST_REPLY_PREFIX": "Ultima risposta:"
+    },
+    "SYSTEM": {
+      "WELCOME": "Questo spazio è per voi. Non serve avere le parole giuste."
+    }
+  },
+  "PROFILE": {
+    "BADGE": { "PREMIUM": "MC Premium" }
   }
 }
 
