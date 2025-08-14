@@ -351,6 +351,13 @@
   },
   "PROFILE": {
     "BADGE": { "PREMIUM": "MC Premium" }
+  },
+  "example": {
+    "title": "A real example",
+    "ucme_label": "UCME",
+    "ucme_text": "I can’t tell if I’m tired, sad, or just empty. I keep functioning, but I don’t feel alive.",
+    "reply_label": "Reply",
+    "reply_text": "Sometimes clarity begins exactly when everything stops. Don’t rush to fill the silence. Stay inside it. That’s where you start feeling again."
   }
 }
 

@@ -351,6 +351,13 @@
   },
   "PROFILE": {
     "BADGE": { "PREMIUM": "MC Premium" }
+  },
+  "example": {
+    "title": "Un esempio reale",
+    "ucme_label": "UCMe",
+    "ucme_text": "Non riesco più a capire se sono stanco, triste, o solo vuoto. Continuo a funzionare, ma non mi sento vivo.",
+    "reply_label": "Risposta",
+    "reply_text": "A volte la lucidità arriva proprio quando tutto si ferma. Non correre per riempire il silenzio. Restaci dentro. È da lì che si torna a sentirsi."
   }
 }
 
