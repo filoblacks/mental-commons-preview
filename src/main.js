@@ -61,11 +61,15 @@ function showAdminNav() {
   };
 
   // Desktop nav
-  // Se esiste già un link admin (es. in .nav-actions) mostralo e basta
-  const existingAdminLink = document.getElementById('nav-admin');
-  if (existingAdminLink) {
-    existingAdminLink.style.display = 'inline-block';
-  } else {
+  const existingAdminLinks = Array.from(document.querySelectorAll('#nav-admin'));
+  if (existingAdminLinks.length) {
+    // Mostra solo il primo, rimuovi gli altri per evitare duplicati
+    existingAdminLinks.forEach((el, idx) => {
+      el.style.display = idx === 0 ? 'inline-block' : 'none';
+    });
+  }
+
+  if (existingAdminLinks.length === 0) {
     addLink('.ritual-actions', 'nav-dashboard', 'nav-admin');
   }
   // Mobile nav
