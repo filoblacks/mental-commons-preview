@@ -76,6 +76,9 @@
         margin-top: auto;
         flex-shrink: 0;
       }
+      .lang-en { display: none; }
+      html[lang="en"] .lang-en { display: block; }
+      html[lang="en"] .lang-it { display: none; }
     </style>
 </head>
 <body class="cookie-policy-page">
@@ -107,7 +110,7 @@
         </div>
     </header>
 
-    <main class="cookie-content">
+    <main class="cookie-content lang-it">
         <div class="container">
             <h1 data-i18n="legal.cookie.title"></h1>
             <p class="cookie-date" data-i18n="legal.cookie.updated"></p>
@@ -214,6 +217,111 @@
             </div>
         </div>
     </main>
+
+    <!-- English version -->
+    <section class="cookie-content lang-en">
+      <div class="container">
+        <h1>Mental Commons Cookie Policy</h1>
+        <p class="cookie-date">Last updated: 7 August 2025</p>
+
+        <section class="cookie-section">
+          <h2>Introduction</h2>
+          <p>Mental Commons uses only cookies and similar technologies that are strictly necessary for safe and responsible operation of the platform. We do not perform advertising tracking or user profiling. This Cookie Policy describes the types of cookies used, their function and how they are managed.</p>
+        </section>
+
+        <section class="cookie-section">
+          <h2>1. Session Cookie (Backend)</h2>
+          <p><strong>Name:</strong> <code>mc_session</code></p>
+          <p><strong>Purpose:</strong> Secure server-side authentication management</p>
+          <p><strong>Characteristics:</strong></p>
+          <ul>
+            <li>httpOnly: true (not accessible via JavaScript)</li>
+            <li>secure: true (HTTPS only)</li>
+            <li>sameSite: 'strict' (CSRF protection)</li>
+            <li>maxAge: 30 minutes</li>
+            <li>path: '/'</li>
+          </ul>
+        </section>
+
+        <section class="cookie-section">
+          <h2>2. LocalStorage (Frontend)</h2>
+          <p>Mental Commons uses the browser's local storage to maintain user state.</p>
+          <ul>
+            <li><code>mental_commons_token</code>: JWT token for authentication</li>
+            <li><code>mental_commons_user</code>: User data serialized in JSON</li>
+          </ul>
+          <p>These data are not shared with third parties and are handled locally.</p>
+        </section>
+
+        <section class="cookie-section">
+          <h2>3. Third-party Cookies</h2>
+          <h3>Stripe</h3>
+          <ul>
+            <li><strong>Origin:</strong> <code>https://js.stripe.com/v3/</code></li>
+            <li><strong>Purpose:</strong> Managing payments and checkout</li>
+            <li><strong>Types:</strong> Session cookies and temporary preferences</li>
+          </ul>
+          <h3>Supabase</h3>
+          <ul>
+            <li><strong>Origin:</strong> <code>https://*.supabase.co</code></li>
+            <li><strong>Purpose:</strong> Secure database connection and authentication</li>
+            <li><strong>Notes:</strong> <code>autoRefreshToken: false</code>, <code>persistSession: false</code></li>
+          </ul>
+          <h3>Google Fonts</h3>
+          <ul>
+            <li><strong>Origin:</strong> <code>https://fonts.googleapis.com</code>, <code>https://fonts.gstatic.com</code></li>
+            <li><strong>Purpose:</strong> Loading web fonts</li>
+            <li><strong>Types:</strong> Technical cache cookies</li>
+          </ul>
+          <h3>Unpkg (CDN)</h3>
+          <ul>
+            <li><strong>Origin:</strong> <code>https://unpkg.com</code></li>
+            <li><strong>Purpose:</strong> Loading JavaScript libraries</li>
+            <li><strong>Types:</strong> Cache cookies, not profiling</li>
+          </ul>
+        </section>
+
+        <section class="cookie-section">
+          <h2>4. Analytics Cookies</h2>
+          <p>We currently do not use active tracking tools like Google Analytics. The Vercel Analytics library is installed but <strong>not actively configured</strong>. No personal data are collected or shared for statistics.</p>
+        </section>
+
+        <section class="cookie-section">
+          <h2>5. Security Configurations</h2>
+          <p>Mental Commons implements a <strong>strict Content Security Policy (CSP)</strong> that limits:</p>
+          <ul>
+            <li><strong>Scripts:</strong> only from 'self', 'unsafe-inline', <code>https://unpkg.com</code></li>
+            <li><strong>Connections:</strong> only to 'self', <code>https://*.supabase.co</code>, <code>wss://*.supabase.co</code></li>
+            <li><strong>Fonts:</strong> only from Google Fonts</li>
+            <li><strong>Images:</strong> only from 'self' and data:</li>
+          </ul>
+        </section>
+
+        <section class="cookie-section">
+          <h2>6. Cookie Management</h2>
+          <ul>
+            <li><strong>Automatic rotation:</strong> Sessions are refreshed every 15 minutes</li>
+            <li><strong>Timeout:</strong> Inactivity over 30 minutes triggers automatic logout</li>
+            <li><strong>Limit:</strong> Maximum 5 active sessions per user</li>
+            <li><strong>Cleanup:</strong> Expired cookies are removed automatically</li>
+          </ul>
+        </section>
+
+        <section class="cookie-section">
+          <h2>7. User Choices</h2>
+          <p>Because no non-essential cookies are present, no consent banner is required. Using the site implies acceptance of minimal technical cookies necessary for operation.</p>
+        </section>
+
+        <section class="cookie-section">
+          <h2>8. Contacts</h2>
+          <p>For further information: <a href="mailto:comunicazioni@mentalcommons.xyz">comunicazioni@mentalcommons.xyz</a></p>
+        </section>
+
+        <div class="cookie-note">
+          <p>This site believes in radical privacy: no surprises, no ads, no data around. Only what is needed to run the platform, safely and respectfully.</p>
+        </div>
+      </div>
+    </section>
 
     <!-- Footer -->
     
